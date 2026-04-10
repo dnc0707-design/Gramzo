@@ -217,38 +217,6 @@
                 </div>
             </div>
 
-            <!-- Partner View (Hidden) -->
-            <div id="view-Partner" class="hidden space-y-8">
-                <div id="shop-registration" class="bg-white p-10 rounded-[3rem] shadow-sm border border-gray-100">
-                    <h3 class="font-black text-2xl mb-2 text-primary">Partner Hub</h3>
-                    <p class="text-sm text-gray-400 mb-8 font-semibold">Join the network</p>
-                    <div class="space-y-5">
-                        <input id="p-shop-name" placeholder="Business Name">
-                        <select id="p-shop-cat">
-                            <option value="Food">Food Partner</option>
-                            <option value="Grocery">Grocery Partner</option>
-                            <option value="Ride">Ride Partner</option>
-                            <option value="Services">Services Partner</option>
-                        </select>
-                        <input id="p-shop-img" placeholder="Banner Image URL">
-                        <button id="btn-register-shop" class="w-full bg-green-600 text-white p-5 rounded-[2rem] font-black text-lg shadow-xl shadow-green-100">LAUNCH MY SHOP</button>
-                    </div>
-                </div>
-                <div id="partner-panel" class="hidden space-y-10">
-                    <div class="bg-white p-10 rounded-[3rem] shadow-sm border border-gray-100">
-                        <h3 class="font-black text-2xl mb-8">Listing Manager</h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                            <input id="item-name" placeholder="Item/Service Name">
-                            <input id="item-price" type="number" placeholder="Price (₹)">
-                            <input id="item-qty" placeholder="Unit (e.g. 1kg)">
-                            <input id="item-img" placeholder="Image Link">
-                        </div>
-                        <button id="btn-add-item" class="w-full mt-8 bg-gray-900 text-white p-5 rounded-[2rem] font-black">List Item</button>
-                    </div>
-                    <div id="partner-order-list" class="space-y-4"></div>
-                </div>
-            </div>
-
             <!-- Master Admin View (Hidden) -->
             <div id="view-Admin" class="hidden space-y-8">
                 <div class="grid grid-cols-2 gap-6">
@@ -278,7 +246,8 @@
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, getDoc, getDocs, setDoc, onSnapshot, addDoc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const firebaseConfig = {
+        // CONFIG: Prioritize Environment provided config, fallback to user provided IDs
+        const userConfig = {
             apiKey: "AIzaSyCA4U4jva7HHeMP-yk1VJy3l_BBct3Gohg",
             authDomain: "gramzo.firebaseapp.com",
             projectId: "gramzo",
@@ -287,16 +256,16 @@
             appId: "1:674262956986:web:772f68694c77e15bf3fb83",
             measurementId: "G-K5WBG7RRFM"
         };
-
+        
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : userConfig;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'gramzo-super-pichai-v11';
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const currentAppId = typeof __app_id !== 'undefined' ? __app_id : 'gramzo-super-pichai-v10';
 
-        const getCol = (name) => collection(db, 'artifacts', currentAppId, 'public', 'data', name);
+        const getCol = (name) => collection(db, 'artifacts', appId, 'public', 'data', name);
 
         let currentUser = null;
-        let myShop = null;
         let currentFilter = null;
         let cart = [];
         const fees = { Santuri: 10, Muradi: 20, Tarabari: 25, Garshika: 20 };
@@ -305,7 +274,7 @@
 
         async function startApp() {
             try {
-                // Ensure a valid session exists for Firestore security rules
+                // Rule 3: Technical Auth Layer
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
@@ -320,8 +289,9 @@
                     }
                 });
             } catch (e) {
-                console.error("Firebase Init Error:", e);
+                console.error("Firebase Initialization Failed:", e);
                 document.getElementById('status-dot').className = "w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_#ef4444] animate-none";
+                showMsg("System Connection Failed. Please refresh.");
             }
         }
 
@@ -333,13 +303,21 @@
         };
 
         const handleAuth = async (type) => {
-            if (!authReady) {
-                showMsg("Connecting to system... Please wait 2 seconds.");
-                return;
+            const msgEl = document.getElementById('auth-msg');
+            
+            // Check if auth is ready
+            if (!authReady || !auth.currentUser) {
+                msgEl.innerText = "Connecting to secure database...";
+                msgEl.className = "text-[11px] text-center font-bold mt-4 text-orange-500";
+                try {
+                    await signInAnonymously(auth);
+                } catch(e) {
+                    msgEl.innerText = "Connection error. Check console.";
+                    return;
+                }
             }
 
-            const msgEl = document.getElementById('auth-msg');
-            msgEl.innerText = "Processing...";
+            msgEl.innerText = "Processing request...";
             msgEl.className = "text-[11px] text-center font-bold mt-4 text-blue-500";
 
             try {
@@ -352,15 +330,16 @@
                     const pass = document.getElementById('reg-pass').value.trim();
 
                     if (!name || phone.length !== 10 || !village || !address || pincode.length !== 6 || pass.length < 4) {
-                        msgEl.innerText = "Check entries: 10-digit mobile, 6-digit pincode required";
+                        msgEl.innerText = "Invalid data. Mobile must be 10 digits, Pincode 6 digits.";
                         msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
                         return;
                     }
 
-                    const userRef = doc(db, 'artifacts', currentAppId, 'public', 'data', 'users', phone);
+                    // Rule 1: Use strict artifact path
+                    const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', phone);
                     const snap = await getDoc(userRef);
                     if (snap.exists()) {
-                        msgEl.innerText = "Mobile number already registered.";
+                        msgEl.innerText = "This number is already registered.";
                         msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
                         return;
                     }
@@ -381,12 +360,12 @@
                     }
 
                     if (phone.length !== 10 || !pass) {
-                        msgEl.innerText = "Enter valid mobile and password";
+                        msgEl.innerText = "Enter 10-digit mobile and password";
                         msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
                         return;
                     }
 
-                    const userRef = doc(db, 'artifacts', currentAppId, 'public', 'data', 'users', phone);
+                    const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', phone);
                     const snap = await getDoc(userRef);
                     if (!snap.exists()) {
                         msgEl.innerText = "Account not found. Please register.";
@@ -405,8 +384,8 @@
                     finishLogin();
                 }
             } catch (e) {
-                console.error("Auth Exception:", e);
-                msgEl.innerText = "Database busy. Retry shortly.";
+                console.error("Database Transaction Failed:", e);
+                msgEl.innerText = "Secure connection timeout. Try once more.";
                 msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
             }
         };
@@ -427,7 +406,7 @@
             }
             
             initRealtimeListeners();
-            showMsg(`System Ready: ${currentUser.name}`);
+            showMsg(`Session Verified: ${currentUser.name}`);
         };
 
         function loadGuestData() {
@@ -528,7 +507,7 @@
                 cart = []; renderCartUI(); 
                 showMsg("Order Successfully Placed!");
                 window.scrollTo({ top: 0, behavior: 'smooth' });
-            } catch (e) { showMsg("Booking failed."); }
+            } catch (e) { showMsg("Booking failed. System timeout."); }
         };
 
         window.logout = () => { if(confirm("Sign out of Gramzo?")) location.reload(); };
