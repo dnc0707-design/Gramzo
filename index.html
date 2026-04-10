@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+< html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -30,12 +30,12 @@
         .auth-dropdown { 
             display: none; 
             position: absolute; 
-            right: 0; 
+            left: 0; 
             top: 100%; 
             margin-top: 0.75rem; 
             width: 22rem; 
             z-index: 60; 
-            transform-origin: top right;
+            transform-origin: top left;
             animation: slideIn 0.2s ease-out;
         }
         
@@ -70,31 +70,26 @@
     <!-- Header / Navbar -->
     <nav class="glass sticky top-0 z-50 px-4 py-4 border-b border-gray-100">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
-            <div onclick="location.reload()" class="cursor-pointer group">
-                <div class="flex items-center gap-2">
-                    <h1 class="text-2xl font-black text-green-600 tracking-tighter group-hover:scale-105 transition">GRAMZO</h1>
-                    <div id="status-dot" class="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" title="System Connection Status"></div>
-                </div>
-                <p class="text-[9px] text-gray-400 font-extrabold uppercase tracking-[0.2em]">The Rural Super App</p>
-            </div>
-
+            
+            <!-- Auth Portal (Now on the Top Left as requested) -->
             <div class="relative">
                 <div id="unauthed-ui" class="flex items-center">
-                    <button id="auth-btn-main" onclick="toggleAuthModal()" class="bg-green-600 text-white px-6 py-3 rounded-2xl text-sm font-bold flex items-center gap-2 shadow-lg shadow-green-100 transition-all active:scale-95">
-                        <span id="auth-btn-text">Login / Join</span> <i id="auth-btn-icon" class="fa-solid fa-user-circle ml-1"></i>
+                    <button id="auth-btn-main" onclick="toggleAuthModal()" class="bg-green-600 text-white px-5 py-2.5 rounded-2xl text-sm font-bold flex items-center gap-2 shadow-lg shadow-green-100 transition-all active:scale-95">
+                        <i id="auth-btn-icon" class="fa-solid fa-user-circle"></i> <span id="auth-btn-text">Sign In</span>
                     </button>
                 </div>
                 
                 <div id="authed-ui" class="hidden flex items-center gap-4">
-                    <div class="text-right hidden sm:block">
-                        <p id="display-name" class="text-sm font-bold text-gray-800"></p>
-                        <p id="display-role" class="text-[10px] text-green-600 font-black uppercase tracking-widest"></p>
-                    </div>
-                    <button id="logout-btn" class="w-12 h-12 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center hover:bg-red-500 hover:text-white transition shadow-sm">
-                        <i class="fa-solid fa-power-off text-lg"></i>
+                    <button id="logout-btn" class="w-10 h-10 bg-red-50 text-red-500 rounded-xl flex items-center justify-center hover:bg-red-500 hover:text-white transition shadow-sm">
+                        <i class="fa-solid fa-right-from-bracket"></i>
                     </button>
+                    <div class="text-left hidden sm:block">
+                        <p id="display-name" class="text-xs font-bold text-gray-800 leading-none"></p>
+                        <p id="display-role" class="text-[9px] text-green-600 font-black uppercase tracking-widest mt-1"></p>
+                    </div>
                 </div>
 
+                <!-- Redefined User-Only Auth Modal -->
                 <div id="auth-modal" class="auth-dropdown bg-white rounded-[2rem] shadow-2xl border border-gray-100 p-8">
                     <div id="auth-view-login">
                         <h3 class="font-black text-xl mb-6 text-gray-800">Welcome Back</h3>
@@ -103,28 +98,36 @@
                             <input id="login-pass" type="password" placeholder="Password">
                             <button id="submit-login" class="w-full bg-green-600 text-white p-4 rounded-2xl font-bold text-sm shadow-xl shadow-green-100 active:scale-95 transition">Sign In</button>
                             <p class="text-center text-xs font-bold text-gray-400 mt-4">
-                                New to Gramzo? <button id="to-register" class="text-green-600 hover:underline font-bold">Create User Account</button>
+                                First time on Gramzo? <button id="to-register" class="text-green-600 hover:underline">Register Here</button>
                             </p>
                         </div>
                     </div>
 
                     <div id="auth-view-register" class="hidden">
-                        <h3 class="font-black text-xl mb-6 text-gray-800">New Registration</h3>
+                        <h3 class="font-black text-xl mb-6 text-gray-800">Create Account</h3>
                         <div class="space-y-3">
                             <input id="reg-name" type="text" placeholder="Full Name">
-                            <input id="reg-phone" type="tel" placeholder="Mobile Number" maxlength="10">
+                            <input id="reg-phone" type="tel" placeholder="10-Digit Mobile Number" maxlength="10">
                             <input id="reg-village" type="text" placeholder="Village Name">
-                            <input id="reg-address" type="text" placeholder="Full Home Address">
-                            <input id="reg-pincode" type="tel" placeholder="Pincode (6 digits)" maxlength="6">
+                            <input id="reg-pincode" type="tel" placeholder="Pin Code" maxlength="6">
                             <input id="reg-pass" type="password" placeholder="Create Password">
-                            <button id="submit-register" class="w-full bg-green-600 text-white p-4 rounded-2xl font-bold text-sm shadow-xl shadow-green-100 active:scale-95 transition">Register Now</button>
+                            <button id="submit-register" class="w-full bg-green-600 text-white p-4 rounded-2xl font-bold text-sm shadow-xl shadow-green-100 active:scale-95 transition">Register & Sign In</button>
                             <p class="text-center text-xs font-bold text-gray-400 mt-4">
-                                Already registered? <button id="to-login" class="text-green-600 hover:underline font-bold">Login</button>
+                                Already registered? <button id="to-login" class="text-green-600 hover:underline">Login Instead</button>
                             </p>
                         </div>
                     </div>
                     <p id="auth-msg" class="text-[11px] text-center font-bold mt-4 min-h-[1rem]"></p>
                 </div>
+            </div>
+
+            <!-- Logo (Right Side) -->
+            <div onclick="location.reload()" class="cursor-pointer group text-right">
+                <div class="flex items-center gap-2 justify-end">
+                    <h1 class="text-2xl font-black text-green-600 tracking-tighter group-hover:scale-105 transition">GRAMZO</h1>
+                    <div id="status-dot" class="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></div>
+                </div>
+                <p class="text-[9px] text-gray-400 font-extrabold uppercase tracking-[0.2em]">Rural Super App</p>
             </div>
         </div>
     </nav>
@@ -135,28 +138,24 @@
         <section class="text-center py-6">
             <h2 class="text-gray-400 font-bold uppercase tracking-[0.2em] text-[10px] mb-8">One App for every Village need</h2>
             <div class="flex justify-center gap-4 sm:gap-10 overflow-x-auto custom-scroll px-4 pb-2">
-                <!-- Food (Zomato) -->
                 <div class="flex-shrink-0 group cursor-pointer text-center" id="btn-food">
                     <div class="service-btn text-orange-500 group-hover:bg-orange-500 group-hover:text-white group-hover:scale-110">
                         <i class="fa-solid fa-utensils"></i>
                     </div>
                     <p class="text-xs font-black mt-4 text-gray-600 tracking-tight">FOOD</p>
                 </div>
-                <!-- Grocery (Zepto) -->
                 <div class="flex-shrink-0 group cursor-pointer text-center" id="btn-grocery">
                     <div class="service-btn text-green-500 group-hover:bg-green-500 group-hover:text-white group-hover:scale-110">
                         <i class="fa-solid fa-bolt"></i>
                     </div>
                     <p class="text-xs font-black mt-4 text-gray-600 tracking-tight">GROCERY</p>
                 </div>
-                <!-- Ride (Rapido) -->
                 <div class="flex-shrink-0 group cursor-pointer text-center" id="btn-ride">
                     <div class="service-btn text-blue-500 group-hover:bg-blue-500 group-hover:text-white group-hover:scale-110">
                         <i class="fa-solid fa-motorcycle"></i>
                     </div>
                     <p class="text-xs font-black mt-4 text-gray-600 tracking-tight">RIDE</p>
                 </div>
-                <!-- Services (UrbanClap) -->
                 <div class="flex-shrink-0 group cursor-pointer text-center" id="btn-services">
                     <div class="service-btn text-purple-600 group-hover:bg-purple-600 group-hover:text-white group-hover:scale-110">
                         <i class="fa-solid fa-screwdriver-wrench"></i>
@@ -179,7 +178,7 @@
                     <div class="flex justify-between items-end mb-8">
                         <div>
                             <h3 class="font-black text-3xl tracking-tight">Marketplace</h3>
-                            <p class="text-xs text-gray-400 font-bold">Zomato • Zepto • Rapido • UrbanClap</p>
+                            <p class="text-xs text-gray-400 font-bold">Fast Delivery • Village Special</p>
                         </div>
                         <span id="active-filter" class="text-[10px] bg-green-50 text-green-600 px-4 py-1.5 rounded-full font-black tracking-widest border border-green-100 uppercase">All Listings</span>
                     </div>
@@ -210,28 +209,28 @@
                                 <span class="text-sm font-bold text-gray-500">Pay on Delivery</span>
                                 <span id="cart-total" class="text-4xl font-black text-green-600 tracking-tighter">₹0</span>
                             </div>
-                            <input id="cart-address" placeholder="Exact Delivery Location / Landmark">
-                            <button id="btn-place-order" class="w-full bg-green-600 text-white py-6 rounded-[2rem] font-black text-xl shadow-2xl shadow-green-100 active:scale-95 transition">BOOK NOW</button>
+                            <input id="cart-address" placeholder="Enter Delivery Address (e.g. Near Kalimandir)">
+                            <button id="btn-place-order" class="w-full bg-green-600 text-white py-6 rounded-[2rem] font-black text-xl shadow-2xl shadow-green-100 active:scale-95 transition">PLACE ORDER</button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Master Admin View (Hidden) -->
+            <!-- Master Admin View (Access via Master Login) -->
             <div id="view-Admin" class="hidden space-y-8">
                 <div class="grid grid-cols-2 gap-6">
                     <div class="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm text-center">
-                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Platform Revenue</p>
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Total GTV</p>
                         <h4 id="stat-rev" class="text-4xl font-black text-green-600 tracking-tighter">₹0</h4>
                     </div>
                     <div class="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm text-center">
-                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Volume</p>
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Total Activity</p>
                         <h4 id="stat-ord" class="text-4xl font-black text-blue-600 tracking-tighter">0</h4>
                     </div>
                 </div>
                 <div id="admin-log-container" class="bg-white rounded-[2.5rem] overflow-hidden border">
                     <table class="w-full text-left text-xs">
-                        <thead class="bg-gray-50 border-b"><tr><th class="p-6">TXN</th><th class="p-6">Customer</th><th class="p-6">Amt</th><th class="p-6">Status</th></tr></thead>
+                        <thead class="bg-gray-50 border-b"><tr><th class="p-6">TXN</th><th class="p-6">Customer</th><th class="p-6">Amt</th><th class="p-6 text-right">Status</th></tr></thead>
                         <tbody id="admin-log-body" class="divide-y divide-gray-50"></tbody>
                     </table>
                 </div>
@@ -246,8 +245,8 @@
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, getDoc, getDocs, setDoc, onSnapshot, addDoc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // CONFIG: Prioritize Environment provided config, fallback to user provided IDs
-        const userConfig = {
+        // Firebase Config
+        const firebaseConfig = {
             apiKey: "AIzaSyCA4U4jva7HHeMP-yk1VJy3l_BBct3Gohg",
             authDomain: "gramzo.firebaseapp.com",
             projectId: "gramzo",
@@ -256,14 +255,13 @@
             appId: "1:674262956986:web:772f68694c77e15bf3fb83",
             measurementId: "G-K5WBG7RRFM"
         };
-        
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : userConfig;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'gramzo-super-pichai-v11';
+
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        const currentAppId = typeof __app_id !== 'undefined' ? __app_id : 'gramzo-super-revamp-v12';
 
-        const getCol = (name) => collection(db, 'artifacts', appId, 'public', 'data', name);
+        const getCol = (name) => collection(db, 'artifacts', currentAppId, 'public', 'data', name);
 
         let currentUser = null;
         let currentFilter = null;
@@ -274,7 +272,6 @@
 
         async function startApp() {
             try {
-                // Rule 3: Technical Auth Layer
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
@@ -289,9 +286,8 @@
                     }
                 });
             } catch (e) {
-                console.error("Firebase Initialization Failed:", e);
-                document.getElementById('status-dot').className = "w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_#ef4444] animate-none";
-                showMsg("System Connection Failed. Please refresh.");
+                console.error("Firebase Connection Error:", e);
+                document.getElementById('status-dot').className = "w-2 h-2 rounded-full bg-red-500 animate-none";
             }
         }
 
@@ -304,20 +300,12 @@
 
         const handleAuth = async (type) => {
             const msgEl = document.getElementById('auth-msg');
-            
-            // Check if auth is ready
-            if (!authReady || !auth.currentUser) {
-                msgEl.innerText = "Connecting to secure database...";
-                msgEl.className = "text-[11px] text-center font-bold mt-4 text-orange-500";
-                try {
-                    await signInAnonymously(auth);
-                } catch(e) {
-                    msgEl.innerText = "Connection error. Check console.";
-                    return;
-                }
+            if (!authReady) {
+                showMsg("Establishing secure connection...");
+                return;
             }
 
-            msgEl.innerText = "Processing request...";
+            msgEl.innerText = "Processing...";
             msgEl.className = "text-[11px] text-center font-bold mt-4 text-blue-500";
 
             try {
@@ -325,26 +313,27 @@
                     const name = document.getElementById('reg-name').value.trim();
                     const phone = document.getElementById('reg-phone').value.trim();
                     const village = document.getElementById('reg-village').value.trim();
-                    const address = document.getElementById('reg-address').value.trim();
                     const pincode = document.getElementById('reg-pincode').value.trim();
                     const pass = document.getElementById('reg-pass').value.trim();
 
-                    if (!name || phone.length !== 10 || !village || !address || pincode.length !== 6 || pass.length < 4) {
-                        msgEl.innerText = "Invalid data. Mobile must be 10 digits, Pincode 6 digits.";
+                    if (!name || phone.length !== 10 || !village || pincode.length !== 6 || pass.length < 4) {
+                        msgEl.innerText = "Check entries: Mobile (10 digits), Pin code (6 digits) required.";
                         msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
                         return;
                     }
 
-                    // Rule 1: Use strict artifact path
-                    const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', phone);
+                    const userRef = doc(db, 'artifacts', currentAppId, 'public', 'data', 'users', phone);
                     const snap = await getDoc(userRef);
                     if (snap.exists()) {
-                        msgEl.innerText = "This number is already registered.";
+                        msgEl.innerText = "This mobile number is already registered.";
                         msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
                         return;
                     }
 
-                    const userData = { name, phone, village, address, pincode, pin: pass, role: 'User', created: new Date().toISOString() };
+                    const userData = { 
+                        name, phone, village, pincode, pin: pass, 
+                        role: 'User', created: new Date().toISOString() 
+                    };
                     await setDoc(userRef, userData);
                     
                     showMsg("Registration Successful!");
@@ -354,21 +343,22 @@
                     const phone = document.getElementById('login-phone').value.trim();
                     const pass = document.getElementById('login-pass').value.trim();
 
+                    // Master Admin Logic (Hidden)
                     if (phone === '12345' && pass === 'Pass@123') {
                         currentUser = { name: 'Master Admin', role: 'Admin', phone: '12345' };
                         return finishLogin();
                     }
 
                     if (phone.length !== 10 || !pass) {
-                        msgEl.innerText = "Enter 10-digit mobile and password";
+                        msgEl.innerText = "Enter 10-digit mobile number and password.";
                         msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
                         return;
                     }
 
-                    const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', phone);
+                    const userRef = doc(db, 'artifacts', currentAppId, 'public', 'data', 'users', phone);
                     const snap = await getDoc(userRef);
                     if (!snap.exists()) {
-                        msgEl.innerText = "Account not found. Please register.";
+                        msgEl.innerText = "No account found. Register above.";
                         msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
                         return;
                     }
@@ -384,8 +374,8 @@
                     finishLogin();
                 }
             } catch (e) {
-                console.error("Database Transaction Failed:", e);
-                msgEl.innerText = "Secure connection timeout. Try once more.";
+                console.error("Auth Failure:", e);
+                msgEl.innerText = "System busy. Retry in a moment.";
                 msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
             }
         };
@@ -402,11 +392,11 @@
 
             if (currentUser.role === 'User') {
                 document.getElementById('cart-box').classList.remove('opacity-40', 'pointer-events-none', 'scale-95', 'blur-[1px]');
-                if (currentUser.address) document.getElementById('cart-address').value = `${currentUser.address}, ${currentUser.village}`;
+                if (currentUser.village) document.getElementById('cart-address').value = `${currentUser.village}`;
             }
             
             initRealtimeListeners();
-            showMsg(`Session Verified: ${currentUser.name}`);
+            showMsg(`Welcome back, ${currentUser.name}`);
         };
 
         function loadGuestData() {
@@ -431,7 +421,7 @@
                             </div>
                         </div>
                     </div>
-                `).join('') : '<div class="col-span-2 text-center py-20 text-gray-300 italic">No listings found in this category.</div>';
+                `).join('') : '<div class="col-span-2 text-center py-20 text-gray-300 italic">No listings in this category.</div>';
             });
         }
 
@@ -458,11 +448,15 @@
             currentFilter = (currentFilter === cat) ? null : cat;
             document.getElementById('active-filter').innerText = currentFilter ? currentFilter.toUpperCase() : "ALL LISTINGS";
             loadGuestData();
-            showMsg(`Filtering: ${currentFilter || 'All'}`);
+            showMsg(`Viewing: ${currentFilter || 'General'}`);
         };
 
         window.addToCart = (name, price, shopName) => {
-            if(!currentUser) return toggleAuthModal();
+            if(!currentUser) {
+                toggleAuthModal();
+                showMsg("Please Login to add items.");
+                return;
+            }
             cart.push({name, price, shopName});
             renderCartUI();
             showMsg(`Added: ${name}`);
@@ -474,7 +468,7 @@
             const sub = cart.reduce((s, i) => s + i.price, 0);
 
             if (!cart.length) {
-                list.innerHTML = '<p class="text-gray-400 italic text-sm text-center py-6 border-dashed border rounded-3xl">Empty basket</p>';
+                list.innerHTML = '<p class="text-gray-400 italic text-sm text-center py-6 border-dashed border rounded-3xl">Basket is empty</p>';
                 document.getElementById('cart-total').innerText = '₹0';
                 return;
             }
@@ -492,8 +486,9 @@
         window.removeFromCart = (idx) => { cart.splice(idx, 1); renderCartUI(); };
 
         window.placeOrder = async () => {
+            if (!currentUser) return toggleAuthModal();
             const addr = document.getElementById('cart-address').value.trim();
-            if(!addr) return showMsg("Please enter your exact location.");
+            if(!addr) return showMsg("Delivery location required.");
             const gp = document.getElementById('cart-gp').value;
             const sub = cart.reduce((s,i) => s + i.price, 0);
             const total = sub + (fees[gp] || 10);
@@ -507,16 +502,15 @@
                 cart = []; renderCartUI(); 
                 showMsg("Order Successfully Placed!");
                 window.scrollTo({ top: 0, behavior: 'smooth' });
-            } catch (e) { showMsg("Booking failed. System timeout."); }
+            } catch (e) { showMsg("Network busy. Retry booking."); }
         };
 
-        window.logout = () => { if(confirm("Sign out of Gramzo?")) location.reload(); };
+        window.logout = () => { if(confirm("Sign out from Gramzo?")) location.reload(); };
 
         document.getElementById('submit-login').onclick = () => handleAuth('login');
         document.getElementById('submit-register').onclick = () => handleAuth('register');
         document.getElementById('to-register').onclick = () => toggleAuthView('register');
         document.getElementById('to-login').onclick = () => toggleAuthView('login');
-        document.getElementById('logout-btn').onclick = () => logout();
         document.getElementById('btn-food').onclick = () => filterBy('Food');
         document.getElementById('btn-grocery').onclick = () => filterBy('Grocery');
         document.getElementById('btn-ride').onclick = () => filterBy('Ride');
