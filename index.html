@@ -3,134 +3,225 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gramzo</title>
+  <title>Gramzo | Rural Super App</title>
   <style>
-    *{box-sizing:border-box} body{font-family:Arial,sans-serif;margin:0;background:#f8fafc;color:#111827}
-    .hero{background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;padding:24px 0 32px}
-    .wrap{max-width:980px;margin:auto;padding:16px}
-    .brand{display:flex;align-items:center;gap:14px}.brand img{height:72px;border-radius:16px}
-    .lang{margin-left:auto;padding:10px;border:none;border-radius:12px}
-    .services{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px}
-    .card,.section{background:#fff;border-radius:24px;padding:18px;box-shadow:0 8px 24px rgba(0,0,0,.08)}
-    .card{text-align:center}.card img{height:56px;width:56px;border-radius:18px}
-    .section{margin-top:18px}
-    input,select,button{width:100%;padding:14px;border-radius:14px;border:1px solid #d1d5db;margin-top:10px}
-    button{background:#16a34a;color:#fff;border:none;font-weight:700;cursor:pointer}
-    .productRow{display:flex;justify-content:space-between;align-items:center;gap:10px;text-align:left}
-    .smallBtn{width:auto;margin:0;padding:8px 12px}
+    :root { --primary: #16a34a; --bg: #f8fafc; --text: #111827; }
+    * { box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
+    body { margin: 0; background: var(--bg); color: var(--text); padding-bottom: 50px; }
+    
+    .hero { background: linear-gradient(135deg, #16a34a, #15803d); color: #fff; padding: 20px 0; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .wrap { max-width: 600px; margin: auto; padding: 0 16px; }
+    
+    /* Horizontal Category Scroll */
+    .categories { display: flex; gap: 12px; overflow-x: auto; padding: 10px 0; scrollbar-width: none; }
+    .categories::-webkit-scrollbar { display: none; }
+    .cat-card { background: rgba(255,255,255,0.2); min-width: 100px; padding: 12px; border-radius: 16px; text-align: center; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.3); }
+    .cat-card img { height: 40px; margin-bottom: 5px; }
+    .cat-card span { display: block; font-size: 12px; font-weight: bold; text-transform: uppercase; }
+
+    .section { background: #fff; border-radius: 20px; padding: 20px; margin-top: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+    h2 { font-size: 1.2rem; margin-top: 0; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+    
+    input, select, button { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; margin-top: 8px; outline: none; font-size: 16px; }
+    button { background: var(--primary); color: #fff; border: none; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
+    button:active { opacity: 0.8; }
+    .secondary-btn { background: #f1f5f9; color: #475569; margin-top: 8px; }
+
+    .product-list { display: grid; gap: 10px; margin-top: 15px; }
+    .item-card { display: flex; justify-content: space-between; align-items: center; padding: 12px; border: 1px solid #f1f5f9; border-radius: 12px; }
+    .price-tag { font-weight: bold; color: var(--primary); }
+    .add-btn { width: auto; padding: 6px 12px; font-size: 14px; margin: 0; }
+    
+    .badge { background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; }
   </style>
 </head>
 <body>
-  <div class="hero" style="padding:14px 0 20px">
-    <div class="wrap" style="display:flex;align-items:center;gap:16px;justify-content:space-between;">
-      <div style="display:flex;gap:18px;margin:18px 0 10px;align-items:center;overflow:auto;">
-        <div class="card" style="min-width:180px;display:flex;align-items:center;gap:12px;"><img src="food.png" /><h3 style="margin:0">FOOD</h3></div>
-        <div class="card" style="min-width:180px;display:flex;align-items:center;gap:12px;"><img src="grocery.png" /><h3 style="margin:0">GROCERY</h3></div>
-        <div class="card" style="min-width:180px;display:flex;align-items:center;gap:12px;"><img src="ride.png" /><h3 style="margin:0">RIDE</h3></div>
+
+  <div class="hero">
+    <div class="wrap">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h1 style="margin:0; font-size: 1.5rem;">Gramzo</h1>
+        <select id="lang" onchange="updateLang()" style="width:auto; margin:0; padding:4px; background:transparent; color:white; border:1px solid white;">
+          <option value="en">English</option>
+          <option value="bn">বাংলা</option>
+          <option value="hi">हिन्दी</option>
+        </select>
       </div>
-      <div class="services">
-        <div class="card"><img src="food.png" /><h3>Food</h3></div>
-        <div class="card"><img src="grocery.png" /><h3>Grocery</h3></div>
-        <div class="card"><img src="ride.png" /><h3>Ride</h3></div>
+      <p id="tagline" style="margin: 5px 0 15px; opacity: 0.9; font-size: 0.9rem;">Rural Living, Simplified</p>
+      
+      <div class="categories">
+        <div class="cat-card"><img src="https://cdn-icons-png.flaticon.com/512/3081/3081913.png" /><span>Food</span></div>
+        <div class="cat-card"><img src="https://cdn-icons-png.flaticon.com/512/3724/3724720.png" /><span>Grocery</span></div>
+        <div class="cat-card"><img src="https://cdn-icons-png.flaticon.com/512/2111/2111440.png" /><span>Ride</span></div>
+        <div class="cat-card"><img src="https://cdn-icons-png.flaticon.com/512/2784/2784530.png" /><span>Medicine</span></div>
       </div>
     </div>
   </div>
 
   <div class="wrap">
-    <div class="section">
-      <h2>Login / Register</h2>
-      <select id="role"><option>User</option><option>Partner</option><option>Admin</option></select>
-      <input id="name" placeholder="Name" />
-      <input id="phone" placeholder="Phone" />
-      <input id="pin" placeholder="4 digit PIN" />
-      <button onclick="registerUser()">Register</button>
-      <button onclick="loginUser()">Login</button>
+    <div id="authBox" class="section">
+      <h2 id="authTitle">Login / Register</h2>
+      <select id="role"><option value="User">Customer</option><option value="Partner">Shop Partner</option></select>
+      <input id="phone" type="tel" placeholder="Phone Number" />
+      <input id="pin" type="password" placeholder="4 Digit PIN" maxlength="4" />
+      <button onclick="authAction('login')">Login</button>
+      <button class="secondary-btn" onclick="authAction('reg')">Create New Account</button>
+    </div>
+
+    <div id="partnerPanel" class="section" style="display:none;">
+      <h2>🏪 Shop Manager <span class="badge">Partner</span></h2>
+      <input id="productName" placeholder="Item Name (e.g. Samosa)" />
+      <input id="productPrice" type="number" placeholder="Price (₹)" />
+      <button onclick="addProduct()">List Product</button>
     </div>
 
     <div class="section">
-      <h2>Add Product</h2>
-      <input id="productName" placeholder="Product Name" />
-      <input id="productPrice" placeholder="Price" />
-      <button onclick="addProduct()">Add Product</button>
-      <div id="products"></div>
+      <h2 id="marketTitle">🛒 Marketplace</h2>
+      <div id="productList" class="product-list">
+        <p style="text-align:center; color:#94a3b8;">Loading local items...</p>
+      </div>
     </div>
 
-    <div class="section">
-      <h2>🛒 Cart</h2>
-      <div id="cartItems"><p>No items in cart</p></div>
-      <div id="cartTotal" style="font-weight:700">Total: ₹0</div>
-      <input id="deliveryAddress" placeholder="Delivery Address" />
+    <div id="cartBox" class="section">
+      <h2>🛍️ My Cart</h2>
+      <div id="cartItems"></div>
+      <div id="cartTotal" style="font-size:1.1rem; font-weight:800; margin-top:10px; border-top:1px solid #eee; padding-top:10px;">Total: ₹0</div>
+      
+      <h3 style="font-size:0.9rem; margin-top:15px;">Delivery Details</h3>
       <select id="deliveryGp" onchange="renderCart()">
-        <option>Santuri</option><option>Muradi</option><option>Garshika</option><option>Tarabari</option><option>Ramchandrapur-Kotaldi</option><option>Balitora</option>
+        <option value="Santuri">Santuri (₹10)</option>
+        <option value="Muradi">Muradi (₹20)</option>
+        <option value="Garshika">Garshika (₹20)</option>
+        <option value="Tarabari">Tarabari (₹25)</option>
+        <option value="Ramchandrapur">Ramchandrapur (₹25)</option>
       </select>
-      <button onclick="checkoutCart()">Checkout (COD / UPI)</button>
+      <input id="address" placeholder="House No / Landmark" />
+      <button onclick="checkout()">Place Order (COD)</button>
     </div>
   </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script>
+// --- Initialization ---
 const firebaseConfig = {
-  apiKey: "AIzaSyCA4U4jva7HHeMP-yk1VJy3l_BBct3Gohg",
+  apiKey: "AIzaSyCA4U4jva7HHeMP-yk1VJy3l_BBct3Gohg", // Using your provided config
   authDomain: "gramzo.firebaseapp.com",
   projectId: "gramzo",
   storageBucket: "gramzo.firebasestorage.app",
   messagingSenderId: "674262956986",
-  appId: "1:674262956986:web:772f68694c77e15bf3fb83",
-  measurementId: "G-K5WBG7RRFM"
+  appId: "1:674262956986:web:772f68694c77e15bf3fb83"
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-const t={en:'Rural Living, Simplified',bn:'গ্রামীণ জীবন, সহজভাবে',hi:'ग्रामीण जीवन, आसान',sat:'ᱨᱩᱨᱟᱞ ᱡᱤᱵᱚᱱ, ᱥᱚᱦᱚᱡ'};
-const cart=[];
-function changeLang(){tagline.innerText=t[lang.value];}
-async function registerUser(){
-  const payload = {
-    role: role.value,
-    name: name.value.trim(),
-    phone: phone.value.trim(),
-    pin: pin.value.trim(),
-    createdAt: new Date().toISOString()
-  };
-  if(!payload.phone || !payload.pin) return alert('Phone and PIN required');
-  await db.collection('users').doc(payload.phone).set(payload);
-  alert('Registered successfully');
+const translations = {
+  en: { tag: 'Rural Living, Simplified', market: 'Marketplace', auth: 'Login / Register' },
+  bn: { tag: 'গ্রামীণ জীবন, সহজভাবে', market: 'বাজার', auth: 'লগইন / রেজিস্ট্রেশন' },
+  hi: { tag: 'ग्रामीण जीवन, आसान', market: 'बाज़ार', auth: 'लॉगিন / रजिस्टर' }
+};
+
+let currentUser = null;
+let cart = [];
+
+// --- Functions ---
+
+function updateLang() {
+  const l = document.getElementById('lang').value;
+  document.getElementById('tagline').innerText = translations[l].tag;
+  document.getElementById('marketTitle').innerText = `🛒 ${translations[l].market}`;
+  document.getElementById('authTitle').innerText = translations[l].auth;
 }
-async function loginUser(){
-  const doc = await db.collection('users').doc(phone.value.trim()).get();
-  if(!doc.exists) return alert('No account found');
-  if(doc.data().pin !== pin.value.trim()) return alert('Wrong PIN');
-  alert('Login success');
+
+async function authAction(type) {
+  const p = document.getElementById('phone').value;
+  const pin = document.getElementById('pin').value;
+  const role = document.getElementById('role').value;
+
+  if (p.length < 10) return alert("Enter valid phone");
+
+  if (type === 'reg') {
+    await db.collection('users').doc(p).set({ phone: p, pin, role, created: new Date() });
+    alert("Account Created! Please login.");
+  } else {
+    const doc = await db.collection('users').doc(p).get();
+    if (doc.exists() && doc.data().pin === pin) {
+      currentUser = doc.data();
+      document.getElementById('authBox').innerHTML = `<h3>Welcome, ${p} <span class="badge">${currentUser.role}</span></h3>`;
+      if (currentUser.role === 'Partner') document.getElementById('partnerPanel').style.display = 'block';
+    } else {
+      alert("Invalid Credentials");
+    }
+  }
 }
-async function addProduct(){
- const name=productName.value.trim(); const price=Number(productPrice.value||0); if(!name||!price)return;
- products.innerHTML=`<div class="card productRow">${name} • ₹${price}<button class="smallBtn" onclick="addToCart('${name}',${price})">Add to Cart</button></div>`+products.innerHTML;
- await db.collection('products').add({name,price,createdAt:new Date().toISOString()});
- productName.value=''; productPrice.value='';
+
+// Real-time product listener
+db.collection('products').orderBy('createdAt', 'desc').onSnapshot(snap => {
+  const list = document.getElementById('productList');
+  list.innerHTML = '';
+  snap.forEach(doc => {
+    const p = doc.data();
+    list.innerHTML += `
+      <div class="item-card">
+        <div><strong>${p.name}</strong><br><span class="price-tag">₹${p.price}</span></div>
+        <button class="add-btn" onclick="addToCart('${p.name}', ${p.price})">Add +</button>
+      </div>`;
+  });
+});
+
+async function addProduct() {
+  const name = document.getElementById('productName').value;
+  const price = document.getElementById('productPrice').value;
+  if (!name || !price) return;
+  
+  await db.collection('products').add({ name, price: Number(price), createdAt: new Date() });
+  document.getElementById('productName').value = '';
+  document.getElementById('productPrice').value = '';
 }
-function addToCart(name,price){cart.push({name,price});renderCart();}
-function renderCart(){
- const charges={Santuri:10,Muradi:20,Garshika:20,Tarabari:25,'Ramchandrapur-Kotaldi':25,Balitora:25};
- const dc=charges[deliveryGp.value]||10;
- if(!cart.length){cartItems.innerHTML='<p>No items in cart</p>';cartTotal.innerText='Total: ₹0';return;}
- let total=0; cartItems.innerHTML=cart.map(i=>{total+=i.price; return `<div class="card" style="text-align:left;margin-top:8px">${i.name} • ₹${i.price}</div>`}).join('');
- total+=dc; cartTotal.innerText=`Total: ₹${total} (incl delivery ₹${dc})`;
+
+function addToCart(name, price) {
+  cart.push({ name, price });
+  renderCart();
 }
-async function checkoutCart(){
-  if(!cart.length) return alert('Cart is empty');
+
+function renderCart() {
+  const container = document.getElementById('cartItems');
+  const charges = { Santuri:10, Muradi:20, Garshika:20, Tarabari:25, Ramchandrapur:25 };
+  const fee = charges[document.getElementById('deliveryGp').value] || 0;
+  
+  if (cart.length === 0) {
+    container.innerHTML = '<p style="color:#94a3b8">Cart is empty</p>';
+    return;
+  }
+
+  container.innerHTML = cart.map((item, idx) => `
+    <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:14px;">
+      <span>${item.name}</span>
+      <span>₹${item.price}</span>
+    </div>
+  `).join('');
+
+  const subtotal = cart.reduce((sum, i) => sum + i.price, 0);
+  document.getElementById('cartTotal').innerText = `Total: ₹${subtotal + fee} (Incl. ₹${fee} delivery)`;
+}
+
+async function checkout() {
+  if (!currentUser) return alert("Please login first");
+  if (cart.length === 0) return alert("Cart is empty");
+
   const order = {
-    items: [...cart],
-    gp: deliveryGp.value,
-    address: deliveryAddress.value.trim(),
-    total: cart.reduce((s,i)=>s+i.price,0),
-    paymentMode: 'COD / UPI',
-    status: 'Placed',
-    createdAt: new Date().toISOString()
+    customer: currentUser.phone,
+    items: cart,
+    address: document.getElementById('address').value,
+    gp: document.getElementById('deliveryGp').value,
+    status: 'Pending',
+    time: new Date()
   };
+
   await db.collection('orders').add(order);
-  alert(`Order placed for ${deliveryGp.value} at ${deliveryAddress.value}`);
-  cart.length=0; renderCart();
+  alert("Order Placed Successfully! Stay near your phone.");
+  cart = [];
+  renderCart();
 }
 </script>
 </body>
