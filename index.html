@@ -138,24 +138,28 @@
         <section class="text-center py-6">
             <h2 class="text-gray-400 font-bold uppercase tracking-[0.2em] text-[10px] mb-8">One App for every Village need</h2>
             <div class="flex justify-center gap-4 sm:gap-10 overflow-x-auto custom-scroll px-4 pb-2">
+                <!-- Food (Zomato) -->
                 <div class="flex-shrink-0 group cursor-pointer text-center" id="btn-food">
                     <div class="service-btn text-orange-500 group-hover:bg-orange-500 group-hover:text-white group-hover:scale-110">
                         <i class="fa-solid fa-utensils"></i>
                     </div>
                     <p class="text-xs font-black mt-4 text-gray-600 tracking-tight">FOOD</p>
                 </div>
+                <!-- Grocery (Zepto) -->
                 <div class="flex-shrink-0 group cursor-pointer text-center" id="btn-grocery">
                     <div class="service-btn text-green-500 group-hover:bg-green-500 group-hover:text-white group-hover:scale-110">
                         <i class="fa-solid fa-bolt"></i>
                     </div>
                     <p class="text-xs font-black mt-4 text-gray-600 tracking-tight">GROCERY</p>
                 </div>
+                <!-- Ride (Rapido) -->
                 <div class="flex-shrink-0 group cursor-pointer text-center" id="btn-ride">
                     <div class="service-btn text-blue-500 group-hover:bg-blue-500 group-hover:text-white group-hover:scale-110">
                         <i class="fa-solid fa-motorcycle"></i>
                     </div>
                     <p class="text-xs font-black mt-4 text-gray-600 tracking-tight">RIDE</p>
                 </div>
+                <!-- Services (UrbanClap) -->
                 <div class="flex-shrink-0 group cursor-pointer text-center" id="btn-services">
                     <div class="service-btn text-purple-600 group-hover:bg-purple-600 group-hover:text-white group-hover:scale-110">
                         <i class="fa-solid fa-screwdriver-wrench"></i>
@@ -240,7 +244,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, getDoc, getDocs, setDoc, onSnapshot, addDoc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, getDoc, setDoc, onSnapshot, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // CONFIG: Prioritize Environment provided config, fallback to user provided IDs
         const userConfig = {
@@ -254,7 +258,7 @@
         };
         
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : userConfig;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'gramzo-master-v15';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'gramzo-super-pichai-v15';
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
@@ -268,7 +272,7 @@
         
         let authReady = false;
 
-        // Force establish session
+        // Establish session and keep it alive
         async function startApp() {
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -285,7 +289,7 @@
                     }
                 });
             } catch (e) {
-                console.error("Firebase Auth Initialization Failed:", e);
+                console.error("Auth Init Error:", e);
                 document.getElementById('status-dot').className = "w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_#ef4444] animate-none";
             }
         }
@@ -300,27 +304,32 @@
         const handleAuth = async (type) => {
             const msgEl = document.getElementById('auth-msg');
             
-            // Check if connection is truly alive
+            // Critical check for auth readiness
             if (!auth.currentUser) {
-                msgEl.innerText = "Syncing with cloud database...";
+                msgEl.innerText = "Syncing with cloud... please wait 1 second.";
                 msgEl.className = "text-[11px] text-center font-bold mt-4 text-orange-500";
-                try {
+                try { 
                     await signInAnonymously(auth);
-                    // Wait for the token to settle
-                    await new Promise(resolve => setTimeout(resolve, 800));
-                } catch(e) {
-                    msgEl.innerText = "Connection failed. Please refresh.";
-                    return;
-                }
+                    await new Promise(r => setTimeout(r, 1000));
+                } catch(e) { return; }
             }
 
-            msgEl.innerText = "Processing secure request...";
+            msgEl.innerText = "Connecting to Secure Vault...";
             msgEl.className = "text-[11px] text-center font-bold mt-4 text-blue-500";
 
-            try {
-                // ADDED: Robust delay to ensure Firestore has recognized the Auth token
-                await new Promise(resolve => setTimeout(resolve, 1200));
+            // Helper for retrying the doc handshake (fixes Timeout issue)
+            const getDocWithRetry = async (ref, attempts = 3) => {
+                for (let i = 0; i < attempts; i++) {
+                    try {
+                        return await getDoc(ref);
+                    } catch (e) {
+                        if (i === attempts - 1) throw e;
+                        await new Promise(r => setTimeout(r, 800)); // Wait before retry
+                    }
+                }
+            };
 
+            try {
                 if (type === 'register') {
                     const name = document.getElementById('reg-name').value.trim();
                     const phone = document.getElementById('reg-phone').value.trim();
@@ -329,36 +338,24 @@
                     const pass = document.getElementById('reg-pass').value.trim();
 
                     if (!name || phone.length !== 10 || !village || pincode.length !== 6 || pass.length < 4) {
-                        msgEl.innerText = "Error: Mobile (10 digits) and Pincode (6 digits) required.";
+                        msgEl.innerText = "Invalid data. 10-digit mobile & 6-digit pin required.";
                         msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
                         return;
                     }
 
-                    // Rule 1: Use strict artifact path
                     const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', phone);
-                    
-                    // Use a simple getDoc to verify connection before setting
-                    let snap;
-                    try {
-                        snap = await getDoc(userRef);
-                    } catch(e) {
-                        throw new Error("Handshake timeout. Please click submit again.");
-                    }
+                    const snap = await getDocWithRetry(userRef);
 
                     if (snap && snap.exists()) {
-                        msgEl.innerText = "Mobile number is already registered.";
+                        msgEl.innerText = "This number is already registered.";
                         msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
                         return;
                     }
 
-                    const userData = { 
-                        name, phone, village, pincode, pin: pass, 
-                        role: 'User', created: new Date().toISOString() 
-                    };
-                    
+                    const userData = { name, phone, village, pincode, pin: pass, role: 'User', created: new Date().toISOString() };
                     await setDoc(userRef, userData);
                     
-                    showMsg("Registration Successful! Welcome to Gramzo.");
+                    showMsg("User Registered Successfully!");
                     currentUser = userData;
                     finishLogin();
                 } else {
@@ -377,7 +374,7 @@
                     }
 
                     const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', phone);
-                    const snap = await getDoc(userRef);
+                    const snap = await getDocWithRetry(userRef);
                     
                     if (!snap.exists()) {
                         msgEl.innerText = "Account not found. Please register first.";
@@ -396,8 +393,7 @@
                     finishLogin();
                 }
             } catch (e) {
-                console.error("Auth Exception:", e);
-                // FRIENDLY RETRY MESSAGE
+                console.error("Sync Exception:", e);
                 msgEl.innerText = "Handshake timeout. Please click Submit again.";
                 msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
             }
