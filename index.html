@@ -390,8 +390,16 @@
         import { getFirestore, collection, doc, getDoc, setDoc, onSnapshot, addDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Config & Initialization
-        const fallbackConfig = { apiKey: "dummy", authDomain: "gramzo.firebaseapp.com", projectId: "gramzo" };
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : fallbackConfig;
+        const userConfig = {
+            apiKey: "AIzaSyCA4U4jva7HHeMP-yk1VJy3l_BBct3Gohg",
+            authDomain: "gramzo.firebaseapp.com",
+            projectId: "gramzo",
+            storageBucket: "gramzo.firebasestorage.app",
+            messagingSenderId: "674262956986",
+            appId: "1:674262956986:web:772f68694c77e15bf3fb83",
+            measurementId: "G-K5WBG7RRFM"
+        };
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : userConfig;
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'gramzo-super-v2';
         
         const app = initializeApp(firebaseConfig);
