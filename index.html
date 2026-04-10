@@ -78,11 +78,6 @@
         .badge-User { @apply bg-blue-100 text-blue-700; }
         .badge-Partner { @apply bg-amber-100 text-amber-700; }
         .badge-Admin { @apply bg-purple-100 text-purple-700; }
-
-        /* Custom Checkbox */
-        .toggle-checkbox:checked { @apply bg-emerald-500 border-emerald-500; right: 0; border-color: #10b981; }
-        .toggle-checkbox:checked + .toggle-label { @apply bg-emerald-500; }
-        .toggle-checkbox:checked + .toggle-label:after { transform: translateX(100%); border-color: white; }
     </style>
 </head>
 <body>
@@ -103,9 +98,9 @@
 
             <!-- Right: Auth / Profile -->
             <div id="auth-container">
-                <!-- Unauthenticated State -->
-                <button id="btn-login-trigger" onclick="openAuthModal()" class="bg-gray-900 text-white px-5 py-2.5 rounded-full text-sm font-bold shadow-md hover:bg-gray-800 transition-colors active:scale-95">
-                    Login / Sign Up
+                <!-- Unauthenticated State (User Login) -->
+                <button id="btn-login-trigger" onclick="openAuthModal('User')" class="bg-gray-900 text-white px-5 py-2.5 rounded-full text-sm font-bold shadow-md hover:bg-gray-800 transition-colors active:scale-95 flex items-center gap-2">
+                    <i class="fa-solid fa-user"></i> User Login
                 </button>
                 
                 <!-- Authenticated State -->
@@ -137,7 +132,7 @@
     </nav>
 
     <!-- Main Content Area -->
-    <main class="pt-24 px-4 pb-20 max-w-md mx-auto sm:max-w-4xl sm:px-6">
+    <main class="pt-24 px-4 pb-10 max-w-md mx-auto sm:max-w-4xl sm:px-6">
         
         <!-- ========================================== -->
         <!-- VIEW: USER (Marketplace & Services)        -->
@@ -206,6 +201,22 @@
                     <div class="col-span-full py-10 text-center text-gray-400 font-medium text-sm animate-pulse">Loading amazing local products...</div>
                 </div>
             </div>
+
+            <!-- Bottom Partner Call-to-Action -->
+            <div id="partner-cta" class="mt-12 bg-gray-900 rounded-[2.5rem] p-8 text-center text-white shadow-xl relative overflow-hidden">
+                <div class="absolute -right-10 -top-10 w-40 h-40 bg-emerald-500 rounded-full opacity-20 blur-2xl"></div>
+                <div class="absolute -left-10 -bottom-10 w-40 h-40 bg-blue-500 rounded-full opacity-20 blur-2xl"></div>
+                <div class="relative z-10">
+                    <div class="w-14 h-14 mx-auto bg-white/10 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-md">
+                        <i class="fa-solid fa-handshake text-2xl text-emerald-400"></i>
+                    </div>
+                    <h3 class="text-2xl font-black mb-2">Partner with Gramzo</h3>
+                    <p class="text-gray-400 text-sm mb-6 max-w-xs mx-auto">Grow your business. Join us as a Shop Owner, Driver, or Delivery Rider today.</p>
+                    <button onclick="openAuthModal('Partner')" class="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-4 rounded-full text-sm font-bold shadow-lg shadow-emerald-500/30 transition-transform active:scale-95 w-full sm:w-auto">
+                        Login / Register as Partner
+                    </button>
+                </div>
+            </div>
         </div>
 
         <!-- ========================================== -->
@@ -259,7 +270,7 @@
                     <h2 class="text-2xl font-black mb-4" id="partner-welcome">Welcome, Partner!</h2>
                     <div class="flex items-center gap-2 bg-white/20 w-fit px-4 py-2 rounded-full backdrop-blur-sm">
                         <div class="w-2 h-2 rounded-full bg-green-300 animate-pulse"></div>
-                        <span class="text-sm font-bold">Online & Ready</span>
+                        <span class="text-sm font-bold" id="partner-category-badge">Online & Ready</span>
                     </div>
                 </div>
                 <i class="fa-solid fa-motorcycle absolute right-[-20px] bottom-[-20px] text-8xl opacity-20"></i>
@@ -320,7 +331,7 @@
     <div id="auth-overlay" class="modal-overlay">
         <div class="modal-content">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="font-black text-2xl text-gray-900" id="auth-title">Welcome</h3>
+                <h3 class="font-black text-2xl text-gray-900" id="auth-title">User Login</h3>
                 <button onclick="closeAuthModal()" class="w-8 h-8 bg-gray-100 text-gray-500 rounded-full flex items-center justify-center hover:bg-gray-200 transition">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
@@ -331,7 +342,7 @@
                 <input id="login-pass" type="password" class="input-field" placeholder="Password">
                 <button id="submit-login" onclick="handleAuth('login')" class="w-full bg-gray-900 text-white p-4 rounded-2xl font-bold text-sm shadow-xl hover:bg-gray-800 active:scale-95 transition">Secure Login</button>
                 <p class="text-center text-xs font-medium text-gray-500 mt-4">
-                    New to Gramzo? <button onclick="switchAuthView('register')" class="text-emerald-600 font-bold hover:underline">Create Account</button>
+                    Don't have an account? <button onclick="switchAuthView('register')" class="text-emerald-600 font-bold hover:underline">Register Here</button>
                 </p>
             </div>
 
@@ -341,16 +352,23 @@
                 <input id="reg-village" type="text" class="input-field" placeholder="Village / Area Name">
                 <input id="reg-pass" type="password" class="input-field" placeholder="Create Password">
                 
-                <!-- Role Selection -->
-                <div class="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl flex items-start gap-3 mt-2">
-                    <input type="checkbox" id="reg-is-partner" class="mt-1 w-4 h-4 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500">
-                    <div>
-                        <label for="reg-is-partner" class="text-sm font-bold text-gray-900 block cursor-pointer">Register as Delivery Partner</label>
-                        <p class="text-[10px] text-gray-500 leading-tight mt-1">Earn money by delivering orders in your area.</p>
+                <!-- Partner Specific Fields -->
+                <div id="partner-fields" class="hidden bg-gray-50 p-4 rounded-2xl border border-gray-100 space-y-3 mt-2">
+                    <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider">Partner Details</label>
+                    <select id="reg-partner-category" class="input-field !bg-white" onchange="toggleLicenseField()">
+                        <option value="" disabled selected>Select Business Type</option>
+                        <option value="Food Owner">Food Shop Owner</option>
+                        <option value="Grocery Owner">Grocery Shop Owner</option>
+                        <option value="Vehicle Owner">Bike / Toto / Car Owner</option>
+                        <option value="Delivery Rider">Delivery Rider</option>
+                    </select>
+                    <div id="license-container" class="hidden transition-all">
+                        <input id="reg-license" type="text" class="input-field !bg-white" placeholder="Enter Vehicle License Number">
+                        <p class="text-[10px] text-gray-500 mt-1 ml-2">Required for vehicle verification</p>
                     </div>
                 </div>
 
-                <button id="submit-register" onclick="handleAuth('register')" class="w-full bg-emerald-500 text-white p-4 rounded-2xl font-bold text-sm shadow-xl shadow-emerald-500/20 active:scale-95 transition mt-2">Sign Up Now</button>
+                <button id="submit-register" onclick="handleAuth('register')" class="w-full bg-emerald-500 text-white p-4 rounded-2xl font-bold text-sm shadow-xl shadow-emerald-500/20 active:scale-95 transition mt-4">Sign Up Now</button>
                 <p class="text-center text-xs font-medium text-gray-500 mt-4">
                     Already have an account? <button onclick="switchAuthView('login')" class="text-gray-900 font-bold hover:underline">Login</button>
                 </p>
@@ -384,7 +402,8 @@
         let currentUser = null;
         let currentFilter = null;
         let cart = [];
-        let unsubscribeListeners = []; // Array to hold unsubs to clean up on logout
+        let unsubscribeListeners = []; 
+        let currentAuthRole = 'User'; // Keeps track of which flow opened the modal
         
         // Helper to get collection path strictly matching rules
         const getCol = (name) => collection(db, 'artifacts', appId, 'public', 'data', name);
@@ -401,8 +420,6 @@
 
                 onAuthStateChanged(auth, (user) => {
                     if (user && !currentUser) {
-                        // User is anon until they explicitly login via our UI.
-                        // We load marketplace data regardless so guest users can browse.
                         loadMarketplaceData();
                     }
                 });
@@ -414,9 +431,11 @@
 
         // --- UI Interactions --- //
 
-        window.openAuthModal = () => {
+        window.openAuthModal = (role = 'User') => {
+            currentAuthRole = role;
             const overlay = document.getElementById('auth-overlay');
             overlay.classList.add('active');
+            switchAuthView('login'); // Default to login view
         };
 
         window.closeAuthModal = () => {
@@ -428,8 +447,27 @@
         window.switchAuthView = (view) => {
             document.getElementById('auth-view-login').style.display = view === 'login' ? 'block' : 'none';
             document.getElementById('auth-view-register').style.display = view === 'register' ? 'block' : 'none';
-            document.getElementById('auth-title').innerText = view === 'login' ? 'Welcome Back' : 'Join Gramzo';
+            
+            const titlePrefix = currentAuthRole === 'Partner' ? 'Partner' : 'User';
+            document.getElementById('auth-title').innerText = view === 'login' ? `${titlePrefix} Login` : `Join as ${titlePrefix}`;
+            
+            // Show partner-specific dropdowns only if registering as a Partner
+            if(view === 'register') {
+                document.getElementById('partner-fields').style.display = currentAuthRole === 'Partner' ? 'block' : 'none';
+            }
+            
             document.getElementById('auth-msg').classList.add('hidden');
+        };
+
+        window.toggleLicenseField = () => {
+            const category = document.getElementById('reg-partner-category').value;
+            const licenseContainer = document.getElementById('license-container');
+            if (category === 'Vehicle Owner') {
+                licenseContainer.classList.remove('hidden');
+            } else {
+                licenseContainer.classList.add('hidden');
+                document.getElementById('reg-license').value = ''; // clear it
+            }
         };
 
         window.toggleProfileMenu = () => {
@@ -444,6 +482,10 @@
                 target.classList.add('active');
                 window.scrollTo(0,0);
             }
+            
+            // Hide the Partner CTA block at the bottom if logged in
+            const cta = document.getElementById('partner-cta');
+            if(cta) cta.style.display = currentUser ? 'none' : 'block';
             
             // Update bottom nav active state if present
             document.querySelectorAll('.b-nav-item').forEach(el => {
@@ -501,12 +543,32 @@
                     const phone = document.getElementById('reg-phone').value.trim();
                     const village = document.getElementById('reg-village').value.trim();
                     const pass = document.getElementById('reg-pass').value.trim();
-                    const isPartner = document.getElementById('reg-is-partner').checked;
 
                     if (!name || phone.length !== 10 || !village || pass.length < 4) {
                         msgEl.className = "text-xs text-center font-bold mt-4 min-h-[1.5rem] px-4 rounded-lg py-2 bg-red-50 text-red-600 block";
-                        msgEl.innerText = "Please fill all details correctly (10-digit phone).";
+                        msgEl.innerText = "Please fill all basic details correctly (10-digit phone).";
                         return;
+                    }
+
+                    // Partner Validation
+                    let partnerCategory = null;
+                    let licenseStr = null;
+
+                    if (currentAuthRole === 'Partner') {
+                        partnerCategory = document.getElementById('reg-partner-category').value;
+                        if (!partnerCategory) {
+                            msgEl.className = "text-xs text-center font-bold mt-4 min-h-[1.5rem] px-4 rounded-lg py-2 bg-red-50 text-red-600 block";
+                            msgEl.innerText = "Please select a Partner Business Type.";
+                            return;
+                        }
+                        if (partnerCategory === 'Vehicle Owner') {
+                            licenseStr = document.getElementById('reg-license').value.trim();
+                            if (!licenseStr) {
+                                msgEl.className = "text-xs text-center font-bold mt-4 min-h-[1.5rem] px-4 rounded-lg py-2 bg-red-50 text-red-600 block";
+                                msgEl.innerText = "License number is required for Vehicle Owners.";
+                                return;
+                            }
+                        }
                     }
 
                     const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', phone);
@@ -518,8 +580,12 @@
                         return;
                     }
 
-                    const role = isPartner ? 'Partner' : 'User';
-                    const userData = { name, phone, village, pin: pass, role, created: new Date().toISOString() };
+                    const userData = { 
+                        name, phone, village, pin: pass, 
+                        role: currentAuthRole, 
+                        created: new Date().toISOString(),
+                        ...(currentAuthRole === 'Partner' && { category: partnerCategory, license: licenseStr })
+                    };
                     await setDoc(userRef, userData);
                     
                     currentUser = userData;
@@ -597,6 +663,9 @@
                 document.getElementById('cart-address').value = currentUser.village;
             } else if (currentUser.role === 'Partner') {
                 document.getElementById('partner-welcome').innerText = `Hello, ${currentUser.name.split(' ')[0]}!`;
+                if(currentUser.category) {
+                    document.getElementById('partner-category-badge').innerText = `Online (${currentUser.category})`;
+                }
             }
 
             // Init Role-specific real-time DB listeners
@@ -616,6 +685,10 @@
             document.getElementById('profile-trigger').classList.add('hidden');
             document.getElementById('btn-login-trigger').classList.remove('hidden');
             document.getElementById('bottom-nav').classList.add('hidden');
+            
+            // Bring back the Partner CTA block
+            const cta = document.getElementById('partner-cta');
+            if(cta) cta.style.display = 'block';
             
             document.getElementById('user-location-display').innerText = "Select Location below to order";
             
@@ -653,6 +726,8 @@
 
         // 1. Marketplace (Public, available to guests)
         function loadMarketplaceData() {
+            if (!auth.currentUser) return; // Prevent unauthorized Firestore queries
+            
             // Setup dummy data if none exists in db to make the demo look good immediately
             const dummyProducts = [
                 { name: "Fresh Tomatoes", price: 40, category: "Grocery", qty: "1 Kg", image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400&q=80" },
@@ -698,7 +773,6 @@
                 `).join('');
             }, (error) => console.error("Products error:", error));
             
-            // We don't push this to unsubscribeListeners because we want it active always
         }
 
         window.filterCategory = (cat) => {
@@ -802,7 +876,7 @@
         // --- Cart & Order Logic --- //
 
         window.addToCart = (name, price) => {
-            if(!currentUser) { openAuthModal(); return; }
+            if(!currentUser) { openAuthModal('User'); return; }
             if(currentUser.role !== 'User') { showToast("Switch to User account to buy.", "error"); return; }
             
             cart.push({name, price});
@@ -930,8 +1004,7 @@
         };
 
         // Init
-        loadMarketplaceData(); // Call immediately for visual structure before auth resolves
-        startApp();
+        startApp(); // startApp already calls loadMarketplaceData() safely after auth completes
     </script>
 </body>
 </html>
