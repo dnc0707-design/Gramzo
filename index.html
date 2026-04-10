@@ -50,8 +50,9 @@
             @apply w-full p-4 bg-gray-50 rounded-2xl border border-gray-100 outline-none focus:ring-2 ring-green-500 text-sm transition-all; 
         }
 
+        /* Restored Menu Size */
         .service-btn {
-            @apply h-16 w-16 sm:h-20 sm:w-20 bg-white rounded-[2rem] sm:rounded-[2.5rem] shadow-sm border border-gray-50 flex items-center justify-center text-2xl sm:text-3xl transition-all duration-300;
+            @apply h-24 w-24 bg-white rounded-[2.5rem] shadow-md border border-gray-50 flex items-center justify-center text-4xl transition-all duration-300;
         }
 
         .card-animate {
@@ -84,7 +85,7 @@
             <div class="relative">
                 <!-- Unauthenticated UI -->
                 <div id="unauthed-ui" class="flex items-center">
-                    <button id="auth-btn-main" onclick="toggleAuthModal()" class="bg-gray-200 text-gray-400 px-6 py-3 rounded-2xl text-sm font-bold flex items-center gap-2" disabled>
+                    <button id="auth-btn-main" onclick="toggleAuthModal()" class="bg-gray-200 text-gray-400 px-6 py-3 rounded-2xl text-sm font-bold flex items-center gap-2 shadow-sm transition-all duration-300" disabled>
                         <span id="auth-btn-text">Connecting...</span> <i id="auth-btn-icon" class="fa-solid fa-circle-notch fa-spin"></i>
                     </button>
                 </div>
@@ -130,35 +131,35 @@
         
         <!-- Centered 4-in-1 Service Selection -->
         <section class="text-center py-6">
-            <h2 class="text-gray-400 font-bold uppercase tracking-[0.2em] text-[10px] mb-8">Everything you need, simplified</h2>
+            <h2 class="text-gray-400 font-bold uppercase tracking-[0.2em] text-[10px] mb-8">One App for every Village need</h2>
             <div class="flex justify-center gap-4 sm:gap-10 overflow-x-auto custom-scroll px-4 pb-2">
                 <!-- Food (Zomato) -->
                 <div class="flex-shrink-0 group cursor-pointer text-center" onclick="filterBy('Food')">
                     <div class="service-btn text-orange-500 group-hover:bg-orange-500 group-hover:text-white group-hover:scale-110">
                         <i class="fa-solid fa-utensils"></i>
                     </div>
-                    <p class="text-[10px] font-black mt-4 text-gray-600 tracking-tight">FOOD</p>
+                    <p class="text-xs font-black mt-4 text-gray-600 tracking-tight">FOOD</p>
                 </div>
                 <!-- Grocery (Zepto) -->
                 <div class="flex-shrink-0 group cursor-pointer text-center" onclick="filterBy('Grocery')">
                     <div class="service-btn text-green-500 group-hover:bg-green-500 group-hover:text-white group-hover:scale-110">
                         <i class="fa-solid fa-bolt"></i>
                     </div>
-                    <p class="text-[10px] font-black mt-4 text-gray-600 tracking-tight">GROCERY</p>
+                    <p class="text-xs font-black mt-4 text-gray-600 tracking-tight">GROCERY</p>
                 </div>
                 <!-- Ride (Rapido) -->
                 <div class="flex-shrink-0 group cursor-pointer text-center" onclick="filterBy('Ride')">
                     <div class="service-btn text-blue-500 group-hover:bg-blue-500 group-hover:text-white group-hover:scale-110">
                         <i class="fa-solid fa-motorcycle"></i>
                     </div>
-                    <p class="text-[10px] font-black mt-4 text-gray-600 tracking-tight">RIDE</p>
+                    <p class="text-xs font-black mt-4 text-gray-600 tracking-tight">RIDE</p>
                 </div>
                 <!-- Services (UrbanClap) -->
                 <div class="flex-shrink-0 group cursor-pointer text-center" onclick="filterBy('Services')">
                     <div class="service-btn text-purple-600 group-hover:bg-purple-600 group-hover:text-white group-hover:scale-110">
                         <i class="fa-solid fa-screwdriver-wrench"></i>
                     </div>
-                    <p class="text-[10px] font-black mt-4 text-gray-600 tracking-tight">SERVICES</p>
+                    <p class="text-xs font-black mt-4 text-gray-600 tracking-tight">SERVICES</p>
                 </div>
             </div>
         </section>
@@ -171,15 +172,15 @@
 
         <div id="view-container">
             
-            <!-- 1. USER VIEW (Zomato/Zepto/Rapido/UrbanClap logic) -->
+            <!-- 1. USER VIEW -->
             <div id="view-User" class="space-y-12">
                 <div>
                     <div class="flex justify-between items-end mb-8">
                         <div>
                             <h3 class="font-black text-3xl tracking-tight">Marketplace</h3>
-                            <p class="text-xs text-gray-400 font-bold">Fastest delivery in the village</p>
+                            <p class="text-xs text-gray-400 font-bold">Zomato • Zepto • Rapido • UrbanClap</p>
                         </div>
-                        <span id="active-filter" class="text-[10px] bg-green-50 text-green-600 px-4 py-1.5 rounded-full font-black tracking-widest border border-green-100">ALL SERVICES</span>
+                        <span id="active-filter" class="text-[10px] bg-green-50 text-green-600 px-4 py-1.5 rounded-full font-black tracking-widest border border-green-100 uppercase">All Listings</span>
                     </div>
                     <div id="market-list" class="grid grid-cols-1 sm:grid-cols-2 gap-8">
                         <!-- Marketplace items -->
@@ -198,7 +199,7 @@
                         </div>
                         <div class="space-y-6 pt-8 border-t border-dashed border-gray-200">
                             <div class="flex flex-col sm:flex-row gap-4 items-center justify-between">
-                                <label class="text-xs font-black text-gray-400 uppercase tracking-widest">Village/GP Area</label>
+                                <label class="text-xs font-black text-gray-400 uppercase tracking-widest">Village Area</label>
                                 <select id="cart-gp" onchange="renderCartUI()" class="sm:w-64">
                                     <option value="Santuri">Santuri Village (+₹10)</option>
                                     <option value="Muradi">Muradi Hub (+₹20)</option>
@@ -217,51 +218,51 @@
                 </div>
             </div>
 
-            <!-- 2. PARTNER VIEW (Vendor dashboard) -->
+            <!-- 2. PARTNER VIEW -->
             <div id="view-Partner" class="hidden space-y-8">
                 <div id="shop-registration" class="bg-white p-10 rounded-[3rem] shadow-sm border border-gray-100">
-                    <h3 class="font-black text-2xl mb-2">Partner Onboarding</h3>
-                    <p class="text-sm text-gray-400 mb-8 font-semibold">Join the largest rural network</p>
+                    <h3 class="font-black text-2xl mb-2 text-primary">Partner Hub</h3>
+                    <p class="text-sm text-gray-400 mb-8 font-semibold">Scale your local business globally</p>
                     <div class="space-y-5">
-                        <input id="p-shop-name" placeholder="Business or Name (e.g., Roy Electricians)">
+                        <input id="p-shop-name" placeholder="Business Name (e.g., Star Electricians)">
                         <select id="p-shop-cat">
-                            <option value="Food">Food / Restaurant</option>
-                            <option value="Grocery">Grocery / Store</option>
-                            <option value="Ride">Vehicle / Transport</option>
-                            <option value="Services">Local Service (Plumber/Electrician/etc)</option>
+                            <option value="Food">Food / Zomato Partner</option>
+                            <option value="Grocery">Grocery / Zepto Partner</option>
+                            <option value="Ride">Ride / Rapido Partner</option>
+                            <option value="Services">Service / UrbanClap Partner</option>
                         </select>
                         <input id="p-shop-img" placeholder="Banner or Profile Image URL">
-                        <button onclick="registerShop()" class="w-full bg-green-600 text-white p-5 rounded-[2rem] font-black text-lg shadow-xl shadow-green-100">START EARNING</button>
+                        <button onclick="registerShop()" class="w-full bg-green-600 text-white p-5 rounded-[2rem] font-black text-lg shadow-xl shadow-green-100">LAUNCH MY SHOP</button>
                     </div>
                 </div>
 
                 <div id="partner-panel" class="hidden space-y-10">
                     <div class="bg-white p-10 rounded-[3rem] shadow-sm border border-gray-100">
-                        <h3 class="font-black text-2xl mb-8">Listing Manager</h3>
+                        <h3 class="font-black text-2xl mb-8">Marketplace Manager</h3>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                             <input id="item-name" placeholder="Service/Item Name">
                             <input id="item-price" type="number" placeholder="Price (₹)">
                             <input id="item-qty" placeholder="Unit (e.g., 1kg, 1 visit, 1 hour)">
                             <input id="item-img" placeholder="Item Image Link">
                         </div>
-                        <button onclick="addItem()" class="w-full mt-8 bg-gray-900 text-white p-5 rounded-[2rem] font-black text-sm uppercase tracking-widest">Update Marketplace</button>
+                        <button onclick="addItem()" class="w-full mt-8 bg-gray-900 text-white p-5 rounded-[2rem] font-black text-sm uppercase tracking-widest">Update Home Screen</button>
                     </div>
                     <div>
-                        <h3 class="font-black text-xl mb-6">Booking Requests</h3>
+                        <h3 class="font-black text-xl mb-6">Real-time Bookings</h3>
                         <div id="partner-order-list" class="space-y-4"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- 3. MASTER ADMIN (Pichai View) -->
+            <!-- 3. MASTER ADMIN -->
             <div id="view-Admin" class="hidden space-y-8">
                 <div class="grid grid-cols-2 gap-6">
                     <div class="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm text-center">
-                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Platform Revenue</p>
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Platform GTV</p>
                         <h4 id="stat-rev" class="text-4xl font-black text-green-600 tracking-tighter">₹0</h4>
                     </div>
                     <div class="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm text-center">
-                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Total Volume</p>
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Total Activity</p>
                         <h4 id="stat-ord" class="text-4xl font-black text-blue-600 tracking-tighter">0</h4>
                     </div>
                 </div>
@@ -269,14 +270,14 @@
                 <div class="flex bg-white p-1.5 rounded-[2rem] border shadow-sm mb-4">
                     <button onclick="switchAdminTab('activity')" id="admin-t-activity" class="flex-1 py-4 text-xs font-black rounded-2xl admin-tab-active transition">Activity</button>
                     <button onclick="switchAdminTab('control')" id="admin-t-control" class="flex-1 py-4 text-xs font-black text-gray-400 rounded-2xl transition">Governance</button>
-                    <button onclick="switchAdminTab('ads')" id="admin-t-ads" class="flex-1 py-4 text-xs font-black text-gray-400 rounded-2xl transition">Ad Center</button>
+                    <button onclick="switchAdminTab('ads')" id="admin-t-ads" class="flex-1 py-4 text-xs font-black text-gray-400 rounded-2xl transition">Campaigns</button>
                 </div>
 
                 <div id="admin-activity" class="space-y-6">
                     <div class="bg-white rounded-[2.5rem] overflow-hidden border border-gray-100 shadow-sm">
                         <table class="w-full text-left text-xs">
                             <thead class="bg-gray-50 font-black text-gray-400 border-b">
-                                <tr><th class="p-6">ID</th><th class="p-6">Customer</th><th class="p-6">Amount</th><th class="p-6 text-right">Status</th></tr>
+                                <tr><th class="p-6">TXN ID</th><th class="p-6">Customer</th><th class="p-6">Amount</th><th class="p-6 text-right">Status</th></tr>
                             </thead>
                             <tbody id="admin-log-body" class="divide-y divide-gray-50"></tbody>
                         </table>
@@ -285,24 +286,24 @@
 
                 <div id="admin-control" class="hidden space-y-8">
                     <div class="bg-white p-10 rounded-[2.5rem] border shadow-sm">
-                        <h4 class="font-black text-xl mb-6">Partners Registry</h4>
+                        <h4 class="font-black text-xl mb-6">Global Partners Registry</h4>
                         <div id="admin-shop-list" class="grid grid-cols-1 gap-3"></div>
                     </div>
                     <div class="bg-white p-10 rounded-[2.5rem] border shadow-sm">
-                        <h4 class="font-black text-xl mb-6">Master Inventory</h4>
+                        <h4 class="font-black text-xl mb-6">Central Inventory</h4>
                         <div id="admin-item-list" class="grid grid-cols-1 gap-3"></div>
                     </div>
                 </div>
 
                 <div id="admin-ads" class="hidden space-y-6">
                     <div class="bg-white p-10 rounded-[2.5rem] border shadow-sm">
-                        <h4 class="font-black text-xl mb-6">Platform Campaigns</h4>
-                        <input id="ad-text" placeholder="Promo Message" class="mb-4">
-                        <div class="flex items-center gap-4 mb-4">
-                            <span class="text-xs font-bold text-gray-400 uppercase">Banner Color:</span>
+                        <h4 class="font-black text-xl mb-6">Banner Campaigns</h4>
+                        <input id="ad-text" placeholder="Promo Message">
+                        <div class="flex items-center gap-4 mt-4">
+                            <span class="text-xs font-bold text-gray-400 uppercase">Brand Color:</span>
                             <input id="ad-color" type="color" value="#16a34a" class="h-12 w-20 cursor-pointer">
                         </div>
-                        <button onclick="pushAd()" class="w-full bg-black text-white p-5 rounded-[2rem] font-black">Publish Globally</button>
+                        <button onclick="pushAd()" class="w-full bg-black text-white p-5 rounded-[2rem] font-black mt-4">Publish To All Users</button>
                     </div>
                     <div id="admin-ad-history" class="space-y-3"></div>
                 </div>
@@ -322,7 +323,7 @@
          * 1. CORE ARCHITECTURE & AUTHENTICATION
          */
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { apiKey: "" };
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'gramzo-super-v2-final';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'gramzo-super-v4-pichai';
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
@@ -336,53 +337,57 @@
         let cart = [];
         const fees = { Santuri: 10, Muradi: 20, Tarabari: 25, Garshika: 20 };
 
-        // Robust start sequence to prevent "Connecting..." hang
+        /**
+         * FIX: Robust Authentication Initialization
+         * Added a 2-second timeout bypass to ensure the button activates.
+         */
         async function startApp() {
             const authBtn = document.getElementById('auth-btn-main');
             const authText = document.getElementById('auth-btn-text');
             const authIcon = document.getElementById('auth-btn-icon');
 
-            // Timeout fallback: Enable button even if auth is slow
-            const timeout = setTimeout(() => {
-                if (authBtn.disabled) {
-                    enableAuthButton("Offline Mode", false);
-                }
-            }, 5000);
-
+            // Layer 3: Technical Auth (Mandatory)
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await auth.signInWithCustomToken(__initial_auth_token);
                 } else {
                     await auth.signInAnonymously();
                 }
-                
-                auth.onAuthStateChanged(user => {
-                    if (user) {
-                        clearTimeout(timeout);
-                        enableAuthButton("Login / Register", true);
-                        loadGuestData();
+
+                // Wait for state confirmation
+                const checkAuth = setInterval(() => {
+                    if (auth.currentUser) {
+                        clearInterval(checkAuth);
+                        enableAppUI();
                     }
-                });
-            } catch (e) { 
-                console.error("Firebase Init Error:", e);
-                enableAuthButton("Retry Connection", false);
+                }, 500);
+
+                // Fail-safe: Enable after 2.5 seconds regardless
+                setTimeout(() => {
+                    if (authBtn.disabled) {
+                        clearInterval(checkAuth);
+                        enableAppUI();
+                        console.warn("Auth initializing in background...");
+                    }
+                }, 2500);
+
+            } catch (e) {
+                console.error("Auth Error:", e);
+                enableAppUI(); // Still enable so user can try to login
             }
         }
 
-        function enableAuthButton(text, success) {
+        function enableAppUI() {
             const authBtn = document.getElementById('auth-btn-main');
             const authText = document.getElementById('auth-btn-text');
             const authIcon = document.getElementById('auth-btn-icon');
             
             authBtn.disabled = false;
-            authText.innerText = text;
-            authIcon.className = success ? "fa-solid fa-chevron-right ml-2 text-[10px]" : "fa-solid fa-triangle-exclamation text-yellow-500";
-            if (success) {
-                authBtn.classList.remove('bg-gray-200', 'text-gray-400');
-                authBtn.classList.add('bg-green-600', 'text-white', 'shadow-lg');
-            } else {
-                authBtn.classList.add('bg-gray-800', 'text-white');
-            }
+            authText.innerText = "Login / Join";
+            authIcon.className = "fa-solid fa-chevron-right ml-2 text-[10px]";
+            authBtn.classList.remove('bg-gray-200', 'text-gray-400');
+            authBtn.classList.add('bg-green-600', 'text-white', 'shadow-lg');
+            loadGuestData();
         }
 
         /**
@@ -411,7 +416,7 @@
                     currentUser = { id: 'admin', name: 'Master Admin', role: 'Admin' };
                     return finishLogin();
                 }
-                return showMsg("Invalid Credentials");
+                return showMsg("Invalid Admin ID/Password");
             }
 
             if (!id || pass.length < 4) return showMsg("ID and 4-digit PIN required");
@@ -423,17 +428,17 @@
                     const snap = await userRef.get();
                     if (snap.exists) return showMsg("User already registered");
                     await userRef.set({ phone: id, pin: pass, name, role: selectedRole, created: new Date().toISOString() });
-                    showMsg("Registered! Please login.");
+                    showMsg("Registration Success! Please login.");
                 } else {
                     const snap = await userRef.get();
                     if (!snap.exists) return showMsg("Account not found");
                     const data = snap.data();
                     if (data.pin !== pass) return showMsg("Wrong PIN");
-                    if (data.role !== selectedRole) return showMsg(`Role mismatch: ${data.role}`);
+                    if (data.role !== selectedRole) return showMsg(`Wrong Role Hub: ${data.role}`);
                     currentUser = data;
                     finishLogin();
                 }
-            } catch (e) { showMsg("Error: " + e.message); }
+            } catch (e) { showMsg("Auth Error: " + e.message); }
         }
 
         async function finishLogin() {
@@ -461,7 +466,7 @@
             }
 
             initRealtimeListeners();
-            showMsg(`Connected to ${currentUser.role} Hub`);
+            showMsg(`Welcome to the ${currentUser.role} Dashboard`);
         }
 
         /**
@@ -478,20 +483,20 @@
 
                 list.innerHTML = filtered.length ? filtered.map(p => `
                     <div class="bg-white rounded-[2.5rem] overflow-hidden border border-gray-100 flex flex-col shadow-sm hover:shadow-2xl transition-all duration-300 card-animate">
-                        <div class="h-48 bg-gray-50 relative overflow-hidden">
+                        <div class="h-56 bg-gray-50 relative overflow-hidden">
                             <img src="${p.image}" onerror="this.src='https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=80'" class="w-full h-full object-cover">
                             <span class="absolute top-5 left-5 bg-white/95 backdrop-blur px-4 py-1.5 rounded-full text-[9px] font-black uppercase text-green-600 tracking-widest border border-green-50">${p.category}</span>
                         </div>
                         <div class="p-8">
-                            <h4 class="font-black text-gray-800 text-lg mb-1">${p.name}</h4>
-                            <p class="text-[9px] text-gray-400 font-bold uppercase mb-6">By ${p.shopName} • ${p.qty || '1 unit'}</p>
+                            <h4 class="font-black text-gray-800 text-xl tracking-tight mb-1">${p.name}</h4>
+                            <p class="text-[10px] text-gray-400 font-bold uppercase mb-6">Listed by ${p.shopName} • ${p.qty || '1 unit'}</p>
                             <div class="flex justify-between items-center">
-                                <span class="text-2xl font-black text-green-600">₹${p.price}</span>
-                                <button onclick="addToCart('${p.name}', ${p.price}, '${p.shopName}')" class="h-10 w-10 bg-green-600 text-white rounded-xl shadow-lg active:scale-90 transition">+</button>
+                                <span class="text-3xl font-black text-green-600">₹${p.price}</span>
+                                <button onclick="addToCart('${p.name}', ${p.price}, '${p.shopName}')" class="h-12 w-12 bg-green-600 text-white rounded-2xl shadow-xl shadow-green-100 active:scale-90 transition">+</button>
                             </div>
                         </div>
                     </div>
-                `).join('') : '<div class="col-span-2 text-center py-20 text-gray-300 font-bold italic">No listings in this category yet...</div>';
+                `).join('') : '<div class="col-span-2 text-center py-20 text-gray-300 font-bold italic">No listings here. Be the first to add one!</div>';
                 
                 if(currentUser && currentUser.role === 'Admin') {
                     document.getElementById('admin-item-list').innerHTML = items.map(p => `
@@ -506,7 +511,7 @@
                 const banner = document.getElementById('promo-banner');
                 const ads = snap.docs.map(d => ({id: d.id, ...d.data()}));
                 if(ads[0]) {
-                    banner.innerHTML = `<div class="w-full h-full flex items-center justify-center text-white text-center" style="background:${ads[0].color}"><h2 class="text-2xl font-black italic uppercase">${ads[0].text}</h2></div>`;
+                    banner.innerHTML = `<div class="w-full h-full flex items-center justify-center text-white text-center" style="background:${ads[0].color}"><h2 class="text-3xl font-black italic uppercase tracking-tighter">${ads[0].text}</h2></div>`;
                 }
             });
         }
@@ -524,11 +529,11 @@
                     rev += o.total; count++;
                     if(adminLog) adminLog.innerHTML += `<tr><td class="p-4 font-mono">#${doc.id.slice(-4)}</td><td class="p-4 font-bold">${o.customer}</td><td class="p-4 font-black text-green-600">₹${o.total}</td><td class="p-4 text-right uppercase text-[9px]">${o.status}</td></tr>`;
                     if(partnerLog && myShop && o.items.some(i => i.shopName === myShop.name)) {
-                        partnerLog.innerHTML += `<div class="bg-white p-6 rounded-3xl border border-l-8 border-green-500 shadow-sm">
-                            <div class="flex justify-between mb-4"><h5 class="font-black text-gray-800 uppercase">ORDER #${doc.id.slice(-6)}</h5><span class="text-[9px] font-bold text-orange-600 px-2 py-1 bg-orange-50 rounded">${o.status}</span></div>
-                            <div class="text-xs space-y-1 mb-4">${o.items.filter(i => i.shopName === myShop.name).map(i => `<div class="flex justify-between"><span>${i.name}</span><b>₹${i.price}</b></div>`).join('')}</div>
-                            <button onclick="updateOrder('${doc.id}', 'Confirmed')" class="w-full bg-blue-50 text-blue-600 p-2 rounded-xl text-[10px] font-bold uppercase mb-2">Confirm</button>
-                            <button onclick="updateOrder('${doc.id}', 'Fulfilled')" class="w-full bg-green-600 text-white p-2 rounded-xl text-[10px] font-bold uppercase">Mark Fulfilled</button>
+                        partnerLog.innerHTML += `<div class="bg-white p-8 rounded-[2.5rem] border border-l-8 border-green-500 shadow-sm">
+                            <div class="flex justify-between mb-4"><h5 class="font-black text-gray-800 uppercase tracking-tighter">ORDER #${doc.id.slice(-6)}</h5><span class="text-[9px] font-bold text-orange-600 px-3 py-1 bg-orange-50 rounded-full">${o.status}</span></div>
+                            <div class="text-xs space-y-1 mb-4 pb-4 border-b border-dashed">${o.items.filter(i => i.shopName === myShop.name).map(i => `<div class="flex justify-between"><span>${i.name}</span><b>₹${i.price}</b></div>`).join('')}</div>
+                            <button onclick="updateOrder('${doc.id}', 'Confirmed')" class="w-full bg-blue-50 text-blue-600 p-3 rounded-2xl text-[10px] font-bold uppercase mb-2">Confirm Order</button>
+                            <button onclick="updateOrder('${doc.id}', 'Completed')" class="w-full bg-green-600 text-white p-3 rounded-2xl text-[10px] font-bold uppercase">Mark Completed</button>
                         </div>`;
                     }
                 });
@@ -538,7 +543,10 @@
 
             if(currentUser.role === 'Admin') {
                 getCol('shops').onSnapshot(snap => {
-                    document.getElementById('admin-shop-list').innerHTML = snap.docs.map(d => `<div class="flex justify-between items-center bg-gray-50 p-3 rounded-2xl border"><span class="text-xs font-bold">${d.data().name} (${d.data().category})</span><button onclick="deleteDoc('shops', '${d.id}')" class="text-red-400"><i class="fa-solid fa-trash"></i></button></div>`).join('');
+                    document.getElementById('admin-shop-list').innerHTML = snap.docs.map(d => `<div class="flex justify-between items-center bg-gray-50 p-4 rounded-2xl border">
+                        <span class="text-xs font-bold">${d.data().name} (${d.data().category})</span>
+                        <button onclick="deleteDoc('shops', '${d.id}')" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
+                    </div>`).join('');
                 });
             }
         }
@@ -548,8 +556,9 @@
          */
         function filterBy(cat) {
             currentFilter = (currentFilter === cat) ? null : cat;
-            document.getElementById('active-filter').innerText = currentFilter ? currentFilter.toUpperCase() : "ALL SERVICES";
+            document.getElementById('active-filter').innerText = currentFilter ? currentFilter.toUpperCase() : "ALL LISTINGS";
             loadGuestData();
+            showMsg(`Showing: ${currentFilter || 'All Services'}`);
         }
 
         function addToCart(name, price, shopName) {
@@ -565,11 +574,18 @@
             const sub = cart.reduce((s, i) => s + i.price, 0);
 
             if (!cart.length) {
-                list.innerHTML = '<p class="text-gray-400 italic text-sm text-center py-6">Your basket is empty</p>';
+                list.innerHTML = '<p class="text-gray-400 italic text-sm text-center py-6 border-2 border-dashed border-gray-50 rounded-3xl">Your basket is empty</p>';
                 document.getElementById('cart-total').innerText = '₹0';
                 return;
             }
-            list.innerHTML = cart.map((i, idx) => `<div class="flex justify-between items-center bg-gray-50 p-3 rounded-2xl text-xs font-bold"><span>${i.name}</span><div class="flex items-center gap-3"><span>₹${i.price}</span><button onclick="removeFromCart(${idx})" class="text-red-400"><i class="fa-solid fa-circle-minus"></i></button></div></div>`).join('');
+            list.innerHTML = cart.map((i, idx) => `
+                <div class="flex justify-between items-center bg-gray-50 p-4 rounded-2xl text-xs font-bold">
+                    <span>${i.name}</span>
+                    <div class="flex items-center gap-4">
+                        <span class="text-green-600">₹${i.price}</span>
+                        <button onclick="removeFromCart(${idx})" class="text-red-400 hover:scale-125 transition"><i class="fa-solid fa-circle-minus text-lg"></i></button>
+                    </div>
+                </div>`).join('');
             document.getElementById('cart-total').innerText = `₹${sub + fee}`;
         }
 
@@ -581,8 +597,20 @@
             const gp = document.getElementById('cart-gp').value;
             const total = cart.reduce((s,i) => s + i.price, 0) + (fees[gp] || 10);
 
-            await getCol('orders').add({ customer: currentUser.name, phone: currentUser.phone, items: cart, total, gp, address: addr, status: 'Placed', time: firebase.firestore.FieldValue.serverTimestamp() });
-            cart = []; renderCartUI(); showMsg("Booking Success!");
+            await getCol('orders').add({ 
+                customer: currentUser.name, 
+                phone: currentUser.phone, 
+                items: cart, 
+                total, 
+                gp, 
+                address: addr, 
+                status: 'Placed', 
+                time: firebase.firestore.FieldValue.serverTimestamp() 
+            });
+            cart = []; 
+            renderCartUI(); 
+            showMsg("Success! Booking confirmed.");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         async function registerShop() {
@@ -591,7 +619,7 @@
             const img = document.getElementById('p-shop-img').value.trim();
             if(!name) return showMsg("Business name required");
             await getCol('shops').add({ name, category: cat, owner: currentUser.phone, image: img || 'https://via.placeholder.com/150' });
-            showMsg("Business Registered! Relogging...");
+            showMsg("Business Registered! System Refreshing...");
             setTimeout(() => location.reload(), 1500);
         }
 
@@ -600,9 +628,9 @@
             const price = Number(document.getElementById('item-price').value);
             const qty = document.getElementById('item-qty').value;
             const img = document.getElementById('item-img').value;
-            if(!name || !price) return showMsg("Fill all details");
+            if(!name || !price) return showMsg("Name and Price required");
             await getCol('products').add({ name, price, qty, image: img || 'https://via.placeholder.com/200', shopName: myShop.name, category: myShop.category, created: new Date().toISOString() });
-            showMsg("Item Added!");
+            showMsg("Listing Updated!");
             ['item-name', 'item-price', 'item-qty', 'item-img'].forEach(id => document.getElementById(id).value = '');
         }
 
@@ -612,15 +640,16 @@
             if(!text) return;
             await getCol('ads').add({ text, color });
             document.getElementById('ad-text').value = '';
-            showMsg("Ad Published!");
+            showMsg("Global Campaign Published!");
         }
 
         async function deleteDoc(col, id) {
-            if(confirm("Confirm Master Deletion?")) await getCol(col).doc(id).delete();
+            if(confirm("Master Command: Delete this entity?")) await getCol(col).doc(id).delete();
         }
 
         async function updateOrder(id, status) {
             await getCol('orders').doc(id).update({ status });
+            showMsg(`Order status: ${status}`);
         }
 
         function switchAdminTab(t) {
