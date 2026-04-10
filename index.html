@@ -12,6 +12,10 @@
         :root {
             --primary: #16a34a;
             --primary-dark: #15803d;
+            --accent-food: #f97316;
+            --accent-grocery: #22c55e;
+            --accent-ride: #3b82f6;
+            --accent-service: #8b5cf6;
         }
 
         body {
@@ -47,7 +51,7 @@
         }
 
         .service-btn {
-            @apply h-20 w-20 bg-white rounded-[2.5rem] shadow-sm border border-gray-50 flex items-center justify-center text-3xl transition-all duration-300;
+            @apply h-16 w-16 sm:h-20 sm:w-20 bg-white rounded-[2rem] sm:rounded-[2.5rem] shadow-sm border border-gray-50 flex items-center justify-center text-2xl sm:text-3xl transition-all duration-300;
         }
 
         .card-animate {
@@ -59,6 +63,10 @@
         }
 
         .admin-tab-active { @apply bg-green-600 text-white shadow-lg shadow-green-100; }
+        
+        /* Skeleton loading pulse */
+        .pulse { animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
 </head>
 <body class="pb-24">
@@ -67,15 +75,17 @@
     <nav class="glass sticky top-0 z-50 px-4 py-4 border-b border-gray-100">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
             <div onclick="location.reload()" class="cursor-pointer group">
-                <h1 class="text-2xl font-black text-green-600 tracking-tighter group-hover:scale-105 transition">GRAMZO</h1>
-                <p class="text-[9px] text-gray-400 font-extrabold uppercase tracking-[0.2em]">Rural Commerce Hub</p>
+                <h1 class="text-2xl font-black text-green-600 tracking-tighter group-hover:scale-105 transition flex items-center gap-2">
+                    <i class="fa-solid fa-cube text-primary"></i> GRAMZO
+                </h1>
+                <p class="text-[9px] text-gray-400 font-extrabold uppercase tracking-[0.2em]">The Rural Super App</p>
             </div>
 
             <div class="relative">
                 <!-- Unauthenticated UI -->
                 <div id="unauthed-ui" class="flex items-center">
-                    <button id="auth-btn-main" onclick="toggleAuthModal()" class="bg-gray-200 text-gray-400 px-6 py-3 rounded-2xl text-sm font-bold flex items-center gap-2 cursor-not-allowed" disabled>
-                        Connecting... <i class="fa-solid fa-circle-notch fa-spin"></i>
+                    <button id="auth-btn-main" onclick="toggleAuthModal()" class="bg-gray-200 text-gray-400 px-6 py-3 rounded-2xl text-sm font-bold flex items-center gap-2" disabled>
+                        <span id="auth-btn-text">Connecting...</span> <i id="auth-btn-icon" class="fa-solid fa-circle-notch fa-spin"></i>
                     </button>
                 </div>
                 
@@ -100,7 +110,7 @@
 
                     <div class="space-y-4">
                         <div id="reg-name-box">
-                            <input id="auth-name" type="text" placeholder="Your Full Name">
+                            <input id="auth-name" type="text" placeholder="Full Name">
                         </div>
                         <input id="auth-id" type="text" placeholder="Phone Number / ID">
                         <input id="auth-pass" type="password" placeholder="4-Digit PIN / Password">
@@ -118,197 +128,181 @@
 
     <main class="max-w-4xl mx-auto p-4 space-y-8">
         
-        <!-- Centered Service Selection -->
+        <!-- Centered 4-in-1 Service Selection -->
         <section class="text-center py-6">
-            <h2 class="text-gray-400 font-bold uppercase tracking-[0.2em] text-[10px] mb-8">Service Marketplace</h2>
-            <div class="flex justify-center gap-6 sm:gap-14 overflow-x-auto custom-scroll px-4 pb-2">
+            <h2 class="text-gray-400 font-bold uppercase tracking-[0.2em] text-[10px] mb-8">Everything you need, simplified</h2>
+            <div class="flex justify-center gap-4 sm:gap-10 overflow-x-auto custom-scroll px-4 pb-2">
+                <!-- Food (Zomato) -->
                 <div class="flex-shrink-0 group cursor-pointer text-center" onclick="filterBy('Food')">
                     <div class="service-btn text-orange-500 group-hover:bg-orange-500 group-hover:text-white group-hover:scale-110">
                         <i class="fa-solid fa-utensils"></i>
                     </div>
-                    <p class="text-xs font-black mt-4 text-gray-600 tracking-tight">Food</p>
+                    <p class="text-[10px] font-black mt-4 text-gray-600 tracking-tight">FOOD</p>
                 </div>
+                <!-- Grocery (Zepto) -->
                 <div class="flex-shrink-0 group cursor-pointer text-center" onclick="filterBy('Grocery')">
                     <div class="service-btn text-green-500 group-hover:bg-green-500 group-hover:text-white group-hover:scale-110">
-                        <i class="fa-solid fa-basket-shopping"></i>
+                        <i class="fa-solid fa-bolt"></i>
                     </div>
-                    <p class="text-xs font-black mt-4 text-gray-600 tracking-tight">Grocery</p>
+                    <p class="text-[10px] font-black mt-4 text-gray-600 tracking-tight">GROCERY</p>
                 </div>
+                <!-- Ride (Rapido) -->
                 <div class="flex-shrink-0 group cursor-pointer text-center" onclick="filterBy('Ride')">
                     <div class="service-btn text-blue-500 group-hover:bg-blue-500 group-hover:text-white group-hover:scale-110">
                         <i class="fa-solid fa-motorcycle"></i>
                     </div>
-                    <p class="text-xs font-black mt-4 text-gray-600 tracking-tight">Ride</p>
+                    <p class="text-[10px] font-black mt-4 text-gray-600 tracking-tight">RIDE</p>
+                </div>
+                <!-- Services (UrbanClap) -->
+                <div class="flex-shrink-0 group cursor-pointer text-center" onclick="filterBy('Services')">
+                    <div class="service-btn text-purple-600 group-hover:bg-purple-600 group-hover:text-white group-hover:scale-110">
+                        <i class="fa-solid fa-screwdriver-wrench"></i>
+                    </div>
+                    <p class="text-[10px] font-black mt-4 text-gray-600 tracking-tight">SERVICES</p>
                 </div>
             </div>
         </section>
 
-        <!-- Dynamic Ads -->
+        <!-- Global Ad Engine -->
         <div id="promo-banner" class="w-full h-40 bg-gray-200 rounded-[3rem] flex items-center justify-center overflow-hidden shadow-inner relative">
             <div class="absolute inset-0 opacity-10 bg-[radial-gradient(circle,rgba(0,0,0,1)_1px,transparent_1px)] bg-[size:20px_20px]"></div>
             <p class="text-gray-400 font-black italic tracking-tighter text-2xl z-10">Gramzo Seasonal Offers</p>
         </div>
 
-        <!-- Dashboard Views -->
         <div id="view-container">
             
-            <!-- 1. USER VIEW -->
+            <!-- 1. USER VIEW (Zomato/Zepto/Rapido/UrbanClap logic) -->
             <div id="view-User" class="space-y-12">
                 <div>
                     <div class="flex justify-between items-end mb-8">
                         <div>
                             <h3 class="font-black text-3xl tracking-tight">Marketplace</h3>
-                            <p class="text-xs text-gray-400 font-bold">Handpicked for your village</p>
+                            <p class="text-xs text-gray-400 font-bold">Fastest delivery in the village</p>
                         </div>
                         <span id="active-filter" class="text-[10px] bg-green-50 text-green-600 px-4 py-1.5 rounded-full font-black tracking-widest border border-green-100">ALL SERVICES</span>
                     </div>
                     <div id="market-list" class="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                        <!-- Products rendered here -->
+                        <!-- Marketplace items -->
                     </div>
                 </div>
 
-                <!-- Checkout Section (Locked for guests) -->
+                <!-- Checkout Section -->
                 <div id="cart-box" class="opacity-40 pointer-events-none transition-all duration-700 scale-95 origin-top blur-[1px]">
                     <div class="bg-white rounded-[3rem] p-10 shadow-sm border border-gray-100">
                         <div class="flex justify-between items-center mb-8">
-                            <h3 class="font-black text-2xl">Your Basket</h3>
-                            <i class="fa-solid fa-shopping-bag text-green-600 text-2xl"></i>
+                            <h3 class="font-black text-2xl">Confirm Booking</h3>
+                            <i class="fa-solid fa-receipt text-green-600 text-2xl"></i>
                         </div>
                         <div id="cart-items" class="space-y-4 mb-8">
-                            <p class="text-gray-400 italic text-sm text-center py-6 border-2 border-dashed border-gray-50 rounded-3xl">Cart is currently empty</p>
+                            <p class="text-gray-400 italic text-sm text-center py-6 border-2 border-dashed border-gray-50 rounded-3xl">Your basket is empty</p>
                         </div>
                         <div class="space-y-6 pt-8 border-t border-dashed border-gray-200">
                             <div class="flex flex-col sm:flex-row gap-4 items-center justify-between">
-                                <label class="text-xs font-black text-gray-400 uppercase tracking-widest">Delivery Area</label>
+                                <label class="text-xs font-black text-gray-400 uppercase tracking-widest">Village/GP Area</label>
                                 <select id="cart-gp" onchange="renderCartUI()" class="sm:w-64">
                                     <option value="Santuri">Santuri Village (+₹10)</option>
                                     <option value="Muradi">Muradi Hub (+₹20)</option>
                                     <option value="Tarabari">Tarabari Outpost (+₹25)</option>
+                                    <option value="Garshika">Garshika (+₹20)</option>
                                 </select>
                             </div>
                             <div class="flex justify-between items-center py-2">
-                                <span class="text-sm font-bold text-gray-500">Grand Total</span>
+                                <span class="text-sm font-bold text-gray-500">Pay on Delivery</span>
                                 <span id="cart-total" class="text-4xl font-black text-green-600 tracking-tighter">₹0</span>
                             </div>
-                            <input id="cart-address" placeholder="Delivery Landmark (e.g., Near Primary School)">
-                            <button onclick="placeOrder()" class="w-full bg-green-600 text-white py-6 rounded-[2rem] font-black text-xl shadow-2xl shadow-green-100 hover:bg-green-700 transition active:scale-95">CONFIRM BOOKING</button>
+                            <input id="cart-address" placeholder="Exact Delivery Location / Landmark">
+                            <button onclick="placeOrder()" class="w-full bg-green-600 text-white py-6 rounded-[2rem] font-black text-xl shadow-2xl shadow-green-100 active:scale-95 transition">BOOK NOW</button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 2. PARTNER VIEW -->
+            <!-- 2. PARTNER VIEW (Vendor dashboard) -->
             <div id="view-Partner" class="hidden space-y-8">
-                <!-- Shop Registration -->
                 <div id="shop-registration" class="bg-white p-10 rounded-[3rem] shadow-sm border border-gray-100">
                     <h3 class="font-black text-2xl mb-2">Partner Onboarding</h3>
-                    <p class="text-sm text-gray-400 mb-8 font-semibold">Tell us about your business or vehicle</p>
+                    <p class="text-sm text-gray-400 mb-8 font-semibold">Join the largest rural network</p>
                     <div class="space-y-5">
-                        <input id="p-shop-name" placeholder="Business Name (e.g., Roy Sweets)">
+                        <input id="p-shop-name" placeholder="Business or Name (e.g., Roy Electricians)">
                         <select id="p-shop-cat">
-                            <option value="Food">Restaurant / Eatery</option>
-                            <option value="Grocery">General Store / Groceries</option>
-                            <option value="Ride">Vehicle (Toto/Auto/Car)</option>
+                            <option value="Food">Food / Restaurant</option>
+                            <option value="Grocery">Grocery / Store</option>
+                            <option value="Ride">Vehicle / Transport</option>
+                            <option value="Services">Local Service (Plumber/Electrician/etc)</option>
                         </select>
-                        <input id="p-shop-img" placeholder="Banner Image URL (Optional)">
-                        <button onclick="registerShop()" class="w-full bg-green-600 text-white p-5 rounded-[2rem] font-black text-lg shadow-xl shadow-green-100">LAUNCH BUSINESS</button>
+                        <input id="p-shop-img" placeholder="Banner or Profile Image URL">
+                        <button onclick="registerShop()" class="w-full bg-green-600 text-white p-5 rounded-[2rem] font-black text-lg shadow-xl shadow-green-100">START EARNING</button>
                     </div>
                 </div>
 
-                <!-- Dashboard -->
                 <div id="partner-panel" class="hidden space-y-10">
                     <div class="bg-white p-10 rounded-[3rem] shadow-sm border border-gray-100">
-                        <h3 class="font-black text-2xl mb-8">Inventory Manager</h3>
+                        <h3 class="font-black text-2xl mb-8">Listing Manager</h3>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                            <div class="space-y-1">
-                                <label class="text-[10px] font-black uppercase text-gray-400 ml-2">Item Name</label>
-                                <input id="item-name" placeholder="What are you selling?">
-                            </div>
-                            <div class="space-y-1">
-                                <label class="text-[10px] font-black uppercase text-gray-400 ml-2">Price (₹)</label>
-                                <input id="item-price" type="number" placeholder="0.00">
-                            </div>
-                            <div class="space-y-1">
-                                <label class="text-[10px] font-black uppercase text-gray-400 ml-2">Quantity/Unit</label>
-                                <input id="item-qty" placeholder="e.g., 500g, 1 plate, Per KM">
-                            </div>
-                            <div class="space-y-1">
-                                <label class="text-[10px] font-black uppercase text-gray-400 ml-2">Product Image Link</label>
-                                <input id="item-img" placeholder="https://...">
-                            </div>
+                            <input id="item-name" placeholder="Service/Item Name">
+                            <input id="item-price" type="number" placeholder="Price (₹)">
+                            <input id="item-qty" placeholder="Unit (e.g., 1kg, 1 visit, 1 hour)">
+                            <input id="item-img" placeholder="Item Image Link">
                         </div>
-                        <button onclick="addItem()" class="w-full mt-8 bg-gray-900 text-white p-5 rounded-[2rem] font-black text-sm uppercase tracking-widest shadow-xl">Push to Marketplace</button>
+                        <button onclick="addItem()" class="w-full mt-8 bg-gray-900 text-white p-5 rounded-[2rem] font-black text-sm uppercase tracking-widest">Update Marketplace</button>
                     </div>
                     <div>
-                        <h3 class="font-black text-xl mb-6">Live Incoming Orders</h3>
+                        <h3 class="font-black text-xl mb-6">Booking Requests</h3>
                         <div id="partner-order-list" class="space-y-4"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- 3. ADMIN VIEW -->
+            <!-- 3. MASTER ADMIN (Pichai View) -->
             <div id="view-Admin" class="hidden space-y-8">
                 <div class="grid grid-cols-2 gap-6">
                     <div class="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm text-center">
-                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Total GTV</p>
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Platform Revenue</p>
                         <h4 id="stat-rev" class="text-4xl font-black text-green-600 tracking-tighter">₹0</h4>
                     </div>
                     <div class="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm text-center">
-                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Global Volume</p>
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Total Volume</p>
                         <h4 id="stat-ord" class="text-4xl font-black text-blue-600 tracking-tighter">0</h4>
                     </div>
                 </div>
 
-                <!-- Admin Tabs -->
                 <div class="flex bg-white p-1.5 rounded-[2rem] border shadow-sm mb-4">
-                    <button onclick="switchAdminTab('activity')" id="admin-t-activity" class="flex-1 py-4 text-xs font-black rounded-2xl admin-tab-active transition">Site Activity</button>
-                    <button onclick="switchAdminTab('control')" id="admin-t-control" class="flex-1 py-4 text-xs font-black text-gray-400 rounded-2xl transition">Master Control</button>
+                    <button onclick="switchAdminTab('activity')" id="admin-t-activity" class="flex-1 py-4 text-xs font-black rounded-2xl admin-tab-active transition">Activity</button>
+                    <button onclick="switchAdminTab('control')" id="admin-t-control" class="flex-1 py-4 text-xs font-black text-gray-400 rounded-2xl transition">Governance</button>
                     <button onclick="switchAdminTab('ads')" id="admin-t-ads" class="flex-1 py-4 text-xs font-black text-gray-400 rounded-2xl transition">Ad Center</button>
                 </div>
 
-                <!-- Tab: Activity -->
                 <div id="admin-activity" class="space-y-6">
                     <div class="bg-white rounded-[2.5rem] overflow-hidden border border-gray-100 shadow-sm">
                         <table class="w-full text-left text-xs">
-                            <thead class="bg-gray-50 font-black text-gray-400 uppercase tracking-widest border-b">
-                                <tr>
-                                    <th class="p-6">Transaction ID</th>
-                                    <th class="p-6">Customer</th>
-                                    <th class="p-6">Amount</th>
-                                    <th class="p-6 text-right">Status</th>
-                                </tr>
+                            <thead class="bg-gray-50 font-black text-gray-400 border-b">
+                                <tr><th class="p-6">ID</th><th class="p-6">Customer</th><th class="p-6">Amount</th><th class="p-6 text-right">Status</th></tr>
                             </thead>
-                            <tbody id="admin-log-body" class="divide-y divide-gray-50">
-                                <!-- Order logs -->
-                            </tbody>
+                            <tbody id="admin-log-body" class="divide-y divide-gray-50"></tbody>
                         </table>
                     </div>
                 </div>
 
-                <!-- Tab: Master Control -->
                 <div id="admin-control" class="hidden space-y-8">
                     <div class="bg-white p-10 rounded-[2.5rem] border shadow-sm">
-                        <h4 class="font-black text-xl mb-6 flex items-center gap-3"><i class="fa-solid fa-store text-green-600"></i> Registered Shops</h4>
+                        <h4 class="font-black text-xl mb-6">Partners Registry</h4>
                         <div id="admin-shop-list" class="grid grid-cols-1 gap-3"></div>
                     </div>
                     <div class="bg-white p-10 rounded-[2.5rem] border shadow-sm">
-                        <h4 class="font-black text-xl mb-6 flex items-center gap-3"><i class="fa-solid fa-box-open text-orange-600"></i> All Inventory</h4>
+                        <h4 class="font-black text-xl mb-6">Master Inventory</h4>
                         <div id="admin-item-list" class="grid grid-cols-1 gap-3"></div>
                     </div>
                 </div>
 
-                <!-- Tab: Ads -->
                 <div id="admin-ads" class="hidden space-y-6">
                     <div class="bg-white p-10 rounded-[2.5rem] border shadow-sm">
-                        <h4 class="font-black text-xl mb-6 uppercase tracking-tight">Launch Global Campaign</h4>
-                        <div class="space-y-4">
-                            <input id="ad-text" placeholder="Campaign Message (e.g., Happy New Year! Big Discounts inside)">
-                            <div class="flex items-center gap-4">
-                                <label class="text-xs font-bold text-gray-400">Accent Color:</label>
-                                <input id="ad-color" type="color" value="#16a34a" class="h-14 w-24 p-1 rounded-xl cursor-pointer">
-                            </div>
-                            <button onclick="pushAd()" class="w-full bg-black text-white p-5 rounded-[2rem] font-black text-lg shadow-xl shadow-gray-200">PUBLISH TO HOME</button>
+                        <h4 class="font-black text-xl mb-6">Platform Campaigns</h4>
+                        <input id="ad-text" placeholder="Promo Message" class="mb-4">
+                        <div class="flex items-center gap-4 mb-4">
+                            <span class="text-xs font-bold text-gray-400 uppercase">Banner Color:</span>
+                            <input id="ad-color" type="color" value="#16a34a" class="h-12 w-20 cursor-pointer">
                         </div>
+                        <button onclick="pushAd()" class="w-full bg-black text-white p-5 rounded-[2rem] font-black">Publish Globally</button>
                     </div>
                     <div id="admin-ad-history" class="space-y-3"></div>
                 </div>
@@ -317,26 +311,22 @@
         </div>
     </main>
 
-    <!-- Global Notifications -->
-    <div id="ui-msg" class="fixed top-12 left-1/2 -translate-x-1/2 bg-gray-900/95 text-white px-8 py-4 rounded-[2rem] text-sm font-bold z-[100] hidden backdrop-blur shadow-2xl border border-white/10 ring-1 ring-white/10"></div>
+    <div id="ui-msg" class="fixed top-12 left-1/2 -translate-x-1/2 bg-gray-900/95 text-white px-8 py-4 rounded-[2rem] text-sm font-bold z-[100] hidden backdrop-blur shadow-2xl"></div>
 
-    <!-- Firebase Compat SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
     <script>
         /**
-         * 1. INITIALIZATION & FIREBASE CONNECTIVITY
-         * (Rules 1 & 3: Mandatory Anonymous Auth + Artifact Paths)
+         * 1. CORE ARCHITECTURE & AUTHENTICATION
          */
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { apiKey: "" };
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'gramzo-rural-super-v1';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'gramzo-super-v2-final';
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
 
-        // Rule 1: Mandatory path helper
         const getCol = (name) => db.collection('artifacts').doc(appId).collection('public').doc('data').collection(name);
 
         let currentUser = null;
@@ -344,10 +334,21 @@
         let selectedRole = 'User';
         let currentFilter = null;
         let cart = [];
-        const fees = { Santuri: 10, Muradi: 20, Tarabari: 25 };
+        const fees = { Santuri: 10, Muradi: 20, Tarabari: 25, Garshika: 20 };
 
-        // Mandatory Technical Auth Layer
+        // Robust start sequence to prevent "Connecting..." hang
         async function startApp() {
+            const authBtn = document.getElementById('auth-btn-main');
+            const authText = document.getElementById('auth-btn-text');
+            const authIcon = document.getElementById('auth-btn-icon');
+
+            // Timeout fallback: Enable button even if auth is slow
+            const timeout = setTimeout(() => {
+                if (authBtn.disabled) {
+                    enableAuthButton("Offline Mode", false);
+                }
+            }, 5000);
+
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await auth.signInWithCustomToken(__initial_auth_token);
@@ -357,22 +358,35 @@
                 
                 auth.onAuthStateChanged(user => {
                     if (user) {
-                        const btn = document.getElementById('auth-btn-main');
-                        btn.innerHTML = 'Login / Register <i class="fa-solid fa-chevron-right ml-2 text-[10px]"></i>';
-                        btn.classList.remove('bg-gray-200', 'text-gray-400', 'cursor-not-allowed');
-                        btn.classList.add('bg-green-600', 'text-white', 'shadow-lg', 'shadow-green-100');
-                        btn.disabled = false;
-                        loadGuestData(); // Allow everyone to see products immediately
+                        clearTimeout(timeout);
+                        enableAuthButton("Login / Register", true);
+                        loadGuestData();
                     }
                 });
             } catch (e) { 
-                console.error("Firebase Auth Fail:", e); 
-                showMsg("Network connection error. Check console.");
+                console.error("Firebase Init Error:", e);
+                enableAuthButton("Retry Connection", false);
+            }
+        }
+
+        function enableAuthButton(text, success) {
+            const authBtn = document.getElementById('auth-btn-main');
+            const authText = document.getElementById('auth-btn-text');
+            const authIcon = document.getElementById('auth-btn-icon');
+            
+            authBtn.disabled = false;
+            authText.innerText = text;
+            authIcon.className = success ? "fa-solid fa-chevron-right ml-2 text-[10px]" : "fa-solid fa-triangle-exclamation text-yellow-500";
+            if (success) {
+                authBtn.classList.remove('bg-gray-200', 'text-gray-400');
+                authBtn.classList.add('bg-green-600', 'text-white', 'shadow-lg');
+            } else {
+                authBtn.classList.add('bg-gray-800', 'text-white');
             }
         }
 
         /**
-         * 2. ACCOUNT MANAGEMENT (Login, Register, Role Switching)
+         * 2. ACCOUNT HANDLING
          */
         function toggleAuthModal() { document.getElementById('auth-modal').classList.toggle('active'); }
         
@@ -392,13 +406,12 @@
             const pass = document.getElementById('auth-pass').value.trim();
             const name = document.getElementById('auth-name').value.trim();
 
-            // Special Case: Master Admin Login
             if (selectedRole === 'Admin') {
                 if (id === '12345' && pass === 'Pass@123') {
                     currentUser = { id: 'admin', name: 'Master Admin', role: 'Admin' };
                     return finishLogin();
                 }
-                return showMsg("Invalid Admin Credentials");
+                return showMsg("Invalid Credentials");
             }
 
             if (!id || pass.length < 4) return showMsg("ID and 4-digit PIN required");
@@ -406,17 +419,17 @@
             try {
                 const userRef = getCol('users').doc(id);
                 if (type === 'register') {
-                    if (!name) return showMsg("Full Name required");
+                    if (!name) return showMsg("Name required");
                     const snap = await userRef.get();
-                    if (snap.exists) return showMsg("This number is already registered.");
+                    if (snap.exists) return showMsg("User already registered");
                     await userRef.set({ phone: id, pin: pass, name, role: selectedRole, created: new Date().toISOString() });
-                    showMsg("Account Created! You can now login.");
+                    showMsg("Registered! Please login.");
                 } else {
                     const snap = await userRef.get();
-                    if (!snap.exists) return showMsg("No account found for this number.");
+                    if (!snap.exists) return showMsg("Account not found");
                     const data = snap.data();
-                    if (data.pin !== pass) return showMsg("Incorrect PIN. Try again.");
-                    if (data.role !== selectedRole) return showMsg(`Account found but role is: ${data.role}`);
+                    if (data.pin !== pass) return showMsg("Wrong PIN");
+                    if (data.role !== selectedRole) return showMsg(`Role mismatch: ${data.role}`);
                     currentUser = data;
                     finishLogin();
                 }
@@ -448,143 +461,95 @@
             }
 
             initRealtimeListeners();
-            showMsg(`Successfully logged in as ${currentUser.name}`);
+            showMsg(`Connected to ${currentUser.role} Hub`);
         }
 
         /**
-         * 3. DATA RENDERING & REALTIME SYNC (Rule 2: Fetch & Filter in Memory)
+         * 3. DATA & REALTIME SYNC
          */
         function loadGuestData() {
-            // Realtime Marketplace Index
             getCol('products').onSnapshot(snap => {
                 const list = document.getElementById('market-list');
                 const items = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
                 
-                // Rule 2: Manual filtering/sorting
                 const filtered = items
                     .filter(i => !currentFilter || i.category === currentFilter)
                     .sort((a,b) => b.created?.localeCompare(a.created));
 
-                list.innerHTML = filtered.map(p => `
-                    <div class="bg-white rounded-[2.5rem] overflow-hidden border border-gray-100 flex flex-col group shadow-sm hover:shadow-2xl transition-all duration-300 card-animate">
+                list.innerHTML = filtered.length ? filtered.map(p => `
+                    <div class="bg-white rounded-[2.5rem] overflow-hidden border border-gray-100 flex flex-col shadow-sm hover:shadow-2xl transition-all duration-300 card-animate">
                         <div class="h-48 bg-gray-50 relative overflow-hidden">
-                            <img src="${p.image}" onerror="this.src='https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=80'" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
-                            <span class="absolute top-5 left-5 bg-white/95 backdrop-blur px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-green-600 tracking-widest border border-green-50 shadow-sm">${p.category}</span>
+                            <img src="${p.image}" onerror="this.src='https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=80'" class="w-full h-full object-cover">
+                            <span class="absolute top-5 left-5 bg-white/95 backdrop-blur px-4 py-1.5 rounded-full text-[9px] font-black uppercase text-green-600 tracking-widest border border-green-50">${p.category}</span>
                         </div>
                         <div class="p-8">
-                            <h4 class="font-black text-gray-800 text-xl tracking-tight mb-1">${p.name}</h4>
-                            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-6">Listed by ${p.shopName} • ${p.qty || '1 unit'}</p>
+                            <h4 class="font-black text-gray-800 text-lg mb-1">${p.name}</h4>
+                            <p class="text-[9px] text-gray-400 font-bold uppercase mb-6">By ${p.shopName} • ${p.qty || '1 unit'}</p>
                             <div class="flex justify-between items-center">
-                                <span class="text-3xl font-black text-green-600 tracking-tighter">₹${p.price}</span>
-                                <button onclick="addToCart('${p.name}', ${p.price}, '${p.shopName}')" class="h-12 w-12 bg-green-600 text-white rounded-[1.25rem] shadow-xl shadow-green-100 flex items-center justify-center hover:bg-green-700 transition active:scale-90">
-                                    <i class="fa-solid fa-plus text-lg"></i>
-                                </button>
+                                <span class="text-2xl font-black text-green-600">₹${p.price}</span>
+                                <button onclick="addToCart('${p.name}', ${p.price}, '${p.shopName}')" class="h-10 w-10 bg-green-600 text-white rounded-xl shadow-lg active:scale-90 transition">+</button>
                             </div>
                         </div>
                     </div>
-                `).join('');
+                `).join('') : '<div class="col-span-2 text-center py-20 text-gray-300 font-bold italic">No listings in this category yet...</div>';
                 
-                // Admin Management List
                 if(currentUser && currentUser.role === 'Admin') {
                     document.getElementById('admin-item-list').innerHTML = items.map(p => `
-                        <div class="flex justify-between items-center bg-gray-50 p-4 rounded-2xl border border-gray-100 group">
-                            <div><p class="text-xs font-black text-gray-800">${p.name}</p><p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">₹${p.price} • ${p.shopName}</p></div>
-                            <button onclick="deleteDoc('products', '${p.id}')" class="text-red-400 opacity-0 group-hover:opacity-100 transition"><i class="fa-solid fa-trash-can"></i></button>
+                        <div class="flex justify-between items-center bg-gray-50 p-3 rounded-2xl border">
+                            <span class="text-xs font-bold">${p.name} (₹${p.price})</span>
+                            <button onclick="deleteDoc('products', '${p.id}')" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
                         </div>`).join('');
                 }
             });
 
-            // Realtime Ads
             getCol('ads').onSnapshot(snap => {
                 const banner = document.getElementById('promo-banner');
-                const adminAdList = document.getElementById('admin-ad-history');
                 const ads = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                
                 if(ads[0]) {
-                    banner.innerHTML = `
-                        <div class="w-full h-full flex items-center justify-center text-white px-10 text-center animate-pulse" style="background:${ads[0].color}">
-                            <h2 class="text-3xl font-black italic uppercase tracking-tighter leading-tight drop-shadow-lg">${ads[0].text}</h2>
-                        </div>`;
-                }
-                
-                if(currentUser && currentUser.role === 'Admin' && adminAdList) {
-                    adminAdList.innerHTML = ads.map(d => `
-                        <div class="p-4 bg-gray-50 rounded-2xl border flex justify-between items-center">
-                            <div class="flex items-center gap-3"><div class="w-4 h-4 rounded-full" style="background:${d.color}"></div><span class="text-xs font-bold text-gray-700">${d.text}</span></div>
-                            <button onclick="deleteDoc('ads', '${d.id}')" class="text-red-400"><i class="fa-solid fa-xmark"></i></button>
-                        </div>`).join('');
+                    banner.innerHTML = `<div class="w-full h-full flex items-center justify-center text-white text-center" style="background:${ads[0].color}"><h2 class="text-2xl font-black italic uppercase">${ads[0].text}</h2></div>`;
                 }
             });
         }
 
         function initRealtimeListeners() {
-            // Orders Master Sync
             getCol('orders').onSnapshot(snap => {
                 let rev = 0, count = 0;
                 const adminLog = document.getElementById('admin-log-body');
                 const partnerLog = document.getElementById('partner-order-list');
-                
                 if(adminLog) adminLog.innerHTML = '';
                 if(partnerLog) partnerLog.innerHTML = '';
 
                 snap.forEach(doc => {
                     const o = doc.data();
-                    const oid = doc.id.slice(-6).toUpperCase();
                     rev += o.total; count++;
-
-                    // Admin Table
-                    if(adminLog) {
-                        adminLog.innerHTML += `
-                            <tr class="hover:bg-gray-50/50 transition">
-                                <td class="p-6 font-mono font-bold text-[10px] text-gray-400">#${oid}</td>
-                                <td class="p-6 font-black text-gray-800">${o.customer}</td>
-                                <td class="p-6 font-black text-green-600">₹${o.total}</td>
-                                <td class="p-6 text-right"><span class="px-3 py-1 bg-green-50 text-green-600 border border-green-100 rounded-full font-black text-[9px] tracking-widest uppercase">${o.status}</span></td>
-                            </tr>`;
-                    }
-
-                    // Partner Targeted View
+                    if(adminLog) adminLog.innerHTML += `<tr><td class="p-4 font-mono">#${doc.id.slice(-4)}</td><td class="p-4 font-bold">${o.customer}</td><td class="p-4 font-black text-green-600">₹${o.total}</td><td class="p-4 text-right uppercase text-[9px]">${o.status}</td></tr>`;
                     if(partnerLog && myShop && o.items.some(i => i.shopName === myShop.name)) {
-                        partnerLog.innerHTML += `
-                            <div class="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm border-l-8 border-green-500">
-                                <div class="flex justify-between items-start mb-6">
-                                    <div><h5 class="font-black text-gray-800 tracking-tight">ORDER #${oid}</h5><p class="text-[10px] text-gray-400 font-bold">CUSTOMER: ${o.phone}</p></div>
-                                    <span class="bg-orange-50 text-orange-600 px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest">${o.status}</span>
-                                </div>
-                                <div class="space-y-2 mb-8 border-y border-dashed py-4">
-                                    ${o.items.filter(i => i.shopName === myShop.name).map(i => `<div class="flex justify-between text-xs font-bold text-gray-500"><span>${i.name}</span><span>₹${i.price}</span></div>`).join('')}
-                                </div>
-                                <div class="flex gap-3">
-                                    <button onclick="updateOrder('${doc.id}', 'Preparing')" class="flex-1 bg-gray-100 text-gray-500 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest">Mark Preparing</button>
-                                    <button onclick="updateOrder('${doc.id}', 'Delivered')" class="flex-1 bg-green-600 text-white py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-green-100">Deliver</button>
-                                </div>
-                            </div>`;
+                        partnerLog.innerHTML += `<div class="bg-white p-6 rounded-3xl border border-l-8 border-green-500 shadow-sm">
+                            <div class="flex justify-between mb-4"><h5 class="font-black text-gray-800 uppercase">ORDER #${doc.id.slice(-6)}</h5><span class="text-[9px] font-bold text-orange-600 px-2 py-1 bg-orange-50 rounded">${o.status}</span></div>
+                            <div class="text-xs space-y-1 mb-4">${o.items.filter(i => i.shopName === myShop.name).map(i => `<div class="flex justify-between"><span>${i.name}</span><b>₹${i.price}</b></div>`).join('')}</div>
+                            <button onclick="updateOrder('${doc.id}', 'Confirmed')" class="w-full bg-blue-50 text-blue-600 p-2 rounded-xl text-[10px] font-bold uppercase mb-2">Confirm</button>
+                            <button onclick="updateOrder('${doc.id}', 'Fulfilled')" class="w-full bg-green-600 text-white p-2 rounded-xl text-[10px] font-bold uppercase">Mark Fulfilled</button>
+                        </div>`;
                     }
                 });
                 if(document.getElementById('stat-rev')) document.getElementById('stat-rev').innerText = `₹${rev}`;
                 if(document.getElementById('stat-ord')) document.getElementById('stat-ord').innerText = count;
             });
 
-            // Master Shop Index (Admin only)
             if(currentUser.role === 'Admin') {
                 getCol('shops').onSnapshot(snap => {
-                    document.getElementById('admin-shop-list').innerHTML = snap.docs.map(d => `
-                        <div class="flex justify-between items-center bg-gray-50 p-4 rounded-2xl border border-gray-100">
-                            <div><p class="text-xs font-black text-gray-800">${d.data().name}</p><p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">${d.data().category} • Owner ID: ${d.data().owner}</p></div>
-                            <button onclick="deleteDoc('shops', '${d.id}')" class="text-red-400"><i class="fa-solid fa-trash-can"></i></button>
-                        </div>`).join('');
+                    document.getElementById('admin-shop-list').innerHTML = snap.docs.map(d => `<div class="flex justify-between items-center bg-gray-50 p-3 rounded-2xl border"><span class="text-xs font-bold">${d.data().name} (${d.data().category})</span><button onclick="deleteDoc('shops', '${d.id}')" class="text-red-400"><i class="fa-solid fa-trash"></i></button></div>`).join('');
                 });
             }
         }
 
         /**
-         * 4. APP ACTIONS (Cart, Orders, Listings, Ads)
+         * 4. APP ACTIONS
          */
         function filterBy(cat) {
             currentFilter = (currentFilter === cat) ? null : cat;
             document.getElementById('active-filter').innerText = currentFilter ? currentFilter.toUpperCase() : "ALL SERVICES";
             loadGuestData();
-            showMsg(`Filtering by: ${currentFilter || 'All Items'}`);
         }
 
         function addToCart(name, price, shopName) {
@@ -599,53 +564,25 @@
             const fee = fees[document.getElementById('cart-gp').value] || 10;
             const sub = cart.reduce((s, i) => s + i.price, 0);
 
-            if (cart.length === 0) {
-                list.innerHTML = '<p class="text-gray-400 italic text-sm text-center py-6 border-2 border-dashed border-gray-50 rounded-3xl">Cart is currently empty</p>';
+            if (!cart.length) {
+                list.innerHTML = '<p class="text-gray-400 italic text-sm text-center py-6">Your basket is empty</p>';
                 document.getElementById('cart-total').innerText = '₹0';
                 return;
             }
-
-            list.innerHTML = cart.map((i, idx) => `
-                <div class="flex justify-between items-center bg-gray-50 p-4 rounded-2xl border border-gray-100">
-                    <div><p class="text-xs font-black text-gray-700">${i.name}</p><p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">from ${i.shopName}</p></div>
-                    <div class="flex items-center gap-4">
-                        <span class="font-black text-green-600">₹${i.price}</span>
-                        <button onclick="removeFromCart(${idx})" class="text-red-400 hover:scale-125 transition"><i class="fa-solid fa-circle-minus"></i></button>
-                    </div>
-                </div>`).join('');
-            
+            list.innerHTML = cart.map((i, idx) => `<div class="flex justify-between items-center bg-gray-50 p-3 rounded-2xl text-xs font-bold"><span>${i.name}</span><div class="flex items-center gap-3"><span>₹${i.price}</span><button onclick="removeFromCart(${idx})" class="text-red-400"><i class="fa-solid fa-circle-minus"></i></button></div></div>`).join('');
             document.getElementById('cart-total').innerText = `₹${sub + fee}`;
         }
 
-        function removeFromCart(idx) { 
-            cart.splice(idx, 1); 
-            renderCartUI(); 
-        }
+        function removeFromCart(idx) { cart.splice(idx, 1); renderCartUI(); }
 
         async function placeOrder() {
             const addr = document.getElementById('cart-address').value.trim();
-            if(!addr) return showMsg("Please enter your village/house address.");
-            
+            if(!addr) return showMsg("Please enter delivery address");
             const gp = document.getElementById('cart-gp').value;
-            const sub = cart.reduce((s,i) => s + i.price, 0);
-            const total = sub + (fees[gp] || 10);
+            const total = cart.reduce((s,i) => s + i.price, 0) + (fees[gp] || 10);
 
-            await getCol('orders').add({
-                customer: currentUser.name,
-                phone: currentUser.phone,
-                items: cart,
-                total: total,
-                gp: gp,
-                address: addr,
-                status: 'Placed',
-                time: firebase.firestore.FieldValue.serverTimestamp()
-            });
-
-            cart = []; 
-            renderCartUI(); 
-            document.getElementById('cart-address').value = '';
-            showMsg("Success! Order placed successfully.");
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            await getCol('orders').add({ customer: currentUser.name, phone: currentUser.phone, items: cart, total, gp, address: addr, status: 'Placed', time: firebase.firestore.FieldValue.serverTimestamp() });
+            cart = []; renderCartUI(); showMsg("Booking Success!");
         }
 
         async function registerShop() {
@@ -653,86 +590,54 @@
             const cat = document.getElementById('p-shop-cat').value;
             const img = document.getElementById('p-shop-img').value.trim();
             if(!name) return showMsg("Business name required");
-
-            await getCol('shops').add({
-                name,
-                category: cat,
-                owner: currentUser.phone,
-                image: img || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=80',
-                created: new Date().toISOString()
-            });
-
-            showMsg("Shop Created! Refreshing view...");
+            await getCol('shops').add({ name, category: cat, owner: currentUser.phone, image: img || 'https://via.placeholder.com/150' });
+            showMsg("Business Registered! Relogging...");
             setTimeout(() => location.reload(), 1500);
         }
 
         async function addItem() {
-            const name = document.getElementById('item-name').value.trim();
+            const name = document.getElementById('item-name').value;
             const price = Number(document.getElementById('item-price').value);
-            const qty = document.getElementById('item-qty').value.trim();
-            const img = document.getElementById('item-img').value.trim();
-            
-            if(!name || !price) return showMsg("Name and Price are mandatory.");
-
-            await getCol('products').add({
-                name,
-                price,
-                qty: qty || '1 unit',
-                image: img || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=80',
-                shopName: myShop.name,
-                category: myShop.category,
-                shopId: myShop.id,
-                created: new Date().toISOString()
-            });
-
-            showMsg(`Added ${name} to your listing`);
+            const qty = document.getElementById('item-qty').value;
+            const img = document.getElementById('item-img').value;
+            if(!name || !price) return showMsg("Fill all details");
+            await getCol('products').add({ name, price, qty, image: img || 'https://via.placeholder.com/200', shopName: myShop.name, category: myShop.category, created: new Date().toISOString() });
+            showMsg("Item Added!");
             ['item-name', 'item-price', 'item-qty', 'item-img'].forEach(id => document.getElementById(id).value = '');
         }
 
         async function pushAd() {
-            const text = document.getElementById('ad-text').value.trim();
+            const text = document.getElementById('ad-text').value;
             const color = document.getElementById('ad-color').value;
-            if(!text) return showMsg("Campaign message required");
-
-            await getCol('ads').add({ text, color, created: new Date().toISOString() });
+            if(!text) return;
+            await getCol('ads').add({ text, color });
             document.getElementById('ad-text').value = '';
-            showMsg("New Campaign Published Globally!");
+            showMsg("Ad Published!");
         }
 
         async function deleteDoc(col, id) {
-            if(confirm("Master Warning: Are you sure you want to delete this from the entire site?")) {
-                await getCol(col).doc(id).delete();
-                showMsg("Item removed from system.");
-            }
+            if(confirm("Confirm Master Deletion?")) await getCol(col).doc(id).delete();
         }
 
         async function updateOrder(id, status) {
             await getCol('orders').doc(id).update({ status });
-            showMsg(`Order status updated to: ${status}`);
         }
 
         function switchAdminTab(t) {
             ['activity', 'control', 'ads'].forEach(tab => {
                 document.getElementById(`admin-${tab}`).classList.toggle('hidden', tab !== t);
-                const btn = document.getElementById(`admin-t-${tab}`);
-                btn.className = tab === t ? 
-                    'flex-1 py-4 text-xs font-black rounded-2xl admin-tab-active transition' : 
-                    'flex-1 py-4 text-xs font-black text-gray-400 rounded-2xl transition';
+                document.getElementById(`admin-t-${tab}`).className = tab === t ? 'flex-1 py-4 text-xs font-black rounded-2xl admin-tab-active transition' : 'flex-1 py-4 text-xs font-black text-gray-400 rounded-2xl transition';
             });
         }
 
         function showMsg(txt) {
             const el = document.getElementById('ui-msg');
-            el.innerText = txt; 
-            el.classList.remove('hidden');
+            el.innerText = txt; el.classList.remove('hidden');
             setTimeout(() => el.classList.add('hidden'), 4000);
         }
 
-        function logout() { 
-            if(confirm("Sign out of Gramzo?")) location.reload(); 
-        }
+        function logout() { location.reload(); }
 
-        // ENTRY POINT
         window.onload = startApp;
     </script>
 </body>
