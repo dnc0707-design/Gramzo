@@ -268,16 +268,15 @@
         
         let authReady = false;
 
+        // Initialize App with robust Auth tracking
         async function startApp() {
             try {
-                // Rule 3: Auth BEFORE Queries - Always establish session first
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
                     await signInAnonymously(auth);
                 }
 
-                // Wait for the state to confirm we have a valid user object
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
                         authReady = true;
@@ -286,9 +285,9 @@
                     }
                 });
             } catch (e) {
-                console.error("Firebase Auth Initialization Failed:", e);
+                console.error("Firebase Auth Init Failed:", e);
                 document.getElementById('status-dot').className = "w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_#ef4444] animate-none";
-                showMsg("System connection timeout. Please refresh.");
+                showMsg("Connection lost. Please refresh the page.");
             }
         }
 
@@ -302,22 +301,21 @@
         const handleAuth = async (type) => {
             const msgEl = document.getElementById('auth-msg');
             
-            // Check if auth is actually ready before touching Firestore
+            // Mandatory Rule 3 Check
             if (!authReady || !auth.currentUser) {
-                msgEl.innerText = "System warming up... Please wait.";
+                msgEl.innerText = "Securing connection... Please wait 3 seconds.";
                 msgEl.className = "text-[11px] text-center font-bold mt-4 text-orange-500";
-                try {
-                    await signInAnonymously(auth);
-                } catch(e) {
-                    msgEl.innerText = "Connection lost. Refresh required.";
-                    return;
-                }
+                try { await signInAnonymously(auth); } catch(e) {}
+                return;
             }
 
             msgEl.innerText = "Processing request...";
             msgEl.className = "text-[11px] text-center font-bold mt-4 text-blue-500";
 
             try {
+                // ADDED: Small delay to ensure auth token propagation before Firestore call
+                await new Promise(resolve => setTimeout(resolve, 500));
+
                 if (type === 'register') {
                     const name = document.getElementById('reg-name').value.trim();
                     const phone = document.getElementById('reg-phone').value.trim();
@@ -326,7 +324,7 @@
                     const pass = document.getElementById('reg-pass').value.trim();
 
                     if (!name || phone.length !== 10 || !village || pincode.length !== 6 || pass.length < 4) {
-                        msgEl.innerText = "Invalid data. Mobile must be 10 digits, Pincode 6 digits.";
+                        msgEl.innerText = "Invalid details. Mobile (10 digits) and Pincode (6 digits) required.";
                         msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
                         return;
                     }
@@ -335,7 +333,7 @@
                     const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', phone);
                     const snap = await getDoc(userRef);
                     if (snap.exists()) {
-                        msgEl.innerText = "This mobile is already registered.";
+                        msgEl.innerText = "This number is already registered.";
                         msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
                         return;
                     }
@@ -346,14 +344,13 @@
                     };
                     await setDoc(userRef, userData);
                     
-                    showMsg("Registration Successful! Signing you in...");
+                    showMsg("Registration Successful! Logging in...");
                     currentUser = userData;
                     finishLogin();
                 } else {
                     const phone = document.getElementById('login-phone').value.trim();
                     const pass = document.getElementById('login-pass').value.trim();
 
-                    // Master Admin Logic
                     if (phone === '12345' && pass === 'Pass@123') {
                         currentUser = { name: 'Master Admin', role: 'Admin', phone: '12345' };
                         return finishLogin();
@@ -368,7 +365,7 @@
                     const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', phone);
                     const snap = await getDoc(userRef);
                     if (!snap.exists()) {
-                        msgEl.innerText = "Account not found. Please register.";
+                        msgEl.innerText = "No account found. Please register.";
                         msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
                         return;
                     }
@@ -384,9 +381,9 @@
                     finishLogin();
                 }
             } catch (e) {
-                console.error("Auth Exception Details:", e);
-                // FRIENDLY ERROR HANDLING FOR LATENCY
-                msgEl.innerText = "Connection timeout. Please try clicking submit again.";
+                console.error("Auth Exception:", e);
+                // Robust retry message for latency/permission prop issues
+                msgEl.innerText = "Database sync issue. Please click submit again.";
                 msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
             }
         };
@@ -403,7 +400,7 @@
 
             if (currentUser.role === 'User') {
                 document.getElementById('cart-box').classList.remove('opacity-40', 'pointer-events-none', 'scale-95', 'blur-[1px]');
-                if (currentUser.village) document.getElementById('cart-address').value = `Village: ${currentUser.village}`;
+                if (currentUser.village) document.getElementById('cart-address').value = `${currentUser.village}`;
             }
             
             initRealtimeListeners();
@@ -432,13 +429,11 @@
                             </div>
                         </div>
                     </div>
-                `).join('') : '<div class="col-span-2 text-center py-20 text-gray-300 italic">No listings found in this category.</div>';
-            }, (err) => console.warn("Market snapshot latency:", err));
+                `).join('') : '<div class="col-span-2 text-center py-20 text-gray-300 italic">Exploring listings... No items found here yet.</div>';
+            });
         }
 
         function initRealtimeListeners() {
-            if (!auth.currentUser) return;
-
             onSnapshot(getCol('orders'), (snap) => {
                 let rev = 0, count = 0;
                 const adminLog = document.getElementById('admin-log-body');
@@ -454,14 +449,14 @@
                 });
                 if(document.getElementById('stat-rev')) document.getElementById('stat-rev').innerText = `₹${rev}`;
                 if(document.getElementById('stat-ord')) document.getElementById('stat-ord').innerText = count;
-            }, (err) => console.warn("Order snapshot latency:", err));
+            });
         }
 
         window.filterBy = (cat) => {
             currentFilter = (currentFilter === cat) ? null : cat;
             document.getElementById('active-filter').innerText = currentFilter ? currentFilter.toUpperCase() : "ALL LISTINGS";
             loadGuestData();
-            showMsg(`Exploring: ${currentFilter || 'Marketplace'}`);
+            showMsg(`Filtering: ${currentFilter || 'All'}`);
         };
 
         window.addToCart = (name, price, shopName) => {
@@ -481,7 +476,7 @@
             const sub = cart.reduce((s, i) => s + i.price, 0);
 
             if (!cart.length) {
-                list.innerHTML = '<p class="text-gray-400 italic text-sm text-center py-6 border-dashed border rounded-3xl">Cart is empty</p>';
+                list.innerHTML = '<p class="text-gray-400 italic text-sm text-center py-6 border-dashed border rounded-3xl">Basket is empty</p>';
                 document.getElementById('cart-total').innerText = '₹0';
                 return;
             }
@@ -499,9 +494,8 @@
         window.removeFromCart = (idx) => { cart.splice(idx, 1); renderCartUI(); };
 
         window.placeOrder = async () => {
-            if (!currentUser) return toggleAuthModal();
             const addr = document.getElementById('cart-address').value.trim();
-            if(!addr) return showMsg("We need a landmark for delivery.");
+            if(!addr) return showMsg("Please enter your delivery location.");
             const gp = document.getElementById('cart-gp').value;
             const sub = cart.reduce((s,i) => s + i.price, 0);
             const total = sub + (fees[gp] || 10);
@@ -513,15 +507,12 @@
                     time: serverTimestamp() 
                 });
                 cart = []; renderCartUI(); 
-                showMsg("Success! Booking sent.");
+                showMsg("Order Successfully Placed!");
                 window.scrollTo({ top: 0, behavior: 'smooth' });
-            } catch (e) { 
-                console.error("Booking write error:", e);
-                showMsg("Database busy. Click BOOK NOW again."); 
-            }
+            } catch (e) { showMsg("Network busy. Retry booking."); }
         };
 
-        window.logout = () => { if(confirm("Sign out from Gramzo?")) location.reload(); };
+        window.logout = () => { if(confirm("Sign out of Gramzo?")) location.reload(); };
 
         document.getElementById('submit-login').onclick = () => handleAuth('login');
         document.getElementById('submit-register').onclick = () => handleAuth('register');
