@@ -47,7 +47,7 @@
         .auth-dropdown.active { display: block; }
         
         input, select { 
-            @apply w-full p-4 bg-gray-50 rounded-2xl border border-gray-100 outline-none focus:ring-2 ring-green-500 text-sm transition-all; 
+            @apply w-full p-3.5 bg-gray-50 rounded-2xl border border-gray-100 outline-none focus:ring-2 ring-green-500 text-sm transition-all; 
         }
 
         /* Restored Menu Size */
@@ -87,7 +87,7 @@
                 <!-- Authentication UI -->
                 <div id="unauthed-ui" class="flex items-center">
                     <button id="auth-btn-main" onclick="toggleAuthModal()" class="bg-green-600 text-white px-6 py-3 rounded-2xl text-sm font-bold flex items-center gap-2 shadow-lg shadow-green-100 transition-all duration-300">
-                        <span id="auth-btn-text">Login / Join</span> <i id="auth-btn-icon" class="fa-solid fa-chevron-right ml-2 text-[10px]"></i>
+                        <span id="auth-btn-text">Login / Join</span> <i id="auth-btn-icon" class="fa-solid fa-user-circle ml-2"></i>
                     </button>
                 </div>
                 
@@ -102,27 +102,36 @@
                     </button>
                 </div>
 
-                <!-- Auth Modal (Dropdown) -->
+                <!-- Auth Modal (Dropdown) - Redefined for User Only -->
                 <div id="auth-modal" class="auth-dropdown bg-white rounded-[2rem] shadow-2xl border border-gray-100 p-8">
-                    <div class="flex bg-gray-100 p-1.5 rounded-2xl mb-6">
-                        <button onclick="switchRole('User')" id="tab-User" class="flex-1 py-2.5 rounded-xl text-xs font-bold bg-white text-green-600 shadow-sm transition">User</button>
-                        <button onclick="switchRole('Partner')" id="tab-Partner" class="flex-1 py-2.5 rounded-xl text-xs font-bold text-gray-500 transition">Partner</button>
-                        <button onclick="switchRole('Admin')" id="tab-Admin" class="flex-1 py-2.5 rounded-xl text-xs font-bold text-gray-500 transition">Admin</button>
+                    <div id="auth-view-login">
+                        <h3 class="font-black text-xl mb-6 text-gray-800">Welcome Back</h3>
+                        <div class="space-y-4">
+                            <input id="login-phone" type="tel" placeholder="Mobile Number" maxlength="10">
+                            <input id="login-pass" type="password" placeholder="Password">
+                            <button onclick="handleAuth('login')" class="w-full bg-green-600 text-white p-4 rounded-2xl font-bold text-sm shadow-xl shadow-green-100 active:scale-95 transition">Sign In</button>
+                            <p class="text-center text-xs font-bold text-gray-400 mt-4">
+                                New to Gramzo? <button onclick="toggleAuthView('register')" class="text-green-600 hover:underline">Create Account</button>
+                            </p>
+                        </div>
                     </div>
 
-                    <div class="space-y-4">
-                        <div id="reg-name-box">
-                            <input id="auth-name" type="text" placeholder="Your Full Name">
+                    <div id="auth-view-register" class="hidden">
+                        <h3 class="font-black text-xl mb-6 text-gray-800">New Registration</h3>
+                        <div class="space-y-3">
+                            <input id="reg-name" type="text" placeholder="Full Name">
+                            <input id="reg-phone" type="tel" placeholder="Mobile Number" maxlength="10">
+                            <input id="reg-village" type="text" placeholder="Village Name">
+                            <input id="reg-address" type="text" placeholder="Full Address">
+                            <input id="reg-pincode" type="tel" placeholder="Pincode" maxlength="6">
+                            <input id="reg-pass" type="password" placeholder="Password">
+                            <button onclick="handleAuth('register')" class="w-full bg-green-600 text-white p-4 rounded-2xl font-bold text-sm shadow-xl shadow-green-100 active:scale-95 transition">Register Now</button>
+                            <p class="text-center text-xs font-bold text-gray-400 mt-4">
+                                Already registered? <button onclick="toggleAuthView('login')" class="text-green-600 hover:underline">Login</button>
+                            </p>
                         </div>
-                        <input id="auth-id" type="text" placeholder="Phone Number / ID">
-                        <input id="auth-pass" type="password" placeholder="4-Digit PIN / Password">
-                        
-                        <div class="flex gap-3 pt-2">
-                            <button onclick="handleAuth('login')" class="flex-1 bg-green-600 text-white p-4 rounded-2xl font-bold text-sm shadow-xl shadow-green-100 active:scale-95 transition">Login</button>
-                            <button id="reg-btn-action" onclick="handleAuth('register')" class="flex-1 bg-gray-800 text-white p-4 rounded-2xl font-bold text-sm active:scale-95 transition">Register</button>
-                        </div>
-                        <p id="auth-msg" class="text-[11px] text-center font-bold mt-4 min-h-[1rem]"></p>
                     </div>
+                    <p id="auth-msg" class="text-[11px] text-center font-bold mt-4 min-h-[1rem]"></p>
                 </div>
             </div>
         </div>
@@ -219,7 +228,7 @@
                 </div>
             </div>
 
-            <!-- 2. PARTNER VIEW -->
+            <!-- 2. PARTNER VIEW (Internal only) -->
             <div id="view-Partner" class="hidden space-y-8">
                 <div id="shop-registration" class="bg-white p-10 rounded-[3rem] shadow-sm border border-gray-100">
                     <h3 class="font-black text-2xl mb-2 text-primary">Partner Hub</h3>
@@ -255,7 +264,7 @@
                 </div>
             </div>
 
-            <!-- 3. MASTER ADMIN -->
+            <!-- 3. MASTER ADMIN (Internal only) -->
             <div id="view-Admin" class="hidden space-y-8">
                 <div class="grid grid-cols-2 gap-6">
                     <div class="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm text-center">
@@ -333,18 +342,13 @@
 
         let currentUser = null;
         let myShop = null;
-        let selectedRole = 'User';
+        let selectedRole = 'User'; // Default role
         let currentFilter = null;
         let cart = [];
         const fees = { Santuri: 10, Muradi: 20, Tarabari: 25, Garshika: 20 };
 
-        /**
-         * CRITICAL FIX: Robust System Initialization
-         * We ensure background auth is always active before user attempts login.
-         */
         async function startApp() {
             try {
-                // Mandatory Rule 3: Auth BEFORE Queries
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await auth.signInWithCustomToken(__initial_auth_token);
                 } else {
@@ -353,7 +357,6 @@
 
                 auth.onAuthStateChanged(user => {
                     if (user) {
-                        console.log("System connection established.");
                         document.getElementById('status-dot').className = "w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]";
                         loadGuestData();
                     }
@@ -365,93 +368,100 @@
         }
 
         /**
-         * 2. ACCOUNT HANDLING (LOGIN / REGISTER LOGIC)
+         * 2. ACCOUNT HANDLING (USER ONLY PUBLIC INTERFACE)
          */
         function toggleAuthModal() { document.getElementById('auth-modal').classList.toggle('active'); }
         
-        function switchRole(role) {
-            selectedRole = role;
-            ['User', 'Partner', 'Admin'].forEach(r => {
-                const btn = document.getElementById(`tab-${r}`);
-                btn.className = r === role ? 
-                    'flex-1 py-2.5 rounded-xl text-xs font-bold bg-white text-green-600 shadow-sm' : 
-                    'flex-1 py-2.5 rounded-xl text-xs font-bold text-gray-500';
-            });
-            document.getElementById('reg-name-box').classList.toggle('hidden', role === 'Admin');
+        function toggleAuthView(view) {
+            document.getElementById('auth-view-login').classList.toggle('hidden', view === 'register');
+            document.getElementById('auth-view-register').classList.toggle('hidden', view === 'login');
+            document.getElementById('auth-msg').innerText = "";
         }
 
-        // Helper to ensure auth is active before any DB call
         async function ensureTechnicalAuth() {
-            if (!auth.currentUser) {
-                console.log("Establishing background auth...");
-                await auth.signInAnonymously();
-            }
+            if (!auth.currentUser) await auth.signInAnonymously();
+        }
+
+        function switchRole(role) {
+            selectedRole = role;
+            // Removed tab switching logic for Top Right UI as per request
         }
 
         async function handleAuth(type) {
-            const id = document.getElementById('auth-id').value.trim();
-            const pass = document.getElementById('auth-pass').value.trim();
-            const name = document.getElementById('auth-name').value.trim();
             const msgEl = document.getElementById('auth-msg');
-
-            msgEl.innerText = "Processing...";
+            msgEl.innerText = "Working...";
             msgEl.className = "text-[11px] text-center font-bold mt-4 text-blue-500";
-
-            if (selectedRole === 'Admin') {
-                if (id === '12345' && pass === 'Pass@123') {
-                    currentUser = { id: 'admin', name: 'Master Admin', role: 'Admin' };
-                    return finishLogin();
-                }
-                msgEl.innerText = "Invalid Admin Credentials";
-                msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
-                return;
-            }
-
-            if (!id || pass.length < 4) {
-                msgEl.innerText = "Valid Phone & 4-digit PIN required";
-                msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
-                return;
-            }
 
             try {
                 await ensureTechnicalAuth();
-                const userRef = getCol('users').doc(id);
 
                 if (type === 'register') {
-                    if (!name) {
-                        msgEl.innerText = "Full Name is required";
+                    const name = document.getElementById('reg-name').value.trim();
+                    const phone = document.getElementById('reg-phone').value.trim();
+                    const village = document.getElementById('reg-village').value.trim();
+                    const address = document.getElementById('reg-address').value.trim();
+                    const pincode = document.getElementById('reg-pincode').value.trim();
+                    const pass = document.getElementById('reg-pass').value.trim();
+
+                    if (!name || phone.length !== 10 || !village || !address || pincode.length < 6 || pass.length < 4) {
+                        msgEl.innerText = "Please fill all fields correctly (10-digit mobile)";
+                        msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
                         return;
                     }
+
+                    const userRef = getCol('users').doc(phone);
                     const snap = await userRef.get();
                     if (snap.exists) {
-                        msgEl.innerText = "Phone number already registered";
+                        msgEl.innerText = "This mobile is already registered.";
+                        msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
                         return;
                     }
-                    await userRef.set({ phone: id, pin: pass, name, role: selectedRole, created: new Date().toISOString() });
-                    msgEl.innerText = "Registration Success! Please Login.";
-                    msgEl.className = "text-[11px] text-center font-bold mt-4 text-green-600";
+
+                    const userData = { 
+                        name, phone, village, address, pincode, pin: pass, 
+                        role: 'User', created: new Date().toISOString() 
+                    };
+                    await userRef.set(userData);
+                    
+                    showMsg("User Registered Successfully!");
+                    currentUser = userData;
+                    finishLogin();
                 } else {
-                    const snap = await userRef.get();
-                    if (!snap.exists) {
-                        msgEl.innerText = "Account not found. Please register.";
+                    const phone = document.getElementById('login-phone').value.trim();
+                    const pass = document.getElementById('login-pass').value.trim();
+
+                    // Internal Master Login
+                    if (phone === '12345' && pass === 'Pass@123') {
+                        currentUser = { name: 'Master Admin', role: 'Admin', phone: '12345' };
+                        return finishLogin();
+                    }
+
+                    if (phone.length !== 10 || !pass) {
+                        msgEl.innerText = "Enter valid mobile and password";
+                        msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
                         return;
                     }
+
+                    const snap = await getCol('users').doc(phone).get();
+                    if (!snap.exists) {
+                        msgEl.innerText = "Account not found.";
+                        msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
+                        return;
+                    }
+
                     const data = snap.data();
                     if (data.pin !== pass) {
-                        msgEl.innerText = "Wrong PIN. Try again.";
+                        msgEl.innerText = "Wrong password.";
+                        msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
                         return;
                     }
-                    if (data.role !== selectedRole) {
-                        msgEl.innerText = `Role mismatch: registered as ${data.role}`;
-                        return;
-                    }
+
                     currentUser = data;
                     finishLogin();
                 }
-            } catch (e) { 
+            } catch (e) {
                 console.error(e);
-                msgEl.innerText = "Database error. Please try again.";
-                msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
+                msgEl.innerText = "Connection failed. Try again.";
             }
         }
 
@@ -467,6 +477,8 @@
 
             if (currentUser.role === 'User') {
                 document.getElementById('cart-box').classList.remove('opacity-40', 'pointer-events-none', 'scale-95', 'blur-[1px]');
+                // Pre-fill address if available
+                if (currentUser.address) document.getElementById('cart-address').value = `${currentUser.address}, ${currentUser.village}`;
             }
             
             if (currentUser.role === 'Partner') {
@@ -480,7 +492,7 @@
             }
 
             initRealtimeListeners();
-            showMsg(`Dashboard Loaded: ${currentUser.role}`);
+            showMsg(`Logged in as ${currentUser.name}`);
         }
 
         /**
@@ -490,10 +502,7 @@
             getCol('products').onSnapshot(snap => {
                 const list = document.getElementById('market-list');
                 const items = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
-                
-                const filtered = items
-                    .filter(i => !currentFilter || i.category === currentFilter)
-                    .sort((a,b) => b.created?.localeCompare(a.created));
+                const filtered = items.filter(i => !currentFilter || i.category === currentFilter).sort((a,b) => b.created?.localeCompare(a.created));
 
                 list.innerHTML = filtered.length ? filtered.map(p => `
                     <div class="bg-white rounded-[2.5rem] overflow-hidden border border-gray-100 flex flex-col shadow-sm hover:shadow-2xl transition-all duration-300 card-animate">
@@ -544,7 +553,7 @@
                     if(adminLog) adminLog.innerHTML += `<tr><td class="p-6 font-mono font-bold text-[10px] text-gray-400">#${doc.id.slice(-4)}</td><td class="p-6 font-black text-gray-800 text-sm">${o.customer}</td><td class="p-6 font-black text-green-600 text-sm">₹${o.total}</td><td class="p-6 text-right uppercase text-[9px] font-bold"><span class="bg-gray-100 px-3 py-1 rounded-full">${o.status}</span></td></tr>`;
                     if(partnerLog && myShop && o.items.some(i => i.shopName === myShop.name)) {
                         partnerLog.innerHTML += `<div class="bg-white p-8 rounded-[2.5rem] border border-l-8 border-green-500 shadow-sm">
-                            <div class="flex justify-between mb-4"><h5 class="font-black text-gray-800 uppercase tracking-tighter">ORDER #${doc.id.slice(-6)}</h5><span class="text-[9px] font-bold text-orange-600 px-3 py-1 bg-orange-50 rounded-full">${o.status}</span></div>
+                            <div class="flex justify-between mb-4"><h5 class="font-black text-gray-800 uppercase tracking-tighter">ORDER #${doc.id.slice(-6)}</h5><span class="text-[9px] font-bold text-orange-600 px-2 py-1 bg-orange-50 rounded-full">${o.status}</span></div>
                             <div class="text-xs space-y-1 mb-4 pb-4 border-b border-dashed">${o.items.filter(i => i.shopName === myShop.name).map(i => `<div class="flex justify-between"><span>${i.name}</span><b>₹${i.price}</b></div>`).join('')}</div>
                             <button onclick="updateOrder('${doc.id}', 'Confirmed')" class="w-full bg-blue-50 text-blue-600 p-3 rounded-2xl text-[10px] font-bold uppercase mb-2">Confirm Order</button>
                             <button onclick="updateOrder('${doc.id}', 'Completed')" class="w-full bg-green-600 text-white p-3 rounded-2xl text-[10px] font-bold uppercase">Mark Completed</button>
@@ -628,7 +637,7 @@
                 showMsg("Order Successfully Placed!");
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } catch (e) {
-                showMsg("Booking failed. System Busy.");
+                showMsg("Booking failed.");
             }
         }
 
@@ -640,9 +649,9 @@
             try {
                 await ensureTechnicalAuth();
                 await getCol('shops').add({ name, category: cat, owner: currentUser.phone, image: img || 'https://via.placeholder.com/150' });
-                showMsg("Business Registered! System Syncing...");
+                showMsg("Partner Account Configured.");
                 setTimeout(() => location.reload(), 1500);
-            } catch (e) { showMsg("Error registering shop."); }
+            } catch (e) { showMsg("Error."); }
         }
 
         async function addItem() {
@@ -650,13 +659,13 @@
             const price = Number(document.getElementById('item-price').value);
             const qty = document.getElementById('item-qty').value;
             const img = document.getElementById('item-img').value;
-            if(!name || !price) return showMsg("Product details missing");
+            if(!name || !price) return showMsg("Details missing");
             try {
                 await ensureTechnicalAuth();
                 await getCol('products').add({ name, price, qty, image: img || 'https://via.placeholder.com/200', shopName: myShop.name, category: myShop.category, created: new Date().toISOString() });
                 showMsg("Product Listed!");
                 ['item-name', 'item-price', 'item-qty', 'item-img'].forEach(id => document.getElementById(id).value = '');
-            } catch (e) { showMsg("Failed to add item."); }
+            } catch (e) { showMsg("Failed."); }
         }
 
         async function pushAd() {
@@ -668,16 +677,16 @@
                 await getCol('ads').add({ text, color, created: new Date().toISOString() });
                 document.getElementById('ad-text').value = '';
                 showMsg("Campaign Live!");
-            } catch (e) { showMsg("Failed to push ad."); }
+            } catch (e) { showMsg("Failed."); }
         }
 
         async function deleteDoc(col, id) {
-            if(confirm("Master Action: Delete this entity permanently?")) {
+            if(confirm("Delete permanently?")) {
                 try {
                     await ensureTechnicalAuth();
                     await getCol(col).doc(id).delete();
-                    showMsg("Deleted from system.");
-                } catch (e) { showMsg("Access Denied."); }
+                    showMsg("Deleted.");
+                } catch (e) { showMsg("Error."); }
             }
         }
 
@@ -686,7 +695,7 @@
                 await ensureTechnicalAuth();
                 await getCol('orders').doc(id).update({ status });
                 showMsg(`Status: ${status}`);
-            } catch (e) { showMsg("Update failed."); }
+            } catch (e) { showMsg("Failed."); }
         }
 
         function switchAdminTab(t) {
@@ -703,7 +712,7 @@
         }
 
         function logout() { 
-            if(confirm("Sign out of Gramzo?")) location.reload(); 
+            if(confirm("Sign out?")) location.reload(); 
         }
 
         window.onload = startApp;
