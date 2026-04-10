@@ -50,7 +50,6 @@
             @apply w-full p-3.5 bg-gray-50 rounded-2xl border border-gray-100 outline-none focus:ring-2 ring-green-500 text-sm transition-all; 
         }
 
-        /* Restored Menu Size */
         .service-btn {
             @apply h-24 w-24 bg-white rounded-[2.5rem] shadow-md border border-gray-50 flex items-center justify-center text-4xl transition-all duration-300;
         }
@@ -64,10 +63,6 @@
         }
 
         .admin-tab-active { @apply bg-green-600 text-white shadow-lg shadow-green-100; }
-        
-        /* Skeleton loading pulse */
-        .pulse { animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
 </head>
 <body class="pb-24">
@@ -84,34 +79,31 @@
             </div>
 
             <div class="relative">
-                <!-- Authentication UI -->
                 <div id="unauthed-ui" class="flex items-center">
                     <button id="auth-btn-main" onclick="toggleAuthModal()" class="bg-green-600 text-white px-6 py-3 rounded-2xl text-sm font-bold flex items-center gap-2 shadow-lg shadow-green-100 transition-all duration-300">
                         <span id="auth-btn-text">Login / Join</span> <i id="auth-btn-icon" class="fa-solid fa-user-circle ml-2"></i>
                     </button>
                 </div>
                 
-                <!-- Authenticated UI -->
                 <div id="authed-ui" class="hidden flex items-center gap-4">
                     <div class="text-right hidden sm:block">
                         <p id="display-name" class="text-sm font-bold text-gray-800"></p>
                         <p id="display-role" class="text-[10px] text-green-600 font-black uppercase tracking-widest"></p>
                     </div>
-                    <button onclick="logout()" class="w-12 h-12 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center hover:bg-red-500 hover:text-white transition shadow-sm">
+                    <button id="logout-btn" class="w-12 h-12 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center hover:bg-red-500 hover:text-white transition shadow-sm">
                         <i class="fa-solid fa-power-off text-lg"></i>
                     </button>
                 </div>
 
-                <!-- Auth Modal (Dropdown) - Redefined for User Only -->
                 <div id="auth-modal" class="auth-dropdown bg-white rounded-[2rem] shadow-2xl border border-gray-100 p-8">
                     <div id="auth-view-login">
                         <h3 class="font-black text-xl mb-6 text-gray-800">Welcome Back</h3>
                         <div class="space-y-4">
                             <input id="login-phone" type="tel" placeholder="Mobile Number" maxlength="10">
                             <input id="login-pass" type="password" placeholder="Password">
-                            <button onclick="handleAuth('login')" class="w-full bg-green-600 text-white p-4 rounded-2xl font-bold text-sm shadow-xl shadow-green-100 active:scale-95 transition">Sign In</button>
+                            <button id="submit-login" class="w-full bg-green-600 text-white p-4 rounded-2xl font-bold text-sm shadow-xl shadow-green-100 active:scale-95 transition">Sign In</button>
                             <p class="text-center text-xs font-bold text-gray-400 mt-4">
-                                New to Gramzo? <button onclick="toggleAuthView('register')" class="text-green-600 hover:underline">Create Account</button>
+                                New to Gramzo? <button id="to-register" class="text-green-600 hover:underline">Create Account</button>
                             </p>
                         </div>
                     </div>
@@ -125,9 +117,9 @@
                             <input id="reg-address" type="text" placeholder="Full Address">
                             <input id="reg-pincode" type="tel" placeholder="Pincode" maxlength="6">
                             <input id="reg-pass" type="password" placeholder="Password">
-                            <button onclick="handleAuth('register')" class="w-full bg-green-600 text-white p-4 rounded-2xl font-bold text-sm shadow-xl shadow-green-100 active:scale-95 transition">Register Now</button>
+                            <button id="submit-register" class="w-full bg-green-600 text-white p-4 rounded-2xl font-bold text-sm shadow-xl shadow-green-100 active:scale-95 transition">Register Now</button>
                             <p class="text-center text-xs font-bold text-gray-400 mt-4">
-                                Already registered? <button onclick="toggleAuthView('login')" class="text-green-600 hover:underline">Login</button>
+                                Already registered? <button id="to-login" class="text-green-600 hover:underline">Login</button>
                             </p>
                         </div>
                     </div>
@@ -139,33 +131,28 @@
 
     <main class="max-w-4xl mx-auto p-4 space-y-8">
         
-        <!-- Centered 4-in-1 Service Selection -->
         <section class="text-center py-6">
             <h2 class="text-gray-400 font-bold uppercase tracking-[0.2em] text-[10px] mb-8">One App for every Village need</h2>
             <div class="flex justify-center gap-4 sm:gap-10 overflow-x-auto custom-scroll px-4 pb-2">
-                <!-- Food (Zomato) -->
-                <div class="flex-shrink-0 group cursor-pointer text-center" onclick="filterBy('Food')">
+                <div class="flex-shrink-0 group cursor-pointer text-center" id="btn-food">
                     <div class="service-btn text-orange-500 group-hover:bg-orange-500 group-hover:text-white group-hover:scale-110">
                         <i class="fa-solid fa-utensils"></i>
                     </div>
                     <p class="text-xs font-black mt-4 text-gray-600 tracking-tight">FOOD</p>
                 </div>
-                <!-- Grocery (Zepto) -->
-                <div class="flex-shrink-0 group cursor-pointer text-center" onclick="filterBy('Grocery')">
+                <div class="flex-shrink-0 group cursor-pointer text-center" id="btn-grocery">
                     <div class="service-btn text-green-500 group-hover:bg-green-500 group-hover:text-white group-hover:scale-110">
                         <i class="fa-solid fa-bolt"></i>
                     </div>
                     <p class="text-xs font-black mt-4 text-gray-600 tracking-tight">GROCERY</p>
                 </div>
-                <!-- Ride (Rapido) -->
-                <div class="flex-shrink-0 group cursor-pointer text-center" onclick="filterBy('Ride')">
+                <div class="flex-shrink-0 group cursor-pointer text-center" id="btn-ride">
                     <div class="service-btn text-blue-500 group-hover:bg-blue-500 group-hover:text-white group-hover:scale-110">
                         <i class="fa-solid fa-motorcycle"></i>
                     </div>
                     <p class="text-xs font-black mt-4 text-gray-600 tracking-tight">RIDE</p>
                 </div>
-                <!-- Services (UrbanClap) -->
-                <div class="flex-shrink-0 group cursor-pointer text-center" onclick="filterBy('Services')">
+                <div class="flex-shrink-0 group cursor-pointer text-center" id="btn-services">
                     <div class="service-btn text-purple-600 group-hover:bg-purple-600 group-hover:text-white group-hover:scale-110">
                         <i class="fa-solid fa-screwdriver-wrench"></i>
                     </div>
@@ -174,7 +161,6 @@
             </div>
         </section>
 
-        <!-- Global Ad Engine -->
         <div id="promo-banner" class="w-full h-40 bg-gray-200 rounded-[3rem] flex items-center justify-center overflow-hidden shadow-inner relative">
             <div class="absolute inset-0 opacity-10 bg-[radial-gradient(circle,rgba(0,0,0,1)_1px,transparent_1px)] bg-[size:20px_20px]"></div>
             <p class="text-gray-400 font-black italic tracking-tighter text-2xl z-10">Gramzo Seasonal Offers</p>
@@ -182,7 +168,6 @@
 
         <div id="view-container">
             
-            <!-- 1. USER VIEW -->
             <div id="view-User" class="space-y-12">
                 <div>
                     <div class="flex justify-between items-end mb-8">
@@ -192,25 +177,22 @@
                         </div>
                         <span id="active-filter" class="text-[10px] bg-green-50 text-green-600 px-4 py-1.5 rounded-full font-black tracking-widest border border-green-100 uppercase">All Listings</span>
                     </div>
-                    <div id="market-list" class="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                        <!-- Marketplace items -->
-                    </div>
+                    <div id="market-list" class="grid grid-cols-1 sm:grid-cols-2 gap-8"></div>
                 </div>
 
-                <!-- Checkout Section -->
                 <div id="cart-box" class="opacity-40 pointer-events-none transition-all duration-700 scale-95 origin-top blur-[1px]">
                     <div class="bg-white rounded-[3rem] p-10 shadow-sm border border-gray-100">
                         <div class="flex justify-between items-center mb-8">
                             <h3 class="font-black text-2xl">Confirm Booking</h3>
                             <i class="fa-solid fa-receipt text-green-600 text-2xl"></i>
                         </div>
-                        <div id="cart-items" class="space-y-4 mb-8">
+                        <div id="cart-items-list" class="space-y-4 mb-8">
                             <p class="text-gray-400 italic text-sm text-center py-6 border-2 border-dashed border-gray-50 rounded-3xl">Your basket is empty</p>
                         </div>
                         <div class="space-y-6 pt-8 border-t border-dashed border-gray-200">
                             <div class="flex flex-col sm:flex-row gap-4 items-center justify-between">
                                 <label class="text-xs font-black text-gray-400 uppercase tracking-widest">Village Area</label>
-                                <select id="cart-gp" onchange="renderCartUI()" class="sm:w-64">
+                                <select id="cart-gp" class="sm:w-64">
                                     <option value="Santuri">Santuri Village (+₹10)</option>
                                     <option value="Muradi">Muradi Hub (+₹20)</option>
                                     <option value="Tarabari">Tarabari Outpost (+₹25)</option>
@@ -222,27 +204,27 @@
                                 <span id="cart-total" class="text-4xl font-black text-green-600 tracking-tighter">₹0</span>
                             </div>
                             <input id="cart-address" placeholder="Exact Delivery Location / Landmark">
-                            <button onclick="placeOrder()" class="w-full bg-green-600 text-white py-6 rounded-[2rem] font-black text-xl shadow-2xl shadow-green-100 active:scale-95 transition">BOOK NOW</button>
+                            <button id="btn-place-order" class="w-full bg-green-600 text-white py-6 rounded-[2rem] font-black text-xl shadow-2xl shadow-green-100 active:scale-95 transition">BOOK NOW</button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 2. PARTNER VIEW (Internal only) -->
+            <!-- Partner View (Hidden) -->
             <div id="view-Partner" class="hidden space-y-8">
                 <div id="shop-registration" class="bg-white p-10 rounded-[3rem] shadow-sm border border-gray-100">
                     <h3 class="font-black text-2xl mb-2 text-primary">Partner Hub</h3>
                     <p class="text-sm text-gray-400 mb-8 font-semibold">Scale your local business globally</p>
                     <div class="space-y-5">
-                        <input id="p-shop-name" placeholder="Business Name (e.g., Star Electricians)">
+                        <input id="p-shop-name" placeholder="Business Name">
                         <select id="p-shop-cat">
                             <option value="Food">Food / Zomato Partner</option>
                             <option value="Grocery">Grocery / Zepto Partner</option>
                             <option value="Ride">Ride / Rapido Partner</option>
                             <option value="Services">Service / UrbanClap Partner</option>
                         </select>
-                        <input id="p-shop-img" placeholder="Banner or Profile Image URL">
-                        <button onclick="registerShop()" class="w-full bg-green-600 text-white p-5 rounded-[2rem] font-black text-lg shadow-xl shadow-green-100">LAUNCH MY SHOP</button>
+                        <input id="p-shop-img" placeholder="Banner Image URL">
+                        <button id="btn-register-shop" class="w-full bg-green-600 text-white p-5 rounded-[2rem] font-black text-lg shadow-xl shadow-green-100">LAUNCH MY SHOP</button>
                     </div>
                 </div>
 
@@ -252,19 +234,16 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                             <input id="item-name" placeholder="Service/Item Name">
                             <input id="item-price" type="number" placeholder="Price (₹)">
-                            <input id="item-qty" placeholder="Unit (e.g., 1kg, 1 visit, 1 hour)">
+                            <input id="item-qty" placeholder="Unit (e.g., 1kg)">
                             <input id="item-img" placeholder="Item Image Link">
                         </div>
-                        <button onclick="addItem()" class="w-full mt-8 bg-gray-900 text-white p-5 rounded-[2rem] font-black text-sm uppercase tracking-widest">Update Home Screen</button>
+                        <button id="btn-add-item" class="w-full mt-8 bg-gray-900 text-white p-5 rounded-[2rem] font-black text-sm uppercase tracking-widest">Update Home Screen</button>
                     </div>
-                    <div>
-                        <h3 class="font-black text-xl mb-6">Real-time Bookings</h3>
-                        <div id="partner-order-list" class="space-y-4"></div>
-                    </div>
+                    <div id="partner-order-list" class="space-y-4"></div>
                 </div>
             </div>
 
-            <!-- 3. MASTER ADMIN (Internal only) -->
+            <!-- Master Admin View (Hidden) -->
             <div id="view-Admin" class="hidden space-y-8">
                 <div class="grid grid-cols-2 gap-6">
                     <div class="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm text-center">
@@ -278,9 +257,9 @@
                 </div>
 
                 <div class="flex bg-white p-1.5 rounded-[2rem] border shadow-sm mb-4">
-                    <button onclick="switchAdminTab('activity')" id="admin-t-activity" class="flex-1 py-4 text-xs font-black rounded-2xl admin-tab-active transition">Activity</button>
-                    <button onclick="switchAdminTab('control')" id="admin-t-control" class="flex-1 py-4 text-xs font-black text-gray-400 rounded-2xl transition">Governance</button>
-                    <button onclick="switchAdminTab('ads')" id="admin-t-ads" class="flex-1 py-4 text-xs font-black text-gray-400 rounded-2xl transition">Campaigns</button>
+                    <button id="admin-tab-activity" class="flex-1 py-4 text-xs font-black rounded-2xl admin-tab-active transition">Activity</button>
+                    <button id="admin-tab-control" class="flex-1 py-4 text-xs font-black text-gray-400 rounded-2xl transition">Governance</button>
+                    <button id="admin-tab-ads" class="flex-1 py-4 text-xs font-black text-gray-400 rounded-2xl transition">Campaigns</button>
                 </div>
 
                 <div id="admin-activity" class="space-y-6">
@@ -296,7 +275,7 @@
 
                 <div id="admin-control" class="hidden space-y-8">
                     <div class="bg-white p-10 rounded-[2.5rem] border shadow-sm">
-                        <h4 class="font-black text-xl mb-6">Global Partners Registry</h4>
+                        <h4 class="font-black text-xl mb-6">Partners Registry</h4>
                         <div id="admin-shop-list" class="grid grid-cols-1 gap-3"></div>
                     </div>
                     <div class="bg-white p-10 rounded-[2.5rem] border shadow-sm">
@@ -313,7 +292,7 @@
                             <span class="text-xs font-bold text-gray-400 uppercase">Brand Color:</span>
                             <input id="ad-color" type="color" value="#16a34a" class="h-12 w-20 cursor-pointer">
                         </div>
-                        <button onclick="pushAd()" class="w-full bg-black text-white p-5 rounded-[2rem] font-black mt-4">Publish To All Users</button>
+                        <button id="btn-push-ad" class="w-full bg-black text-white p-5 rounded-[2rem] font-black mt-4">Publish To All Users</button>
                     </div>
                     <div id="admin-ad-history" class="space-y-3"></div>
                 </div>
@@ -324,39 +303,40 @@
 
     <div id="ui-msg" class="fixed top-12 left-1/2 -translate-x-1/2 bg-gray-900/95 text-white px-8 py-4 rounded-[2rem] text-sm font-bold z-[100] hidden backdrop-blur shadow-2xl"></div>
 
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, getDoc, getDocs, setDoc, onSnapshot, addDoc, updateDoc, deleteDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    <script>
-        /**
-         * 1. CORE ARCHITECTURE & AUTHENTICATION
-         */
+        // 1. CONFIG & INIT
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { apiKey: "" };
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'gramzo-super-pichai-v5';
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const auth = firebase.auth();
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'gramzo-master-v6';
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-        const getCol = (name) => db.collection('artifacts').doc(appId).collection('public').doc('data').collection(name);
+        const getCol = (name) => collection(db, 'artifacts', appId, 'public', 'data', name);
 
         let currentUser = null;
         let myShop = null;
-        let selectedRole = 'User'; // Default role
+        let selectedRole = 'User';
         let currentFilter = null;
         let cart = [];
         const fees = { Santuri: 10, Muradi: 20, Tarabari: 25, Garshika: 20 };
 
+        // 2. AUTHENTICATION & STARTUP
         async function startApp() {
             try {
+                // RULE 3: Auth BEFORE Queries
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await auth.signInWithCustomToken(__initial_auth_token);
+                    await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
-                    await auth.signInAnonymously();
+                    await signInAnonymously(auth);
                 }
 
-                auth.onAuthStateChanged(user => {
+                onAuthStateChanged(auth, (user) => {
                     if (user) {
+                        console.log("System connection established.");
                         document.getElementById('status-dot').className = "w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]";
                         loadGuestData();
                     }
@@ -367,33 +347,21 @@
             }
         }
 
-        /**
-         * 2. ACCOUNT HANDLING (USER ONLY PUBLIC INTERFACE)
-         */
-        function toggleAuthModal() { document.getElementById('auth-modal').classList.toggle('active'); }
-        
-        function toggleAuthView(view) {
+        window.toggleAuthModal = () => document.getElementById('auth-modal').classList.toggle('active');
+        window.toggleAuthView = (view) => {
             document.getElementById('auth-view-login').classList.toggle('hidden', view === 'register');
             document.getElementById('auth-view-register').classList.toggle('hidden', view === 'login');
             document.getElementById('auth-msg').innerText = "";
-        }
+        };
 
-        async function ensureTechnicalAuth() {
-            if (!auth.currentUser) await auth.signInAnonymously();
-        }
-
-        function switchRole(role) {
-            selectedRole = role;
-            // Removed tab switching logic for Top Right UI as per request
-        }
-
-        async function handleAuth(type) {
+        const handleAuth = async (type) => {
             const msgEl = document.getElementById('auth-msg');
-            msgEl.innerText = "Working...";
+            msgEl.innerText = "Processing...";
             msgEl.className = "text-[11px] text-center font-bold mt-4 text-blue-500";
 
             try {
-                await ensureTechnicalAuth();
+                // Ensure anonymous auth is active if not already
+                if (!auth.currentUser) await signInAnonymously(auth);
 
                 if (type === 'register') {
                     const name = document.getElementById('reg-name').value.trim();
@@ -409,10 +377,10 @@
                         return;
                     }
 
-                    const userRef = getCol('users').doc(phone);
-                    const snap = await userRef.get();
-                    if (snap.exists) {
-                        msgEl.innerText = "This mobile is already registered.";
+                    const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', phone);
+                    const snap = await getDoc(userRef);
+                    if (snap.exists()) {
+                        msgEl.innerText = "Mobile number already registered.";
                         msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
                         return;
                     }
@@ -421,7 +389,7 @@
                         name, phone, village, address, pincode, pin: pass, 
                         role: 'User', created: new Date().toISOString() 
                     };
-                    await userRef.set(userData);
+                    await setDoc(userRef, userData);
                     
                     showMsg("User Registered Successfully!");
                     currentUser = userData;
@@ -430,7 +398,6 @@
                     const phone = document.getElementById('login-phone').value.trim();
                     const pass = document.getElementById('login-pass').value.trim();
 
-                    // Internal Master Login
                     if (phone === '12345' && pass === 'Pass@123') {
                         currentUser = { name: 'Master Admin', role: 'Admin', phone: '12345' };
                         return finishLogin();
@@ -442,8 +409,9 @@
                         return;
                     }
 
-                    const snap = await getCol('users').doc(phone).get();
-                    if (!snap.exists) {
+                    const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', phone);
+                    const snap = await getDoc(userRef);
+                    if (!snap.exists()) {
                         msgEl.innerText = "Account not found.";
                         msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
                         return;
@@ -460,12 +428,14 @@
                     finishLogin();
                 }
             } catch (e) {
-                console.error(e);
-                msgEl.innerText = "Connection failed. Try again.";
+                console.error("Auth Exception:", e);
+                msgEl.innerText = "Registration failed. Check your connection.";
+                msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
             }
-        }
+        };
+        window.handleAuth = handleAuth;
 
-        async function finishLogin() {
+        const finishLogin = async () => {
             document.getElementById('auth-modal').classList.remove('active');
             document.getElementById('unauthed-ui').classList.add('hidden');
             document.getElementById('authed-ui').classList.remove('hidden');
@@ -477,12 +447,11 @@
 
             if (currentUser.role === 'User') {
                 document.getElementById('cart-box').classList.remove('opacity-40', 'pointer-events-none', 'scale-95', 'blur-[1px]');
-                // Pre-fill address if available
                 if (currentUser.address) document.getElementById('cart-address').value = `${currentUser.address}, ${currentUser.village}`;
             }
             
             if (currentUser.role === 'Partner') {
-                const shopSnap = await getCol('shops').get();
+                const shopSnap = await getDocs(getCol('shops'));
                 const shop = shopSnap.docs.find(d => d.data().owner === currentUser.phone);
                 if (shop) {
                     myShop = { id: shop.id, ...shop.data() };
@@ -492,17 +461,16 @@
             }
 
             initRealtimeListeners();
-            showMsg(`Logged in as ${currentUser.name}`);
-        }
+            showMsg(`Dashboard Loaded: ${currentUser.role}`);
+        };
 
-        /**
-         * 3. DATA & REALTIME SYNC
-         */
+        // 3. DATA & REALTIME SYNC
         function loadGuestData() {
-            getCol('products').onSnapshot(snap => {
+            onSnapshot(getCol('products'), (snap) => {
                 const list = document.getElementById('market-list');
                 const items = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
-                const filtered = items.filter(i => !currentFilter || i.category === currentFilter).sort((a,b) => b.created?.localeCompare(a.created));
+                const filtered = items.filter(i => !currentFilter || i.category === currentFilter);
+                filtered.sort((a,b) => (b.created || "").localeCompare(a.created || ""));
 
                 list.innerHTML = filtered.length ? filtered.map(p => `
                     <div class="bg-white rounded-[2.5rem] overflow-hidden border border-gray-100 flex flex-col shadow-sm hover:shadow-2xl transition-all duration-300 card-animate">
@@ -525,12 +493,12 @@
                     document.getElementById('admin-item-list').innerHTML = items.map(p => `
                         <div class="flex justify-between items-center bg-gray-50 p-3 rounded-2xl border">
                             <span class="text-xs font-bold text-gray-700">${p.name} (₹${p.price})</span>
-                            <button onclick="deleteDoc('products', '${p.id}')" class="text-red-400 p-2 hover:bg-red-50 rounded-lg transition"><i class="fa-solid fa-trash"></i></button>
+                            <button onclick="deleteEntity('products', '${p.id}')" class="text-red-400 p-2 hover:bg-red-50 rounded-lg transition"><i class="fa-solid fa-trash"></i></button>
                         </div>`).join('');
                 }
-            });
+            }, (error) => console.error("Products error:", error));
 
-            getCol('ads').onSnapshot(snap => {
+            onSnapshot(getCol('ads'), (snap) => {
                 const banner = document.getElementById('promo-banner');
                 const ads = snap.docs.map(d => ({id: d.id, ...d.data()}));
                 if(ads[0]) {
@@ -540,59 +508,58 @@
         }
 
         function initRealtimeListeners() {
-            getCol('orders').onSnapshot(snap => {
+            onSnapshot(getCol('orders'), (snap) => {
                 let rev = 0, count = 0;
                 const adminLog = document.getElementById('admin-log-body');
                 const partnerLog = document.getElementById('partner-order-list');
                 if(adminLog) adminLog.innerHTML = '';
                 if(partnerLog) partnerLog.innerHTML = '';
 
-                snap.forEach(doc => {
-                    const o = doc.data();
+                snap.docs.forEach(docSnap => {
+                    const o = docSnap.data();
+                    const id = docSnap.id;
                     rev += o.total; count++;
-                    if(adminLog) adminLog.innerHTML += `<tr><td class="p-6 font-mono font-bold text-[10px] text-gray-400">#${doc.id.slice(-4)}</td><td class="p-6 font-black text-gray-800 text-sm">${o.customer}</td><td class="p-6 font-black text-green-600 text-sm">₹${o.total}</td><td class="p-6 text-right uppercase text-[9px] font-bold"><span class="bg-gray-100 px-3 py-1 rounded-full">${o.status}</span></td></tr>`;
+                    if(adminLog) adminLog.innerHTML += `<tr><td class="p-6 font-mono font-bold text-[10px] text-gray-400">#${id.slice(-4)}</td><td class="p-6 font-black text-gray-800 text-sm">${o.customer}</td><td class="p-6 font-black text-green-600 text-sm">₹${o.total}</td><td class="p-6 text-right uppercase text-[9px] font-bold"><span class="bg-gray-100 px-3 py-1 rounded-full">${o.status}</span></td></tr>`;
                     if(partnerLog && myShop && o.items.some(i => i.shopName === myShop.name)) {
                         partnerLog.innerHTML += `<div class="bg-white p-8 rounded-[2.5rem] border border-l-8 border-green-500 shadow-sm">
-                            <div class="flex justify-between mb-4"><h5 class="font-black text-gray-800 uppercase tracking-tighter">ORDER #${doc.id.slice(-6)}</h5><span class="text-[9px] font-bold text-orange-600 px-2 py-1 bg-orange-50 rounded-full">${o.status}</span></div>
+                            <div class="flex justify-between mb-4"><h5 class="font-black text-gray-800 uppercase tracking-tighter">ORDER #${id.slice(-6)}</h5><span class="text-[9px] font-bold text-orange-600 px-2 py-1 bg-orange-50 rounded-full">${o.status}</span></div>
                             <div class="text-xs space-y-1 mb-4 pb-4 border-b border-dashed">${o.items.filter(i => i.shopName === myShop.name).map(i => `<div class="flex justify-between"><span>${i.name}</span><b>₹${i.price}</b></div>`).join('')}</div>
-                            <button onclick="updateOrder('${doc.id}', 'Confirmed')" class="w-full bg-blue-50 text-blue-600 p-3 rounded-2xl text-[10px] font-bold uppercase mb-2">Confirm Order</button>
-                            <button onclick="updateOrder('${doc.id}', 'Completed')" class="w-full bg-green-600 text-white p-3 rounded-2xl text-[10px] font-bold uppercase">Mark Completed</button>
+                            <button onclick="updateOrderStatus('${id}', 'Confirmed')" class="w-full bg-blue-50 text-blue-600 p-3 rounded-2xl text-[10px] font-bold uppercase mb-2">Confirm Order</button>
+                            <button onclick="updateOrderStatus('${id}', 'Completed')" class="w-full bg-green-600 text-white p-3 rounded-2xl text-[10px] font-bold uppercase">Mark Completed</button>
                         </div>`;
                     }
                 });
                 if(document.getElementById('stat-rev')) document.getElementById('stat-rev').innerText = `₹${rev}`;
                 if(document.getElementById('stat-ord')) document.getElementById('stat-ord').innerText = count;
-            });
+            }, (error) => console.error("Orders error:", error));
 
             if(currentUser.role === 'Admin') {
-                getCol('shops').onSnapshot(snap => {
+                onSnapshot(getCol('shops'), (snap) => {
                     document.getElementById('admin-shop-list').innerHTML = snap.docs.map(d => `<div class="flex justify-between items-center bg-gray-50 p-4 rounded-2xl border">
                         <span class="text-xs font-bold text-gray-700">${d.data().name} (${d.data().category})</span>
-                        <button onclick="deleteDoc('shops', '${d.id}')" class="text-red-400 p-2 hover:bg-red-50 rounded-lg transition"><i class="fa-solid fa-trash"></i></button>
+                        <button onclick="deleteEntity('shops', '${d.id}')" class="text-red-400 p-2 hover:bg-red-50 rounded-lg transition"><i class="fa-solid fa-trash"></i></button>
                     </div>`).join('');
                 });
             }
         }
 
-        /**
-         * 4. APP ACTIONS
-         */
-        function filterBy(cat) {
+        // 4. ACTIONS
+        window.filterBy = (cat) => {
             currentFilter = (currentFilter === cat) ? null : cat;
             document.getElementById('active-filter').innerText = currentFilter ? currentFilter.toUpperCase() : "ALL LISTINGS";
             loadGuestData();
             showMsg(`Hub: ${currentFilter || 'General Marketplace'}`);
-        }
+        };
 
-        function addToCart(name, price, shopName) {
+        window.addToCart = (name, price, shopName) => {
             if(!currentUser) return toggleAuthModal();
             cart.push({name, price, shopName});
             renderCartUI();
             showMsg(`Added: ${name}`);
-        }
+        };
 
-        function renderCartUI() {
-            const list = document.getElementById('cart-items');
+        const renderCartUI = () => {
+            const list = document.getElementById('cart-items-list');
             const fee = fees[document.getElementById('cart-gp').value] || 10;
             const sub = cart.reduce((s, i) => s + i.price, 0);
 
@@ -610,19 +577,19 @@
                     </div>
                 </div>`).join('');
             document.getElementById('cart-total').innerText = `₹${sub + fee}`;
-        }
+        };
 
-        function removeFromCart(idx) { cart.splice(idx, 1); renderCartUI(); }
+        window.removeFromCart = (idx) => { cart.splice(idx, 1); renderCartUI(); };
 
-        async function placeOrder() {
+        window.placeOrder = async () => {
             const addr = document.getElementById('cart-address').value.trim();
             if(!addr) return showMsg("Delivery location required");
             const gp = document.getElementById('cart-gp').value;
-            const total = cart.reduce((s,i) => s + i.price, 0) + (fees[gp] || 10);
+            const sub = cart.reduce((s,i) => s + i.price, 0);
+            const total = sub + (fees[gp] || 10);
 
             try {
-                await ensureTechnicalAuth();
-                await getCol('orders').add({ 
+                await addDoc(getCol('orders'), { 
                     customer: currentUser.name, 
                     phone: currentUser.phone, 
                     items: cart, 
@@ -630,80 +597,75 @@
                     gp, 
                     address: addr, 
                     status: 'Placed', 
-                    time: firebase.firestore.FieldValue.serverTimestamp() 
+                    time: serverTimestamp() 
                 });
                 cart = []; 
                 renderCartUI(); 
                 showMsg("Order Successfully Placed!");
                 window.scrollTo({ top: 0, behavior: 'smooth' });
-            } catch (e) {
-                showMsg("Booking failed.");
-            }
-        }
+            } catch (e) { showMsg("Booking failed."); }
+        };
 
-        async function registerShop() {
+        window.registerShop = async () => {
             const name = document.getElementById('p-shop-name').value.trim();
             const cat = document.getElementById('p-shop-cat').value;
             const img = document.getElementById('p-shop-img').value.trim();
             if(!name) return showMsg("Business name required");
             try {
-                await ensureTechnicalAuth();
-                await getCol('shops').add({ name, category: cat, owner: currentUser.phone, image: img || 'https://via.placeholder.com/150' });
-                showMsg("Partner Account Configured.");
+                await addDoc(getCol('shops'), { name, category: cat, owner: currentUser.phone, image: img || 'https://via.placeholder.com/150' });
+                showMsg("Business Registered!");
                 setTimeout(() => location.reload(), 1500);
             } catch (e) { showMsg("Error."); }
-        }
+        };
 
-        async function addItem() {
+        window.addItem = async () => {
             const name = document.getElementById('item-name').value;
             const price = Number(document.getElementById('item-price').value);
             const qty = document.getElementById('item-qty').value;
             const img = document.getElementById('item-img').value;
             if(!name || !price) return showMsg("Details missing");
             try {
-                await ensureTechnicalAuth();
-                await getCol('products').add({ name, price, qty, image: img || 'https://via.placeholder.com/200', shopName: myShop.name, category: myShop.category, created: new Date().toISOString() });
+                await addDoc(getCol('products'), { name, price, qty, image: img || 'https://via.placeholder.com/200', shopName: myShop.name, category: myShop.category, created: new Date().toISOString() });
                 showMsg("Product Listed!");
                 ['item-name', 'item-price', 'item-qty', 'item-img'].forEach(id => document.getElementById(id).value = '');
             } catch (e) { showMsg("Failed."); }
-        }
+        };
 
-        async function pushAd() {
+        window.pushAd = async () => {
             const text = document.getElementById('ad-text').value;
             const color = document.getElementById('ad-color').value;
             if(!text) return;
             try {
-                await ensureTechnicalAuth();
-                await getCol('ads').add({ text, color, created: new Date().toISOString() });
+                await addDoc(getCol('ads'), { text, color, created: new Date().toISOString() });
                 document.getElementById('ad-text').value = '';
                 showMsg("Campaign Live!");
             } catch (e) { showMsg("Failed."); }
-        }
+        };
 
-        async function deleteDoc(col, id) {
+        window.deleteEntity = async (colName, id) => {
             if(confirm("Delete permanently?")) {
                 try {
-                    await ensureTechnicalAuth();
-                    await getCol(col).doc(id).delete();
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', colName, id));
                     showMsg("Deleted.");
                 } catch (e) { showMsg("Error."); }
             }
-        }
+        };
 
-        async function updateOrder(id, status) {
+        window.updateOrderStatus = async (id, status) => {
             try {
-                await ensureTechnicalAuth();
-                await getCol('orders').doc(id).update({ status });
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', id), { status });
                 showMsg(`Status: ${status}`);
             } catch (e) { showMsg("Failed."); }
-        }
+        };
 
-        function switchAdminTab(t) {
+        window.switchAdminTab = (t) => {
             ['activity', 'control', 'ads'].forEach(tab => {
                 document.getElementById(`admin-${tab}`).classList.toggle('hidden', tab !== t);
-                document.getElementById(`admin-t-${tab}`).className = tab === t ? 'flex-1 py-4 text-xs font-black rounded-2xl admin-tab-active transition' : 'flex-1 py-4 text-xs font-black text-gray-400 rounded-2xl transition';
+                document.getElementById(`admin-tab-${tab}`).className = tab === t ? 'flex-1 py-4 text-xs font-black rounded-2xl admin-tab-active transition' : 'flex-1 py-4 text-xs font-black text-gray-400 rounded-2xl transition';
             });
-        }
+        };
+
+        window.logout = () => { if(confirm("Sign out?")) location.reload(); };
 
         function showMsg(txt) {
             const el = document.getElementById('ui-msg');
@@ -711,11 +673,26 @@
             setTimeout(() => el.classList.add('hidden'), 4000);
         }
 
-        function logout() { 
-            if(confirm("Sign out?")) location.reload(); 
-        }
+        // Attach static events
+        document.getElementById('submit-login').onclick = () => handleAuth('login');
+        document.getElementById('submit-register').onclick = () => handleAuth('register');
+        document.getElementById('to-register').onclick = () => toggleAuthView('register');
+        document.getElementById('to-login').onclick = () => toggleAuthView('login');
+        document.getElementById('logout-btn').onclick = () => logout();
+        document.getElementById('btn-food').onclick = () => filterBy('Food');
+        document.getElementById('btn-grocery').onclick = () => filterBy('Grocery');
+        document.getElementById('btn-ride').onclick = () => filterBy('Ride');
+        document.getElementById('btn-services').onclick = () => filterBy('Services');
+        document.getElementById('btn-place-order').onclick = () => placeOrder();
+        document.getElementById('btn-register-shop').onclick = () => registerShop();
+        document.getElementById('btn-add-item').onclick = () => addItem();
+        document.getElementById('btn-push-ad').onclick = () => pushAd();
+        document.getElementById('admin-tab-activity').onclick = () => switchAdminTab('activity');
+        document.getElementById('admin-tab-control').onclick = () => switchAdminTab('control');
+        document.getElementById('admin-tab-ads').onclick = () => switchAdminTab('ads');
+        document.getElementById('cart-gp').onchange = () => renderCartUI();
 
-        window.onload = startApp;
+        startApp();
     </script>
 </body>
 </html>
