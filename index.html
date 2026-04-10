@@ -1,4 +1,4 @@
-< html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -71,7 +71,7 @@
     <nav class="glass sticky top-0 z-50 px-4 py-4 border-b border-gray-100">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
             
-            <!-- Auth Portal (Now on the Top Left as requested) -->
+            <!-- Auth Portal (Top Left) -->
             <div class="relative">
                 <div id="unauthed-ui" class="flex items-center">
                     <button id="auth-btn-main" onclick="toggleAuthModal()" class="bg-green-600 text-white px-5 py-2.5 rounded-2xl text-sm font-bold flex items-center gap-2 shadow-lg shadow-green-100 transition-all active:scale-95">
@@ -89,7 +89,7 @@
                     </div>
                 </div>
 
-                <!-- Redefined User-Only Auth Modal -->
+                <!-- User-Only Auth Modal -->
                 <div id="auth-modal" class="auth-dropdown bg-white rounded-[2rem] shadow-2xl border border-gray-100 p-8">
                     <div id="auth-view-login">
                         <h3 class="font-black text-xl mb-6 text-gray-800">Welcome Back</h3>
@@ -98,7 +98,7 @@
                             <input id="login-pass" type="password" placeholder="Password">
                             <button id="submit-login" class="w-full bg-green-600 text-white p-4 rounded-2xl font-bold text-sm shadow-xl shadow-green-100 active:scale-95 transition">Sign In</button>
                             <p class="text-center text-xs font-bold text-gray-400 mt-4">
-                                First time on Gramzo? <button id="to-register" class="text-green-600 hover:underline">Register Here</button>
+                                First time on Gramzo? <button id="to-register" class="text-green-600 hover:underline font-bold">Register Here</button>
                             </p>
                         </div>
                     </div>
@@ -113,7 +113,7 @@
                             <input id="reg-pass" type="password" placeholder="Create Password">
                             <button id="submit-register" class="w-full bg-green-600 text-white p-4 rounded-2xl font-bold text-sm shadow-xl shadow-green-100 active:scale-95 transition">Register & Sign In</button>
                             <p class="text-center text-xs font-bold text-gray-400 mt-4">
-                                Already registered? <button id="to-login" class="text-green-600 hover:underline">Login Instead</button>
+                                Already registered? <button id="to-login" class="text-green-600 hover:underline font-bold">Login Instead</button>
                             </p>
                         </div>
                     </div>
@@ -172,7 +172,6 @@
         </div>
 
         <div id="view-container">
-            <!-- 1. USER VIEW -->
             <div id="view-User" class="space-y-12">
                 <div>
                     <div class="flex justify-between items-end mb-8">
@@ -185,7 +184,6 @@
                     <div id="market-list" class="grid grid-cols-1 sm:grid-cols-2 gap-8"></div>
                 </div>
 
-                <!-- Checkout Component -->
                 <div id="cart-box" class="opacity-40 pointer-events-none transition-all duration-700 scale-95 origin-top blur-[1px]">
                     <div class="bg-white rounded-[3rem] p-10 shadow-sm border border-gray-100">
                         <div class="flex justify-between items-center mb-8">
@@ -216,7 +214,6 @@
                 </div>
             </div>
 
-            <!-- Master Admin View (Access via Master Login) -->
             <div id="view-Admin" class="hidden space-y-8">
                 <div class="grid grid-cols-2 gap-6">
                     <div class="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm text-center">
@@ -245,8 +242,8 @@
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, getDoc, getDocs, setDoc, onSnapshot, addDoc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase Config
-        const firebaseConfig = {
+        // CONFIG: Prioritize Environment provided config, fallback to user provided IDs
+        const userConfig = {
             apiKey: "AIzaSyCA4U4jva7HHeMP-yk1VJy3l_BBct3Gohg",
             authDomain: "gramzo.firebaseapp.com",
             projectId: "gramzo",
@@ -255,13 +252,14 @@
             appId: "1:674262956986:web:772f68694c77e15bf3fb83",
             measurementId: "G-K5WBG7RRFM"
         };
-
+        
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : userConfig;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'gramzo-super-pichai-v14';
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const currentAppId = typeof __app_id !== 'undefined' ? __app_id : 'gramzo-super-revamp-v12';
 
-        const getCol = (name) => collection(db, 'artifacts', currentAppId, 'public', 'data', name);
+        const getCol = (name) => collection(db, 'artifacts', appId, 'public', 'data', name);
 
         let currentUser = null;
         let currentFilter = null;
@@ -272,12 +270,14 @@
 
         async function startApp() {
             try {
+                // Rule 3: Auth BEFORE Queries - Always establish session first
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
                     await signInAnonymously(auth);
                 }
 
+                // Wait for the state to confirm we have a valid user object
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
                         authReady = true;
@@ -286,8 +286,9 @@
                     }
                 });
             } catch (e) {
-                console.error("Firebase Connection Error:", e);
-                document.getElementById('status-dot').className = "w-2 h-2 rounded-full bg-red-500 animate-none";
+                console.error("Firebase Auth Initialization Failed:", e);
+                document.getElementById('status-dot').className = "w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_#ef4444] animate-none";
+                showMsg("System connection timeout. Please refresh.");
             }
         }
 
@@ -300,12 +301,20 @@
 
         const handleAuth = async (type) => {
             const msgEl = document.getElementById('auth-msg');
-            if (!authReady) {
-                showMsg("Establishing secure connection...");
-                return;
+            
+            // Check if auth is actually ready before touching Firestore
+            if (!authReady || !auth.currentUser) {
+                msgEl.innerText = "System warming up... Please wait.";
+                msgEl.className = "text-[11px] text-center font-bold mt-4 text-orange-500";
+                try {
+                    await signInAnonymously(auth);
+                } catch(e) {
+                    msgEl.innerText = "Connection lost. Refresh required.";
+                    return;
+                }
             }
 
-            msgEl.innerText = "Processing...";
+            msgEl.innerText = "Processing request...";
             msgEl.className = "text-[11px] text-center font-bold mt-4 text-blue-500";
 
             try {
@@ -317,15 +326,16 @@
                     const pass = document.getElementById('reg-pass').value.trim();
 
                     if (!name || phone.length !== 10 || !village || pincode.length !== 6 || pass.length < 4) {
-                        msgEl.innerText = "Check entries: Mobile (10 digits), Pin code (6 digits) required.";
+                        msgEl.innerText = "Invalid data. Mobile must be 10 digits, Pincode 6 digits.";
                         msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
                         return;
                     }
 
-                    const userRef = doc(db, 'artifacts', currentAppId, 'public', 'data', 'users', phone);
+                    // Rule 1: Use strict artifact path
+                    const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', phone);
                     const snap = await getDoc(userRef);
                     if (snap.exists()) {
-                        msgEl.innerText = "This mobile number is already registered.";
+                        msgEl.innerText = "This mobile is already registered.";
                         msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
                         return;
                     }
@@ -336,29 +346,29 @@
                     };
                     await setDoc(userRef, userData);
                     
-                    showMsg("Registration Successful!");
+                    showMsg("Registration Successful! Signing you in...");
                     currentUser = userData;
                     finishLogin();
                 } else {
                     const phone = document.getElementById('login-phone').value.trim();
                     const pass = document.getElementById('login-pass').value.trim();
 
-                    // Master Admin Logic (Hidden)
+                    // Master Admin Logic
                     if (phone === '12345' && pass === 'Pass@123') {
                         currentUser = { name: 'Master Admin', role: 'Admin', phone: '12345' };
                         return finishLogin();
                     }
 
                     if (phone.length !== 10 || !pass) {
-                        msgEl.innerText = "Enter 10-digit mobile number and password.";
+                        msgEl.innerText = "Enter valid mobile and password";
                         msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
                         return;
                     }
 
-                    const userRef = doc(db, 'artifacts', currentAppId, 'public', 'data', 'users', phone);
+                    const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', phone);
                     const snap = await getDoc(userRef);
                     if (!snap.exists()) {
-                        msgEl.innerText = "No account found. Register above.";
+                        msgEl.innerText = "Account not found. Please register.";
                         msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
                         return;
                     }
@@ -374,8 +384,9 @@
                     finishLogin();
                 }
             } catch (e) {
-                console.error("Auth Failure:", e);
-                msgEl.innerText = "System busy. Retry in a moment.";
+                console.error("Auth Exception Details:", e);
+                // FRIENDLY ERROR HANDLING FOR LATENCY
+                msgEl.innerText = "Connection timeout. Please try clicking submit again.";
                 msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
             }
         };
@@ -392,11 +403,11 @@
 
             if (currentUser.role === 'User') {
                 document.getElementById('cart-box').classList.remove('opacity-40', 'pointer-events-none', 'scale-95', 'blur-[1px]');
-                if (currentUser.village) document.getElementById('cart-address').value = `${currentUser.village}`;
+                if (currentUser.village) document.getElementById('cart-address').value = `Village: ${currentUser.village}`;
             }
             
             initRealtimeListeners();
-            showMsg(`Welcome back, ${currentUser.name}`);
+            showMsg(`Session Verified: ${currentUser.name}`);
         };
 
         function loadGuestData() {
@@ -421,11 +432,13 @@
                             </div>
                         </div>
                     </div>
-                `).join('') : '<div class="col-span-2 text-center py-20 text-gray-300 italic">No listings in this category.</div>';
-            });
+                `).join('') : '<div class="col-span-2 text-center py-20 text-gray-300 italic">No listings found in this category.</div>';
+            }, (err) => console.warn("Market snapshot latency:", err));
         }
 
         function initRealtimeListeners() {
+            if (!auth.currentUser) return;
+
             onSnapshot(getCol('orders'), (snap) => {
                 let rev = 0, count = 0;
                 const adminLog = document.getElementById('admin-log-body');
@@ -441,20 +454,20 @@
                 });
                 if(document.getElementById('stat-rev')) document.getElementById('stat-rev').innerText = `₹${rev}`;
                 if(document.getElementById('stat-ord')) document.getElementById('stat-ord').innerText = count;
-            });
+            }, (err) => console.warn("Order snapshot latency:", err));
         }
 
         window.filterBy = (cat) => {
             currentFilter = (currentFilter === cat) ? null : cat;
             document.getElementById('active-filter').innerText = currentFilter ? currentFilter.toUpperCase() : "ALL LISTINGS";
             loadGuestData();
-            showMsg(`Viewing: ${currentFilter || 'General'}`);
+            showMsg(`Exploring: ${currentFilter || 'Marketplace'}`);
         };
 
         window.addToCart = (name, price, shopName) => {
             if(!currentUser) {
                 toggleAuthModal();
-                showMsg("Please Login to add items.");
+                showMsg("Sign in to start booking.");
                 return;
             }
             cart.push({name, price, shopName});
@@ -468,7 +481,7 @@
             const sub = cart.reduce((s, i) => s + i.price, 0);
 
             if (!cart.length) {
-                list.innerHTML = '<p class="text-gray-400 italic text-sm text-center py-6 border-dashed border rounded-3xl">Basket is empty</p>';
+                list.innerHTML = '<p class="text-gray-400 italic text-sm text-center py-6 border-dashed border rounded-3xl">Cart is empty</p>';
                 document.getElementById('cart-total').innerText = '₹0';
                 return;
             }
@@ -488,7 +501,7 @@
         window.placeOrder = async () => {
             if (!currentUser) return toggleAuthModal();
             const addr = document.getElementById('cart-address').value.trim();
-            if(!addr) return showMsg("Delivery location required.");
+            if(!addr) return showMsg("We need a landmark for delivery.");
             const gp = document.getElementById('cart-gp').value;
             const sub = cart.reduce((s,i) => s + i.price, 0);
             const total = sub + (fees[gp] || 10);
@@ -500,9 +513,12 @@
                     time: serverTimestamp() 
                 });
                 cart = []; renderCartUI(); 
-                showMsg("Order Successfully Placed!");
+                showMsg("Success! Booking sent.");
                 window.scrollTo({ top: 0, behavior: 'smooth' });
-            } catch (e) { showMsg("Network busy. Retry booking."); }
+            } catch (e) { 
+                console.error("Booking write error:", e);
+                showMsg("Database busy. Click BOOK NOW again."); 
+            }
         };
 
         window.logout = () => { if(confirm("Sign out from Gramzo?")) location.reload(); };
