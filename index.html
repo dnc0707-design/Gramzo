@@ -79,14 +79,12 @@
             </div>
 
             <div class="relative">
-                <!-- Main Login Trigger -->
                 <div id="unauthed-ui" class="flex items-center">
                     <button id="auth-btn-main" onclick="toggleAuthModal()" class="bg-green-600 text-white px-6 py-3 rounded-2xl text-sm font-bold flex items-center gap-2 shadow-lg shadow-green-100 transition-all active:scale-95">
                         <span id="auth-btn-text">Login / Join</span> <i id="auth-btn-icon" class="fa-solid fa-user-circle ml-1"></i>
                     </button>
                 </div>
                 
-                <!-- Authenticated User Display -->
                 <div id="authed-ui" class="hidden flex items-center gap-4">
                     <div class="text-right hidden sm:block">
                         <p id="display-name" class="text-sm font-bold text-gray-800"></p>
@@ -97,9 +95,7 @@
                     </button>
                 </div>
 
-                <!-- Dropdown Modal -->
                 <div id="auth-modal" class="auth-dropdown bg-white rounded-[2rem] shadow-2xl border border-gray-100 p-8">
-                    <!-- Login Form -->
                     <div id="auth-view-login">
                         <h3 class="font-black text-xl mb-6 text-gray-800">Welcome Back</h3>
                         <div class="space-y-4">
@@ -107,24 +103,23 @@
                             <input id="login-pass" type="password" placeholder="Password">
                             <button id="submit-login" class="w-full bg-green-600 text-white p-4 rounded-2xl font-bold text-sm shadow-xl shadow-green-100 active:scale-95 transition">Sign In</button>
                             <p class="text-center text-xs font-bold text-gray-400 mt-4">
-                                New to Gramzo? <button id="to-register" class="text-green-600 hover:underline">Create Account</button>
+                                New to Gramzo? <button id="to-register" class="text-green-600 hover:underline font-bold">Create User Account</button>
                             </p>
                         </div>
                     </div>
 
-                    <!-- Register Form -->
                     <div id="auth-view-register" class="hidden">
                         <h3 class="font-black text-xl mb-6 text-gray-800">New Registration</h3>
                         <div class="space-y-3">
                             <input id="reg-name" type="text" placeholder="Full Name">
                             <input id="reg-phone" type="tel" placeholder="Mobile Number" maxlength="10">
                             <input id="reg-village" type="text" placeholder="Village Name">
-                            <input id="reg-address" type="text" placeholder="Full Address">
-                            <input id="reg-pincode" type="tel" placeholder="Pincode" maxlength="6">
-                            <input id="reg-pass" type="password" placeholder="Password">
+                            <input id="reg-address" type="text" placeholder="Full Home Address">
+                            <input id="reg-pincode" type="tel" placeholder="Pincode (6 digits)" maxlength="6">
+                            <input id="reg-pass" type="password" placeholder="Create Password">
                             <button id="submit-register" class="w-full bg-green-600 text-white p-4 rounded-2xl font-bold text-sm shadow-xl shadow-green-100 active:scale-95 transition">Register Now</button>
                             <p class="text-center text-xs font-bold text-gray-400 mt-4">
-                                Already registered? <button id="to-login" class="text-green-600 hover:underline">Login</button>
+                                Already registered? <button id="to-login" class="text-green-600 hover:underline font-bold">Login</button>
                             </p>
                         </div>
                     </div>
@@ -178,8 +173,7 @@
         </div>
 
         <div id="view-container">
-            
-            <!-- 1. USER VIEW (Marketplace) -->
+            <!-- 1. USER VIEW -->
             <div id="view-User" class="space-y-12">
                 <div>
                     <div class="flex justify-between items-end mb-8">
@@ -189,9 +183,7 @@
                         </div>
                         <span id="active-filter" class="text-[10px] bg-green-50 text-green-600 px-4 py-1.5 rounded-full font-black tracking-widest border border-green-100 uppercase">All Listings</span>
                     </div>
-                    <div id="market-list" class="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                        <!-- Items populated via JS -->
-                    </div>
+                    <div id="market-list" class="grid grid-cols-1 sm:grid-cols-2 gap-8"></div>
                 </div>
 
                 <!-- Checkout Component -->
@@ -225,94 +217,57 @@
                 </div>
             </div>
 
-            <!-- 2. PARTNER VIEW (Internal) -->
+            <!-- Partner View (Hidden) -->
             <div id="view-Partner" class="hidden space-y-8">
                 <div id="shop-registration" class="bg-white p-10 rounded-[3rem] shadow-sm border border-gray-100">
                     <h3 class="font-black text-2xl mb-2 text-primary">Partner Hub</h3>
-                    <p class="text-sm text-gray-400 mb-8 font-semibold">Scale your local business globally</p>
+                    <p class="text-sm text-gray-400 mb-8 font-semibold">Join the network</p>
                     <div class="space-y-5">
                         <input id="p-shop-name" placeholder="Business Name">
                         <select id="p-shop-cat">
-                            <option value="Food">Food / Zomato Partner</option>
-                            <option value="Grocery">Grocery / Zepto Partner</option>
-                            <option value="Ride">Ride / Rapido Partner</option>
-                            <option value="Services">Service / UrbanClap Partner</option>
+                            <option value="Food">Food Partner</option>
+                            <option value="Grocery">Grocery Partner</option>
+                            <option value="Ride">Ride Partner</option>
+                            <option value="Services">Services Partner</option>
                         </select>
                         <input id="p-shop-img" placeholder="Banner Image URL">
                         <button id="btn-register-shop" class="w-full bg-green-600 text-white p-5 rounded-[2rem] font-black text-lg shadow-xl shadow-green-100">LAUNCH MY SHOP</button>
                     </div>
                 </div>
-
                 <div id="partner-panel" class="hidden space-y-10">
                     <div class="bg-white p-10 rounded-[3rem] shadow-sm border border-gray-100">
                         <h3 class="font-black text-2xl mb-8">Listing Manager</h3>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                            <input id="item-name" placeholder="Service/Item Name">
+                            <input id="item-name" placeholder="Item/Service Name">
                             <input id="item-price" type="number" placeholder="Price (₹)">
-                            <input id="item-qty" placeholder="Unit (e.g., 1kg)">
-                            <input id="item-img" placeholder="Item Image Link">
+                            <input id="item-qty" placeholder="Unit (e.g. 1kg)">
+                            <input id="item-img" placeholder="Image Link">
                         </div>
-                        <button id="btn-add-item" class="w-full mt-8 bg-gray-900 text-white p-5 rounded-[2rem] font-black text-sm uppercase tracking-widest">Update Home Screen</button>
+                        <button id="btn-add-item" class="w-full mt-8 bg-gray-900 text-white p-5 rounded-[2rem] font-black">List Item</button>
                     </div>
                     <div id="partner-order-list" class="space-y-4"></div>
                 </div>
             </div>
 
-            <!-- 3. MASTER ADMIN (Internal) -->
+            <!-- Master Admin View (Hidden) -->
             <div id="view-Admin" class="hidden space-y-8">
                 <div class="grid grid-cols-2 gap-6">
                     <div class="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm text-center">
-                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Platform GTV</p>
-                        <h4 id="stat-rev" class="text-4xl font-black text-green-600 tracking-tighter">₹0</h4>
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Platform Revenue</p>
+                        <h4 id="stat-rev" class="text-4xl font-black text-green-600">₹0</h4>
                     </div>
                     <div class="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm text-center">
-                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Total Activity</p>
-                        <h4 id="stat-ord" class="text-4xl font-black text-blue-600 tracking-tighter">0</h4>
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Volume</p>
+                        <h4 id="stat-ord" class="text-4xl font-black text-blue-600">0</h4>
                     </div>
                 </div>
-
-                <div class="flex bg-white p-1.5 rounded-[2rem] border shadow-sm mb-4">
-                    <button id="admin-tab-activity" class="flex-1 py-4 text-xs font-black rounded-2xl admin-tab-active transition">Activity</button>
-                    <button id="admin-tab-control" class="flex-1 py-4 text-xs font-black text-gray-400 rounded-2xl transition">Governance</button>
-                    <button id="admin-tab-ads" class="flex-1 py-4 text-xs font-black text-gray-400 rounded-2xl transition">Campaigns</button>
-                </div>
-
-                <div id="admin-activity" class="space-y-6">
-                    <div class="bg-white rounded-[2.5rem] overflow-hidden border border-gray-100 shadow-sm">
-                        <table class="w-full text-left text-xs">
-                            <thead class="bg-gray-50 font-black text-gray-400 border-b">
-                                <tr><th class="p-6">TXN ID</th><th class="p-6">Customer</th><th class="p-6">Amount</th><th class="p-6 text-right">Status</th></tr>
-                            </thead>
-                            <tbody id="admin-log-body" class="divide-y divide-gray-50"></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div id="admin-control" class="hidden space-y-8">
-                    <div class="bg-white p-10 rounded-[2.5rem] border shadow-sm">
-                        <h4 class="font-black text-xl mb-6">Partners Registry</h4>
-                        <div id="admin-shop-list" class="grid grid-cols-1 gap-3"></div>
-                    </div>
-                    <div class="bg-white p-10 rounded-[2.5rem] border shadow-sm">
-                        <h4 class="font-black text-xl mb-6">Central Inventory</h4>
-                        <div id="admin-item-list" class="grid grid-cols-1 gap-3"></div>
-                    </div>
-                </div>
-
-                <div id="admin-ads" class="hidden space-y-6">
-                    <div class="bg-white p-10 rounded-[2.5rem] border shadow-sm">
-                        <h4 class="font-black text-xl mb-6">Banner Campaigns</h4>
-                        <input id="ad-text" placeholder="Promo Message">
-                        <div class="flex items-center gap-4 mt-4">
-                            <span class="text-xs font-bold text-gray-400 uppercase">Brand Color:</span>
-                            <input id="ad-color" type="color" value="#16a34a" class="h-12 w-20 cursor-pointer">
-                        </div>
-                        <button id="btn-push-ad" class="w-full bg-black text-white p-5 rounded-[2rem] font-black mt-4">Publish To All Users</button>
-                    </div>
-                    <div id="admin-ad-history" class="space-y-3"></div>
+                <div id="admin-log-container" class="bg-white rounded-[2.5rem] overflow-hidden border">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-gray-50 border-b"><tr><th class="p-6">TXN</th><th class="p-6">Customer</th><th class="p-6">Amt</th><th class="p-6">Status</th></tr></thead>
+                        <tbody id="admin-log-body" class="divide-y divide-gray-50"></tbody>
+                    </table>
                 </div>
             </div>
-
         </div>
     </main>
 
@@ -320,17 +275,26 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, getDoc, getDocs, setDoc, onSnapshot, addDoc, updateDoc, deleteDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, getDoc, getDocs, setDoc, onSnapshot, addDoc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // 1. CONFIG & INIT
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { apiKey: "" };
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'gramzo-super-hub-v7';
+        // Your provided config
+        const firebaseConfig = {
+            apiKey: "AIzaSyCA4U4jva7HHeMP-yk1VJy3l_BBct3Gohg",
+            authDomain: "gramzo.firebaseapp.com",
+            projectId: "gramzo",
+            storageBucket: "gramzo.firebasestorage.app",
+            messagingSenderId: "674262956986",
+            appId: "1:674262956986:web:772f68694c77e15bf3fb83",
+            measurementId: "G-K5WBG7RRFM"
+        };
+
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        const currentAppId = typeof __app_id !== 'undefined' ? __app_id : 'gramzo-master-v9';
 
-        const getCol = (name) => collection(db, 'artifacts', appId, 'public', 'data', name);
+        const getCol = (name) => collection(db, 'artifacts', currentAppId, 'public', 'data', name);
 
         let currentUser = null;
         let myShop = null;
@@ -338,10 +302,9 @@
         let cart = [];
         const fees = { Santuri: 10, Muradi: 20, Tarabari: 25, Garshika: 20 };
 
-        // 2. AUTHENTICATION & STARTUP
         async function startApp() {
             try {
-                // Rule 3: Technical background auth (Anonymous)
+                // Background connection
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
@@ -350,7 +313,6 @@
 
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
-                        console.log("Gramzo Core Ready");
                         document.getElementById('status-dot').className = "w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]";
                         loadGuestData();
                     }
@@ -361,7 +323,6 @@
             }
         }
 
-        // Globalized Helper Functions for HTML access
         window.toggleAuthModal = () => document.getElementById('auth-modal').classList.toggle('active');
         window.toggleAuthView = (view) => {
             document.getElementById('auth-view-login').classList.toggle('hidden', view === 'register');
@@ -375,9 +336,6 @@
             msgEl.className = "text-[11px] text-center font-bold mt-4 text-blue-500";
 
             try {
-                // Background check
-                if (!auth.currentUser) await signInAnonymously(auth);
-
                 if (type === 'register') {
                     const name = document.getElementById('reg-name').value.trim();
                     const phone = document.getElementById('reg-phone').value.trim();
@@ -386,34 +344,31 @@
                     const pincode = document.getElementById('reg-pincode').value.trim();
                     const pass = document.getElementById('reg-pass').value.trim();
 
-                    if (!name || phone.length !== 10 || !village || !address || pincode.length < 6 || pass.length < 4) {
-                        msgEl.innerText = "Please fill all fields (10-digit mobile)";
+                    if (!name || phone.length !== 10 || !village || !address || pincode.length !== 6 || pass.length < 4) {
+                        msgEl.innerText = "Check entries: 10-digit mobile, 6-digit pin required";
                         msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
                         return;
                     }
 
-                    const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', phone);
+                    const userRef = doc(db, 'artifacts', currentAppId, 'public', 'data', 'users', phone);
                     const snap = await getDoc(userRef);
                     if (snap.exists()) {
-                        msgEl.innerText = "Mobile number already registered.";
+                        msgEl.innerText = "This mobile number is already registered.";
                         msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
                         return;
                     }
 
-                    const userData = { 
-                        name, phone, village, address, pincode, pin: pass, 
-                        role: 'User', created: new Date().toISOString() 
-                    };
+                    const userData = { name, phone, village, address, pincode, pin: pass, role: 'User', created: new Date().toISOString() };
                     await setDoc(userRef, userData);
                     
-                    showMsg("User Registered Successfully!");
+                    showMsg("Registration Successful! Welcome.");
                     currentUser = userData;
                     finishLogin();
                 } else {
                     const phone = document.getElementById('login-phone').value.trim();
                     const pass = document.getElementById('login-pass').value.trim();
 
-                    // Master Admin Logic
+                    // Master Login
                     if (phone === '12345' && pass === 'Pass@123') {
                         currentUser = { name: 'Master Admin', role: 'Admin', phone: '12345' };
                         return finishLogin();
@@ -425,7 +380,7 @@
                         return;
                     }
 
-                    const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', phone);
+                    const userRef = doc(db, 'artifacts', currentAppId, 'public', 'data', 'users', phone);
                     const snap = await getDoc(userRef);
                     if (!snap.exists()) {
                         msgEl.innerText = "Account not found. Please register.";
@@ -444,8 +399,8 @@
                     finishLogin();
                 }
             } catch (e) {
-                console.error("Auth Failure:", e);
-                msgEl.innerText = "Registration failed. Check network.";
+                console.error(e);
+                msgEl.innerText = "System busy. Retry in a moment.";
                 msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
             }
         };
@@ -465,21 +420,10 @@
                 if (currentUser.address) document.getElementById('cart-address').value = `${currentUser.address}, ${currentUser.village}`;
             }
             
-            if (currentUser.role === 'Partner') {
-                const shopSnap = await getDocs(getCol('shops'));
-                const shop = shopSnap.docs.find(d => d.data().owner === currentUser.phone);
-                if (shop) {
-                    myShop = { id: shop.id, ...shop.data() };
-                    document.getElementById('shop-registration').classList.add('hidden');
-                    document.getElementById('partner-panel').classList.remove('hidden');
-                }
-            }
-
             initRealtimeListeners();
-            showMsg(`Welcome back, ${currentUser.name}`);
+            showMsg(`Authenticated: ${currentUser.name}`);
         };
 
-        // 3. DATA ENGINE
         function loadGuestData() {
             onSnapshot(getCol('products'), (snap) => {
                 const list = document.getElementById('market-list');
@@ -488,37 +432,21 @@
                 filtered.sort((a,b) => (b.created || "").localeCompare(a.created || ""));
 
                 list.innerHTML = filtered.length ? filtered.map(p => `
-                    <div class="bg-white rounded-[2.5rem] overflow-hidden border border-gray-100 flex flex-col shadow-sm hover:shadow-2xl transition-all duration-300 card-animate">
+                    <div class="bg-white rounded-[2.5rem] overflow-hidden border shadow-sm hover:shadow-2xl transition-all duration-300 card-animate">
                         <div class="h-56 bg-gray-50 relative overflow-hidden">
                             <img src="${p.image}" onerror="this.src='https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=80'" class="w-full h-full object-cover">
-                            <span class="absolute top-5 left-5 bg-white/95 backdrop-blur px-4 py-1.5 rounded-full text-[9px] font-black uppercase text-green-600 tracking-widest border border-green-50 shadow-sm">${p.category}</span>
+                            <span class="absolute top-5 left-5 bg-white px-4 py-1.5 rounded-full text-[9px] font-black uppercase text-green-600 border">${p.category}</span>
                         </div>
                         <div class="p-8">
-                            <h4 class="font-black text-gray-800 text-xl tracking-tight mb-1">${p.name}</h4>
-                            <p class="text-[10px] text-gray-400 font-bold uppercase mb-6">Listed by ${p.shopName} • ${p.qty || '1 unit'}</p>
+                            <h4 class="font-black text-gray-800 text-xl mb-1">${p.name}</h4>
+                            <p class="text-[10px] text-gray-400 font-bold uppercase mb-6">${p.qty || '1 unit'}</p>
                             <div class="flex justify-between items-center">
-                                <span class="text-3xl font-black text-green-600 tracking-tighter">₹${p.price}</span>
-                                <button onclick="addToCart('${p.name}', ${p.price}, '${p.shopName}')" class="h-12 w-12 bg-green-600 text-white rounded-2xl shadow-xl shadow-green-100 active:scale-90 transition">+</button>
+                                <span class="text-3xl font-black text-green-600">₹${p.price}</span>
+                                <button onclick="addToCart('${p.name}', ${p.price}, '${p.shopName || 'Gramzo'}')" class="h-12 w-12 bg-green-600 text-white rounded-2xl shadow-xl transition active:scale-90">+</button>
                             </div>
                         </div>
                     </div>
-                `).join('') : '<div class="col-span-2 text-center py-20 text-gray-300 font-bold italic">No listings here yet.</div>';
-                
-                if(currentUser && currentUser.role === 'Admin') {
-                    document.getElementById('admin-item-list').innerHTML = items.map(p => `
-                        <div class="flex justify-between items-center bg-gray-50 p-3 rounded-2xl border">
-                            <span class="text-xs font-bold text-gray-700">${p.name} (₹${p.price})</span>
-                            <button onclick="deleteEntity('products', '${p.id}')" class="text-red-400 p-2 hover:bg-red-50 rounded-lg transition"><i class="fa-solid fa-trash"></i></button>
-                        </div>`).join('');
-                }
-            });
-
-            onSnapshot(getCol('ads'), (snap) => {
-                const banner = document.getElementById('promo-banner');
-                const ads = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                if(ads[0]) {
-                    banner.innerHTML = `<div class="w-full h-full flex items-center justify-center text-white text-center px-10 transition-all duration-500" style="background:${ads[0].color}"><h2 class="text-3xl font-black italic uppercase tracking-tighter drop-shadow-md">${ads[0].text}</h2></div>`;
-                }
+                `).join('') : '<div class="col-span-2 text-center py-20 text-gray-300 italic">No listings found in this category.</div>';
             });
         }
 
@@ -526,66 +454,48 @@
             onSnapshot(getCol('orders'), (snap) => {
                 let rev = 0, count = 0;
                 const adminLog = document.getElementById('admin-log-body');
-                const partnerLog = document.getElementById('partner-order-list');
                 if(adminLog) adminLog.innerHTML = '';
-                if(partnerLog) partnerLog.innerHTML = '';
 
                 snap.docs.forEach(docSnap => {
                     const o = docSnap.data();
                     const id = docSnap.id;
                     rev += o.total; count++;
-                    if(adminLog) adminLog.innerHTML += `<tr><td class="p-6 font-mono font-bold text-[10px] text-gray-400">#${id.slice(-4)}</td><td class="p-6 font-black text-gray-800 text-sm">${o.customer}</td><td class="p-6 font-black text-green-600 text-sm">₹${o.total}</td><td class="p-6 text-right uppercase text-[9px] font-bold"><span class="bg-gray-100 px-3 py-1 rounded-full">${o.status}</span></td></tr>`;
-                    if(partnerLog && myShop && o.items.some(i => i.shopName === myShop.name)) {
-                        partnerLog.innerHTML += `<div class="bg-white p-8 rounded-[2.5rem] border border-l-8 border-green-500 shadow-sm">
-                            <div class="flex justify-between mb-4"><h5 class="font-black text-gray-800 uppercase tracking-tighter">ORDER #${id.slice(-6)}</h5><span class="text-[9px] font-bold text-orange-600 px-2 py-1 bg-orange-50 rounded-full">${o.status}</span></div>
-                            <div class="text-xs space-y-1 mb-4 pb-4 border-b border-dashed">${o.items.filter(i => i.shopName === myShop.name).map(i => `<div class="flex justify-between"><span>${i.name}</span><b>₹${i.price}</b></div>`).join('')}</div>
-                            <button onclick="updateOrderStatus('${id}', 'Confirmed')" class="w-full bg-blue-50 text-blue-600 p-3 rounded-2xl text-[10px] font-bold uppercase mb-2">Confirm Order</button>
-                            <button onclick="updateOrderStatus('${id}', 'Completed')" class="w-full bg-green-600 text-white p-3 rounded-2xl text-[10px] font-bold uppercase">Mark Completed</button>
-                        </div>`;
+                    if(adminLog) {
+                        adminLog.innerHTML += `<tr><td class="p-6 font-mono font-bold text-[10px] text-gray-400">#${id.slice(-4)}</td><td class="p-6 font-black text-gray-800 text-sm">${o.customer}</td><td class="p-6 font-black text-green-600 text-sm">₹${o.total}</td><td class="p-6 text-right uppercase text-[9px] font-bold"><span>${o.status}</span></td></tr>`;
                     }
                 });
                 if(document.getElementById('stat-rev')) document.getElementById('stat-rev').innerText = `₹${rev}`;
                 if(document.getElementById('stat-ord')) document.getElementById('stat-ord').innerText = count;
             });
-
-            if(currentUser.role === 'Admin') {
-                onSnapshot(getCol('shops'), (snap) => {
-                    document.getElementById('admin-shop-list').innerHTML = snap.docs.map(d => `<div class="flex justify-between items-center bg-gray-50 p-4 rounded-2xl border">
-                        <span class="text-xs font-bold text-gray-700">${d.data().name} (${d.data().category})</span>
-                        <button onclick="deleteEntity('shops', '${d.id}')" class="text-red-400 p-2 hover:bg-red-50 rounded-lg transition"><i class="fa-solid fa-trash"></i></button>
-                    </div>`).join('');
-                });
-            }
         }
 
-        // 4. ACTION ATTACHMENTS
         window.filterBy = (cat) => {
             currentFilter = (currentFilter === cat) ? null : cat;
             document.getElementById('active-filter').innerText = currentFilter ? currentFilter.toUpperCase() : "ALL LISTINGS";
             loadGuestData();
-            showMsg(`Switched Hub: ${currentFilter || 'General'}`);
+            showMsg(`Filtering: ${currentFilter || 'All'}`);
         };
 
         window.addToCart = (name, price, shopName) => {
             if(!currentUser) return toggleAuthModal();
             cart.push({name, price, shopName});
             renderCartUI();
-            showMsg(`Added to basket: ${name}`);
+            showMsg(`Added: ${name}`);
         };
 
-        const renderCartUI = () => {
+        window.renderCartUI = () => {
             const list = document.getElementById('cart-items-list');
             const fee = fees[document.getElementById('cart-gp').value] || 10;
             const sub = cart.reduce((s, i) => s + i.price, 0);
 
             if (!cart.length) {
-                list.innerHTML = '<p class="text-gray-400 italic text-sm text-center py-6 border-2 border-dashed border-gray-50 rounded-3xl">Your basket is empty</p>';
+                list.innerHTML = '<p class="text-gray-400 italic text-sm text-center py-6 border-dashed border rounded-3xl">Empty basket</p>';
                 document.getElementById('cart-total').innerText = '₹0';
                 return;
             }
             list.innerHTML = cart.map((i, idx) => `
                 <div class="flex justify-between items-center bg-gray-50 p-4 rounded-2xl text-xs font-bold">
-                    <span class="text-gray-700">${i.name}</span>
+                    <span>${i.name}</span>
                     <div class="flex items-center gap-4">
                         <span class="text-green-600 font-black">₹${i.price}</span>
                         <button onclick="removeFromCart(${idx})" class="text-red-400 hover:scale-125 transition"><i class="fa-solid fa-circle-minus text-lg"></i></button>
@@ -598,18 +508,15 @@
 
         window.placeOrder = async () => {
             const addr = document.getElementById('cart-address').value.trim();
-            if(!addr) return showMsg("Delivery address required");
+            if(!addr) return showMsg("Please enter your exact location.");
             const gp = document.getElementById('cart-gp').value;
             const sub = cart.reduce((s,i) => s + i.price, 0);
             const total = sub + (fees[gp] || 10);
 
             try {
                 await addDoc(getCol('orders'), { 
-                    customer: currentUser.name, 
-                    phone: currentUser.phone, 
-                    items: cart, 
-                    total, gp, address: addr, 
-                    status: 'Placed', 
+                    customer: currentUser.name, phone: currentUser.phone, 
+                    items: cart, total, gp, address: addr, status: 'Placed', 
                     time: serverTimestamp() 
                 });
                 cart = []; renderCartUI(); 
@@ -618,74 +525,8 @@
             } catch (e) { showMsg("Booking failed."); }
         };
 
-        window.registerShop = async () => {
-            const name = document.getElementById('p-shop-name').value.trim();
-            const cat = document.getElementById('p-shop-cat').value;
-            const img = document.getElementById('p-shop-img').value.trim();
-            if(!name) return showMsg("Name your business.");
-            try {
-                await addDoc(getCol('shops'), { name, category: cat, owner: currentUser.phone, image: img || 'https://via.placeholder.com/150' });
-                showMsg("Partner Registered!");
-                setTimeout(() => location.reload(), 1000);
-            } catch (e) { showMsg("Registration Error."); }
-        };
+        window.logout = () => { if(confirm("Sign out of Gramzo?")) location.reload(); };
 
-        window.addItem = async () => {
-            const name = document.getElementById('item-name').value;
-            const price = Number(document.getElementById('item-price').value);
-            const qty = document.getElementById('item-qty').value;
-            const img = document.getElementById('item-img').value;
-            if(!name || !price) return showMsg("Details missing.");
-            try {
-                await addDoc(getCol('products'), { name, price, qty, image: img || 'https://via.placeholder.com/200', shopName: myShop.name, category: myShop.category, created: new Date().toISOString() });
-                showMsg("Listing Live!");
-                ['item-name', 'item-price', 'item-qty', 'item-img'].forEach(id => document.getElementById(id).value = '');
-            } catch (e) { showMsg("Failed to list."); }
-        };
-
-        window.pushAd = async () => {
-            const text = document.getElementById('ad-text').value;
-            const color = document.getElementById('ad-color').value;
-            if(!text) return;
-            try {
-                await addDoc(getCol('ads'), { text, color, created: new Date().toISOString() });
-                document.getElementById('ad-text').value = '';
-                showMsg("Ad Campaign Pushed!");
-            } catch (e) { showMsg("Campaign error."); }
-        };
-
-        window.deleteEntity = async (colName, id) => {
-            if(confirm("Master Action: Delete permanently?")) {
-                try {
-                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', colName, id));
-                    showMsg("Deleted.");
-                } catch (e) { showMsg("Error."); }
-            }
-        };
-
-        window.updateOrderStatus = async (id, status) => {
-            try {
-                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', id), { status });
-                showMsg(`Order: ${status}`);
-            } catch (e) { showMsg("Update failed."); }
-        };
-
-        window.switchAdminTab = (t) => {
-            ['activity', 'control', 'ads'].forEach(tab => {
-                document.getElementById(`admin-${tab}`).classList.toggle('hidden', tab !== t);
-                document.getElementById(`admin-tab-${tab}`).className = tab === t ? 'flex-1 py-4 text-xs font-black rounded-2xl admin-tab-active transition' : 'flex-1 py-4 text-xs font-black text-gray-400 rounded-2xl transition';
-            });
-        };
-
-        window.logout = () => { if(confirm("Sign out?")) location.reload(); };
-
-        function showMsg(txt) {
-            const el = document.getElementById('ui-msg');
-            el.innerText = txt; el.classList.remove('hidden');
-            setTimeout(() => el.classList.add('hidden'), 4000);
-        }
-
-        // Static Event Listeners
         document.getElementById('submit-login').onclick = () => handleAuth('login');
         document.getElementById('submit-register').onclick = () => handleAuth('register');
         document.getElementById('to-register').onclick = () => toggleAuthView('register');
@@ -696,13 +537,12 @@
         document.getElementById('btn-ride').onclick = () => filterBy('Ride');
         document.getElementById('btn-services').onclick = () => filterBy('Services');
         document.getElementById('btn-place-order').onclick = () => placeOrder();
-        document.getElementById('btn-register-shop').onclick = () => registerShop();
-        document.getElementById('btn-add-item').onclick = () => addItem();
-        document.getElementById('btn-push-ad').onclick = () => pushAd();
-        document.getElementById('admin-tab-activity').onclick = () => switchAdminTab('activity');
-        document.getElementById('admin-tab-control').onclick = () => switchAdminTab('control');
-        document.getElementById('admin-tab-ads').onclick = () => switchAdminTab('ads');
-        document.getElementById('cart-gp').onchange = () => renderCartUI();
+
+        function showMsg(txt) {
+            const el = document.getElementById('ui-msg');
+            el.innerText = txt; el.classList.remove('hidden');
+            setTimeout(() => el.classList.add('hidden'), 4000);
+        }
 
         startApp();
     </script>
