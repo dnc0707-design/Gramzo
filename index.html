@@ -1,228 +1,522 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gramzo | Rural Super App</title>
-  <style>
-    :root { --primary: #16a34a; --bg: #f8fafc; --text: #111827; }
-    * { box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
-    body { margin: 0; background: var(--bg); color: var(--text); padding-bottom: 50px; }
-    
-    .hero { background: linear-gradient(135deg, #16a34a, #15803d); color: #fff; padding: 20px 0; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-    .wrap { max-width: 600px; margin: auto; padding: 0 16px; }
-    
-    /* Horizontal Category Scroll */
-    .categories { display: flex; gap: 12px; overflow-x: auto; padding: 10px 0; scrollbar-width: none; }
-    .categories::-webkit-scrollbar { display: none; }
-    .cat-card { background: rgba(255,255,255,0.2); min-width: 100px; padding: 12px; border-radius: 16px; text-align: center; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.3); }
-    .cat-card img { height: 40px; margin-bottom: 5px; }
-    .cat-card span { display: block; font-size: 12px; font-weight: bold; text-transform: uppercase; }
-
-    .section { background: #fff; border-radius: 20px; padding: 20px; margin-top: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-    h2 { font-size: 1.2rem; margin-top: 0; color: var(--primary); display: flex; align-items: center; gap: 8px; }
-    
-    input, select, button { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; margin-top: 8px; outline: none; font-size: 16px; }
-    button { background: var(--primary); color: #fff; border: none; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
-    button:active { opacity: 0.8; }
-    .secondary-btn { background: #f1f5f9; color: #475569; margin-top: 8px; }
-
-    .product-list { display: grid; gap: 10px; margin-top: 15px; }
-    .item-card { display: flex; justify-content: space-between; align-items: center; padding: 12px; border: 1px solid #f1f5f9; border-radius: 12px; }
-    .price-tag { font-weight: bold; color: var(--primary); }
-    .add-btn { width: auto; padding: 6px 12px; font-size: 14px; margin: 0; }
-    
-    .badge { background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gramzo | Rural Super App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .custom-scroll::-webkit-scrollbar { display: none; }
+        .tab-active { border-bottom: 3px solid #16a34a; color: #16a34a; font-weight: bold; }
+        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        body { background-color: #f1f5f9; }
+    </style>
 </head>
-<body>
+<body class="pb-20">
 
-  <div class="hero">
-    <div class="wrap">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <h1 style="margin:0; font-size: 1.5rem;">Gramzo</h1>
-        <select id="lang" onchange="updateLang()" style="width:auto; margin:0; padding:4px; background:transparent; color:white; border:1px solid white;">
-          <option value="en">English</option>
-          <option value="bn">বাংলা</option>
-          <option value="hi">हिन्दी</option>
-        </select>
-      </div>
-      <p id="tagline" style="margin: 5px 0 15px; opacity: 0.9; font-size: 0.9rem;">Rural Living, Simplified</p>
-      
-      <div class="categories">
-        <div class="cat-card"><img src="https://cdn-icons-png.flaticon.com/512/3081/3081913.png" /><span>Food</span></div>
-        <div class="cat-card"><img src="https://cdn-icons-png.flaticon.com/512/3724/3724720.png" /><span>Grocery</span></div>
-        <div class="cat-card"><img src="https://cdn-icons-png.flaticon.com/512/2111/2111440.png" /><span>Ride</span></div>
-        <div class="cat-card"><img src="https://cdn-icons-png.flaticon.com/512/2784/2784530.png" /><span>Medicine</span></div>
-      </div>
-    </div>
-  </div>
+    <!-- Auth Guard / Login Modal -->
+    <div id="auth-screen" class="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center p-6">
+        <div class="w-full max-w-md space-y-6">
+            <div class="text-center">
+                <h1 class="text-4xl font-black text-green-600 tracking-tight">GRAMZO</h1>
+                <p class="text-gray-500">Rural Life, Simplified</p>
+            </div>
 
-  <div class="wrap">
-    <div id="authBox" class="section">
-      <h2 id="authTitle">Login / Register</h2>
-      <select id="role"><option value="User">Customer</option><option value="Partner">Shop Partner</option></select>
-      <input id="phone" type="tel" placeholder="Phone Number" />
-      <input id="pin" type="password" placeholder="4 Digit PIN" maxlength="4" />
-      <button onclick="authAction('login')">Login</button>
-      <button class="secondary-btn" onclick="authAction('reg')">Create New Account</button>
+            <div class="bg-gray-100 p-1 rounded-xl flex">
+                <button onclick="switchAuthMode('User')" id="btn-user" class="flex-1 py-2 rounded-lg font-bold bg-white shadow-sm text-green-600">User</button>
+                <button onclick="switchAuthMode('Partner')" id="btn-partner" class="flex-1 py-2 rounded-lg font-bold text-gray-500">Partner</button>
+                <button onclick="switchAuthMode('Admin')" id="btn-admin" class="flex-1 py-2 rounded-lg font-bold text-gray-500">Admin</button>
+            </div>
+
+            <div class="space-y-4">
+                <input id="auth-phone" type="tel" placeholder="Phone Number" class="w-full p-4 rounded-xl border border-gray-200 outline-none focus:ring-2 ring-green-500">
+                <input id="auth-pin" type="password" placeholder="4-Digit PIN" maxlength="4" class="w-full p-4 rounded-xl border border-gray-200 outline-none focus:ring-2 ring-green-500">
+                
+                <div id="reg-fields" class="space-y-4">
+                    <input id="auth-name" type="text" placeholder="Full Name" class="w-full p-4 rounded-xl border border-gray-200 outline-none focus:ring-2 ring-green-500">
+                </div>
+
+                <button onclick="handleAuth('login')" class="w-full bg-green-600 text-white p-4 rounded-xl font-bold shadow-lg">Login</button>
+                <button onclick="handleAuth('register')" id="reg-btn" class="w-full bg-gray-200 text-gray-700 p-4 rounded-xl font-bold">Register New Account</button>
+            </div>
+            <p id="auth-msg" class="text-center text-sm font-medium"></p>
+        </div>
     </div>
 
-    <div id="partnerPanel" class="section" style="display:none;">
-      <h2>🏪 Shop Manager <span class="badge">Partner</span></h2>
-      <input id="productName" placeholder="Item Name (e.g. Samosa)" />
-      <input id="productPrice" type="number" placeholder="Price (₹)" />
-      <button onclick="addProduct()">List Product</button>
+    <!-- Main App Layout -->
+    <nav class="glass sticky top-0 z-50 px-4 py-3 flex justify-between items-center shadow-sm">
+        <h2 class="text-xl font-black text-green-600">GRAMZO</h2>
+        <div class="flex items-center gap-4">
+            <span id="user-display" class="text-sm font-medium bg-green-100 text-green-700 px-3 py-1 rounded-full"></span>
+            <button onclick="logout()" class="text-gray-400 text-lg"><i class="fa-solid fa-right-from-bracket"></i></button>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto p-4 space-y-6">
+        
+        <!-- User View -->
+        <div id="view-User" class="hidden space-y-6">
+            <!-- Categories -->
+            <div class="flex gap-4 overflow-x-auto custom-scroll py-2">
+                <div class="flex-shrink-0 w-24 text-center space-y-2">
+                    <div class="h-16 w-16 bg-orange-100 rounded-2xl mx-auto flex items-center justify-center text-2xl text-orange-500"><i class="fa-solid fa-utensils"></i></div>
+                    <p class="text-xs font-bold">Food</p>
+                </div>
+                <div class="flex-shrink-0 w-24 text-center space-y-2">
+                    <div class="h-16 w-16 bg-green-100 rounded-2xl mx-auto flex items-center justify-center text-2xl text-green-500"><i class="fa-solid fa-basket-shopping"></i></div>
+                    <p class="text-xs font-bold">Grocery</p>
+                </div>
+                <div class="flex-shrink-0 w-24 text-center space-y-2">
+                    <div class="h-16 w-16 bg-blue-100 rounded-2xl mx-auto flex items-center justify-center text-2xl text-blue-500"><i class="fa-solid fa-motorcycle"></i></div>
+                    <p class="text-xs font-bold">Ride</p>
+                </div>
+                <div class="flex-shrink-0 w-24 text-center space-y-2">
+                    <div class="h-16 w-16 bg-red-100 rounded-2xl mx-auto flex items-center justify-center text-2xl text-red-500"><i class="fa-solid fa-capsules"></i></div>
+                    <p class="text-xs font-bold">Medicine</p>
+                </div>
+            </div>
+
+            <!-- Ad Banners -->
+            <div id="user-ads" class="w-full h-32 bg-gray-200 rounded-2xl flex items-center justify-center overflow-hidden">
+                <!-- Ads will load here -->
+            </div>
+
+            <!-- Market -->
+            <div>
+                <h3 class="font-bold text-lg mb-4">Nearby Shops</h3>
+                <div id="market-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Products -->
+                </div>
+            </div>
+
+            <!-- Cart Section -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                <h3 class="font-bold text-lg mb-4 flex items-center gap-2"><i class="fa-solid fa-cart-shopping text-green-600"></i> My Cart</h3>
+                <div id="cart-items" class="space-y-3 mb-6"></div>
+                <div class="space-y-3 pt-4 border-t border-dashed">
+                    <div class="flex justify-between text-gray-500"><span>Delivery GP</span>
+                        <select id="cart-gp" onchange="updateCartUI()" class="bg-transparent font-bold text-gray-800">
+                            <option value="Santuri">Santuri (+₹10)</option>
+                            <option value="Muradi">Muradi (+₹20)</option>
+                            <option value="Garshika">Garshika (+₹20)</option>
+                            <option value="Tarabari">Tarabari (+₹25)</option>
+                        </select>
+                    </div>
+                    <div class="flex justify-between text-xl font-black"><span>Total Amount</span><span id="cart-total">₹0</span></div>
+                    <input id="cart-address" placeholder="Specific House/Location Address" class="w-full p-3 bg-gray-50 rounded-xl border border-gray-100 outline-none">
+                    <button onclick="placeOrder()" class="w-full bg-green-600 text-white p-4 rounded-xl font-bold shadow-lg shadow-green-200">Order (Cash on Delivery)</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Partner View -->
+        <div id="view-Partner" class="hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <h3 class="font-bold text-lg mb-4">Inventory Management</h3>
+                <div class="space-y-4">
+                    <input id="p-name" placeholder="Item Name" class="w-full p-3 bg-gray-50 rounded-xl border">
+                    <input id="p-price" type="number" placeholder="Price (₹)" class="w-full p-3 bg-gray-50 rounded-xl border">
+                    <button onclick="addNewProduct()" class="w-full bg-green-600 text-white p-3 rounded-xl font-bold">Add to Shop</button>
+                </div>
+            </div>
+            <div>
+                <h3 class="font-bold text-lg mb-4">Incoming Orders</h3>
+                <div id="partner-orders" class="space-y-4"></div>
+            </div>
+        </div>
+
+        <!-- Admin View -->
+        <div id="view-Admin" class="hidden space-y-6">
+            <!-- Tabs -->
+            <div class="flex border-b border-gray-200 mb-6">
+                <button onclick="switchAdminTab('reports')" id="tab-reports" class="flex-1 py-3 tab-active">Reports</button>
+                <button onclick="switchAdminTab('ads')" id="tab-ads" class="flex-1 py-3 text-gray-500">Ads Center</button>
+                <button onclick="switchAdminTab('users')" id="tab-users" class="flex-1 py-3 text-gray-500">User Mgmt</button>
+            </div>
+
+            <!-- Reports Tab -->
+            <div id="admin-reports" class="space-y-6">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                        <p class="text-sm text-gray-500">Total Revenue</p>
+                        <h4 id="stat-revenue" class="text-2xl font-black text-green-600">₹0</h4>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                        <p class="text-sm text-gray-500">Total Orders</p>
+                        <h4 id="stat-orders" class="text-2xl font-black text-blue-600">0</h4>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
+                    <h4 class="font-bold mb-4">Order History (All Users)</h4>
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-gray-50">
+                            <tr><th class="p-3">ID</th><th class="p-3">Customer</th><th class="p-3">GP</th><th class="p-3">Amount</th><th class="p-3">Status</th></tr>
+                        </thead>
+                        <tbody id="admin-order-table"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Ads Tab -->
+            <div id="admin-ads" class="hidden space-y-6">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <h4 class="font-bold mb-4">Create Campaign</h4>
+                    <div class="space-y-4">
+                        <input id="ad-text" placeholder="Promo Text (e.g. 50% OFF TODAY!)" class="w-full p-3 bg-gray-50 rounded-xl border">
+                        <input id="ad-color" type="color" value="#16a34a" class="w-full h-12 rounded-xl border cursor-pointer">
+                        <button onclick="createAd()" class="w-full bg-black text-white p-3 rounded-xl font-bold">Publish Ad</button>
+                    </div>
+                </div>
+                <div id="admin-ads-list" class="space-y-4"></div>
+            </div>
+
+            <!-- User Mgmt Tab -->
+            <div id="admin-users" class="hidden">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <table class="w-full text-left">
+                        <thead class="bg-gray-50">
+                            <tr><th class="p-4">Name</th><th class="p-4">Phone</th><th class="p-4">Role</th><th class="p-4">Action</th></tr>
+                        </thead>
+                        <tbody id="admin-user-table"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Bottom Nav (Mobile Style) -->
+    <div id="bottom-nav" class="fixed bottom-0 left-0 right-0 h-16 bg-white border-t flex items-center justify-around z-40 lg:hidden">
+        <button onclick="scrollToTop()" class="text-green-600 flex flex-col items-center"><i class="fa-solid fa-house"></i><span class="text-[10px] mt-1">Home</span></button>
+        <button onclick="scrollToElement('view-User')" class="text-gray-400 flex flex-col items-center"><i class="fa-solid fa-search"></i><span class="text-[10px] mt-1">Explore</span></button>
+        <button onclick="scrollToElement('cart-items')" class="text-gray-400 flex flex-col items-center"><i class="fa-solid fa-basket-shopping"></i><span class="text-[10px] mt-1">Cart</span></button>
     </div>
 
-    <div class="section">
-      <h2 id="marketTitle">🛒 Marketplace</h2>
-      <div id="productList" class="product-list">
-        <p style="text-align:center; color:#94a3b8;">Loading local items...</p>
-      </div>
-    </div>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
-    <div id="cartBox" class="section">
-      <h2>🛍️ My Cart</h2>
-      <div id="cartItems"></div>
-      <div id="cartTotal" style="font-size:1.1rem; font-weight:800; margin-top:10px; border-top:1px solid #eee; padding-top:10px;">Total: ₹0</div>
-      
-      <h3 style="font-size:0.9rem; margin-top:15px;">Delivery Details</h3>
-      <select id="deliveryGp" onchange="renderCart()">
-        <option value="Santuri">Santuri (₹10)</option>
-        <option value="Muradi">Muradi (₹20)</option>
-        <option value="Garshika">Garshika (₹20)</option>
-        <option value="Tarabari">Tarabari (₹25)</option>
-        <option value="Ramchandrapur">Ramchandrapur (₹25)</option>
-      </select>
-      <input id="address" placeholder="House No / Landmark" />
-      <button onclick="checkout()">Place Order (COD)</button>
-    </div>
-  </div>
+    <script>
+        // --- 1. CONFIGURATION ---
+        const firebaseConfig = {
+            apiKey: "", // Provided by environment
+            authDomain: "gramzo.firebaseapp.com",
+            projectId: "gramzo",
+            storageBucket: "gramzo.firebasestorage.app",
+            messagingSenderId: "674262956986",
+            appId: "1:674262956986:web:772f68694c77e15bf3fb83"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        let currentUser = null;
+        let selectedRole = 'User';
+        let cart = [];
+        const deliveryFees = { Santuri: 10, Muradi: 20, Garshika: 20, Tarabari: 25 };
 
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-<script>
-// --- Initialization ---
-const firebaseConfig = {
-  apiKey: "AIzaSyCA4U4jva7HHeMP-yk1VJy3l_BBct3Gohg", // Using your provided config
-  authDomain: "gramzo.firebaseapp.com",
-  projectId: "gramzo",
-  storageBucket: "gramzo.firebasestorage.app",
-  messagingSenderId: "674262956986",
-  appId: "1:674262956986:web:772f68694c77e15bf3fb83"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+        // --- 2. AUTHENTICATION ---
+        function switchAuthMode(role) {
+            selectedRole = role;
+            ['btn-user', 'btn-partner', 'btn-admin'].forEach(id => {
+                document.getElementById(id).classList.remove('bg-white', 'shadow-sm', 'text-green-600');
+                document.getElementById(id).classList.add('text-gray-500');
+            });
+            const activeBtn = document.getElementById(`btn-${role.toLowerCase()}`);
+            activeBtn.classList.add('bg-white', 'shadow-sm', 'text-green-600');
+            activeBtn.classList.remove('text-gray-500');
+            
+            document.getElementById('reg-fields').classList.toggle('hidden', role === 'Admin');
+            document.getElementById('reg-btn').classList.toggle('hidden', role === 'Admin');
+        }
 
-const translations = {
-  en: { tag: 'Rural Living, Simplified', market: 'Marketplace', auth: 'Login / Register' },
-  bn: { tag: 'গ্রামীণ জীবন, সহজভাবে', market: 'বাজার', auth: 'লগইন / রেজিস্ট্রেশন' },
-  hi: { tag: 'ग्रामीण जीवन, आसान', market: 'बाज़ार', auth: 'लॉगিন / रजिस्टर' }
-};
+        async function handleAuth(type) {
+            const phone = document.getElementById('auth-phone').value.trim();
+            const pin = document.getElementById('auth-pin').value.trim();
+            const name = document.getElementById('auth-name').value.trim();
+            const msg = document.getElementById('auth-msg');
 
-let currentUser = null;
-let cart = [];
+            if (!phone || !pin) return alert("Phone and PIN required");
 
-// --- Functions ---
+            try {
+                if (type === 'register') {
+                    if (!name) return alert("Name required for registration");
+                    await db.collection('users').doc(phone).set({ phone, pin, name, role: selectedRole, created: new Date() });
+                    msg.innerText = "Registration successful! Please login.";
+                    msg.className = "text-center text-sm font-medium text-green-600";
+                } else {
+                    const doc = await db.collection('users').doc(phone).get();
+                    if (!doc.exists()) throw new Error("User not found");
+                    const user = doc.data();
+                    
+                    if (user.pin !== pin) throw new Error("Incorrect PIN");
+                    if (user.role !== selectedRole) throw new Error(`Not registered as ${selectedRole}`);
 
-function updateLang() {
-  const l = document.getElementById('lang').value;
-  document.getElementById('tagline').innerText = translations[l].tag;
-  document.getElementById('marketTitle').innerText = `🛒 ${translations[l].market}`;
-  document.getElementById('authTitle').innerText = translations[l].auth;
-}
+                    currentUser = user;
+                    startApp();
+                }
+            } catch (err) {
+                msg.innerText = err.message;
+                msg.className = "text-center text-sm font-medium text-red-600";
+            }
+        }
 
-async function authAction(type) {
-  const p = document.getElementById('phone').value;
-  const pin = document.getElementById('pin').value;
-  const role = document.getElementById('role').value;
+        function startApp() {
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('user-display').innerText = `${currentUser.name} (${currentUser.role})`;
+            
+            // Show correct view
+            document.getElementById('view-User').classList.add('hidden');
+            document.getElementById('view-Partner').classList.add('hidden');
+            document.getElementById('view-Admin').classList.add('hidden');
+            document.getElementById(`view-${currentUser.role}`).classList.remove('hidden');
 
-  if (p.length < 10) return alert("Enter valid phone");
+            initDataListeners();
+        }
 
-  if (type === 'reg') {
-    await db.collection('users').doc(p).set({ phone: p, pin, role, created: new Date() });
-    alert("Account Created! Please login.");
-  } else {
-    const doc = await db.collection('users').doc(p).get();
-    if (doc.exists() && doc.data().pin === pin) {
-      currentUser = doc.data();
-      document.getElementById('authBox').innerHTML = `<h3>Welcome, ${p} <span class="badge">${currentUser.role}</span></h3>`;
-      if (currentUser.role === 'Partner') document.getElementById('partnerPanel').style.display = 'block';
-    } else {
-      alert("Invalid Credentials");
-    }
-  }
-}
+        function logout() {
+            window.location.reload();
+        }
 
-// Real-time product listener
-db.collection('products').orderBy('createdAt', 'desc').onSnapshot(snap => {
-  const list = document.getElementById('productList');
-  list.innerHTML = '';
-  snap.forEach(doc => {
-    const p = doc.data();
-    list.innerHTML += `
-      <div class="item-card">
-        <div><strong>${p.name}</strong><br><span class="price-tag">₹${p.price}</span></div>
-        <button class="add-btn" onclick="addToCart('${p.name}', ${p.price})">Add +</button>
-      </div>`;
-  });
-});
+        // --- 3. DATA LISTENERS ---
+        function initDataListeners() {
+            // Marketplace Listener
+            db.collection('products').orderBy('created', 'desc').onSnapshot(snap => {
+                const list = document.getElementById('market-list');
+                list.innerHTML = '';
+                snap.forEach(doc => {
+                    const p = doc.data();
+                    list.innerHTML += `
+                        <div class="bg-white p-4 rounded-2xl flex justify-between items-center shadow-sm border border-gray-100">
+                            <div>
+                                <h4 class="font-bold text-gray-800">${p.name}</h4>
+                                <p class="text-green-600 font-black">₹${p.price}</p>
+                            </div>
+                            <button onclick="addToCart('${p.name}', ${p.price})" class="bg-green-50 text-green-600 px-4 py-2 rounded-xl font-bold hover:bg-green-600 hover:text-white transition">Add +</button>
+                        </div>
+                    `;
+                });
+            });
 
-async function addProduct() {
-  const name = document.getElementById('productName').value;
-  const price = document.getElementById('productPrice').value;
-  if (!name || !price) return;
-  
-  await db.collection('products').add({ name, price: Number(price), createdAt: new Date() });
-  document.getElementById('productName').value = '';
-  document.getElementById('productPrice').value = '';
-}
+            // Orders Listener (for Admin & Partner)
+            db.collection('orders').orderBy('time', 'desc').onSnapshot(snap => {
+                const partnerOrders = document.getElementById('partner-orders');
+                const adminOrderTable = document.getElementById('admin-order-table');
+                const statRevenue = document.getElementById('stat-revenue');
+                const statOrdersCount = document.getElementById('stat-orders');
+                
+                let totalRev = 0;
+                let orderCount = 0;
 
-function addToCart(name, price) {
-  cart.push({ name, price });
-  renderCart();
-}
+                if(partnerOrders) partnerOrders.innerHTML = '';
+                if(adminOrderTable) adminOrderTable.innerHTML = '';
 
-function renderCart() {
-  const container = document.getElementById('cartItems');
-  const charges = { Santuri:10, Muradi:20, Garshika:20, Tarabari:25, Ramchandrapur:25 };
-  const fee = charges[document.getElementById('deliveryGp').value] || 0;
-  
-  if (cart.length === 0) {
-    container.innerHTML = '<p style="color:#94a3b8">Cart is empty</p>';
-    return;
-  }
+                snap.forEach(doc => {
+                    const o = doc.data();
+                    const oid = doc.id.slice(-6);
+                    orderCount++;
+                    totalRev += o.total;
 
-  container.innerHTML = cart.map((item, idx) => `
-    <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:14px;">
-      <span>${item.name}</span>
-      <span>₹${item.price}</span>
-    </div>
-  `).join('');
+                    // Admin Table
+                    if(adminOrderTable) {
+                        adminOrderTable.innerHTML += `
+                            <tr class="border-b">
+                                <td class="p-3 font-mono">#${oid}</td>
+                                <td class="p-3">${o.customer}</td>
+                                <td class="p-3">${o.gp}</td>
+                                <td class="p-3 font-bold">₹${o.total}</td>
+                                <td class="p-3"><span class="px-2 py-1 rounded-full text-[10px] bg-blue-100 text-blue-600 font-bold">${o.status}</span></td>
+                            </tr>
+                        `;
+                    }
 
-  const subtotal = cart.reduce((sum, i) => sum + i.price, 0);
-  document.getElementById('cartTotal').innerText = `Total: ₹${subtotal + fee} (Incl. ₹${fee} delivery)`;
-}
+                    // Partner List
+                    if(partnerOrders) {
+                        partnerOrders.innerHTML += `
+                            <div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-green-500">
+                                <div class="flex justify-between items-start mb-3">
+                                    <div>
+                                        <h5 class="font-black text-gray-800">ORDER #${oid}</h5>
+                                        <p class="text-xs text-gray-400">${new Date(o.time.seconds*1000).toLocaleString()}</p>
+                                    </div>
+                                    <span class="bg-orange-100 text-orange-600 px-3 py-1 rounded-lg text-xs font-bold">${o.status}</span>
+                                </div>
+                                <div class="text-sm space-y-1 mb-4">
+                                    ${o.items.map(i => `<div class="flex justify-between"><span>${i.name}</span><span>₹${i.price}</span></div>`).join('')}
+                                </div>
+                                <div class="flex gap-2">
+                                    <button onclick="updateOrderStatus('${doc.id}', 'Preparing')" class="flex-1 bg-blue-50 text-blue-600 p-2 rounded-lg text-xs font-bold">Preparing</button>
+                                    <button onclick="updateOrderStatus('${doc.id}', 'Out for Delivery')" class="flex-1 bg-green-50 text-green-600 p-2 rounded-lg text-xs font-bold">Dispatch</button>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
 
-async function checkout() {
-  if (!currentUser) return alert("Please login first");
-  if (cart.length === 0) return alert("Cart is empty");
+                if(statRevenue) statRevenue.innerText = `₹${totalRev}`;
+                if(statOrdersCount) statOrdersCount.innerText = orderCount;
+            });
 
-  const order = {
-    customer: currentUser.phone,
-    items: cart,
-    address: document.getElementById('address').value,
-    gp: document.getElementById('deliveryGp').value,
-    status: 'Pending',
-    time: new Date()
-  };
+            // Ads Listener
+            db.collection('ads').onSnapshot(snap => {
+                const userAds = document.getElementById('user-ads');
+                const adminAdsList = document.getElementById('admin-ads-list');
+                
+                if(userAds) userAds.innerHTML = '';
+                if(adminAdsList) adminAdsList.innerHTML = '';
 
-  await db.collection('orders').add(order);
-  alert("Order Placed Successfully! Stay near your phone.");
-  cart = [];
-  renderCart();
-}
-</script>
+                snap.forEach(doc => {
+                    const ad = doc.data();
+                    if(userAds) {
+                        userAds.innerHTML = `
+                            <div class="w-full h-full flex items-center justify-center text-white px-6 text-center animate-pulse" style="background:${ad.color}">
+                                <h2 class="text-2xl font-black italic tracking-tighter">${ad.text}</h2>
+                            </div>
+                        `;
+                    }
+                    if(adminAdsList) {
+                        adminAdsList.innerHTML += `
+                            <div class="flex items-center justify-between bg-white p-4 rounded-xl shadow-sm">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-lg" style="background:${ad.color}"></div>
+                                    <span class="font-bold">${ad.text}</span>
+                                </div>
+                                <button onclick="deleteDoc('ads', '${doc.id}')" class="text-red-500"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        `;
+                    }
+                });
+            });
+
+            // Admin User List
+            if(currentUser.role === 'Admin') {
+                db.collection('users').onSnapshot(snap => {
+                    const table = document.getElementById('admin-user-table');
+                    table.innerHTML = '';
+                    snap.forEach(doc => {
+                        const u = doc.data();
+                        table.innerHTML += `
+                            <tr class="border-b text-sm">
+                                <td class="p-4 font-bold">${u.name}</td>
+                                <td class="p-4">${u.phone}</td>
+                                <td class="p-4"><span class="bg-gray-100 px-2 py-1 rounded text-xs">${u.role}</span></td>
+                                <td class="p-4"><button onclick="deleteDoc('users', '${doc.id}')" class="text-red-400">Remove</button></td>
+                            </tr>
+                        `;
+                    });
+                });
+            }
+        }
+
+        // --- 4. CORE ACTIONS ---
+        function addToCart(name, price) {
+            cart.push({ name, price });
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const list = document.getElementById('cart-items');
+            const totalEl = document.getElementById('cart-total');
+            const gp = document.getElementById('cart-gp').value;
+            const fee = deliveryFees[gp] || 0;
+
+            if (cart.length === 0) {
+                list.innerHTML = '<p class="text-gray-400 text-center py-4">Shopping bag is empty</p>';
+                totalEl.innerText = '₹0';
+                return;
+            }
+
+            list.innerHTML = cart.map((i, idx) => `
+                <div class="flex justify-between items-center text-sm">
+                    <span class="text-gray-600">${i.name}</span>
+                    <div class="flex items-center gap-3">
+                        <span class="font-bold">₹${i.price}</span>
+                        <button onclick="removeFromCart(${idx})" class="text-red-400"><i class="fa-solid fa-circle-xmark"></i></button>
+                    </div>
+                </div>
+            `).join('');
+
+            const subtotal = cart.reduce((sum, i) => sum + i.price, 0);
+            totalEl.innerText = `₹${subtotal + fee}`;
+        }
+
+        function removeFromCart(idx) {
+            cart.splice(idx, 1);
+            updateCartUI();
+        }
+
+        async function placeOrder() {
+            if (!cart.length) return alert("Cart is empty");
+            const addr = document.getElementById('cart-address').value.trim();
+            if (!addr) return alert("Please enter delivery address");
+
+            const gp = document.getElementById('cart-gp').value;
+            const subtotal = cart.reduce((sum, i) => sum + i.price, 0);
+            const total = subtotal + (deliveryFees[gp] || 0);
+
+            try {
+                await db.collection('orders').add({
+                    customer: currentUser.name,
+                    phone: currentUser.phone,
+                    items: cart,
+                    gp: gp,
+                    address: addr,
+                    total: total,
+                    status: 'Placed',
+                    time: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                alert("Order Placed Successfully!");
+                cart = [];
+                updateCartUI();
+                document.getElementById('cart-address').value = '';
+            } catch (e) {
+                alert("Error placing order: " + e.message);
+            }
+        }
+
+        async function addNewProduct() {
+            const name = document.getElementById('p-name').value;
+            const price = document.getElementById('p-price').value;
+            if(!name || !price) return alert("Enter details");
+            
+            await db.collection('products').add({ name, price: Number(price), created: new Date() });
+            document.getElementById('p-name').value = '';
+            document.getElementById('p-price').value = '';
+        }
+
+        async function createAd() {
+            const text = document.getElementById('ad-text').value;
+            const color = document.getElementById('ad-color').value;
+            if(!text) return alert("Ad text missing");
+            await db.collection('ads').add({ text, color, created: new Date() });
+            document.getElementById('ad-text').value = '';
+        }
+
+        async function updateOrderStatus(id, status) {
+            await db.collection('orders').doc(id).update({ status });
+        }
+
+        async function deleteDoc(col, id) {
+            if(confirm("Are you sure?")) await db.collection(col).doc(id).delete();
+        }
+
+        // --- 5. UI HELPERS ---
+        function switchAdminTab(tab) {
+            ['reports', 'ads', 'users'].forEach(t => {
+                document.getElementById(`admin-${t}`).classList.add('hidden');
+                document.getElementById(`tab-${t}`).classList.remove('tab-active');
+                document.getElementById(`tab-${t}`).classList.add('text-gray-500');
+            });
+            document.getElementById(`admin-${tab}`).classList.remove('hidden');
+            document.getElementById(`tab-${tab}`).classList.add('tab-active');
+        }
+
+        function scrollToElement(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
 </body>
 </html>
