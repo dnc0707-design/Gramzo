@@ -92,18 +92,18 @@
 <body>
 
     <!-- Top Navigation -->
-    <nav class="glass-nav fixed top-0 w-full z-40 border-b border-gray-200/50">
-        <div class="max-w-md mx-auto px-4 py-2 sm:py-3 flex justify-between items-center sm:max-w-4xl gap-2 sm:gap-4">
+    <nav class="glass-nav fixed top-0 w-full z-40 border-b border-gray-200/50 h-[56px] sm:h-[80px]">
+        <div class="max-w-md mx-auto px-4 py-2 sm:py-3 flex justify-between items-center h-full sm:max-w-4xl gap-2 sm:gap-4">
             <!-- Left: Branding with Tagline -->
-            <div class="flex flex-col justify-center cursor-pointer w-[60%] sm:w-[65%] pr-2 sm:pr-4" onclick="location.reload()">
+            <div class="flex flex-col justify-center cursor-pointer w-[60%] sm:w-[65%] pr-2 sm:pr-4 h-full" onclick="location.reload()">
                 <!-- Vibrant Zepto-Style Text Logo in Green -->
-                <h1 class="text-[2.8rem] sm:text-[3.5rem] font-black font-logo italic tracking-widest truncate w-full text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-green-400 drop-shadow-sm leading-none pb-1">Gramzo</h1>
+                <h1 class="text-[2.2rem] sm:text-[3.5rem] font-black font-logo italic tracking-widest truncate w-full text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-green-400 drop-shadow-sm leading-none pb-1 sm:pb-2">Gramzo</h1>
                 <!-- Tagline -->
-                <p class="text-[9px] sm:text-[11px] font-bold text-gray-500 tracking-wide mt-1 pl-1 truncate">Village needs, delivered in minutes.</p>
+                <p class="text-[8px] sm:text-[11px] font-bold text-gray-500 tracking-wide pl-1 truncate mt-[-2px] sm:mt-[-4px]">Village needs, delivered in minutes.</p>
             </div>
 
             <!-- Right: Auth / Profile -->
-            <div id="auth-container" class="flex items-center gap-2 sm:gap-3 shrink-0 justify-end w-[40%] sm:w-[35%]">
+            <div id="auth-container" class="flex items-center gap-2 sm:gap-3 shrink-0 justify-end w-[40%] sm:w-[35%] h-full">
                 
                 <!-- Language Selector -->
                 <select id="lang-selector" onchange="changeLanguage(this.value)" class="bg-gray-50 border border-gray-200 text-[10px] sm:text-xs font-bold rounded-lg px-1 sm:px-2 py-1.5 sm:py-2 outline-none text-gray-700 cursor-pointer shadow-sm hover:bg-gray-100 transition max-w-[70px] sm:max-w-[90px] truncate">
@@ -146,15 +146,15 @@
         </div>
     </nav>
 
-    <!-- Scrolling Marquee Tagline (Fixed structure) -->
-    <div class="fixed top-[70px] sm:top-[85px] w-full bg-gray-900 border-b border-gray-800 z-30 overflow-hidden py-1.5 sm:py-2 shadow-md block whitespace-nowrap">
-        <div class="animate-marquee inline-block text-[10px] sm:text-[11px] font-black text-emerald-400 uppercase tracking-widest">
+    <!-- Scrolling Marquee Tagline (Perfectly Aligned) -->
+    <div class="fixed top-[56px] sm:top-[80px] w-full bg-gray-900 border-b border-gray-800 z-30 overflow-hidden h-7 sm:h-8 flex items-center shadow-md">
+        <div id="dynamic-marquee" class="animate-marquee inline-block whitespace-nowrap text-[10px] sm:text-[11px] font-black text-emerald-400 uppercase tracking-widest">
             🟢 LIVE IN SANTURI BLOCK VILLAGES AND NEARBY AREAS OF SAKAMBARI PLANT 🟢 &nbsp;&nbsp;|&nbsp;&nbsp; 🟢 LIVE IN SANTURI BLOCK VILLAGES AND NEARBY AREAS OF SAKAMBARI PLANT 🟢 &nbsp;&nbsp;|&nbsp;&nbsp; 🟢 LIVE IN SANTURI BLOCK VILLAGES AND NEARBY AREAS OF SAKAMBARI PLANT 🟢
         </div>
     </div>
 
     <!-- Main Content Area -->
-    <main class="pt-[115px] sm:pt-[135px] px-4 pb-10 max-w-md mx-auto sm:max-w-4xl sm:px-6">
+    <main class="pt-[100px] sm:pt-[125px] px-4 pb-10 max-w-md mx-auto sm:max-w-4xl sm:px-6">
         
         <!-- ========================================== -->
         <!-- VIEW: USER (Marketplace & Services)        -->
@@ -524,6 +524,19 @@
                     </div>
                 </div>
                 <i class="fa-solid fa-bullhorn absolute -right-6 -bottom-6 text-blue-200 text-8xl opacity-40"></i>
+            </div>
+
+            <!-- ADMIN MARQUEE MANAGEMENT -->
+            <div class="bg-purple-50 rounded-[2rem] p-6 border border-purple-100 relative overflow-hidden mt-8">
+                <div class="relative z-10">
+                    <h3 class="font-bold text-purple-800 mb-4">Manage Scrolling Marquee</h3>
+                    <p class="text-xs text-gray-600 mb-4">Update the scrolling text at the top of the user app.</p>
+                    <div class="space-y-3">
+                        <input type="text" id="admin-marquee-text" class="input-field !bg-white" placeholder="Enter new marquee text...">
+                        <button type="button" onclick="adminUpdateMarquee()" id="btn-update-marquee" class="w-full bg-purple-600 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-purple-500/20 active:scale-95 transition mt-2">Publish Marquee Text</button>
+                    </div>
+                </div>
+                <i class="fa-solid fa-text-width absolute -right-6 -bottom-6 text-purple-200 text-8xl opacity-40"></i>
             </div>
 
             <!-- ADMIN APPROVALS SECTION -->
@@ -1288,8 +1301,13 @@
         function loadMarketplaceData() {
             onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'app_config'), (snap) => {
                 const bannerEl = document.getElementById('user-offer-banner');
-                if (snap.exists() && snap.data().offerBanner) {
-                    if (bannerEl) bannerEl.src = snap.data().offerBanner;
+                const marqueeEl = document.getElementById('dynamic-marquee');
+                if (snap.exists()) {
+                    const data = snap.data();
+                    if (data.offerBanner && bannerEl) bannerEl.src = data.offerBanner;
+                    if (data.marqueeText && marqueeEl) {
+                        marqueeEl.innerHTML = `${data.marqueeText} &nbsp;&nbsp;|&nbsp;&nbsp; ${data.marqueeText} &nbsp;&nbsp;|&nbsp;&nbsp; ${data.marqueeText}`;
+                    }
                 }
             });
 
@@ -1594,6 +1612,28 @@
                 document.getElementById('admin-offer-file').value = "";
             } catch(e) {
                 showToast("Error updating banner. Image might be too large.", "error");
+            } finally {
+                btn.innerText = orig;
+                btn.disabled = false;
+            }
+        };
+
+        window.adminUpdateMarquee = async () => {
+            if(currentUser.role !== 'Admin') return;
+            const text = document.getElementById('admin-marquee-text').value.trim();
+            if(!text) return showToast("Please enter marquee text.", "error");
+
+            const btn = document.getElementById('btn-update-marquee');
+            const orig = btn.innerText;
+            btn.innerText = "Updating...";
+            btn.disabled = true;
+
+            try {
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'app_config'), { marqueeText: text }, { merge: true });
+                showToast("Marquee Updated!", "success");
+                document.getElementById('admin-marquee-text').value = "";
+            } catch(e) {
+                showToast("Error updating marquee.", "error");
             } finally {
                 btn.innerText = orig;
                 btn.disabled = false;
