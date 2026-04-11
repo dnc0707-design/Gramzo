@@ -64,7 +64,6 @@
             box-shadow: inset 4px 4px 10px #e5e7eb, inset -4px -4px 10px #ffffff;
         }
 
-        /* Ride booking timeline connector */
         .timeline-line {
             position: absolute; left: 1.25rem; top: 2.5rem; bottom: 2.5rem; width: 2px; background-color: #e5e7eb; z-index: 0;
         }
@@ -75,7 +74,6 @@
     <!-- Top Navigation -->
     <nav class="glass-nav fixed top-0 w-full z-40 border-b border-gray-200/50">
         <div class="max-w-md mx-auto px-5 py-4 flex justify-between items-center sm:max-w-4xl">
-            <!-- Left: Branding -->
             <div class="flex items-center gap-2 cursor-pointer" onclick="location.reload()">
                 <div class="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-emerald-500/30">
                     <i class="fa-solid fa-leaf text-xl"></i>
@@ -86,7 +84,6 @@
                 </div>
             </div>
 
-            <!-- Right: Auth / Profile -->
             <div id="auth-container">
                 <button type="button" id="btn-login-trigger" onclick="openAuthModal('User')" class="bg-gray-900 text-white px-5 py-2.5 rounded-full text-sm font-bold shadow-md hover:bg-gray-800 transition-colors active:scale-95 flex items-center gap-2">
                     <i class="fa-solid fa-user"></i> Login
@@ -126,7 +123,16 @@
         <!-- ========================================== -->
         <div id="view-User" class="view-section active space-y-8">
             
-            <!-- Services Grid -->
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-orange-100 text-orange-500 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-location-dot"></i>
+                </div>
+                <div class="flex-1">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Delivering to</p>
+                    <p class="text-sm font-bold text-gray-900 truncate" id="user-location-display">Select Location below to order</p>
+                </div>
+            </div>
+
             <div>
                 <h2 class="text-lg font-black mb-4 text-gray-900">What are you looking for?</h2>
                 <div class="flex overflow-x-auto no-scrollbar gap-4 sm:gap-8 pb-2">
@@ -149,12 +155,6 @@
                         </div>
                         <span class="text-[11px] font-bold text-gray-700">Book Ride</span>
                     </div>
-                    <div class="flex flex-col items-center gap-2 shrink-0 cursor-pointer group" onclick="filterCategory('Pharmacy')">
-                        <div class="w-[70px] h-[70px] sm:w-24 sm:h-24 rounded-2xl super-icon-wrapper flex items-center justify-center text-red-500 text-2xl group-hover:scale-105">
-                            <i class="fa-solid fa-pills"></i>
-                        </div>
-                        <span class="text-[11px] font-bold text-gray-700">Meds</span>
-                    </div>
                     <div class="flex flex-col items-center gap-2 shrink-0 cursor-pointer group" onclick="filterCategory('Services')">
                         <div class="w-[70px] h-[70px] sm:w-24 sm:h-24 rounded-2xl super-icon-wrapper flex items-center justify-center text-purple-500 text-2xl group-hover:scale-105">
                             <i class="fa-solid fa-screwdriver-wrench"></i>
@@ -163,7 +163,6 @@
                     </div>
                 </div>
 
-                <!-- Hidden Sub-Tabs for Services -->
                 <div id="services-subtabs" class="hidden mt-4 pt-4 border-t border-gray-100 flex gap-2 overflow-x-auto no-scrollbar pb-2 transition-all">
                     <button type="button" onclick="filterCategory('Services', null)" data-subcat="All" class="subtab-btn px-4 py-2 bg-emerald-500 text-white rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition">All Services</button>
                     <button type="button" onclick="filterCategory('Services', 'Electrician')" data-subcat="Electrician" class="subtab-btn px-4 py-2 bg-gray-50 text-gray-700 rounded-full text-xs font-bold whitespace-nowrap transition">Electrician</button>
@@ -173,7 +172,6 @@
                 </div>
             </div>
 
-            <!-- Promotional Banner -->
             <div class="relative w-full h-36 rounded-3xl overflow-hidden bg-gradient-to-r from-emerald-600 to-teal-500 shadow-lg flex items-center p-6">
                 <div class="relative z-10 w-2/3">
                     <span class="bg-white/20 text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider backdrop-blur-md">Gramzo Launch</span>
@@ -182,19 +180,16 @@
                 <i class="fa-solid fa-gift absolute -right-4 -bottom-4 text-9xl text-white opacity-20"></i>
             </div>
 
-            <!-- Marketplace List -->
             <div>
                 <div class="flex justify-between items-end mb-4">
                     <h3 class="font-black text-xl text-gray-900" id="marketplace-title">Trending Near You</h3>
                     <button type="button" id="btn-clear-filter" onclick="filterCategory(null)" class="hidden text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">Clear Filter</button>
                 </div>
                 <div id="market-list" class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                    <!-- Products injected here -->
                     <div class="col-span-full py-10 text-center text-gray-400 font-medium text-sm animate-pulse">Loading local marketplace...</div>
                 </div>
             </div>
 
-            <!-- Bottom Partner Call-to-Action -->
             <div id="partner-cta" class="mt-12 bg-gray-900 rounded-[2.5rem] p-8 text-center text-white shadow-xl relative overflow-hidden">
                 <div class="absolute -right-10 -top-10 w-40 h-40 bg-emerald-500 rounded-full opacity-20 blur-2xl"></div>
                 <div class="absolute -left-10 -bottom-10 w-40 h-40 bg-blue-500 rounded-full opacity-20 blur-2xl"></div>
@@ -212,7 +207,7 @@
         </div>
 
         <!-- ========================================== -->
-        <!-- VIEW: RIDE BOOKING (Rapido/Uber style)     -->
+        <!-- VIEW: RIDE BOOKING                         -->
         <!-- ========================================== -->
         <div id="view-RideBooking" class="view-section space-y-6">
             <div class="flex items-center gap-3 mb-2">
@@ -222,9 +217,7 @@
             
             <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100 relative">
                 <div class="timeline-line"></div>
-                
                 <div class="relative z-10 space-y-4">
-                    <!-- Pickup -->
                     <div class="flex items-center gap-3">
                         <div class="w-3 h-3 rounded-full bg-blue-500 shadow-[0_0_0_4px_rgba(59,130,246,0.2)] shrink-0"></div>
                         <div class="relative w-full">
@@ -234,29 +227,27 @@
                             </button>
                         </div>
                     </div>
-                    
-                    <!-- Drop -->
                     <div class="flex items-center gap-3">
                         <div class="w-3 h-3 rounded-none bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.2)] shrink-0"></div>
                         <input id="ride-drop" class="input-field !pl-4" placeholder="Enter Drop Destination">
                     </div>
                 </div>
-
+                
                 <button type="button" onclick="calculateRideFares()" id="btn-find-rides" class="w-full bg-gray-900 text-white py-4 rounded-2xl font-bold mt-6 hover:bg-gray-800 transition-colors active:scale-95">Find Rides</button>
+                
+                <button type="button" onclick="bookAmbulance()" class="w-full bg-red-500 text-white py-4 rounded-2xl font-bold mt-4 hover:bg-red-600 transition-colors active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-red-500/30">
+                    <i class="fa-solid fa-truck-medical text-xl"></i> Emergency Ambulance (SOS)
+                </button>
             </div>
 
-            <!-- Ride Options (Hidden until calculated) -->
             <div id="ride-options-container" class="hidden space-y-4 animate-fadeIn">
                 <h3 class="font-bold text-gray-500 uppercase tracking-wider text-xs ml-2">Available Options <span id="ride-distance-display" class="lowercase normal-case text-gray-400 font-medium ml-2"></span></h3>
-                
-                <div id="ride-options-list" class="space-y-3">
-                    <!-- Injected via JS -->
-                </div>
+                <div id="ride-options-list" class="space-y-3"></div>
             </div>
         </div>
 
         <!-- ========================================== -->
-        <!-- VIEW: CART & CHECKOUT (User only)          -->
+        <!-- VIEW: CART & CHECKOUT                      -->
         <!-- ========================================== -->
         <div id="view-Cart" class="view-section space-y-6">
             <h2 class="text-2xl font-black text-gray-900">Checkout</h2>
@@ -323,69 +314,81 @@
         <div id="view-Partner-Profile" class="view-section space-y-6">
             <h2 class="text-2xl font-black text-gray-900">My Hub</h2>
             
-            <!-- Shop Owners Section (Food & Grocery & Service Providers) -->
-            <div id="partner-shop-section" class="hidden space-y-6">
-                <!-- Shop Details -->
-                <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100">
-                    <h3 class="font-bold text-gray-900 mb-3">Business Profile</h3>
-                    <div class="flex flex-col sm:flex-row gap-3">
-                        <input id="partner-shop-name" class="input-field flex-1" placeholder="Enter Business Name">
-                        <button type="button" onclick="saveShopName()" id="btn-save-shop" class="bg-gray-900 text-white px-6 py-4 rounded-2xl font-bold active:scale-95 transition">Save</button>
+            <!-- Unified Verification & Profile Section -->
+            <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-gray-900">Verification & Profile</h3>
+                    <span id="partner-approval-status" class="text-[10px] font-black text-gray-500 bg-gray-100 px-2 py-1 rounded uppercase tracking-widest">Setup Needed</span>
+                </div>
+                
+                <div class="space-y-4">
+                    <div id="shop-name-container">
+                        <label class="block text-xs font-bold text-gray-600 mb-1 ml-1" id="shop-name-label">Business Name</label>
+                        <input id="partner-shop-name" class="input-field" placeholder="Enter Business Name">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-1 ml-1" id="doc1-label">Document 1</label>
+                        <input type="file" id="partner-doc1-file" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 transition-all border border-gray-200 rounded-2xl p-2 bg-gray-50/50">
+                        <p class="text-[10px] text-gray-500 mt-1 ml-2">Required for admin verification.</p>
                     </div>
 
-                    <!-- Shop OPEN/CLOSED Toggle -->
-                    <div class="mt-4 flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
-                        <div>
-                            <p class="font-bold text-sm text-gray-900">Accepting Orders</p>
-                            <p class="text-[10px] text-gray-500" id="shop-status-text">Currently Open</p>
-                        </div>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="partner-status-toggle" class="sr-only peer" onchange="toggleShopStatus()">
-                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
-                        </label>
+                    <div id="doc2-container" class="hidden">
+                        <label class="block text-xs font-bold text-gray-600 mb-1 ml-1" id="doc2-label">Document 2</label>
+                        <input type="file" id="partner-doc2-file" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 transition-all border border-gray-200 rounded-2xl p-2 bg-gray-50/50">
+                        <p class="text-[10px] text-gray-500 mt-1 ml-2">Required for admin verification.</p>
                     </div>
+                    
+                    <button type="button" onclick="submitPartnerProfile()" id="btn-submit-profile" class="w-full bg-gray-900 text-white px-6 py-4 rounded-2xl font-bold active:scale-95 transition">Submit Profile for Verification</button>
                 </div>
 
-                <!-- Add Product (Restored for Partners!) -->
-                <div class="bg-emerald-50 rounded-[2rem] p-6 border border-emerald-100 relative overflow-hidden">
-                    <div class="relative z-10">
-                        <h3 class="font-bold text-emerald-800 mb-4">Add to Catalog</h3>
-                        <div class="space-y-3">
-                            <input id="prod-name" class="input-field !bg-white" placeholder="Item / Service Name">
-                            
-                            <!-- Variant Inputs -->
-                            <div id="variant-container" class="space-y-2">
-                                <div class="flex gap-3 variant-row">
-                                    <input class="input-field !bg-white w-1/2 var-qty" placeholder="Unit/Type (e.g. 1 kg)">
-                                    <input type="number" class="input-field !bg-white w-1/2 var-price" placeholder="Price (₹)">
-                                </div>
-                            </div>
-                            
-                            <button type="button" onclick="addVariantRow()" class="text-xs text-emerald-600 font-bold px-3 py-1.5 bg-emerald-100 rounded-lg hover:bg-emerald-200 transition">+ Add another variant/price</button>
-
-                            <button type="button" onclick="addPartnerProduct()" id="btn-add-prod" class="w-full bg-emerald-500 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-emerald-500/20 active:scale-95 transition mt-2">Publish Item</button>
-                        </div>
+                <!-- Shop Status Toggle (Hidden for Riders) -->
+                <div id="shop-status-container" class="mt-6 flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100 hidden">
+                    <div>
+                        <p class="font-bold text-sm text-gray-900">Accepting Orders</p>
+                        <p class="text-[10px] text-gray-500" id="shop-status-text">Currently Open</p>
                     </div>
-                    <i class="fa-solid fa-boxes-stacked absolute -right-6 -bottom-6 text-emerald-200 text-8xl opacity-40"></i>
-                </div>
-
-                <!-- Product Catalog List -->
-                <div>
-                    <h3 class="font-bold text-gray-800 mb-3">Inventory Control</h3>
-                    <div id="partner-catalog-list" class="space-y-3">
-                        <p class="text-sm text-gray-400 text-center py-4 bg-white rounded-2xl border border-gray-100">Loading catalog...</p>
-                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="partner-status-toggle" class="sr-only peer" onchange="toggleShopStatus()">
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                    </label>
                 </div>
             </div>
 
-            <!-- Vehicle / Rider Section -->
-            <div id="partner-vehicle-section" class="hidden bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100">
-                <h3 class="font-bold text-gray-900 mb-3">Vehicle Details</h3>
-                <div class="flex flex-col sm:flex-row gap-3">
-                    <input id="partner-license-input" class="input-field flex-1" placeholder="Enter License/Plate Number">
-                    <button type="button" onclick="saveLicense()" id="btn-save-lic" class="bg-gray-900 text-white px-6 py-4 rounded-2xl font-bold active:scale-95 transition">Update</button>
+            <!-- Approval Warning -->
+            <div id="approval-warning" class="bg-orange-50 border border-orange-200 rounded-[2rem] p-6 text-center hidden">
+                <i class="fa-solid fa-clock-rotate-left text-3xl text-orange-400 mb-2"></i>
+                <p class="text-sm text-orange-800 font-bold" id="approval-warning-text">Your profile is under review by the Admin. You can manage products once approved.</p>
+            </div>
+
+            <!-- Add Product (Locked until approved) -->
+            <div id="add-product-container" class="bg-emerald-50 rounded-[2rem] p-6 border border-emerald-100 relative overflow-hidden hidden">
+                <div class="relative z-10">
+                    <h3 class="font-bold text-emerald-800 mb-4">Add to Catalog</h3>
+                    <div class="space-y-3">
+                        <input id="prod-name" class="input-field !bg-white" placeholder="Item / Service Name">
+                        
+                        <div id="variant-container" class="space-y-2">
+                            <div class="flex gap-3 variant-row">
+                                <input class="input-field !bg-white w-1/2 var-qty" placeholder="Unit/Type (e.g. 1 kg)">
+                                <input type="number" class="input-field !bg-white w-1/2 var-price" placeholder="Price (₹)">
+                            </div>
+                        </div>
+                        
+                        <button type="button" onclick="addVariantRow()" class="text-xs text-emerald-600 font-bold px-3 py-1.5 bg-emerald-100 rounded-lg hover:bg-emerald-200 transition">+ Add another variant/price</button>
+
+                        <button type="button" onclick="addPartnerProduct()" id="btn-add-prod" class="w-full bg-emerald-500 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-emerald-500/20 active:scale-95 transition mt-2">Publish Item</button>
+                    </div>
                 </div>
-                <p class="text-[10px] text-gray-500 mt-3"><i class="fa-solid fa-circle-info mr-1"></i>Ensure your vehicle details are accurate for delivery assignments.</p>
+                <i class="fa-solid fa-boxes-stacked absolute -right-6 -bottom-6 text-emerald-200 text-8xl opacity-40"></i>
+            </div>
+
+            <!-- Product Catalog List -->
+            <div id="partner-catalog-list-container" class="hidden">
+                <h3 class="font-bold text-gray-800 mb-3">Inventory Control</h3>
+                <div id="partner-catalog-list" class="space-y-3">
+                    <p class="text-sm text-gray-400 text-center py-4 bg-white rounded-2xl border border-gray-100">Loading catalog...</p>
+                </div>
             </div>
         </div>
 
@@ -408,6 +411,24 @@
                 </div>
             </div>
 
+            <!-- ADMIN APPROVALS SECTION -->
+            <div class="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden mt-8">
+                <div class="p-5 border-b border-gray-100 bg-orange-50/50 flex items-center justify-between">
+                    <h3 class="font-bold text-gray-800">Pending Shop Approvals</h3>
+                    <span class="w-2 h-2 rounded-full bg-orange-400 animate-pulse"></span>
+                </div>
+                <div class="overflow-x-auto no-scrollbar">
+                    <table class="w-full text-left text-sm whitespace-nowrap">
+                        <thead class="bg-white border-b border-gray-100 text-gray-400 text-[10px] uppercase tracking-wider">
+                            <tr><th class="p-4 font-bold">Partner</th><th class="p-4 font-bold">Business</th><th class="p-4 font-bold">Documents</th><th class="p-4 font-bold text-right">Action</th></tr>
+                        </thead>
+                        <tbody id="admin-approvals-body" class="divide-y divide-gray-50">
+                            <tr><td colspan="4" class="p-6 text-center text-gray-400 text-xs italic">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             <div class="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden mt-8">
                 <div class="p-5 border-b border-gray-100 bg-gray-50/50">
                     <h3 class="font-bold text-gray-800">Recent Transactions</h3>
@@ -427,14 +448,14 @@
 
     </main>
 
-    <!-- Bottom Navigation (Mobile mostly) -->
+    <!-- Bottom Navigation -->
     <div id="bottom-nav" class="fixed bottom-0 w-full bg-white border-t border-gray-200 pb-safe pt-2 px-6 pb-2 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-40 hidden">
         <div class="max-w-md mx-auto flex justify-between items-center sm:max-w-4xl sm:justify-center sm:gap-16">
             <!-- Dynamically populated based on role -->
         </div>
     </div>
 
-    <!-- Auth Modal / Bottom Sheet -->
+    <!-- Auth Modal -->
     <div id="auth-overlay" class="modal-overlay">
         <div class="modal-content">
             <div class="flex justify-between items-center mb-4">
@@ -461,7 +482,6 @@
                 <input id="reg-pincode" type="tel" class="input-field" placeholder="6-Digit Pincode" maxlength="6">
                 <input id="reg-pass" type="password" class="input-field" placeholder="Create Password">
                 
-                <!-- Partner Specific Fields -->
                 <div id="partner-fields" class="hidden bg-gray-50 p-4 rounded-2xl border border-gray-100 space-y-3 mt-2">
                     <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider">Partner Details</label>
                     <select id="reg-partner-category" class="input-field !bg-white" onchange="togglePartnerFields()">
@@ -472,10 +492,6 @@
                         <option value="Vehicle Owner">Bike / Toto / Car Owner</option>
                         <option value="Delivery Rider">Delivery Rider</option>
                     </select>
-                    
-                    <div id="license-container" class="hidden transition-all">
-                        <input id="reg-license" type="text" class="input-field !bg-white" placeholder="Enter Vehicle License Number">
-                    </div>
 
                     <div id="skill-container" class="hidden transition-all">
                         <select id="reg-skill" class="input-field !bg-white">
@@ -533,6 +549,28 @@
         
         const getCol = (name) => collection(db, 'artifacts', appId, 'public', 'data', name);
 
+        // Image Resizer Helper for Firestore 1MB limits
+        const resizeImage = (file, maxSize) => {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        if (width > maxSize) { height *= maxSize / width; width = maxSize; }
+                        canvas.width = width; canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        resolve(canvas.toDataURL('image/jpeg', 0.7)); // compress to 70% quality JPEG
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        };
+
         async function startApp() {
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -548,7 +586,6 @@
             }
         }
 
-        // --- Professional Geolocation Integration ---
         window.getCurrentLocation = (inputId) => {
             const input = document.getElementById(inputId);
             const originalVal = input.value;
@@ -557,7 +594,6 @@
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(async (pos) => {
                     try {
-                        // OpenStreetMap Reverse Geocoding (Free, no API key required)
                         const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`);
                         const data = await res.json();
                         input.value = data.display_name || `${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`;
@@ -575,8 +611,6 @@
                 showToast("Geolocation not supported by device.", "error");
             }
         };
-
-        // --- UI Interactions ---
 
         window.openAuthModal = (role = 'User') => {
             currentAuthRole = role;
@@ -606,19 +640,12 @@
 
         window.togglePartnerFields = () => {
             const category = document.getElementById('reg-partner-category').value;
-            const licenseContainer = document.getElementById('license-container');
             const skillContainer = document.getElementById('skill-container');
             
-            if (category === 'Vehicle Owner') {
-                licenseContainer.classList.remove('hidden');
-                skillContainer.classList.add('hidden');
-            } else if (category === 'Service Provider') {
+            if (category === 'Service Provider') {
                 skillContainer.classList.remove('hidden');
-                licenseContainer.classList.add('hidden');
             } else {
-                licenseContainer.classList.add('hidden');
                 skillContainer.classList.add('hidden');
-                document.getElementById('reg-license').value = ''; 
                 document.getElementById('reg-skill').value = ''; 
             }
         };
@@ -672,8 +699,6 @@
             return Promise.race([promise, new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), ms))]);
         };
 
-        // --- Authentication Flow (Removed dummy/demo login override) ---
-
         window.handleAuth = async (type) => {
             const msgEl = document.getElementById('auth-msg');
             msgEl.classList.remove('hidden');
@@ -710,7 +735,6 @@
                 }
 
                 let partnerCategory = null;
-                let licenseStr = null;
                 let skillStr = null;
 
                 if (currentAuthRole === 'Partner') {
@@ -720,15 +744,6 @@
                         msgEl.innerText = "Please select a Partner Business Type.";
                         btn.innerText = originalText; btn.disabled = false;
                         return;
-                    }
-                    if (partnerCategory === 'Vehicle Owner') {
-                        licenseStr = document.getElementById('reg-license').value.trim();
-                        if (!licenseStr) {
-                            msgEl.className = "text-xs text-center font-bold mb-4 min-h-[1.5rem] px-4 rounded-lg py-2 bg-red-50 text-red-600 block";
-                            msgEl.innerText = "License number is required for Vehicle Owners.";
-                            btn.innerText = originalText; btn.disabled = false;
-                            return;
-                        }
                     }
                     if (partnerCategory === 'Service Provider') {
                         skillStr = document.getElementById('reg-skill').value;
@@ -759,9 +774,10 @@
                     name, phone, pincode, pin: pass, 
                     role: currentAuthRole, 
                     shopStatus: 'Open',
+                    approvalStatus: 'Setup Needed',
                     uid: auth.currentUser?.uid || 'offline_uid',
                     created: new Date().toISOString(),
-                    ...(currentAuthRole === 'Partner' && { category: partnerCategory, license: licenseStr, skill: skillStr, shopName: null })
+                    ...(currentAuthRole === 'Partner' && { category: partnerCategory, skill: skillStr, shopName: null, doc1: null, doc2: null })
                 };
                 
                 setDoc(userRef, userData).catch(e => console.warn("Background DB write delayed."));
@@ -844,22 +860,70 @@
                     document.getElementById('partner-category-badge').innerText = `Online (${currentUser.category})`;
                 }
 
-                if(currentUser.category === 'Food Owner' || currentUser.category === 'Grocery Owner' || currentUser.category === 'Service Provider') {
-                    document.getElementById('partner-shop-section').classList.remove('hidden');
-                    document.getElementById('partner-vehicle-section').classList.add('hidden');
-                    if(currentUser.shopName) document.getElementById('partner-shop-name').value = currentUser.shopName;
-                    
-                    const statusToggle = document.getElementById('partner-status-toggle');
-                    if(statusToggle) statusToggle.checked = (currentUser.shopStatus !== 'Closed');
-                    document.getElementById('shop-status-text').innerText = (currentUser.shopStatus === 'Closed') ? 'Currently Closed' : 'Currently Open';
+                // Dynamic Form Setup for Profile
+                const shopNameCont = document.getElementById('shop-name-container');
+                const shopNameLabel = document.getElementById('shop-name-label');
+                const doc1Label = document.getElementById('doc1-label');
+                const doc2Cont = document.getElementById('doc2-container');
+                const doc2Label = document.getElementById('doc2-label');
+                const statusCont = document.getElementById('shop-status-container');
+                const addProdCont = document.getElementById('add-product-container');
+                const catListCont = document.getElementById('partner-catalog-list-container');
 
-                    if(currentUser.category === 'Service Provider') {
-                        document.getElementById('partner-shop-name').placeholder = "Enter Profile/Business Name (e.g. RK Electricians)";
-                    }
+                if (currentUser.category === 'Food Owner') {
+                    shopNameCont.classList.remove('hidden'); shopNameLabel.innerText = "Restaurant Name";
+                    doc1Label.innerText = "FSSAI License Image"; doc2Cont.classList.add('hidden');
+                    statusCont.classList.remove('hidden'); catListCont.classList.remove('hidden');
+                } else if (currentUser.category === 'Grocery Owner') {
+                    shopNameCont.classList.remove('hidden'); shopNameLabel.innerText = "Grocery Shop Name";
+                    doc1Label.innerText = "GST / Trade License Image"; doc2Cont.classList.add('hidden');
+                    statusCont.classList.remove('hidden'); catListCont.classList.remove('hidden');
+                } else if (currentUser.category === 'Service Provider') {
+                    shopNameCont.classList.remove('hidden'); shopNameLabel.innerText = "Profile / Business Name";
+                    doc1Label.innerText = "Aadhaar Card Copy"; doc2Cont.classList.add('hidden');
+                    statusCont.classList.remove('hidden'); catListCont.classList.remove('hidden');
+                } else { 
+                    shopNameCont.classList.add('hidden'); 
+                    doc1Label.innerText = "Driving License Image"; 
+                    doc2Cont.classList.remove('hidden'); doc2Label.innerText = "RC Copy of Vehicle";
+                    statusCont.classList.add('hidden'); catListCont.classList.add('hidden');
+                    addProdCont.classList.add('hidden'); 
+                }
+
+                if(currentUser.shopName) document.getElementById('partner-shop-name').value = currentUser.shopName;
+
+                // Status Logic
+                const statusToggle = document.getElementById('partner-status-toggle');
+                if(statusToggle) statusToggle.checked = (currentUser.shopStatus !== 'Closed');
+                document.getElementById('shop-status-text').innerText = (currentUser.shopStatus === 'Closed') ? 'Currently Closed' : 'Currently Open';
+
+                // Approval Logic UI
+                const statusLabel = document.getElementById('partner-approval-status');
+                const approvalWarning = document.getElementById('approval-warning');
+                const canAddProducts = (currentUser.category === 'Food Owner' || currentUser.category === 'Grocery Owner' || currentUser.category === 'Service Provider');
+
+                if (currentUser.approvalStatus === 'Approved') {
+                    statusLabel.innerText = "Verified";
+                    statusLabel.className = "text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-1 rounded uppercase tracking-widest";
+                    approvalWarning.classList.add('hidden');
+                    if (canAddProducts) addProdCont.classList.remove('hidden');
+                } else if (currentUser.approvalStatus === 'Rejected') {
+                    statusLabel.innerText = "Rejected";
+                    statusLabel.className = "text-[10px] font-black text-red-600 bg-red-50 px-2 py-1 rounded uppercase tracking-widest";
+                    addProdCont.classList.add('hidden');
+                    approvalWarning.classList.remove('hidden');
+                    document.getElementById('approval-warning-text').innerText = "Your profile was rejected by the Admin. Please contact support.";
+                } else if (currentUser.approvalStatus === 'Pending') {
+                    statusLabel.innerText = "Pending Verification";
+                    statusLabel.className = "text-[10px] font-black text-orange-600 bg-orange-50 px-2 py-1 rounded uppercase tracking-widest";
+                    addProdCont.classList.add('hidden');
+                    approvalWarning.classList.remove('hidden');
+                    document.getElementById('approval-warning-text').innerText = "Your profile is under review by the Admin.";
                 } else {
-                    document.getElementById('partner-shop-section').classList.add('hidden');
-                    document.getElementById('partner-vehicle-section').classList.remove('hidden');
-                    if(currentUser.license) document.getElementById('partner-license-input').value = currentUser.license;
+                    statusLabel.innerText = "Setup Needed";
+                    statusLabel.className = "text-[10px] font-black text-gray-500 bg-gray-100 px-2 py-1 rounded uppercase tracking-widest";
+                    addProdCont.classList.add('hidden');
+                    approvalWarning.classList.add('hidden');
                 }
             }
 
@@ -886,8 +950,6 @@
             showToast("Successfully signed out.");
         };
 
-        // --- Navigation Setup ---
-
         function setupBottomNav(role) {
             const bNav = document.getElementById('bottom-nav');
             bNav.classList.remove('hidden');
@@ -911,8 +973,6 @@
                 container.innerHTML += createNavItem('Admin', 'fa-solid fa-chart-line', 'Dashboard', 'Admin');
             }
         }
-
-        // --- Dynamic Ride Booking & Fare Logic ---
         
         window.openRideBooking = () => {
             if(!currentUser) { showToast("Please login as User to book rides.", "info"); openAuthModal('User'); return; }
@@ -933,15 +993,10 @@
             btn.disabled = true;
 
             setTimeout(() => {
-                // Mock realistic distance based on input logic (no direct API key given)
                 const distanceKm = Math.floor(Math.random() * 15) + 2; 
 
-                // Strictly Following Prompt Constraints for Fare logic:
-                // Bike: 3 Km = 25 Rs Fix. Above 3 km = 3 Rs increase per km.
                 const bikeFare = distanceKm <= 3 ? 25 : 25 + ((distanceKm - 3) * 3);
-                // Toto: First 3 km = 50 Rs Fix. Then 10 Rs per km.
                 const totoFare = distanceKm <= 3 ? 50 : 50 + ((distanceKm - 3) * 10);
-                // Car: Per Km = 15 Rs.
                 const carFare = distanceKm * 15;
 
                 document.getElementById('ride-distance-display').innerText = `(~${distanceKm} km route)`;
@@ -985,7 +1040,7 @@
                 phone: currentUser.phone, 
                 items: [rideItem], 
                 total: fare, 
-                address: pickup, // For driver display
+                address: pickup, 
                 drop_location: drop,
                 status: 'Placed', 
                 partnerId: null,
@@ -1000,7 +1055,32 @@
             });
         };
 
-        // --- Data Fetching & Rendering --- //
+        window.bookAmbulance = () => {
+            if(!currentUser) { showToast("Please login to request an Ambulance.", "info"); openAuthModal('User'); return; }
+            
+            const pickup = document.getElementById('ride-pickup').value.trim() || "Emergency Location (Check GPS)";
+            const rideItem = { name: "Ambulance SOS", price: 0, pickup, drop: "Nearest Hospital" };
+            
+            addDoc(getCol('orders'), { 
+                customer: currentUser.name, 
+                phone: currentUser.phone, 
+                items: [rideItem], 
+                total: 0, 
+                address: pickup, 
+                drop_location: "Nearest Hospital",
+                status: 'Placed', 
+                isEmergency: true,
+                partnerId: null,
+                partnerName: null,
+                time: serverTimestamp() 
+            }).then(() => {
+                showToast("SOS Alert Broadcasted! Help is on the way.", "success");
+                switchMainView('User');
+            }).catch(e => {
+                showToast("Network delayed. Broadcasting in background.", "info");
+                switchMainView('User');
+            });
+        };
 
         window.updatePriceDisplay = (selectEl, priceId) => {
             const price = selectEl.options[selectEl.selectedIndex].dataset.price;
@@ -1025,7 +1105,6 @@
                 { id: "dummy1", name: "Fresh Tomatoes", variants: [{qty: "1 Kg", price: 40}, {qty: "2 Kg", price: 75}], category: "Grocery", image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400&q=80", shopName: "Gramzo Fresh", inStock: true, shopStatus: 'Open' },
                 { id: "dummy2", name: "Aashirvaad Atta", variants: [{qty: "5 Kg", price: 210}, {qty: "10 Kg", price: 400}], category: "Grocery", image: "https://images.unsplash.com/photo-1627483262112-039e9a0a0f16?w=400&q=80", shopName: "Gramzo Supermart", inStock: true, shopStatus: 'Open' },
                 { id: "dummy3", name: "Chicken Biryani", variants: [{qty: "Half", price: 90}, {qty: "Full Plate", price: 150}], category: "Food", image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&q=80", shopName: "Local Kitchen", inStock: false, shopStatus: 'Open' },
-                { id: "dummy4", name: "Paracetamol 500mg", variants: [{qty: "1 Strip", price: 20}, {qty: "3 Strips", price: 55}], category: "Pharmacy", image: "https://images.unsplash.com/photo-1584308666744-24d5e4a86b97?w=400&q=80", shopName: "Gramzo Pharma", inStock: true, shopStatus: 'Open' },
                 { id: "dummy6", name: "AC Repair & Service", price: 499, qty: "1 Visit", category: "Services", subCategory: "Electrician", image: "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=400&q=80", shopName: "Raj Electricals", inStock: true, shopStatus: 'Open' },
                 { id: "dummy7", name: "Deep Cleaning", variants: [{qty: "1 BHK", price: 999}, {qty: "2 BHK", price: 1499}], category: "Services", subCategory: "Cleaner", image: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&q=80", shopName: "CleanSweep" }
             ];
@@ -1135,7 +1214,7 @@
             unsubscribeListeners = [];
 
             if (currentUser.role === 'Admin') {
-                const unsub = onSnapshot(getCol('orders'), (snap) => {
+                const unsubOrders = onSnapshot(getCol('orders'), (snap) => {
                     let rev = 0, count = 0;
                     const adminLog = document.getElementById('admin-log-body');
                     if(adminLog) adminLog.innerHTML = '';
@@ -1150,14 +1229,20 @@
                     orders.forEach(o => {
                         rev += o.total; count++;
                         if(adminLog) {
-                            const statusColor = o.status === 'Placed' ? 'text-amber-500' : o.status === 'Accepted' ? 'text-blue-500' : 'text-emerald-500';
+                            let statusColor = o.status === 'Placed' ? 'text-amber-500' : o.status === 'Accepted' ? 'text-blue-500' : 'text-emerald-500';
+                            let rowBg = '';
+                            if(o.isEmergency) {
+                                statusColor = 'text-red-600';
+                                rowBg = 'bg-red-50';
+                            }
+                            
                             adminLog.innerHTML += `
-                                <tr class="hover:bg-gray-50 transition-colors">
+                                <tr class="hover:bg-gray-50 transition-colors ${rowBg}">
                                     <td class="p-4 font-mono font-bold text-[10px] text-gray-500">#${o.id.slice(-5).toUpperCase()}</td>
                                     <td class="p-4 font-bold text-gray-900 text-xs">${o.customer}</td>
                                     <td class="p-4 font-medium text-gray-500 text-xs">${o.partnerName || '-'}</td>
                                     <td class="p-4 font-black text-gray-900 text-xs">₹${o.total}</td>
-                                    <td class="p-4 text-right uppercase text-[9px] font-black ${statusColor} tracking-wider">${o.status}</td>
+                                    <td class="p-4 text-right uppercase text-[9px] font-black ${statusColor} tracking-wider">${o.isEmergency ? 'SOS Alert' : o.status}</td>
                                 </tr>
                             `;
                         }
@@ -1165,7 +1250,35 @@
                     document.getElementById('stat-rev').innerText = `₹${rev}`;
                     document.getElementById('stat-ord').innerText = count;
                 });
-                unsubscribeListeners.push(unsub);
+                unsubscribeListeners.push(unsubOrders);
+
+                const unsubUsers = onSnapshot(getCol('users'), (snap) => {
+                    const approvalsBody = document.getElementById('admin-approvals-body');
+                    if(!approvalsBody) return;
+                    
+                    // Show all pending partners who have started setup (either shopName or uploaded docs)
+                    const pending = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(u => u.role === 'Partner' && u.approvalStatus === 'Pending' && (u.shopName || u.doc1 || u.doc2));
+
+                    if(pending.length === 0) {
+                        approvalsBody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-gray-400 text-xs italic">No pending approvals right now.</td></tr>';
+                    } else {
+                        approvalsBody.innerHTML = pending.map(u => `
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="p-4 font-bold text-gray-900 text-xs">${u.name}<br><span class="font-mono font-normal text-[9px] text-gray-500">${u.phone}</span></td>
+                                <td class="p-4 font-bold text-gray-700 text-xs">${u.shopName || 'N/A'}<br><span class="text-[9px] font-black text-emerald-500 uppercase tracking-widest">${u.category}</span></td>
+                                <td class="p-4 flex flex-col gap-1">
+                                    ${u.doc1 ? `<a href="${u.doc1}" target="_blank" class="text-[10px] bg-blue-50 text-blue-600 px-2 py-1 rounded font-bold hover:underline inline-block w-max"><i class="fa-solid fa-file-image"></i> Doc 1</a>` : '<span class="text-[10px] text-gray-400 italic">No Doc 1</span>'}
+                                    ${u.doc2 ? `<a href="${u.doc2}" target="_blank" class="text-[10px] bg-blue-50 text-blue-600 px-2 py-1 rounded font-bold hover:underline inline-block w-max"><i class="fa-solid fa-file-image"></i> Doc 2</a>` : ''}
+                                </td>
+                                <td class="p-4 text-right">
+                                    <button type="button" onclick="adminReviewPartner('${u.id}', 'Approved')" class="bg-emerald-500 text-white px-3 py-1 rounded text-[10px] font-black uppercase tracking-wider mr-2 hover:bg-emerald-600 transition">Approve</button>
+                                    <button type="button" onclick="adminReviewPartner('${u.id}', 'Rejected')" class="bg-red-500 text-white px-3 py-1 rounded text-[10px] font-black uppercase tracking-wider hover:bg-red-600 transition">Reject</button>
+                                </td>
+                            </tr>
+                        `).join('');
+                    }
+                });
+                unsubscribeListeners.push(unsubUsers);
             } 
             else if (currentUser.role === 'Partner') {
                 const orderUnsub = onSnapshot(getCol('orders'), (snap) => {
@@ -1184,8 +1297,17 @@
                         const isMine = o.partnerId === currentUser.phone;
                         const itemsStr = o.items.map(i => `${i.name}`).join(', ');
                         
+                        let cardStyle = isMine ? 'border-emerald-500 shadow-emerald-100' : 'border-gray-100';
+                        let iconHeader = '';
+                        
+                        if(o.isEmergency) {
+                            cardStyle = 'border-red-500 shadow-red-100 bg-red-50/50';
+                            iconHeader = `<span class="text-[10px] font-black text-red-600 uppercase tracking-widest bg-red-100 px-2 py-1 rounded flex items-center w-fit mb-2"><i class="fa-solid fa-truck-medical mr-1"></i> EMERGENCY SOS</span>`;
+                        }
+
                         html += `
-                            <div class="bg-white rounded-3xl p-5 shadow-sm border ${isMine ? 'border-emerald-500 shadow-emerald-100' : 'border-gray-100'}">
+                            <div class="bg-white rounded-3xl p-5 shadow-sm border ${cardStyle}">
+                                ${iconHeader}
                                 <div class="flex justify-between items-start mb-3">
                                     <div>
                                         <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Order #${o.id.slice(-4).toUpperCase()}</span>
@@ -1253,44 +1375,67 @@
             }
         }
 
-        // --- Partner Hub Actions --- //
-
-        window.saveShopName = () => {
-            if(!currentUser || !currentUser.phone) return;
-            const shopName = document.getElementById('partner-shop-name').value.trim();
-            if(!shopName) return showToast("Enter a shop name first.", "error");
-            
-            const btn = document.getElementById('btn-save-shop');
-            const orig = btn.innerText;
-            btn.innerText = "...";
-            btn.disabled = true;
-
-            updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.phone), { shopName })
-                .then(() => {
-                    currentUser.shopName = shopName;
-                    showToast("Shop name updated successfully!", "success");
-                })
-                .catch(e => showToast("Network delayed. It will save automatically.", "info"))
-                .finally(() => { btn.innerText = orig; btn.disabled = false; });
+        // --- Admin Functions --- //
+        window.adminReviewPartner = async (partnerPhone, status) => {
+            if(currentUser.role !== 'Admin') return;
+            try {
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', partnerPhone), { approvalStatus: status });
+                showToast(`Partner ${status}!`, "success");
+            } catch(e) {
+                showToast("Error updating status.", "error");
+            }
         };
 
-        window.saveLicense = () => {
+        // --- Partner Hub Actions --- //
+
+        window.submitPartnerProfile = async () => {
             if(!currentUser || !currentUser.phone) return;
-            const license = document.getElementById('partner-license-input').value.trim();
-            if(!license) return showToast("Enter a license/plate number.", "error");
             
-            const btn = document.getElementById('btn-save-lic');
+            const shopNameInput = document.getElementById('partner-shop-name');
+            const shopName = shopNameInput ? shopNameInput.value.trim() : null;
+            
+            const doc1File = document.getElementById('partner-doc1-file')?.files[0];
+            const doc2File = document.getElementById('partner-doc2-file')?.files[0];
+
+            const isRider = currentUser.category === 'Delivery Rider' || currentUser.category === 'Vehicle Owner';
+
+            if (!isRider && !shopName) return showToast("Enter a business name.", "error");
+            
+            const btn = document.getElementById('btn-submit-profile');
             const orig = btn.innerText;
-            btn.innerText = "...";
+            btn.innerText = "Submitting...";
             btn.disabled = true;
 
-            updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.phone), { license })
-                .then(() => {
-                    currentUser.license = license;
-                    showToast("Vehicle details updated!", "success");
-                })
-                .catch(e => showToast("Network delayed. It will save automatically.", "info"))
-                .finally(() => { btn.innerText = orig; btn.disabled = false; });
+            try {
+                let doc1Base64 = currentUser.doc1 || null;
+                let doc2Base64 = currentUser.doc2 || null;
+                
+                if (doc1File) doc1Base64 = await resizeImage(doc1File, 800); 
+                if (doc2File) doc2Base64 = await resizeImage(doc2File, 800); 
+
+                const newStatus = currentUser.approvalStatus === 'Approved' ? 'Approved' : 'Pending';
+
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.phone), { 
+                    shopName: isRider ? currentUser.name : shopName, 
+                    doc1: doc1Base64,
+                    doc2: doc2Base64,
+                    approvalStatus: newStatus
+                });
+
+                currentUser.shopName = isRider ? currentUser.name : shopName;
+                currentUser.doc1 = doc1Base64;
+                currentUser.doc2 = doc2Base64;
+                currentUser.approvalStatus = newStatus;
+                
+                showToast("Profile submitted for Admin verification!", "success");
+                finalizeLoginSequence(); 
+            } catch(e) {
+                console.error(e);
+                showToast("Network delayed or file too large.", "error");
+            } finally { 
+                btn.innerText = orig; 
+                btn.disabled = false; 
+            }
         };
 
         window.toggleShopStatus = async () => {
@@ -1342,6 +1487,8 @@
 
         window.addPartnerProduct = () => {
             if(!currentUser) return;
+            if(currentUser.approvalStatus !== 'Approved') return showToast("Shop not approved yet.", "error");
+
             const name = document.getElementById('prod-name').value.trim();
             if(!name) return showToast("Enter product name.", "error");
 
@@ -1356,7 +1503,7 @@
             if(variants.length === 0) return showToast("Add at least one valid unit and price.", "error");
 
             if(!currentUser.shopName) {
-                showToast("Please setup and Save your Shop Profile above first.", "error");
+                showToast("Please setup and Save your Business Profile first.", "error");
                 document.getElementById('partner-shop-name').focus();
                 return;
             }
@@ -1413,131 +1560,6 @@
             deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', productId))
                 .then(() => showToast("Product removed from catalog.", "success"))
                 .catch(e => showToast("Error removing product.", "error"));
-        };
-
-        // --- Cart & Order Logic --- //
-
-        window.addToCart = (name, price) => {
-            if(!currentUser) { openAuthModal('User'); return; }
-            if(currentUser.role !== 'User') { showToast("Switch to User account to buy.", "error"); return; }
-            
-            cart.push({name, price});
-            renderCartUI();
-            showToast(`${name} added to cart!`, "success");
-            
-            const cartBtn = document.getElementById('nav-btn-Cart');
-            if(cartBtn) {
-                cartBtn.classList.add('scale-110', 'text-emerald-500');
-                setTimeout(() => cartBtn.classList.remove('scale-110', 'text-emerald-500'), 200);
-            }
-        };
-
-        window.renderCartUI = () => {
-            const list = document.getElementById('cart-items-list');
-            const sub = cart.reduce((s, i) => s + i.price, 0);
-            
-            // Dynamic Handling Fee: Base 10 Rs, max 30
-            const handlingFee = cart.length > 0 ? (10 + (cart.length * 2 > 20 ? 20 : cart.length * 2)) : 0;
-            const total = sub + handlingFee;
-
-            document.getElementById('cart-subtotal').innerText = `₹${sub}`;
-            document.getElementById('cart-handling').innerText = `₹${handlingFee}`;
-            document.getElementById('cart-total').innerText = `₹${total}`;
-
-            const btn = document.getElementById('btn-place-order');
-
-            if (!cart.length) {
-                list.innerHTML = '<p class="text-gray-400 font-medium text-sm text-center py-10 border-2 border-dashed border-gray-200 rounded-3xl bg-gray-50/50">Your basket is looking empty!</p>';
-                btn.disabled = true;
-                return;
-            }
-            
-            btn.disabled = false;
-            list.innerHTML = cart.map((i, idx) => `
-                <div class="flex justify-between items-center py-3 border-b border-gray-50 last:border-0 group">
-                    <div class="flex items-center gap-3">
-                        <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
-                        <span class="text-sm font-bold text-gray-800">${i.name}</span>
-                    </div>
-                    <div class="flex items-center gap-4">
-                        <span class="text-sm font-black text-gray-900">₹${i.price}</span>
-                        <button type="button" onclick="removeFromCart(${idx})" class="w-6 h-6 rounded bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors">
-                            <i class="fa-solid fa-minus text-[10px]"></i>
-                        </button>
-                    </div>
-                </div>`).join('');
-        };
-
-        window.removeFromCart = (idx) => { 
-            cart.splice(idx, 1); 
-            renderCartUI(); 
-        };
-
-        window.placeOrder = () => {
-            if(cart.length === 0) return;
-            const addr = document.getElementById('cart-address').value.trim();
-            if(!addr) {
-                showToast("Please provide a delivery address.", "error");
-                document.getElementById('cart-address').focus();
-                return;
-            }
-
-            const sub = cart.reduce((s,i) => s + i.price, 0);
-            const handlingFee = cart.length > 0 ? (10 + (cart.length * 2 > 20 ? 20 : cart.length * 2)) : 0;
-            const total = sub + handlingFee;
-
-            const btn = document.getElementById('btn-place-order');
-            const originalText = btn.innerText;
-            btn.innerText = "PROCESSING...";
-            btn.disabled = true;
-
-            addDoc(getCol('orders'), { 
-                customer: currentUser.name, 
-                phone: currentUser.phone, 
-                items: cart, 
-                total, 
-                address: addr, 
-                status: 'Placed', 
-                partnerId: null,
-                partnerName: null,
-                time: serverTimestamp() 
-            }).then(() => {
-                cart = []; 
-                renderCartUI(); 
-                showToast("Order Placed Successfully! Partner will be assigned soon.", "success");
-                switchMainView('User');
-            }).catch(e => {
-                showToast("Network delayed. Syncing in background.", "info");
-                cart = []; 
-                renderCartUI();
-                switchMainView('User');
-            }).finally(() => {
-                btn.innerText = originalText;
-                btn.disabled = false;
-            });
-        };
-
-        // --- Partner Actions --- //
-
-        window.acceptOrder = (orderId) => {
-            if(currentUser.role !== 'Partner') return;
-            
-            const orderRef = doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId);
-            updateDoc(orderRef, {
-                status: 'Accepted',
-                partnerId: currentUser.phone,
-                partnerName: currentUser.name
-            }).then(() => {
-                showToast("Order Accepted! Please head to pickup.", "success");
-            }).catch(e => showToast("Network delayed. Status syncing.", "info"));
-        };
-
-        window.markDelivered = (orderId) => {
-            if(currentUser.role !== 'Partner') return;
-            const orderRef = doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId);
-            updateDoc(orderRef, { status: 'Delivered' })
-                .then(() => showToast("Delivery Completed. Great job!", "success"))
-                .catch(e => showToast("Network delayed. Syncing.", "info"));
         };
 
         // Init
