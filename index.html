@@ -25,7 +25,7 @@
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .glass-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+        .glass-nav { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
         
         .view-section { display: none; animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         .view-section.active { display: block; }
@@ -87,27 +87,31 @@
 
     <!-- Top Navigation -->
     <nav class="glass-nav fixed top-0 w-full z-40 border-b border-gray-200/50">
-        <div class="max-w-md mx-auto px-5 py-4 flex justify-between items-center sm:max-w-4xl">
-            <div class="flex items-center gap-2 cursor-pointer" onclick="location.reload()">
-                <img src="Gramzo homepage header design.png" alt="Gramzo Logo" class="h-8 sm:h-10 object-contain" onerror="this.onerror=null; this.outerHTML='<h1 class=\'text-2xl font-black text-emerald-600 tracking-tight\'>Gramzo</h1>';">
+        <div class="max-w-md mx-auto px-4 py-3 flex justify-between items-center sm:max-w-4xl gap-2">
+            <!-- Left: Branding -->
+            <div class="flex items-center cursor-pointer shrink-0 max-w-[40%]" onclick="location.reload()">
+                <img src="Gramzo homepage header design.png" alt="Gramzo Logo" class="h-10 sm:h-14 object-contain" onerror="this.onerror=null; this.outerHTML='<h1 class=\'text-2xl font-black text-emerald-600 tracking-tight\'>Gramzo</h1>';">
             </div>
 
-            <div id="auth-container" class="flex items-center gap-3">
+            <!-- Right: Auth / Profile -->
+            <div id="auth-container" class="flex items-center gap-2 sm:gap-3 shrink-0 max-w-[60%] justify-end">
                 
                 <!-- Language Selector -->
-                <select id="lang-selector" onchange="changeLanguage(this.value)" class="bg-gray-50 border border-gray-200 text-xs font-bold rounded-xl px-2 py-2 outline-none text-gray-700 cursor-pointer shadow-sm hover:bg-gray-100 transition">
+                <select id="lang-selector" onchange="changeLanguage(this.value)" class="bg-gray-50 border border-gray-200 text-[10px] sm:text-xs font-bold rounded-lg px-1 sm:px-2 py-1.5 sm:py-2 outline-none text-gray-700 cursor-pointer shadow-sm hover:bg-gray-100 transition max-w-[70px] sm:max-w-[100px] truncate">
                     <option value="en">English</option>
                     <option value="hi">हिंदी</option>
                     <option value="bn">বাংলা</option>
                     <option value="sat">Ol Chiki</option>
                 </select>
 
-                <button type="button" id="btn-login-trigger" onclick="openAuthModal('User')" class="bg-gray-900 text-white px-5 py-2.5 rounded-full text-sm font-bold shadow-md hover:bg-gray-800 transition-colors active:scale-95 flex items-center gap-2">
+                <!-- Unauthenticated State (User Login) -->
+                <button type="button" id="btn-login-trigger" onclick="openAuthModal('User')" class="bg-gray-900 text-white px-3 sm:px-5 py-1.5 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold shadow-md hover:bg-gray-800 transition-colors active:scale-95 flex items-center gap-1.5 whitespace-nowrap">
                     <i class="fa-solid fa-user"></i> <span data-i18n="login">Login</span>
                 </button>
                 
-                <div id="profile-trigger" class="hidden flex items-center gap-3 bg-white border border-gray-100 py-1.5 pl-1.5 pr-4 rounded-full shadow-sm cursor-pointer" onclick="toggleProfileMenu()">
-                    <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-sm">
+                <!-- Authenticated State -->
+                <div id="profile-trigger" class="hidden flex items-center gap-2 sm:gap-3 bg-white border border-gray-100 py-1 sm:py-1.5 pl-1 sm:pl-1.5 pr-3 sm:pr-4 rounded-full shadow-sm cursor-pointer" onclick="toggleProfileMenu()">
+                    <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-xs sm:text-sm">
                         <span id="nav-initial">U</span>
                     </div>
                     <div class="hidden sm:block text-left">
@@ -117,7 +121,8 @@
                     <i class="fa-solid fa-chevron-down text-[10px] text-gray-400 ml-1"></i>
                 </div>
 
-                <div id="profile-menu" class="hidden absolute right-5 top-16 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden transform origin-top-right transition-all">
+                <!-- Profile Dropdown -->
+                <div id="profile-menu" class="hidden absolute right-4 top-14 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden transform origin-top-right transition-all">
                     <div class="p-4 border-b border-gray-50 bg-gray-50/50">
                         <p id="menu-name" class="font-bold text-sm text-gray-900">Name</p>
                         <p id="menu-phone" class="text-xs text-gray-500 font-medium">Phone</p>
@@ -133,27 +138,28 @@
     </nav>
 
     <!-- Scrolling Marquee Tagline -->
-    <div class="fixed top-[72px] w-full bg-gray-900 border-b border-gray-800 z-30 overflow-hidden py-2 flex items-center shadow-md">
-        <span class="animate-marquee text-[11px] font-black text-emerald-400 uppercase tracking-widest">
-            🌟 WHY SHOULD CITIES HAVE ALL THE FUN? &nbsp;&nbsp;|&nbsp;&nbsp; City-style convenience, now in every village. &nbsp;&nbsp;|&nbsp;&nbsp; Food, grocery, rides, and daily essentials—everything your village needs, now just one tap away with Gramzo! 🚀
+    <div class="fixed top-[65px] sm:top-[76px] w-full bg-gray-900 border-b border-gray-800 z-30 overflow-hidden py-1.5 sm:py-2 flex items-center shadow-md">
+        <span class="animate-marquee text-[10px] sm:text-[11px] font-black text-emerald-400 uppercase tracking-widest">
+            🌟 WHY SHOULD CITIES HAVE ALL THE FUN? &nbsp;&nbsp;|&nbsp;&nbsp; Convenience, now in every village. &nbsp;&nbsp;|&nbsp;&nbsp; Food, grocery, rides, and daily essentials—everything your village needs, now just one tap away with Gramzo! 🚀
         </span>
     </div>
 
     <!-- Main Content Area -->
-    <main class="pt-32 px-4 pb-10 max-w-md mx-auto sm:max-w-4xl sm:px-6">
+    <main class="pt-[110px] sm:pt-32 px-4 pb-10 max-w-md mx-auto sm:max-w-4xl sm:px-6">
         
         <!-- ========================================== -->
         <!-- VIEW: USER (Marketplace & Services)        -->
         <!-- ========================================== -->
-        <div id="view-User" class="view-section active space-y-8">
+        <div id="view-User" class="view-section active space-y-6 sm:space-y-8">
             
-            <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-orange-100 text-orange-500 flex items-center justify-center shrink-0">
-                    <i class="fa-solid fa-location-dot"></i>
-                </div>
+            <!-- Address Bar (Interactive Manual Pincode + GPS) -->
+            <div class="bg-white rounded-2xl p-3 sm:p-4 shadow-sm border border-gray-100 flex items-center gap-3">
+                <button type="button" onclick="getCurrentLocation('user-location-input')" class="w-10 h-10 rounded-full bg-orange-100 text-orange-500 flex items-center justify-center shrink-0 hover:bg-orange-200 transition" title="Auto Locate">
+                    <i class="fa-solid fa-location-crosshairs"></i>
+                </button>
                 <div class="flex-1">
                     <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider" data-i18n="delivering_to">Delivering to</p>
-                    <p class="text-sm font-bold text-gray-900 truncate" id="user-location-display">Select Location below to order</p>
+                    <input type="text" id="user-location-input" placeholder="Enter Pincode or Location manually" class="w-full text-sm font-bold text-gray-900 bg-transparent outline-none mt-0.5" />
                 </div>
             </div>
 
@@ -301,7 +307,7 @@
                     <div>
                         <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2 ml-2">Delivery Details</label>
                         <div class="relative">
-                            <textarea id="cart-address" rows="2" class="input-field !py-3 resize-none" placeholder="Type Full Delivery Address manually..."></textarea>
+                            <textarea id="cart-address" rows="2" class="input-field !py-3 resize-none" placeholder="Type Full Delivery Address manually or use Locate..."></textarea>
                             <button type="button" onclick="getCurrentLocation('cart-address')" class="absolute right-3 top-3 text-gray-400 hover:text-emerald-500 transition-colors bg-white rounded-full p-1 shadow-sm border border-gray-100" title="Locate Me">
                                 <i class="fa-solid fa-location-crosshairs"></i> Locate
                             </button>
@@ -1307,14 +1313,10 @@
             
             const clearBtn = document.getElementById('btn-clear-filter');
             const subtabs = document.getElementById('services-subtabs');
-            
-            if (cat) {
-                clearBtn.classList.remove('hidden');
-                document.getElementById('marketplace-title').innerText = `${subCat || cat} Options`;
-            } else {
-                clearBtn.classList.add('hidden');
-                document.getElementById('marketplace-title').innerText = 'Trending Near You';
-            }
+            document.getElementById('marketplace-title').innerText = cat ? `${subCat || cat} Options` : 'Trending Near You';
+
+            if (cat) clearBtn.classList.remove('hidden');
+            else clearBtn.classList.add('hidden');
 
             if (cat === 'Services') {
                 subtabs.classList.remove('hidden');
@@ -1560,6 +1562,7 @@
 
                 const newStatus = currentUser.approvalStatus === 'Approved' ? 'Approved' : 'Pending';
 
+                // Securely create/merge document so it cannot throw "Not found" error
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.phone), { 
                     shopName: isRider ? currentUser.name : shopName, 
                     doc1: doc1Base64,
