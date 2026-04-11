@@ -7,7 +7,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+        /* Imported a specific display font (Righteous) for the logo text alongside the main app font */
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Righteous&display=swap');
         
         :root {
             --primary: #10b981; /* Emerald 500 */
@@ -21,6 +22,10 @@
             color: var(--text-main);
             -webkit-tap-highlight-color: transparent;
             padding-bottom: 90px;
+        }
+
+        .font-logo {
+            font-family: 'Righteous', cursive;
         }
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -90,7 +95,7 @@
         <div class="max-w-md mx-auto px-4 py-3 flex justify-between items-center sm:max-w-4xl gap-2 sm:gap-4">
             <!-- Left: Branding (Takes up all space up to the right side controls) -->
             <div class="flex items-center cursor-pointer flex-1 min-w-0" onclick="location.reload()">
-                <img src="Gramzo homepage header design.png" alt="Gramzo Logo" class="h-10 sm:h-14 w-full object-contain object-left" onerror="this.onerror=null; this.outerHTML='<h1 class=\'text-2xl font-black text-emerald-600 tracking-tight\'>Gramzo</h1>';">
+                <h1 class="text-4xl sm:text-5xl text-blue-600 font-logo tracking-wide truncate w-full">Gramzo</h1>
             </div>
 
             <!-- Right: Auth / Profile -->
@@ -252,11 +257,9 @@
             <footer class="mt-12 pt-8 border-t border-gray-200/60">
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-8 mb-8">
                     <div class="col-span-2 sm:col-span-2">
-                        <div class="flex items-center gap-2 mb-4">
-                            <div class="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center text-white shadow-md">
-                                <i class="fa-solid fa-leaf text-sm"></i>
-                            </div>
-                            <h4 class="font-black text-xl text-gray-900 tracking-tight">Gramzo</h4>
+                        <div class="mb-6">
+                            <!-- Big Bottom Logo -->
+                            <img src="Gramzo homepage header design.png" alt="Gramzo Logo" class="w-48 sm:w-64 h-auto object-contain object-left" onerror="this.onerror=null; this.outerHTML='<h1 class=\'text-4xl font-black text-blue-600 tracking-tight font-logo\'>Gramzo</h1>';">
                         </div>
                         <p class="text-xs text-gray-500 font-medium leading-relaxed max-w-xs mb-4" data-i18n="footer_desc">
                             Bringing city-style convenience to every village. Food, grocery, rides, and services—all in one tap.
@@ -660,7 +663,7 @@
                 'gotta_go': 'Gotta Go? 🚀', 'ride': 'Ride', 'need_help': 'Need Help? 🛠️', 'services': 'Services',
                 'grow_with_us': 'Grow with Gramzo', 'partner_reg': 'Partner Registration',
                 'book_ride': 'Book a Ride', 'find_rides': 'Find Rides', 'checkout': 'Checkout',
-                'footer_desc': 'Bringing city-style convenience to every village. Food, grocery, rides, and services—all in one tap.',
+                'footer_desc': 'Bringing convenience to every village. Food, grocery, rides, and services—all in one tap.',
                 'company': 'Company', 'about_us': 'About Us', 'careers': 'Careers', 'contact_us': 'Contact Us',
                 'legal': 'Legal', 'terms': 'Terms & Conditions', 'privacy': 'Privacy Policy', 'refund': 'Refund Policy'
             },
@@ -673,7 +676,7 @@
                 'gotta_go': 'जाना है? 🚀', 'ride': 'सवारी', 'need_help': 'मदद चाहिए? 🛠️', 'services': 'सेवाएं',
                 'grow_with_us': 'ग्रैमज़ो के साथ बढ़ें', 'partner_reg': 'पार्टनर पंजीकरण',
                 'book_ride': 'सवारी बुक करें', 'find_rides': 'सवारी खोजें', 'checkout': 'चेकआउट',
-                'footer_desc': 'हर गांव में शहर जैसी सुविधा। भोजन, किराना, सवारी और सेवाएं - सब एक टैप में।',
+                'footer_desc': 'हर गांव में सुविधा। भोजन, किराना, सवारी और सेवाएं - सब एक टैप में।',
                 'company': 'कंपनी', 'about_us': 'हमारे बारे में', 'careers': 'करियर', 'contact_us': 'संपर्क करें',
                 'legal': 'कानूनी', 'terms': 'नियम और शर्तें', 'privacy': 'गोपनीयता नीति', 'refund': 'धनवापसी नीति'
             },
@@ -686,11 +689,11 @@
                 'gotta_go': 'যেতে হবে? 🚀', 'ride': 'রাইড', 'need_help': 'সাহায্য দরকার? 🛠️', 'services': 'সেবা',
                 'grow_with_us': 'গ্রামজোর সাথে বাড়ুন', 'partner_reg': 'পার্টনার নিবন্ধন',
                 'book_ride': 'রাইড বুক করুন', 'find_rides': 'রাইড খুঁজুন', 'checkout': 'চেকআউট',
-                'footer_desc': 'প্রতিটি গ্রামে শহরের মতো সুবিধা। খাবার, মুদিখানা, রাইড এবং সেবা—সব এক ট্যাপে।',
+                'footer_desc': 'প্রতিটি গ্রামে সুবিধা। খাবার, মুদিখানা, রাইড এবং সেবা—সব এক ট্যাপে।',
                 'company': 'কোম্পানি', 'about_us': 'আমাদের সম্পর্কে', 'careers': 'ক্যারিয়ার', 'contact_us': 'যোগাযোগ করুন',
                 'legal': 'আইনি', 'terms': 'শর্তাবলী', 'privacy': 'গোপনীয়তা নীতি', 'refund': 'রিফান্ড নীতি'
             },
-            'sat': { // Phonetic approximation
+            'sat': { 
                 'login': 'Bolo', 'logout': 'Odon', 'delivering_to': 'Kulai kana',
                 'hero_title': 'Santuri Block aato ko',
                 'hero_sub': 'ar Sakambari Plant (Nituria) sur re',
@@ -699,7 +702,7 @@
                 'gotta_go': 'Chalak? 🚀', 'ride': 'Gadi', 'need_help': 'Goro? 🛠️', 'services': 'Kami',
                 'grow_with_us': 'Gramzo saota', 'partner_reg': 'Partner Registration',
                 'book_ride': 'Gadi book', 'find_rides': 'Gadi nam', 'checkout': 'Checkout',
-                'footer_desc': 'Bazar leka suvidha, nitok aato re. Jomak, saman, gadi ar kami—mit tap re.',
+                'footer_desc': 'Suvidha, nitok aato re. Jomak, saman, gadi ar kami—mit tap re.',
                 'company': 'Company', 'about_us': 'Abo bhabot', 'careers': 'Kami', 'contact_us': 'Katha',
                 'legal': 'Niyam', 'terms': 'Niyam ar Shorot', 'privacy': 'Privacy Policy', 'refund': 'Taka ruar'
             }
@@ -709,7 +712,7 @@
             const dict = translations[lang] || translations['en'];
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
-                if (dict[key]) el.innerHTML = dict[key]; // innerHTML allows spans/formatting
+                if (dict[key]) el.innerHTML = dict[key]; 
             });
         };
 
@@ -1271,7 +1274,6 @@
         };
 
         function loadMarketplaceData() {
-            // Listen for Offer Banner Updates
             onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'app_config'), (snap) => {
                 const bannerEl = document.getElementById('user-offer-banner');
                 if (snap.exists() && snap.data().offerBanner) {
@@ -1615,7 +1617,6 @@
 
                 const newStatus = currentUser.approvalStatus === 'Approved' ? 'Approved' : 'Pending';
 
-                // Securely create/merge document so it cannot throw "Not found" error
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.phone), { 
                     shopName: isRider ? currentUser.name : shopName, 
                     doc1: doc1Base64,
