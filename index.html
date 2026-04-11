@@ -87,14 +87,14 @@
 
     <!-- Top Navigation -->
     <nav class="glass-nav fixed top-0 w-full z-40 border-b border-gray-200/50">
-        <div class="max-w-md mx-auto px-4 py-3 flex justify-between items-center sm:max-w-4xl gap-2">
-            <!-- Left: Branding -->
-            <div class="flex items-center cursor-pointer shrink-0 max-w-[40%]" onclick="location.reload()">
-                <img src="Gramzo homepage header design.png" alt="Gramzo Logo" class="h-10 sm:h-14 object-contain" onerror="this.onerror=null; this.outerHTML='<h1 class=\'text-2xl font-black text-emerald-600 tracking-tight\'>Gramzo</h1>';">
+        <div class="max-w-md mx-auto px-4 py-3 flex justify-between items-center sm:max-w-4xl gap-2 sm:gap-4">
+            <!-- Left: Branding (Takes up all space up to the right side controls) -->
+            <div class="flex items-center cursor-pointer flex-1 min-w-0" onclick="location.reload()">
+                <img src="Gramzo homepage header design.png" alt="Gramzo Logo" class="h-10 sm:h-14 w-full object-contain object-left" onerror="this.onerror=null; this.outerHTML='<h1 class=\'text-2xl font-black text-emerald-600 tracking-tight\'>Gramzo</h1>';">
             </div>
 
             <!-- Right: Auth / Profile -->
-            <div id="auth-container" class="flex items-center gap-2 sm:gap-3 shrink-0 max-w-[60%] justify-end">
+            <div id="auth-container" class="flex items-center gap-2 sm:gap-3 shrink-0 justify-end">
                 
                 <!-- Language Selector -->
                 <select id="lang-selector" onchange="changeLanguage(this.value)" class="bg-gray-50 border border-gray-200 text-[10px] sm:text-xs font-bold rounded-lg px-1 sm:px-2 py-1.5 sm:py-2 outline-none text-gray-700 cursor-pointer shadow-sm hover:bg-gray-100 transition max-w-[70px] sm:max-w-[100px] truncate">
@@ -247,6 +247,47 @@
                     </button>
                 </div>
             </div>
+
+            <!-- Modern E-Commerce Footer -->
+            <footer class="mt-12 pt-8 border-t border-gray-200/60">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-8 mb-8">
+                    <div class="col-span-2 sm:col-span-2">
+                        <div class="flex items-center gap-2 mb-4">
+                            <div class="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center text-white shadow-md">
+                                <i class="fa-solid fa-leaf text-sm"></i>
+                            </div>
+                            <h4 class="font-black text-xl text-gray-900 tracking-tight">Gramzo</h4>
+                        </div>
+                        <p class="text-xs text-gray-500 font-medium leading-relaxed max-w-xs mb-4" data-i18n="footer_desc">
+                            Bringing city-style convenience to every village. Food, grocery, rides, and services—all in one tap.
+                        </p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-gray-900 mb-4 tracking-tight" data-i18n="company">Company</h4>
+                        <ul class="space-y-3 text-xs text-gray-500 font-medium">
+                            <li><a href="#" onclick="showToast('About Us page coming soon!', 'info'); return false;" class="hover:text-emerald-600 transition" data-i18n="about_us">About Us</a></li>
+                            <li><a href="#" onclick="showToast('Careers page coming soon!', 'info'); return false;" class="hover:text-emerald-600 transition" data-i18n="careers">Careers</a></li>
+                            <li><a href="#" onclick="showToast('Contact Us page coming soon!', 'info'); return false;" class="hover:text-emerald-600 transition" data-i18n="contact_us">Contact Us</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-gray-900 mb-4 tracking-tight" data-i18n="legal">Legal</h4>
+                        <ul class="space-y-3 text-xs text-gray-500 font-medium">
+                            <li><a href="#" onclick="showToast('Terms & Conditions coming soon!', 'info'); return false;" class="hover:text-emerald-600 transition" data-i18n="terms">Terms & Conditions</a></li>
+                            <li><a href="#" onclick="showToast('Privacy Policy coming soon!', 'info'); return false;" class="hover:text-emerald-600 transition" data-i18n="privacy">Privacy Policy</a></li>
+                            <li><a href="#" onclick="showToast('Refund Policy coming soon!', 'info'); return false;" class="hover:text-emerald-600 transition" data-i18n="refund">Refund Policy</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 pb-2 gap-4">
+                    <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
+                    <div class="flex gap-4 text-gray-400 text-sm">
+                        <a href="#" onclick="return false;" class="hover:text-blue-600 transition"><i class="fa-brands fa-facebook"></i></a>
+                        <a href="#" onclick="return false;" class="hover:text-blue-400 transition"><i class="fa-brands fa-twitter"></i></a>
+                        <a href="#" onclick="return false;" class="hover:text-pink-600 transition"><i class="fa-brands fa-instagram"></i></a>
+                    </div>
+                </div>
+            </footer>
         </div>
 
         <!-- ========================================== -->
@@ -618,7 +659,10 @@
                 'u_hungry': 'U Hungry? 🤤', 'food': 'Food', 'empty_fridge': 'Empty Fridge? 🛒', 'grocery': 'Grocery',
                 'gotta_go': 'Gotta Go? 🚀', 'ride': 'Ride', 'need_help': 'Need Help? 🛠️', 'services': 'Services',
                 'grow_with_us': 'Grow with Gramzo', 'partner_reg': 'Partner Registration',
-                'book_ride': 'Book a Ride', 'find_rides': 'Find Rides', 'checkout': 'Checkout'
+                'book_ride': 'Book a Ride', 'find_rides': 'Find Rides', 'checkout': 'Checkout',
+                'footer_desc': 'Bringing city-style convenience to every village. Food, grocery, rides, and services—all in one tap.',
+                'company': 'Company', 'about_us': 'About Us', 'careers': 'Careers', 'contact_us': 'Contact Us',
+                'legal': 'Legal', 'terms': 'Terms & Conditions', 'privacy': 'Privacy Policy', 'refund': 'Refund Policy'
             },
             'hi': {
                 'login': 'लॉग इन', 'logout': 'लॉग आउट', 'delivering_to': 'डिलीवरी स्थान',
@@ -628,7 +672,10 @@
                 'u_hungry': 'भूख लगी है? 🤤', 'food': 'भोजन', 'empty_fridge': 'फ्रिज खाली है? 🛒', 'grocery': 'किराना',
                 'gotta_go': 'जाना है? 🚀', 'ride': 'सवारी', 'need_help': 'मदद चाहिए? 🛠️', 'services': 'सेवाएं',
                 'grow_with_us': 'ग्रैमज़ो के साथ बढ़ें', 'partner_reg': 'पार्टनर पंजीकरण',
-                'book_ride': 'सवारी बुक करें', 'find_rides': 'सवारी खोजें', 'checkout': 'चेकआउट'
+                'book_ride': 'सवारी बुक करें', 'find_rides': 'सवारी खोजें', 'checkout': 'चेकआउट',
+                'footer_desc': 'हर गांव में शहर जैसी सुविधा। भोजन, किराना, सवारी और सेवाएं - सब एक टैप में।',
+                'company': 'कंपनी', 'about_us': 'हमारे बारे में', 'careers': 'करियर', 'contact_us': 'संपर्क करें',
+                'legal': 'कानूनी', 'terms': 'नियम और शर्तें', 'privacy': 'गोपनीयता नीति', 'refund': 'धनवापसी नीति'
             },
             'bn': {
                 'login': 'লগইন', 'logout': 'লগআউট', 'delivering_to': 'ডেলিভারি স্থান',
@@ -638,7 +685,10 @@
                 'u_hungry': 'ক্ষুধা পেয়েছে? 🤤', 'food': 'খাবার', 'empty_fridge': 'ফ্রিজ খালি? 🛒', 'grocery': 'মুদিখানা',
                 'gotta_go': 'যেতে হবে? 🚀', 'ride': 'রাইড', 'need_help': 'সাহায্য দরকার? 🛠️', 'services': 'সেবা',
                 'grow_with_us': 'গ্রামজোর সাথে বাড়ুন', 'partner_reg': 'পার্টনার নিবন্ধন',
-                'book_ride': 'রাইড বুক করুন', 'find_rides': 'রাইড খুঁজুন', 'checkout': 'চেকআউট'
+                'book_ride': 'রাইড বুক করুন', 'find_rides': 'রাইড খুঁজুন', 'checkout': 'চেকআউট',
+                'footer_desc': 'প্রতিটি গ্রামে শহরের মতো সুবিধা। খাবার, মুদিখানা, রাইড এবং সেবা—সব এক ট্যাপে।',
+                'company': 'কোম্পানি', 'about_us': 'আমাদের সম্পর্কে', 'careers': 'ক্যারিয়ার', 'contact_us': 'যোগাযোগ করুন',
+                'legal': 'আইনি', 'terms': 'শর্তাবলী', 'privacy': 'গোপনীয়তা নীতি', 'refund': 'রিফান্ড নীতি'
             },
             'sat': { // Phonetic approximation
                 'login': 'Bolo', 'logout': 'Odon', 'delivering_to': 'Kulai kana',
@@ -648,7 +698,10 @@
                 'u_hungry': 'Rengej? 🤤', 'food': 'Jomak', 'empty_fridge': 'Saman banu? 🛒', 'grocery': 'Saman',
                 'gotta_go': 'Chalak? 🚀', 'ride': 'Gadi', 'need_help': 'Goro? 🛠️', 'services': 'Kami',
                 'grow_with_us': 'Gramzo saota', 'partner_reg': 'Partner Registration',
-                'book_ride': 'Gadi book', 'find_rides': 'Gadi nam', 'checkout': 'Checkout'
+                'book_ride': 'Gadi book', 'find_rides': 'Gadi nam', 'checkout': 'Checkout',
+                'footer_desc': 'Bazar leka suvidha, nitok aato re. Jomak, saman, gadi ar kami—mit tap re.',
+                'company': 'Company', 'about_us': 'Abo bhabot', 'careers': 'Kami', 'contact_us': 'Katha',
+                'legal': 'Niyam', 'terms': 'Niyam ar Shorot', 'privacy': 'Privacy Policy', 'refund': 'Taka ruar'
             }
         };
 
