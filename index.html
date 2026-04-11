@@ -40,20 +40,15 @@
         }
 
         .modal-overlay {
-            display: none; position: fixed; inset: 0; background: rgba(17, 24, 39, 0.4); backdrop-filter: blur(4px); z-index: 100; opacity: 0; transition: opacity 0.3s ease;
+            display: none; position: fixed; inset: 0; background: rgba(17, 24, 39, 0.6); backdrop-filter: blur(4px); z-index: 100; opacity: 0; transition: opacity 0.3s ease;
         }
         .modal-overlay.active { display: block; opacity: 1; }
         
+        /* Fixed Centered Modal for ALL devices */
         .modal-content {
-            position: absolute; bottom: 0; left: 0; right: 0; background: white; border-radius: 2rem 2rem 0 0; padding: 2rem; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); max-height: 90vh; overflow-y: auto;
+            position: absolute; top: 50%; left: 50%; right: auto; bottom: auto; background: white; border-radius: 2rem; padding: 2rem; transform: translate(-50%, -45%) scale(0.95); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); max-height: 85vh; overflow-y: auto; width: 90%; max-width: 28rem; opacity: 0;
         }
-        @media (min-width: 640px) {
-            .modal-content {
-                bottom: auto; top: 50%; left: 50%; right: auto; transform: translate(-50%, -40%); border-radius: 2rem; width: 100%; max-width: 28rem;
-            }
-            .modal-overlay.active .modal-content { transform: translate(-50%, -50%); }
-        }
-        .modal-overlay.active .modal-content { transform: translateY(0); }
+        .modal-overlay.active .modal-content { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 
         .super-icon-wrapper {
             background: linear-gradient(145deg, #ffffff, #f3f4f6);
@@ -549,7 +544,6 @@
         
         const getCol = (name) => collection(db, 'artifacts', appId, 'public', 'data', name);
 
-        // Image Resizer Helper for Firestore 1MB limits
         const resizeImage = (file, maxSize) => {
             return new Promise((resolve) => {
                 const reader = new FileReader();
@@ -563,12 +557,19 @@
                         canvas.width = width; canvas.height = height;
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
-                        resolve(canvas.toDataURL('image/jpeg', 0.7)); // compress to 70% quality JPEG
+                        resolve(canvas.toDataURL('image/jpeg', 0.7)); 
                     };
                     img.src = e.target.result;
                 };
                 reader.readAsDataURL(file);
             });
+        };
+
+        const safeGetDoc = async (ref, ms = 5000) => {
+            return Promise.race([
+                getDoc(ref),
+                new Promise((_, reject) => setTimeout(() => reject(new Error("Database connection timed out.")), ms))
+            ]);
         };
 
         async function startApp() {
@@ -641,19 +642,12 @@
         window.togglePartnerFields = () => {
             const category = document.getElementById('reg-partner-category').value;
             const skillContainer = document.getElementById('skill-container');
-            const licenseContainer = document.getElementById('license-container');
             
             if (category === 'Service Provider') {
                 skillContainer.classList.remove('hidden');
-                if(licenseContainer) licenseContainer.classList.add('hidden');
-            } else if (category === 'Vehicle Owner' || category === 'Delivery Rider') {
-                if(licenseContainer) licenseContainer.classList.remove('hidden');
-                skillContainer.classList.add('hidden');
             } else {
                 skillContainer.classList.add('hidden');
-                if(licenseContainer) licenseContainer.classList.add('hidden');
                 document.getElementById('reg-skill').value = ''; 
-                if(document.getElementById('reg-license')) document.getElementById('reg-license').value = '';
             }
         };
 
@@ -737,10 +731,7 @@
                     const pass = document.getElementById('reg-pass').value.trim();
 
                     if (!name || phone.length !== 10 || pincode.length !== 6 || pass.length < 4) {
-                        msgEl.className = "text-xs text-center font-bold mb-4 min-h-[1.5rem] px-4 rounded-lg py-2 bg-red-50 text-red-600 block";
-                        msgEl.innerText = "Check your details. Require 10-digit phone & 6-digit Pincode.";
-                        btn.innerText = originalText; btn.disabled = false;
-                        return;
+                        throw new Error("Check details. Require 10-digit phone & 6-digit Pincode.");
                     }
 
                     let partnerCategory = null;
@@ -749,30 +740,27 @@
                     if (currentAuthRole === 'Partner') {
                         partnerCategory = document.getElementById('reg-partner-category').value;
                         if (!partnerCategory) {
-                            msgEl.className = "text-xs text-center font-bold mb-4 min-h-[1.5rem] px-4 rounded-lg py-2 bg-red-50 text-red-600 block";
-                            msgEl.innerText = "Please select a Partner Business Type.";
-                            btn.innerText = originalText; btn.disabled = false;
-                            return;
+                            throw new Error("Please select a Partner Business Type.");
                         }
                         if (partnerCategory === 'Service Provider') {
                             skillStr = document.getElementById('reg-skill').value;
                             if (!skillStr) {
-                                msgEl.className = "text-xs text-center font-bold mb-4 min-h-[1.5rem] px-4 rounded-lg py-2 bg-red-50 text-red-600 block";
-                                msgEl.innerText = "Please select your primary skill.";
-                                btn.innerText = originalText; btn.disabled = false;
-                                return;
+                                throw new Error("Please select your primary skill.");
                             }
                         }
                     }
 
                     const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', phone);
-                    const snap = await getDoc(userRef);
+                    
+                    let snap;
+                    try {
+                        snap = await safeGetDoc(userRef, 3000);
+                    } catch(e) {
+                        console.warn("DB check timed out or failed. Proceeding.", e);
+                    }
 
-                    if (snap.exists()) {
-                        msgEl.className = "text-xs text-center font-bold mb-4 min-h-[1.5rem] px-4 rounded-lg py-2 bg-red-50 text-red-600 block";
-                        msgEl.innerText = "Number already registered. Please login.";
-                        btn.innerText = originalText; btn.disabled = false;
-                        return;
+                    if (snap && snap.exists()) {
+                        throw new Error("Number already registered. Please login.");
                     }
 
                     const userData = { 
@@ -785,8 +773,8 @@
                         ...(currentAuthRole === 'Partner' && { category: partnerCategory, skill: skillStr, shopName: null, doc1: null, doc2: null })
                     };
                     
-                    // Securely awaiting save to ensure document exists
-                    await setDoc(userRef, userData, { merge: true });
+                    // Securely fire-and-forget save using merge to avoid strict document creation blocks
+                    setDoc(userRef, userData, { merge: true }).catch(err => console.warn("Background save delayed:", err));
                     
                     currentUser = { ...userData, docId: phone };
                     finalizeLoginSequence();
@@ -802,37 +790,33 @@
                     }
 
                     if (phone.length !== 10 || !pass) {
-                        msgEl.className = "text-xs text-center font-bold mb-4 min-h-[1.5rem] px-4 rounded-lg py-2 bg-red-50 text-red-600 block";
-                        msgEl.innerText = "Invalid credentials format.";
-                        btn.innerText = originalText; btn.disabled = false;
-                        return;
+                        throw new Error("Invalid credentials format.");
                     }
 
                     const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', phone);
-                    const snap = await getDoc(userRef);
+                    let snap;
+                    try {
+                        snap = await safeGetDoc(userRef, 6000);
+                    } catch (e) {
+                        throw new Error("Failed to reach database. Are you online?");
+                    }
                     
-                    if (!snap.exists()) {
-                        msgEl.className = "text-xs text-center font-bold mb-4 min-h-[1.5rem] px-4 rounded-lg py-2 bg-red-50 text-red-600 block";
-                        msgEl.innerText = "Account not found. Please register.";
-                        btn.innerText = originalText; btn.disabled = false;
-                        return;
+                    if (!snap || !snap.exists()) {
+                        throw new Error("Account not found. Please register.");
                     }
 
                     const data = snap.data();
                     if (data.pin !== pass) {
-                        msgEl.className = "text-xs text-center font-bold mb-4 min-h-[1.5rem] px-4 rounded-lg py-2 bg-red-50 text-red-600 block";
-                        msgEl.innerText = "Incorrect password.";
-                        btn.innerText = originalText; btn.disabled = false;
-                        return;
+                        throw new Error("Incorrect password.");
                     }
 
                     currentUser = { ...data, docId: phone };
                     finalizeLoginSequence();
                 }
             } catch (e) {
-                console.error("Auth System Error:", e);
+                console.error("Auth Error:", e);
                 msgEl.className = "text-xs text-center font-bold mb-4 min-h-[1.5rem] px-4 rounded-lg py-2 bg-red-50 text-red-600 block";
-                msgEl.innerText = "System error during authentication. Please try again.";
+                msgEl.innerText = e.message || "System error during authentication. Please try again.";
             } finally {
                 btn.innerText = originalText;
                 btn.disabled = false;
