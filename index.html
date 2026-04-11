@@ -678,11 +678,11 @@
                         }
                     }
 
-                    // Safely query users without using a custom document ID
-                    const usersSnap = await getDocs(getCol('users'));
-                    const exists = usersSnap.docs.some(d => d.data().phone === phone);
+                    // Directly target document ID to bypass strict Collection Scan rules
+                    const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', phone);
+                    const snap = await getDoc(userRef);
 
-                    if (exists) {
+                    if (snap && snap.exists()) {
                         msgEl.className = "text-xs text-center font-bold mb-4 min-h-[1.5rem] px-4 rounded-lg py-2 bg-red-50 text-red-600 block";
                         msgEl.innerText = "Number already registered. Please login.";
                         return;
@@ -696,10 +696,10 @@
                         ...(currentAuthRole === 'Partner' && { category: partnerCategory, license: licenseStr, skill: skillStr, shopName: null })
                     };
                     
-                    // Uses addDoc to auto-generate a secure ID
-                    const docRef = await addDoc(getCol('users'), userData);
+                    // Directly save the document securely
+                    await setDoc(userRef, userData);
                     
-                    currentUser = { ...userData, docId: docRef.id };
+                    currentUser = { ...userData, docId: phone };
                     finalizeLoginSequence();
 
                 } else if (type === 'login') {
@@ -708,7 +708,7 @@
 
                     // Master Admin Backdoor
                     if (phone === '12345' && pass === 'Pass@123') {
-                        currentUser = { name: 'Super Admin', role: 'Admin', phone: '12345' };
+                        currentUser = { name: 'Super Admin', role: 'Admin', phone: '12345', docId: 'admin' };
                         return finalizeLoginSequence();
                     }
 
@@ -718,24 +718,24 @@
                         return;
                     }
 
-                    // Safely query users
-                    const usersSnap = await getDocs(getCol('users'));
-                    const userDoc = usersSnap.docs.find(d => d.data().phone === phone);
+                    // Directly target document ID
+                    const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', phone);
+                    const snap = await getDoc(userRef);
                     
-                    if (!userDoc) {
+                    if (!snap.exists()) {
                         msgEl.className = "text-xs text-center font-bold mb-4 min-h-[1.5rem] px-4 rounded-lg py-2 bg-red-50 text-red-600 block";
                         msgEl.innerText = "Account not found.";
                         return;
                     }
 
-                    const data = userDoc.data();
+                    const data = snap.data();
                     if (data.pin !== pass) {
                         msgEl.className = "text-xs text-center font-bold mb-4 min-h-[1.5rem] px-4 rounded-lg py-2 bg-red-50 text-red-600 block";
                         msgEl.innerText = "Incorrect password.";
                         return;
                     }
 
-                    currentUser = { ...data, docId: userDoc.id };
+                    currentUser = { ...data, docId: phone };
                     finalizeLoginSequence();
                 }
             } catch (e) {
