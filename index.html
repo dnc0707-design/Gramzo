@@ -35,6 +35,14 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+        }
+        .group-hover\:animate-wiggle:hover i {
+            animation: wiggle 0.4s ease-in-out infinite;
+        }
+
         .input-field {
             @apply w-full px-5 py-4 bg-gray-50/50 rounded-2xl border border-gray-200 outline-none focus:bg-white focus:ring-2 ring-emerald-500/50 focus:border-emerald-500 transition-all text-sm font-medium text-gray-800;
         }
@@ -128,45 +136,71 @@
                 </div>
             </div>
 
-            <div>
-                <h2 class="text-lg font-black mb-4 text-gray-900">What are you looking for?</h2>
-                <div class="flex overflow-x-auto no-scrollbar gap-4 sm:gap-8 pb-2">
-                    <div class="flex flex-col items-center gap-2 shrink-0 cursor-pointer group" onclick="filterCategory('Food')">
-                        <div class="w-[70px] h-[70px] sm:w-24 sm:h-24 rounded-2xl super-icon-wrapper flex items-center justify-center text-orange-500 text-2xl group-hover:scale-105">
-                            <i class="fa-solid fa-burger"></i>
-                        </div>
-                        <span class="text-[11px] font-bold text-gray-700">Food</span>
-                    </div>
-                    <div class="flex flex-col items-center gap-2 shrink-0 cursor-pointer group" onclick="filterCategory('Grocery')">
-                        <div class="w-[70px] h-[70px] sm:w-24 sm:h-24 rounded-2xl super-icon-wrapper flex items-center justify-center text-emerald-500 text-2xl group-hover:scale-105">
-                            <i class="fa-solid fa-basket-shopping"></i>
-                        </div>
-                        <span class="text-[11px] font-bold text-gray-700">Grocery</span>
-                    </div>
-                    <div class="flex flex-col items-center gap-2 shrink-0 cursor-pointer group" onclick="openRideBooking()">
-                        <div class="w-[70px] h-[70px] sm:w-24 sm:h-24 rounded-2xl super-icon-wrapper flex items-center justify-center text-blue-500 text-2xl group-hover:scale-105 relative overflow-hidden">
-                            <i class="fa-solid fa-motorcycle relative z-10"></i>
-                            <div class="absolute inset-0 bg-blue-50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        </div>
-                        <span class="text-[11px] font-bold text-gray-700">Book Ride</span>
-                    </div>
-                    <div class="flex flex-col items-center gap-2 shrink-0 cursor-pointer group" onclick="filterCategory('Services')">
-                        <div class="w-[70px] h-[70px] sm:w-24 sm:h-24 rounded-2xl super-icon-wrapper flex items-center justify-center text-purple-500 text-2xl group-hover:scale-105">
-                            <i class="fa-solid fa-screwdriver-wrench"></i>
-                        </div>
-                        <span class="text-[11px] font-bold text-gray-700">Services</span>
-                    </div>
-                </div>
-
-                <div id="services-subtabs" class="hidden mt-4 pt-4 border-t border-gray-100 flex gap-2 overflow-x-auto no-scrollbar pb-2 transition-all">
-                    <button type="button" onclick="filterCategory('Services', null)" data-subcat="All" class="subtab-btn px-4 py-2 bg-emerald-500 text-white rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition">All Services</button>
-                    <button type="button" onclick="filterCategory('Services', 'Electrician')" data-subcat="Electrician" class="subtab-btn px-4 py-2 bg-gray-50 text-gray-700 rounded-full text-xs font-bold whitespace-nowrap transition">Electrician</button>
-                    <button type="button" onclick="filterCategory('Services', 'Plumber')" data-subcat="Plumber" class="subtab-btn px-4 py-2 bg-gray-50 text-gray-700 rounded-full text-xs font-bold whitespace-nowrap transition">Plumber</button>
-                    <button type="button" onclick="filterCategory('Services', 'Cleaner')" data-subcat="Cleaner" class="subtab-btn px-4 py-2 bg-gray-50 text-gray-700 rounded-full text-xs font-bold whitespace-nowrap transition">Cleaner</button>
-                    <button type="button" onclick="filterCategory('Services', 'Cook')" data-subcat="Cook" class="subtab-btn px-4 py-2 bg-gray-50 text-gray-700 rounded-full text-xs font-bold whitespace-nowrap transition">Cook</button>
+            <!-- Premium Hero Section for Gen Z & Investors -->
+            <div class="relative w-full rounded-[2rem] sm:rounded-[2.5rem] bg-gradient-to-br from-emerald-50 via-white to-blue-50 border border-white shadow-[0_8px_30px_rgb(0,0,0,0.06)] p-6 sm:p-10 overflow-hidden group">
+                <!-- Decorative Glowing Orbs -->
+                <div class="absolute -right-16 -top-16 w-48 h-48 bg-emerald-400 rounded-full opacity-20 blur-3xl group-hover:opacity-30 transition-opacity duration-700"></div>
+                <div class="absolute -left-16 -bottom-16 w-48 h-48 bg-blue-400 rounded-full opacity-20 blur-3xl group-hover:opacity-30 transition-opacity duration-700"></div>
+                
+                <div class="relative z-10">
+                    <span class="inline-block py-1.5 px-3 rounded-full bg-white/80 backdrop-blur border border-gray-100 text-[9px] font-black text-emerald-600 uppercase tracking-widest shadow-sm mb-4">
+                        ✨ Gramzo Original
+                    </span>
+                    <h2 class="text-4xl sm:text-5xl font-black text-gray-900 tracking-tighter leading-[1.1] mb-3">
+                        Why should cities have all the <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-blue-500">fun?</span>
+                    </h2>
+                    <p class="text-lg sm:text-xl font-bold text-gray-800 mb-3 tracking-tight">
+                        City-style convenience, now in every village.
+                    </p>
+                    <p class="text-xs sm:text-sm text-gray-500 font-medium leading-relaxed max-w-sm sm:max-w-md">
+                        Food, grocery, rides, doctors, ambulance, and daily essentials—everything your village needs, now just one tap away with Gramzo.
+                    </p>
                 </div>
             </div>
 
+            <div>
+                <h2 class="text-lg font-black mb-4 text-gray-900">What are you looking for?</h2>
+                <div class="flex overflow-x-auto no-scrollbar gap-4 sm:gap-8 pb-2">
+                    <!-- Ride -->
+                    <div class="snap-center shrink-0 cursor-pointer group group-hover:animate-wiggle" onclick="openRideBooking()">
+                        <div class="w-[105px] h-[140px] sm:w-32 sm:h-40 rounded-[2rem] bg-gradient-to-b from-blue-100 to-blue-50 border-2 border-blue-200 flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-xl group-hover:shadow-blue-500/20">
+                            <span class="absolute top-3 bg-blue-500 text-white text-[8px] sm:text-[9px] font-black uppercase px-2.5 py-1 rounded-full shadow-sm">Gotta Go? 🚀</span>
+                            <i class="fa-solid fa-motorcycle text-4xl sm:text-5xl text-blue-500 mt-5 transition-transform duration-300 group-hover:scale-110"></i>
+                            <span class="mt-3 text-sm font-black text-gray-800 tracking-tight">Ride</span>
+                        </div>
+                    </div>
+
+                    <!-- Services -->
+                    <div class="snap-center shrink-0 cursor-pointer group group-hover:animate-wiggle" onclick="filterCategory('Services')">
+                        <div class="w-[105px] h-[140px] sm:w-32 sm:h-40 rounded-[2rem] bg-gradient-to-b from-purple-100 to-purple-50 border-2 border-purple-200 flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-xl group-hover:shadow-purple-500/20">
+                            <span class="absolute top-3 bg-purple-500 text-white text-[8px] sm:text-[9px] font-black uppercase px-2.5 py-1 rounded-full shadow-sm">Need Help? 🛠️</span>
+                            <i class="fa-solid fa-screwdriver-wrench text-4xl sm:text-5xl text-purple-500 mt-5 transition-transform duration-300 group-hover:scale-110"></i>
+                            <span class="mt-3 text-sm font-black text-gray-800 tracking-tight">Services</span>
+                        </div>
+                    </div>
+
+                    <!-- Pharmacy / SOS -->
+                    <div class="snap-center shrink-0 cursor-pointer group group-hover:animate-wiggle" onclick="filterCategory('Pharmacy')">
+                        <div class="w-[105px] h-[140px] sm:w-32 sm:h-40 rounded-[2rem] bg-gradient-to-b from-red-100 to-red-50 border-2 border-red-200 flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-xl group-hover:shadow-red-500/20">
+                            <span class="absolute top-3 bg-red-600 text-white text-[8px] sm:text-[9px] font-black uppercase px-2.5 py-1 rounded-full shadow-md animate-pulse">Emergency! 🚨</span>
+                            <i class="fa-solid fa-truck-medical text-4xl sm:text-5xl text-red-500 mt-5 transition-transform duration-300 group-hover:scale-110"></i>
+                            <span class="mt-3 text-sm font-black text-gray-800 tracking-tight">Meds & SOS</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Hidden Sub-Tabs for Services (UrbanClap style) -->
+                <div id="services-subtabs" class="hidden mt-2 pt-4 border-t border-gray-100 flex gap-2 overflow-x-auto no-scrollbar pb-2 transition-all">
+                    <button type="button" onclick="filterCategory('Services', null)" data-subcat="All" class="subtab-btn px-5 py-2.5 bg-emerald-500 text-white rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition active:scale-95">All Services</button>
+                    <button type="button" onclick="filterCategory('Services', 'Electrician')" data-subcat="Electrician" class="subtab-btn px-5 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition hover:bg-gray-50 active:scale-95">⚡ Electrician</button>
+                    <button type="button" onclick="filterCategory('Services', 'Plumber')" data-subcat="Plumber" class="subtab-btn px-5 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition hover:bg-gray-50 active:scale-95">🚰 Plumber</button>
+                    <button type="button" onclick="filterCategory('Services', 'Cleaner')" data-subcat="Cleaner" class="subtab-btn px-5 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition hover:bg-gray-50 active:scale-95">🧹 Cleaner</button>
+                    <button type="button" onclick="filterCategory('Services', 'Cook')" data-subcat="Cook" class="subtab-btn px-5 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition hover:bg-gray-50 active:scale-95">👨‍🍳 Cook</button>
+                </div>
+            </div>
+
+            <!-- Promotional Banner -->
             <div class="relative w-full h-36 rounded-3xl overflow-hidden bg-gradient-to-r from-emerald-600 to-teal-500 shadow-lg flex items-center p-6">
                 <div class="relative z-10 w-2/3">
                     <span class="bg-white/20 text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider backdrop-blur-md">Gramzo Launch</span>
@@ -175,6 +209,7 @@
                 <i class="fa-solid fa-gift absolute -right-4 -bottom-4 text-9xl text-white opacity-20"></i>
             </div>
 
+            <!-- Marketplace List -->
             <div>
                 <div class="flex justify-between items-end mb-4">
                     <h3 class="font-black text-xl text-gray-900" id="marketplace-title">Trending Near You</h3>
@@ -185,6 +220,7 @@
                 </div>
             </div>
 
+            <!-- Bottom Partner Call-to-Action -->
             <div id="partner-cta" class="mt-12 bg-gray-900 rounded-[2.5rem] p-8 text-center text-white shadow-xl relative overflow-hidden">
                 <div class="absolute -right-10 -top-10 w-40 h-40 bg-emerald-500 rounded-full opacity-20 blur-2xl"></div>
                 <div class="absolute -left-10 -bottom-10 w-40 h-40 bg-blue-500 rounded-full opacity-20 blur-2xl"></div>
@@ -231,7 +267,7 @@
                 <button type="button" onclick="calculateRideFares()" id="btn-find-rides" class="w-full bg-gray-900 text-white py-4 rounded-2xl font-bold mt-6 hover:bg-gray-800 transition-colors active:scale-95">Find Rides</button>
                 
                 <button type="button" onclick="bookAmbulance()" class="w-full bg-red-500 text-white py-4 rounded-2xl font-bold mt-4 hover:bg-red-600 transition-colors active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-red-500/30">
-                    <i class="fa-solid fa-truck-medical text-xl"></i> Emergency Ambulance (SOS)
+                    <i class="fa-solid fa-truck-medical text-xl animate-pulse"></i> Emergency Ambulance (SOS)
                 </button>
             </div>
 
@@ -773,7 +809,6 @@
                         ...(currentAuthRole === 'Partner' && { category: partnerCategory, skill: skillStr, shopName: null, doc1: null, doc2: null })
                     };
                     
-                    // Securely fire-and-forget save using merge to avoid strict document creation blocks
                     setDoc(userRef, userData, { merge: true }).catch(err => console.warn("Background save delayed:", err));
                     
                     currentUser = { ...userData, docId: phone };
