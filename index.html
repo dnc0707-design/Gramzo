@@ -89,18 +89,21 @@
     <nav class="glass-nav fixed top-0 w-full z-40 border-b border-gray-200/50">
         <div class="max-w-md mx-auto px-5 py-4 flex justify-between items-center sm:max-w-4xl">
             <div class="flex items-center gap-2 cursor-pointer" onclick="location.reload()">
-                <div class="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-emerald-500/30">
-                    <i class="fa-solid fa-leaf text-xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl font-black text-gray-900 tracking-tight leading-none">Gramzo</h1>
-                    <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mt-0.5">Super App</p>
-                </div>
+                <img src="Gramzo homepage header design.png" alt="Gramzo Logo" class="h-8 sm:h-10 object-contain" onerror="this.onerror=null; this.outerHTML='<h1 class=\'text-2xl font-black text-emerald-600 tracking-tight\'>Gramzo</h1>';">
             </div>
 
-            <div id="auth-container">
+            <div id="auth-container" class="flex items-center gap-3">
+                
+                <!-- Language Selector -->
+                <select id="lang-selector" onchange="changeLanguage(this.value)" class="bg-gray-50 border border-gray-200 text-xs font-bold rounded-xl px-2 py-2 outline-none text-gray-700 cursor-pointer shadow-sm hover:bg-gray-100 transition">
+                    <option value="en">English</option>
+                    <option value="hi">हिंदी</option>
+                    <option value="bn">বাংলা</option>
+                    <option value="sat">Ol Chiki</option>
+                </select>
+
                 <button type="button" id="btn-login-trigger" onclick="openAuthModal('User')" class="bg-gray-900 text-white px-5 py-2.5 rounded-full text-sm font-bold shadow-md hover:bg-gray-800 transition-colors active:scale-95 flex items-center gap-2">
-                    <i class="fa-solid fa-user"></i> Login
+                    <i class="fa-solid fa-user"></i> <span data-i18n="login">Login</span>
                 </button>
                 
                 <div id="profile-trigger" class="hidden flex items-center gap-3 bg-white border border-gray-100 py-1.5 pl-1.5 pr-4 rounded-full shadow-sm cursor-pointer" onclick="toggleProfileMenu()">
@@ -121,7 +124,7 @@
                     </div>
                     <div class="p-2">
                         <button type="button" onclick="logout()" class="w-full text-left px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 rounded-xl transition-colors flex items-center gap-2">
-                            <i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out
+                            <i class="fa-solid fa-arrow-right-from-bracket"></i> <span data-i18n="logout">Sign Out</span>
                         </button>
                     </div>
                 </div>
@@ -149,74 +152,60 @@
                     <i class="fa-solid fa-location-dot"></i>
                 </div>
                 <div class="flex-1">
-                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Delivering to</p>
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider" data-i18n="delivering_to">Delivering to</p>
                     <p class="text-sm font-bold text-gray-900 truncate" id="user-location-display">Select Location below to order</p>
                 </div>
             </div>
 
-            <!-- Premium Hero Section for Gen Z & Investors -->
-            <div class="relative w-full rounded-[2rem] sm:rounded-[2.5rem] bg-gradient-to-br from-emerald-50 via-white to-blue-50 border border-white shadow-[0_8px_30px_rgb(0,0,0,0.06)] p-6 sm:p-10 overflow-hidden group">
-                <!-- Decorative Glowing Orbs -->
-                <div class="absolute -right-16 -top-16 w-48 h-48 bg-emerald-400 rounded-full opacity-20 blur-3xl group-hover:opacity-30 transition-opacity duration-700"></div>
-                <div class="absolute -left-16 -bottom-16 w-48 h-48 bg-blue-400 rounded-full opacity-20 blur-3xl group-hover:opacity-30 transition-opacity duration-700"></div>
-                
-                <div class="relative z-10">
-                    <span class="inline-block py-1.5 px-3 rounded-full bg-white/80 backdrop-blur border border-gray-100 text-[9px] font-black text-emerald-600 uppercase tracking-widest shadow-sm mb-4">
-                        ✨ Gramzo Original
-                    </span>
-                    <h2 class="text-4xl sm:text-5xl font-black text-gray-900 tracking-tighter leading-[1.1] mb-3">
-                        Why should cities have all the <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-blue-500">fun?</span>
-                    </h2>
-                    <p class="text-lg sm:text-xl font-bold text-gray-800 mb-3 tracking-tight">
-                        City-style convenience, now in every village.
-                    </p>
-                    <p class="text-xs sm:text-sm text-gray-500 font-medium leading-relaxed max-w-sm sm:max-w-md">
-                        Food, grocery, rides, doctors, ambulance, and daily essentials—everything your village needs, now just one tap away with Gramzo.
-                    </p>
-                </div>
+            <!-- Admin Controlled Offer Zone -->
+            <div class="w-full relative rounded-[2rem] overflow-hidden shadow-sm border border-gray-100 h-32 sm:h-48 group bg-emerald-50 cursor-pointer">
+                <span class="absolute top-3 left-3 z-10 inline-block py-1 px-2.5 rounded-full bg-white/90 backdrop-blur text-[9px] font-black text-red-600 uppercase tracking-widest shadow-sm">
+                    <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse inline-block mr-1 align-middle"></span>OFFER ZONE
+                </span>
+                <img id="user-offer-banner" src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="Special Offers">
             </div>
 
             <div>
-                <h2 class="text-lg font-black mb-4 text-gray-900">What are you looking for?</h2>
+                <h2 class="text-lg font-black mb-4 text-gray-900" data-i18n="search">What are you looking for?</h2>
                 <div class="flex overflow-x-auto no-scrollbar gap-4 sm:gap-8 pb-4 px-1 snap-x">
                     <!-- Food -->
                     <div class="snap-center shrink-0 cursor-pointer group group-hover:animate-wiggle" onclick="filterCategory('Food')">
                         <div class="w-[105px] h-[140px] sm:w-32 sm:h-40 rounded-[2rem] bg-gradient-to-b from-orange-100 to-orange-50 border-2 border-orange-200 flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-xl group-hover:shadow-orange-500/20">
-                            <span class="absolute top-3 bg-orange-500 text-white text-[8px] sm:text-[9px] font-black uppercase px-2.5 py-1 rounded-full shadow-sm animate-pulse">U Hungry? 🤤</span>
+                            <span class="absolute top-3 bg-orange-500 text-white text-[8px] sm:text-[9px] font-black uppercase px-2.5 py-1 rounded-full shadow-sm animate-pulse" data-i18n="u_hungry">U Hungry? 🤤</span>
                             <i class="fa-solid fa-burger text-4xl sm:text-5xl text-orange-500 mt-5 transition-transform duration-300 group-hover:scale-110"></i>
-                            <span class="mt-3 text-sm font-black text-gray-800 tracking-tight">Food</span>
+                            <span class="mt-3 text-sm font-black text-gray-800 tracking-tight" data-i18n="food">Food</span>
                         </div>
                     </div>
 
                     <!-- Grocery -->
                     <div class="snap-center shrink-0 cursor-pointer group group-hover:animate-wiggle" onclick="filterCategory('Grocery')">
                         <div class="w-[105px] h-[140px] sm:w-32 sm:h-40 rounded-[2rem] bg-gradient-to-b from-emerald-100 to-emerald-50 border-2 border-emerald-200 flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-xl group-hover:shadow-emerald-500/20">
-                            <span class="absolute top-3 bg-emerald-500 text-white text-[8px] sm:text-[9px] font-black uppercase px-2.5 py-1 rounded-full shadow-sm">Empty Fridge? 🛒</span>
+                            <span class="absolute top-3 bg-emerald-500 text-white text-[8px] sm:text-[9px] font-black uppercase px-2.5 py-1 rounded-full shadow-sm" data-i18n="empty_fridge">Empty Fridge? 🛒</span>
                             <i class="fa-solid fa-basket-shopping text-4xl sm:text-5xl text-emerald-500 mt-5 transition-transform duration-300 group-hover:scale-110"></i>
-                            <span class="mt-3 text-sm font-black text-gray-800 tracking-tight">Grocery</span>
+                            <span class="mt-3 text-sm font-black text-gray-800 tracking-tight" data-i18n="grocery">Grocery</span>
                         </div>
                     </div>
 
                     <!-- Ride -->
                     <div class="snap-center shrink-0 cursor-pointer group group-hover:animate-wiggle" onclick="openRideBooking()">
                         <div class="w-[105px] h-[140px] sm:w-32 sm:h-40 rounded-[2rem] bg-gradient-to-b from-blue-100 to-blue-50 border-2 border-blue-200 flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-xl group-hover:shadow-blue-500/20">
-                            <span class="absolute top-3 bg-blue-500 text-white text-[8px] sm:text-[9px] font-black uppercase px-2.5 py-1 rounded-full shadow-sm">Gotta Go? 🚀</span>
+                            <span class="absolute top-3 bg-blue-500 text-white text-[8px] sm:text-[9px] font-black uppercase px-2.5 py-1 rounded-full shadow-sm" data-i18n="gotta_go">Gotta Go? 🚀</span>
                             <i class="fa-solid fa-motorcycle text-4xl sm:text-5xl text-blue-500 mt-5 transition-transform duration-300 group-hover:scale-110"></i>
-                            <span class="mt-3 text-sm font-black text-gray-800 tracking-tight">Ride</span>
+                            <span class="mt-3 text-sm font-black text-gray-800 tracking-tight" data-i18n="ride">Ride</span>
                         </div>
                     </div>
 
                     <!-- Services -->
                     <div class="snap-center shrink-0 cursor-pointer group group-hover:animate-wiggle" onclick="filterCategory('Services')">
                         <div class="w-[105px] h-[140px] sm:w-32 sm:h-40 rounded-[2rem] bg-gradient-to-b from-purple-100 to-purple-50 border-2 border-purple-200 flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-xl group-hover:shadow-purple-500/20">
-                            <span class="absolute top-3 bg-purple-500 text-white text-[8px] sm:text-[9px] font-black uppercase px-2.5 py-1 rounded-full shadow-sm">Need Help? 🛠️</span>
+                            <span class="absolute top-3 bg-purple-500 text-white text-[8px] sm:text-[9px] font-black uppercase px-2.5 py-1 rounded-full shadow-sm" data-i18n="need_help">Need Help? 🛠️</span>
                             <i class="fa-solid fa-screwdriver-wrench text-4xl sm:text-5xl text-purple-500 mt-5 transition-transform duration-300 group-hover:scale-110"></i>
-                            <span class="mt-3 text-sm font-black text-gray-800 tracking-tight">Services</span>
+                            <span class="mt-3 text-sm font-black text-gray-800 tracking-tight" data-i18n="services">Services</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Hidden Sub-Tabs for Services (UrbanClap style) -->
+                <!-- Hidden Sub-Tabs for Services -->
                 <div id="services-subtabs" class="hidden mt-2 pt-4 border-t border-gray-100 flex gap-2 overflow-x-auto no-scrollbar pb-2 transition-all">
                     <button type="button" onclick="filterCategory('Services', null)" data-subcat="All" class="subtab-btn px-5 py-2.5 bg-emerald-500 text-white rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition active:scale-95">All Services</button>
                     <button type="button" onclick="filterCategory('Services', 'Electrician')" data-subcat="Electrician" class="subtab-btn px-5 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition hover:bg-gray-50 active:scale-95">⚡ Electrician</button>
@@ -229,7 +218,7 @@
             <!-- Marketplace List -->
             <div>
                 <div class="flex justify-between items-end mb-4">
-                    <h3 class="font-black text-xl text-gray-900" id="marketplace-title">Trending Near You</h3>
+                    <h3 class="font-black text-xl text-gray-900" id="marketplace-title" data-i18n="trending">Trending Near You</h3>
                     <button type="button" id="btn-clear-filter" onclick="filterCategory(null)" class="hidden text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">Clear Filter</button>
                 </div>
                 <div id="market-list" class="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -245,9 +234,9 @@
                     <div class="w-14 h-14 mx-auto bg-white/10 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-md">
                         <i class="fa-solid fa-store text-2xl text-emerald-400"></i>
                     </div>
-                    <h3 class="text-2xl font-black mb-2">Grow with Gramzo</h3>
+                    <h3 class="text-2xl font-black mb-2" data-i18n="grow_with_us">Grow with Gramzo</h3>
                     <p class="text-gray-400 text-sm mb-6 max-w-xs mx-auto">Join as a Shop Owner, Service Professional, or Delivery Partner today.</p>
-                    <button type="button" onclick="openAuthModal('Partner')" class="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-4 rounded-full text-sm font-bold shadow-lg shadow-emerald-500/30 transition-transform active:scale-95 w-full sm:w-auto">
+                    <button type="button" onclick="openAuthModal('Partner')" class="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-4 rounded-full text-sm font-bold shadow-lg shadow-emerald-500/30 transition-transform active:scale-95 w-full sm:w-auto" data-i18n="partner_reg">
                         Partner Registration
                     </button>
                 </div>
@@ -260,7 +249,7 @@
         <div id="view-RideBooking" class="view-section space-y-6">
             <div class="flex items-center gap-3 mb-2">
                 <button type="button" onclick="switchMainView('User')" class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-arrow-left"></i></button>
-                <h2 class="text-2xl font-black text-gray-900">Book a Ride</h2>
+                <h2 class="text-2xl font-black text-gray-900" data-i18n="book_ride">Book a Ride</h2>
             </div>
             
             <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100 relative">
@@ -269,7 +258,7 @@
                     <div class="flex items-center gap-3">
                         <div class="w-3 h-3 rounded-full bg-blue-500 shadow-[0_0_0_4px_rgba(59,130,246,0.2)] shrink-0"></div>
                         <div class="relative w-full">
-                            <input id="ride-pickup" class="input-field !pl-4 !pr-10" placeholder="Enter Pickup Location">
+                            <input id="ride-pickup" class="input-field !pl-4 !pr-10" placeholder="Type Pickup Location or Locate">
                             <button type="button" onclick="getCurrentLocation('ride-pickup')" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-500 transition-colors" title="Use Current Location">
                                 <i class="fa-solid fa-location-crosshairs text-lg"></i>
                             </button>
@@ -277,16 +266,16 @@
                     </div>
                     <div class="flex items-center gap-3">
                         <div class="w-3 h-3 rounded-none bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.2)] shrink-0"></div>
-                        <input id="ride-drop" class="input-field !pl-4" placeholder="Enter Drop Destination">
+                        <input id="ride-drop" class="input-field !pl-4" placeholder="Type Drop Destination">
                     </div>
                 </div>
                 
-                <button type="button" onclick="calculateRideFares()" id="btn-find-rides" class="w-full bg-gray-900 text-white py-4 rounded-2xl font-bold mt-6 hover:bg-gray-800 transition-colors active:scale-95">Find Rides</button>
+                <button type="button" onclick="calculateRideFares()" id="btn-find-rides" class="w-full bg-gray-900 text-white py-4 rounded-2xl font-bold mt-6 hover:bg-gray-800 transition-colors active:scale-95" data-i18n="find_rides">Find Rides</button>
                 
                 <!-- SMALL AMBULANCE SOS BUTTON -->
                 <div class="text-right mt-3">
                     <button type="button" onclick="bookAmbulance()" class="text-xs text-red-600 bg-red-50 px-3 py-2 rounded-lg font-bold hover:bg-red-100 transition-colors active:scale-95 inline-flex items-center gap-1.5 border border-red-100 shadow-sm">
-                        <i class="fa-solid fa-truck-medical animate-pulse"></i> Emergency Ambulance (SOS)
+                        <i class="fa-solid fa-truck-medical animate-pulse"></i> Ambulance (SOS)
                     </button>
                 </div>
             </div>
@@ -301,7 +290,7 @@
         <!-- VIEW: CART & CHECKOUT                      -->
         <!-- ========================================== -->
         <div id="view-Cart" class="view-section space-y-6">
-            <h2 class="text-2xl font-black text-gray-900">Checkout</h2>
+            <h2 class="text-2xl font-black text-gray-900" data-i18n="checkout">Checkout</h2>
             
             <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100">
                 <div id="cart-items-list" class="space-y-4 mb-6">
@@ -312,7 +301,7 @@
                     <div>
                         <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2 ml-2">Delivery Details</label>
                         <div class="relative">
-                            <textarea id="cart-address" rows="2" class="input-field !py-3 resize-none" placeholder="Full Delivery Address & Landmark"></textarea>
+                            <textarea id="cart-address" rows="2" class="input-field !py-3 resize-none" placeholder="Type Full Delivery Address manually..."></textarea>
                             <button type="button" onclick="getCurrentLocation('cart-address')" class="absolute right-3 top-3 text-gray-400 hover:text-emerald-500 transition-colors bg-white rounded-full p-1 shadow-sm border border-gray-100" title="Locate Me">
                                 <i class="fa-solid fa-location-crosshairs"></i> Locate
                             </button>
@@ -462,6 +451,19 @@
                 </div>
             </div>
 
+            <!-- ADMIN OFFER ZONE MANAGEMENT -->
+            <div class="bg-blue-50 rounded-[2rem] p-6 border border-blue-100 relative overflow-hidden mt-8">
+                <div class="relative z-10">
+                    <h3 class="font-bold text-blue-800 mb-4">Manage Offer Zone Banner</h3>
+                    <p class="text-xs text-gray-600 mb-4">Upload an image to display in the main promotional space on the user homepage.</p>
+                    <div class="space-y-3">
+                        <input type="file" id="admin-offer-file" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 transition-all border border-gray-200 rounded-2xl p-2 bg-white">
+                        <button type="button" onclick="adminUpdateOffer()" id="btn-update-offer" class="w-full bg-blue-600 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-blue-500/20 active:scale-95 transition mt-2">Publish Offer Image</button>
+                    </div>
+                </div>
+                <i class="fa-solid fa-bullhorn absolute -right-6 -bottom-6 text-blue-200 text-8xl opacity-40"></i>
+            </div>
+
             <!-- ADMIN APPROVALS SECTION -->
             <div class="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden mt-8">
                 <div class="p-5 border-b border-gray-100 bg-orange-50/50 flex items-center justify-between">
@@ -600,6 +602,58 @@
         
         const getCol = (name) => collection(db, 'artifacts', appId, 'public', 'data', name);
 
+        // --- Multi-Language Dictionary ---
+        const translations = {
+            'en': {
+                'login': 'Login', 'logout': 'Sign Out', 'delivering_to': 'Delivering to',
+                'hero_title': 'Santuri Block Villages',
+                'hero_sub': '& Near Sakambari Plant (Nituria)',
+                'search': 'What are you looking for?', 'trending': 'Trending Near You',
+                'u_hungry': 'U Hungry? 🤤', 'food': 'Food', 'empty_fridge': 'Empty Fridge? 🛒', 'grocery': 'Grocery',
+                'gotta_go': 'Gotta Go? 🚀', 'ride': 'Ride', 'need_help': 'Need Help? 🛠️', 'services': 'Services',
+                'grow_with_us': 'Grow with Gramzo', 'partner_reg': 'Partner Registration',
+                'book_ride': 'Book a Ride', 'find_rides': 'Find Rides', 'checkout': 'Checkout'
+            },
+            'hi': {
+                'login': 'लॉग इन', 'logout': 'लॉग आउट', 'delivering_to': 'डिलीवरी स्थान',
+                'hero_title': 'सांतूरी ब्लॉक के गांव',
+                'hero_sub': 'और शाकंभरी प्लांट (नितुरिया) के पास',
+                'search': 'आप क्या खोज रहे हैं?', 'trending': 'आपके आस-पास लोकप्रिय',
+                'u_hungry': 'भूख लगी है? 🤤', 'food': 'भोजन', 'empty_fridge': 'फ्रिज खाली है? 🛒', 'grocery': 'किराना',
+                'gotta_go': 'जाना है? 🚀', 'ride': 'सवारी', 'need_help': 'मदद चाहिए? 🛠️', 'services': 'सेवाएं',
+                'grow_with_us': 'ग्रैमज़ो के साथ बढ़ें', 'partner_reg': 'पार्टनर पंजीकरण',
+                'book_ride': 'सवारी बुक करें', 'find_rides': 'सवारी खोजें', 'checkout': 'चेकआउट'
+            },
+            'bn': {
+                'login': 'লগইন', 'logout': 'লগআউট', 'delivering_to': 'ডেলিভারি স্থান',
+                'hero_title': 'সাঁতুরি ব্লকের গ্রামগুলো',
+                'hero_sub': 'এবং শাকম্বরী প্ল্যান্টের (নিতুরিয়া) কাছাকাছি',
+                'search': 'আপনি কি খুঁজছেন?', 'trending': 'আপনার কাছাকাছি জনপ্রিয়',
+                'u_hungry': 'ক্ষুধা পেয়েছে? 🤤', 'food': 'খাবার', 'empty_fridge': 'ফ্রিজ খালি? 🛒', 'grocery': 'মুদিখানা',
+                'gotta_go': 'যেতে হবে? 🚀', 'ride': 'রাইড', 'need_help': 'সাহায্য দরকার? 🛠️', 'services': 'সেবা',
+                'grow_with_us': 'গ্রামজোর সাথে বাড়ুন', 'partner_reg': 'পার্টনার নিবন্ধন',
+                'book_ride': 'রাইড বুক করুন', 'find_rides': 'রাইড খুঁজুন', 'checkout': 'চেকআউট'
+            },
+            'sat': { // Phonetic approximation
+                'login': 'Bolo', 'logout': 'Odon', 'delivering_to': 'Kulai kana',
+                'hero_title': 'Santuri Block aato ko',
+                'hero_sub': 'ar Sakambari Plant (Nituria) sur re',
+                'search': 'Ched em khoj kana?', 'trending': 'Sur re trending',
+                'u_hungry': 'Rengej? 🤤', 'food': 'Jomak', 'empty_fridge': 'Saman banu? 🛒', 'grocery': 'Saman',
+                'gotta_go': 'Chalak? 🚀', 'ride': 'Gadi', 'need_help': 'Goro? 🛠️', 'services': 'Kami',
+                'grow_with_us': 'Gramzo saota', 'partner_reg': 'Partner Registration',
+                'book_ride': 'Gadi book', 'find_rides': 'Gadi nam', 'checkout': 'Checkout'
+            }
+        };
+
+        window.changeLanguage = (lang) => {
+            const dict = translations[lang] || translations['en'];
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (dict[key]) el.innerHTML = dict[key]; // innerHTML allows spans/formatting
+            });
+        };
+
         const resizeImage = (file, maxSize) => {
             return new Promise((resolve) => {
                 const reader = new FileReader();
@@ -643,7 +697,6 @@
             }
         }
 
-        // --- Improved Geolocation with Sandboxed Iframe Fallback ---
         window.getCurrentLocation = (inputId) => {
             const input = document.getElementById(inputId);
             const originalVal = input.value;
@@ -651,11 +704,10 @@
             
             let locationFound = false;
             
-            // Fallback timer if iframe silently blocks the prompt
             const fallbackTimer = setTimeout(() => {
                 if (locationFound) return;
-                input.value = "Main Street, Gramzo Village Center";
-                showToast("Browser sandbox blocked GPS. Using default location.", "info");
+                input.value = "";
+                showToast("Please type your address manually.", "error");
             }, 3500);
             
             if (navigator.geolocation) {
@@ -676,13 +728,13 @@
                 }, (err) => {
                     locationFound = true;
                     clearTimeout(fallbackTimer);
-                    input.value = "Main Street, Gramzo Village Center"; 
-                    showToast("Browser blocked GPS. Using default location.", "info");
-                }, { timeout: 5000, maximumAge: 10000 });
+                    input.value = ""; 
+                    showToast("Please type your address manually.", "error");
+                }, { timeout: 10000, maximumAge: 0, enableHighAccuracy: true });
             } else {
                 clearTimeout(fallbackTimer);
-                input.value = originalVal;
-                showToast("Geolocation not supported by device.", "error");
+                input.value = "";
+                showToast("Geolocation not supported. Please type manually.", "error");
             }
         };
 
@@ -1160,6 +1212,14 @@
         };
 
         function loadMarketplaceData() {
+            // Listen for Offer Banner Updates
+            onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'app_config'), (snap) => {
+                const bannerEl = document.getElementById('user-offer-banner');
+                if (snap.exists() && snap.data().offerBanner) {
+                    if (bannerEl) bannerEl.src = snap.data().offerBanner;
+                }
+            });
+
             const dummyProducts = [
                 { id: "dummy1", name: "Fresh Tomatoes", variants: [{qty: "1 Kg", price: 40}, {qty: "2 Kg", price: 75}], category: "Grocery", image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400&q=80", shopName: "Gramzo Fresh", inStock: true, shopStatus: 'Open' },
                 { id: "dummy2", name: "Aashirvaad Atta", variants: [{qty: "5 Kg", price: 210}, {qty: "10 Kg", price: 400}], category: "Grocery", image: "https://images.unsplash.com/photo-1627483262112-039e9a0a0f16?w=400&q=80", shopName: "Gramzo Supermart", inStock: true, shopStatus: 'Open' },
@@ -1247,10 +1307,14 @@
             
             const clearBtn = document.getElementById('btn-clear-filter');
             const subtabs = document.getElementById('services-subtabs');
-            document.getElementById('marketplace-title').innerText = cat ? `${subCat || cat} Options` : 'Trending Near You';
-
-            if (cat) clearBtn.classList.remove('hidden');
-            else clearBtn.classList.add('hidden');
+            
+            if (cat) {
+                clearBtn.classList.remove('hidden');
+                document.getElementById('marketplace-title').innerText = `${subCat || cat} Options`;
+            } else {
+                clearBtn.classList.add('hidden');
+                document.getElementById('marketplace-title').innerText = 'Trending Near You';
+            }
 
             if (cat === 'Services') {
                 subtabs.classList.remove('hidden');
@@ -1441,6 +1505,29 @@
                 showToast(`Partner ${status}!`, "success");
             } catch(e) {
                 showToast("Error updating status.", "error");
+            }
+        };
+
+        window.adminUpdateOffer = async () => {
+            if(currentUser.role !== 'Admin') return;
+            const file = document.getElementById('admin-offer-file').files[0];
+            if(!file) return showToast("Please select an image file.", "error");
+
+            const btn = document.getElementById('btn-update-offer');
+            const orig = btn.innerText;
+            btn.innerText = "Uploading...";
+            btn.disabled = true;
+
+            try {
+                const base64 = await resizeImage(file, 1000); 
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'app_config'), { offerBanner: base64 }, { merge: true });
+                showToast("Offer Banner Updated!", "success");
+                document.getElementById('admin-offer-file').value = "";
+            } catch(e) {
+                showToast("Error updating banner. Image might be too large.", "error");
+            } finally {
+                btn.innerText = orig;
+                btn.disabled = false;
             }
         };
 
