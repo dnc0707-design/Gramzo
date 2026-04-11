@@ -30,7 +30,6 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .glass-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
-        .glass-panel { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,0.8); }
         
         /* Smooth Transitions */
         .view-section { display: none; animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
@@ -72,12 +71,6 @@
         .super-icon-wrapper:active {
             box-shadow: inset 4px 4px 10px #e5e7eb, inset -4px -4px 10px #ffffff;
         }
-
-        /* Badges */
-        .badge { @apply px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider; }
-        .badge-User { @apply bg-blue-100 text-blue-700; }
-        .badge-Partner { @apply bg-amber-100 text-amber-700; }
-        .badge-Admin { @apply bg-purple-100 text-purple-700; }
     </style>
 </head>
 <body>
@@ -313,27 +306,23 @@
                         <input id="partner-shop-name" class="input-field flex-1" placeholder="Enter Shop Name (e.g. Ram's Grocery)">
                         <button type="button" onclick="saveShopName()" id="btn-save-shop" class="bg-gray-900 text-white px-6 py-4 rounded-2xl font-bold active:scale-95 transition">Save</button>
                     </div>
-                </div>
 
-                <!-- Add Product -->
-                <div class="bg-emerald-50 rounded-[2rem] p-6 border border-emerald-100 relative overflow-hidden">
-                    <div class="relative z-10">
-                        <h3 class="font-bold text-emerald-800 mb-4">Add New Product</h3>
-                        <div class="space-y-3">
-                            <input id="prod-name" class="input-field !bg-white" placeholder="Product Name (e.g. Rice 1kg)">
-                            <div class="flex gap-3">
-                                <input id="prod-price" type="number" class="input-field !bg-white w-1/2" placeholder="Price (₹)">
-                                <input id="prod-qty" class="input-field !bg-white w-1/2" placeholder="Unit (e.g. 1 kg)">
-                            </div>
-                            <button type="button" onclick="addPartnerProduct()" id="btn-add-prod" class="w-full bg-emerald-500 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-emerald-500/20 active:scale-95 transition">Add to Catalog</button>
+                    <!-- Shop OPEN/CLOSED Toggle -->
+                    <div class="mt-4 flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
+                        <div>
+                            <p class="font-bold text-sm text-gray-900">Store Status</p>
+                            <p class="text-[10px] text-gray-500" id="shop-status-text">Currently Open</p>
                         </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="partner-status-toggle" class="sr-only peer" onchange="toggleShopStatus()">
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                        </label>
                     </div>
-                    <i class="fa-solid fa-boxes-stacked absolute -right-6 -bottom-6 text-emerald-200 text-8xl opacity-40"></i>
                 </div>
 
                 <!-- Product Catalog List -->
                 <div>
-                    <h3 class="font-bold text-gray-800 mb-3">My Catalog</h3>
+                    <h3 class="font-bold text-gray-800 mb-3">My Catalog Inventory</h3>
                     <div id="partner-catalog-list" class="space-y-3">
                         <p class="text-sm text-gray-400 text-center py-4 bg-white rounded-2xl">Loading catalog...</p>
                     </div>
@@ -370,7 +359,40 @@
                 </div>
             </div>
 
-            <div class="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden">
+            <!-- ADMIN PUBLISH PRODUCT SECTION -->
+            <div class="bg-emerald-50 rounded-[2rem] p-6 border border-emerald-100 relative overflow-hidden mt-8">
+                <div class="relative z-10">
+                    <h3 class="font-bold text-emerald-800 mb-4">Publish New Product (Admin Only)</h3>
+                    <p class="text-xs text-gray-600 mb-4">Assign products directly to partner accounts so they show up in the marketplace.</p>
+                    <div class="space-y-3">
+                        <input id="admin-prod-name" class="input-field !bg-white" placeholder="Product / Service Name">
+                        <div class="flex gap-3">
+                            <select id="admin-prod-cat" class="input-field !bg-white w-1/2">
+                                <option value="Food">Food</option>
+                                <option value="Grocery">Grocery</option>
+                                <option value="Services">Services</option>
+                            </select>
+                            <input id="admin-prod-shop-name" class="input-field !bg-white w-1/2" placeholder="Shop Name">
+                        </div>
+                        <input id="admin-prod-partner-phone" type="tel" class="input-field !bg-white" placeholder="Partner Phone Number (Owner ID)" maxlength="10">
+                        
+                        <!-- Variant Inputs -->
+                        <div id="admin-variant-container" class="space-y-2 mt-4">
+                            <p class="text-[10px] font-bold text-gray-400 uppercase">Pricing Variants</p>
+                            <div class="flex gap-3 admin-variant-row">
+                                <input class="input-field !bg-white w-1/2 var-qty" placeholder="Unit (e.g. 1 kg)">
+                                <input type="number" class="input-field !bg-white w-1/2 var-price" placeholder="Price (₹)">
+                            </div>
+                        </div>
+                        
+                        <button type="button" onclick="adminAddVariantRow()" class="text-xs text-emerald-600 font-bold px-3 py-1.5 bg-emerald-100 rounded-lg hover:bg-emerald-200 transition mt-2">+ Add another unit/price</button>
+
+                        <button type="button" onclick="adminAddProduct()" id="btn-add-prod" class="w-full bg-emerald-500 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-emerald-500/20 active:scale-95 transition mt-4">Publish to Marketplace</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden mt-8">
                 <div class="p-5 border-b border-gray-100 bg-gray-50/50">
                     <h3 class="font-bold text-gray-800">Recent Transactions</h3>
                 </div>
@@ -406,7 +428,6 @@
                 </button>
             </div>
 
-            <!-- MOVED MESSAGE TO TOP SO IT IS NEVER HIDDEN BY KEYBOARD -->
             <div id="auth-msg" class="text-xs text-center font-bold mb-4 min-h-[1.5rem] px-4 rounded-lg py-2 hidden transition-all"></div>
 
             <div id="auth-view-login" class="space-y-4">
@@ -470,7 +491,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, getDoc, setDoc, onSnapshot, addDoc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, getDoc, getDocs, setDoc, onSnapshot, addDoc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Config & Initialization
         const userConfig = {
@@ -627,7 +648,7 @@
             ]);
         };
 
-        // --- Authentication Flow (Fire & Forget / Resilient) --- //
+        // --- Authentication Flow --- //
 
         window.handleAuth = async (type) => {
             const msgEl = document.getElementById('auth-msg');
@@ -649,9 +670,7 @@
                         await signInAnonymously(auth); 
                     }
                 }
-            } catch(e) {
-                // Ignore auth failures, proceed locally if needed
-            }
+            } catch(e) {}
 
             if (type === 'register') {
                 const name = document.getElementById('reg-name').value.trim();
@@ -715,12 +734,12 @@
                 const userData = { 
                     name, phone, village, pin: pass, 
                     role: currentAuthRole, 
+                    shopStatus: 'Open',
                     uid: auth.currentUser?.uid || 'offline_uid',
                     created: new Date().toISOString(),
                     ...(currentAuthRole === 'Partner' && { category: partnerCategory, license: licenseStr, skill: skillStr, shopName: null })
                 };
                 
-                // FIRE AND FORGET - Do not block the UI for the Database write!
                 setDoc(userRef, userData).catch(e => console.warn("Background DB write delayed."));
                 
                 currentUser = { ...userData, docId: phone };
@@ -768,7 +787,7 @@
                     finalizeLoginSequence();
                 } catch(e) {
                     console.warn("DB Timeout. Using Demo Override for UI demonstration.");
-                    currentUser = { name: "Demo User", phone: phone, role: currentAuthRole, docId: phone, category: 'Grocery Owner' };
+                    currentUser = { name: "Demo User", phone: phone, role: currentAuthRole, docId: phone, category: 'Grocery Owner', shopStatus: 'Open' };
                     finalizeLoginSequence();
                 }
             }
@@ -817,7 +836,11 @@
                     document.getElementById('partner-vehicle-section').classList.add('hidden');
                     if(currentUser.shopName) document.getElementById('partner-shop-name').value = currentUser.shopName;
                     
-                    // Adjust UI labels if service provider
+                    // Status Toggle Init
+                    const statusToggle = document.getElementById('partner-status-toggle');
+                    if(statusToggle) statusToggle.checked = (currentUser.shopStatus !== 'Closed');
+                    document.getElementById('shop-status-text').innerText = (currentUser.shopStatus === 'Closed') ? 'Currently Closed' : 'Currently Open';
+
                     if(currentUser.category === 'Service Provider') {
                         document.getElementById('partner-shop-name').placeholder = "Enter Profile/Business Name (e.g. RK Electricians)";
                     }
@@ -836,17 +859,14 @@
             currentUser = null;
             cart = [];
             
-            // Clean up DB listeners
             unsubscribeListeners.forEach(unsub => unsub());
             unsubscribeListeners = [];
 
-            // Reset UI
             document.getElementById('profile-menu').classList.add('hidden');
             document.getElementById('profile-trigger').classList.add('hidden');
             document.getElementById('btn-login-trigger').classList.remove('hidden');
             document.getElementById('bottom-nav').classList.add('hidden');
             
-            // Bring back the Partner CTA block
             const cta = document.getElementById('partner-cta');
             if(cta) cta.style.display = 'block';
             
@@ -885,27 +905,41 @@
 
         // --- Data Fetching & Rendering --- //
 
+        window.updatePriceDisplay = (selectEl, priceId) => {
+            const price = selectEl.options[selectEl.selectedIndex].dataset.price;
+            document.getElementById(priceId).innerText = `₹${price}`;
+        };
+
+        window.addVariantToCart = (prodId, baseName, fallbackPrice = null, fallbackQty = '') => {
+            const selectEl = document.getElementById(`sel-${prodId}`);
+            if (selectEl) {
+                const opt = selectEl.options[selectEl.selectedIndex];
+                const price = parseInt(opt.dataset.price);
+                const qty = opt.text;
+                addToCart(`${baseName} (${qty})`, price);
+            } else {
+                const finalName = fallbackQty ? `${baseName} (${fallbackQty})` : baseName;
+                addToCart(finalName, fallbackPrice);
+            }
+        };
+
         // 1. Marketplace (Public, available to guests)
         function loadMarketplaceData() {
-            if (!auth.currentUser) return; // Prevent unauthorized Firestore queries
+            if (!auth.currentUser) return; 
             
-            // Setup dummy data if none exists in db to make the demo look good immediately
             const dummyProducts = [
-                { name: "Fresh Tomatoes", price: 40, category: "Grocery", qty: "1 Kg", image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400&q=80", shopName: "Gramzo Fresh" },
-                { name: "Aashirvaad Atta", price: 210, category: "Grocery", qty: "5 Kg", image: "https://images.unsplash.com/photo-1627483262112-039e9a0a0f16?w=400&q=80", shopName: "Gramzo Supermart" },
-                { name: "Chicken Biryani", price: 150, category: "Food", qty: "1 Plate", image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&q=80", shopName: "Local Kitchen" },
-                { name: "Paracetamol 500mg", price: 20, category: "Pharmacy", qty: "Strip of 10", image: "https://images.unsplash.com/photo-1584308666744-24d5e4a86b97?w=400&q=80", shopName: "Gramzo Pharma" },
-                { name: "Bike Taxi to Station", price: 80, category: "Ride", qty: "Base Fare", image: "https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=400&q=80", shopName: "Gramzo Rides" },
-                { name: "AC Repair & Service", price: 499, category: "Services", subCategory: "Electrician", qty: "1 Visit", image: "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=400&q=80", shopName: "Raj Electricals" },
-                { name: "Deep Home Cleaning", price: 999, category: "Services", subCategory: "Cleaner", qty: "Full House", image: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&q=80", shopName: "CleanSweep Pros" },
-                { name: "Pipe Leakage Fix", price: 299, category: "Services", subCategory: "Plumber", qty: "Inspection", image: "https://images.unsplash.com/photo-1607472586893-edb57cbbea42?w=400&q=80", shopName: "A1 Plumbers" }
+                { id: "dummy1", name: "Fresh Tomatoes", variants: [{qty: "1 Kg", price: 40}, {qty: "2 Kg", price: 75}], category: "Grocery", image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400&q=80", shopName: "Gramzo Fresh", inStock: true, shopStatus: 'Open' },
+                { id: "dummy2", name: "Aashirvaad Atta", variants: [{qty: "5 Kg", price: 210}, {qty: "10 Kg", price: 400}], category: "Grocery", image: "https://images.unsplash.com/photo-1627483262112-039e9a0a0f16?w=400&q=80", shopName: "Gramzo Supermart", inStock: true, shopStatus: 'Open' },
+                { id: "dummy3", name: "Chicken Biryani", variants: [{qty: "Half", price: 90}, {qty: "Full Plate", price: 150}], category: "Food", image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&q=80", shopName: "Local Kitchen", inStock: false, shopStatus: 'Open' },
+                { id: "dummy4", name: "Paracetamol 500mg", variants: [{qty: "1 Strip", price: 20}, {qty: "3 Strips", price: 55}], category: "Pharmacy", image: "https://images.unsplash.com/photo-1584308666744-24d5e4a86b97?w=400&q=80", shopName: "Gramzo Pharma", inStock: true, shopStatus: 'Open' },
+                { id: "dummy5", name: "Bike Taxi to Station", price: 80, qty: "Base Fare", category: "Ride", image: "https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=400&q=80", shopName: "Gramzo Rides", inStock: true, shopStatus: 'Open' },
+                { id: "dummy6", name: "AC Repair & Service", price: 499, qty: "1 Visit", category: "Services", subCategory: "Electrician", image: "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=400&q=80", shopName: "Raj Electricals", inStock: true, shopStatus: 'Open' }
             ];
 
             const unsub = onSnapshot(getCol('products'), (snap) => {
                 const listEl = document.getElementById('market-list');
                 let items = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
                 
-                // Use dummy if DB is empty for demo purposes
                 if(items.length === 0) items = dummyProducts;
 
                 const filtered = items.filter(i => {
@@ -919,26 +953,59 @@
                     return;
                 }
 
-                listEl.innerHTML = filtered.map(p => `
-                    <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex flex-col transform transition hover:-translate-y-1 hover:shadow-md">
-                        <div class="h-32 bg-gray-100 relative">
-                            <img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x300/f3f4f6/a1a1aa?text=Image'">
-                            <span class="absolute top-2 left-2 bg-white/90 backdrop-blur text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded text-gray-800 shadow-sm">${p.subCategory || p.category}</span>
-                        </div>
-                        <div class="p-3 flex-1 flex flex-col justify-between">
-                            <div>
-                                <h4 class="font-bold text-gray-900 text-sm leading-tight mb-1">${p.name}</h4>
-                                <p class="text-[10px] text-gray-500 uppercase tracking-wide font-medium mb-3">${p.qty || ''} • <span class="text-emerald-600 font-bold">${p.shopName || 'Gramzo'}</span></p>
+                listEl.innerHTML = filtered.map(p => {
+                    const hasVariants = p.variants && p.variants.length > 0;
+                    const displayPrice = hasVariants ? p.variants[0].price : p.price;
+                    const isClosed = p.shopStatus === 'Closed';
+                    const isOutOfStock = p.inStock === false;
+                    
+                    let qtyDisplay = `<p class="text-[10px] text-gray-500 uppercase tracking-wide font-medium mb-3">${p.qty || ''} • <span class="text-emerald-600 font-bold">${p.shopName || 'Gramzo'}</span></p>`;
+                    
+                    if (hasVariants) {
+                        const options = p.variants.map((v, i) => `<option value="${i}" data-price="${v.price}">${v.qty}</option>`).join('');
+                        qtyDisplay = `
+                            <div class="mb-3 flex items-center justify-between">
+                                <select onchange="updatePriceDisplay(this, 'price-${p.id}')" id="sel-${p.id}" class="text-xs bg-gray-50 border border-gray-200 rounded-lg p-1.5 outline-none focus:ring-1 ring-emerald-500 font-medium text-gray-700 w-full mr-2">
+                                    ${options}
+                                </select>
+                                <span class="text-[9px] text-emerald-600 font-bold shrink-0">${p.shopName || 'Gramzo'}</span>
                             </div>
-                            <div class="flex justify-between items-center mt-auto">
-                                <span class="text-lg font-black text-emerald-600 tracking-tight">₹${p.price}</span>
-                                <button type="button" onclick="addToCart('${p.name}', ${p.price})" class="w-8 h-8 rounded-full bg-gray-900 text-white flex items-center justify-center hover:bg-emerald-50 transition-colors active:scale-90">
-                                    <i class="fa-solid fa-plus text-xs"></i>
-                                </button>
+                        `;
+                    }
+
+                    // Determine Call To Action Button State
+                    let actionHtml = '';
+                    if (isClosed) {
+                        actionHtml = `<span class="text-[10px] font-black text-red-500 uppercase tracking-widest bg-red-50 px-2 py-1 rounded">Shop Closed</span>`;
+                    } else if (isOutOfStock) {
+                        actionHtml = `<span class="text-[10px] font-black text-orange-500 uppercase tracking-widest bg-orange-50 px-2 py-1 rounded">Out of Stock</span>`;
+                    } else {
+                        actionHtml = `
+                            <span id="price-${p.id}" class="text-lg font-black text-emerald-600 tracking-tight">₹${displayPrice}</span>
+                            <button type="button" onclick="addVariantToCart('${p.id}', '${p.name.replace(/'/g, "\\'")}', ${!hasVariants ? p.price : 'null'}, '${(!hasVariants && p.qty) ? p.qty : ''}')" class="w-8 h-8 rounded-full bg-gray-900 text-white flex items-center justify-center hover:bg-emerald-500 transition-colors active:scale-90 shrink-0">
+                                <i class="fa-solid fa-plus text-xs"></i>
+                            </button>
+                        `;
+                    }
+
+                    return `
+                        <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex flex-col transform transition hover:-translate-y-1 hover:shadow-md ${isClosed || isOutOfStock ? 'opacity-60 grayscale-[0.5]' : ''}">
+                            <div class="h-32 bg-gray-100 relative">
+                                <img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x300/f3f4f6/a1a1aa?text=Image'">
+                                <span class="absolute top-2 left-2 bg-white/90 backdrop-blur text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded text-gray-800 shadow-sm">${p.subCategory || p.category}</span>
+                            </div>
+                            <div class="p-3 flex-1 flex flex-col justify-between">
+                                <div>
+                                    <h4 class="font-bold text-gray-900 text-sm leading-tight mb-1">${p.name}</h4>
+                                    ${qtyDisplay}
+                                </div>
+                                <div class="flex justify-between items-center mt-auto pt-2 border-t border-gray-50">
+                                    ${actionHtml}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
             }, (error) => console.error("Products error:", error));
             
         }
@@ -955,8 +1022,6 @@
 
             if (cat === 'Services') {
                 subtabs.classList.remove('hidden');
-                
-                // Update subtab styling
                 document.querySelectorAll('.subtab-btn').forEach(btn => {
                     const isActive = btn.dataset.subcat === (subCat || 'All');
                     btn.className = `subtab-btn px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition ${isActive ? 'bg-emerald-500 text-white' : 'bg-gray-50 text-gray-700'}`;
@@ -972,7 +1037,6 @@
         function initRoleListeners() {
             if (!currentUser) return;
 
-            // Clear previous user's listeners if any exist
             unsubscribeListeners.forEach(u => u());
             unsubscribeListeners = [];
 
@@ -983,7 +1047,7 @@
                     if(adminLog) adminLog.innerHTML = '';
 
                     const orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                    orders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0)); // simple sort
+                    orders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0));
 
                     if(orders.length === 0 && adminLog) {
                         adminLog.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-gray-400 text-xs italic">No orders yet</td></tr>';
@@ -1006,11 +1070,10 @@
                     });
                     document.getElementById('stat-rev').innerText = `₹${rev}`;
                     document.getElementById('stat-ord').innerText = count;
-                }, (error) => console.error("Admin orders err:", error));
+                });
                 unsubscribeListeners.push(unsub);
             } 
             else if (currentUser.role === 'Partner') {
-                // Listener for Deliveries
                 const orderUnsub = onSnapshot(getCol('orders'), (snap) => {
                     const listEl = document.getElementById('partner-orders-list');
                     let html = '';
@@ -1050,10 +1113,9 @@
                         `;
                     });
                     listEl.innerHTML = html;
-                }, (error) => console.error("Partner orders err:", error));
+                });
                 unsubscribeListeners.push(orderUnsub);
 
-                // Listener for Personal Shop Catalog
                 if (currentUser.category === 'Food Owner' || currentUser.category === 'Grocery Owner' || currentUser.category === 'Service Provider') {
                     const catalogUnsub = onSnapshot(getCol('products'), (snap) => {
                         const list = document.getElementById('partner-catalog-list');
@@ -1061,28 +1123,34 @@
                         
                         const items = snap.docs
                             .map(d => ({id: d.id, ...d.data()}))
-                            .filter(p => p.partnerId === currentUser.phone); // Strict filter by owner ID
+                            .filter(p => p.partnerId === currentUser.phone); 
                         
                         if (items.length === 0) {
                             list.innerHTML = '<p class="text-sm text-gray-400 text-center py-4 bg-white rounded-2xl border border-gray-100">No products added yet.</p>';
                             return;
                         }
                         
-                        list.innerHTML = items.map(p => `
-                            <div class="flex justify-between items-center bg-white border border-gray-100 p-4 rounded-2xl shadow-sm">
-                                <div>
-                                    <p class="font-bold text-sm text-gray-900">${p.name}</p>
-                                    <p class="text-[10px] text-gray-500">${p.qty || ''} • ${p.subCategory || p.category}</p>
+                        list.innerHTML = items.map(p => {
+                            const variantsDisplay = p.variants ? p.variants.map(v => `${v.qty}: ₹${v.price}`).join(', ') : `${p.qty || ''}: ₹${p.price}`;
+                            const stockColor = p.inStock !== false ? 'text-emerald-600 border-emerald-200 bg-emerald-50' : 'text-red-500 border-red-200 bg-red-50';
+                            const stockText = p.inStock !== false ? 'In Stock' : 'Out of Stock';
+
+                            return `
+                                <div class="flex justify-between items-center bg-white border border-gray-100 p-4 rounded-2xl shadow-sm">
+                                    <div class="flex-1 mr-4">
+                                        <p class="font-bold text-sm text-gray-900">${p.name}</p>
+                                        <p class="text-[10px] text-gray-500">${p.subCategory || p.category}</p>
+                                        <p class="text-[10px] text-emerald-600 font-bold mt-1">${variantsDisplay}</p>
+                                    </div>
+                                    <div class="flex items-center gap-3 shrink-0">
+                                        <button type="button" onclick="togglePartnerStock('${p.id}', ${p.inStock !== false})" class="text-[10px] font-bold ${stockColor} border px-2 py-1 rounded transition whitespace-nowrap">
+                                            ${stockText}
+                                        </button>
+                                    </div>
                                 </div>
-                                <div class="flex items-center gap-4">
-                                    <span class="font-black text-emerald-600">₹${p.price}</span>
-                                    <button type="button" onclick="deletePartnerProduct('${p.id}')" class="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors">
-                                        <i class="fa-solid fa-trash text-xs"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        `).join('');
-                    }, (error) => console.error("Catalog err:", error));
+                            `;
+                        }).join('');
+                    });
                     unsubscribeListeners.push(catalogUnsub);
                 }
             }
@@ -1091,7 +1159,7 @@
         // --- Partner Hub Actions --- //
 
         window.saveShopName = () => {
-            if(!currentUser || !currentUser.docId) return;
+            if(!currentUser || !currentUser.phone) return;
             const shopName = document.getElementById('partner-shop-name').value.trim();
             if(!shopName) return showToast("Enter a shop name first.", "error");
             
@@ -1100,7 +1168,7 @@
             btn.innerText = "...";
             btn.disabled = true;
 
-            updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.docId), { shopName })
+            updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.phone), { shopName })
                 .then(() => {
                     currentUser.shopName = shopName;
                     showToast("Shop name updated successfully!", "success");
@@ -1110,7 +1178,7 @@
         };
 
         window.saveLicense = () => {
-            if(!currentUser || !currentUser.docId) return;
+            if(!currentUser || !currentUser.phone) return;
             const license = document.getElementById('partner-license-input').value.trim();
             if(!license) return showToast("Enter a license/plate number.", "error");
             
@@ -1119,7 +1187,7 @@
             btn.innerText = "...";
             btn.disabled = true;
 
-            updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.docId), { license })
+            updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.phone), { license })
                 .then(() => {
                     currentUser.license = license;
                     showToast("Vehicle details updated!", "success");
@@ -1128,28 +1196,74 @@
                 .finally(() => { btn.innerText = orig; btn.disabled = false; });
         };
 
-        window.addPartnerProduct = () => {
-            if(!currentUser) return;
-            const name = document.getElementById('prod-name').value.trim();
-            const price = parseInt(document.getElementById('prod-price').value);
-            const qty = document.getElementById('prod-qty').value.trim();
+        window.toggleShopStatus = async () => {
+            const toggle = document.getElementById('partner-status-toggle');
+            const isOpen = toggle.checked;
+            const newStatus = isOpen ? 'Open' : 'Closed';
             
-            if(!name || isNaN(price)) return showToast("Enter valid product name and price.", "error");
-            if(!currentUser.shopName) {
-                showToast("Please setup and Save your Shop Profile above first.", "error");
-                document.getElementById('partner-shop-name').focus();
-                return;
+            document.getElementById('shop-status-text').innerText = `Currently ${newStatus}`;
+            
+            try {
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.phone), { shopStatus: newStatus });
+                currentUser.shopStatus = newStatus;
+                
+                // Fetch all products, filter in memory, update matching ones
+                const snap = await getDocs(getCol('products'));
+                const myProducts = snap.docs.filter(d => d.data().partnerId === currentUser.phone);
+                
+                myProducts.forEach(d => {
+                    updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', d.id), { shopStatus: newStatus });
+                });
+                
+                showToast(`Shop marked as ${newStatus}`, "success");
+            } catch(e) {
+                showToast("Error updating status", "error");
+                toggle.checked = !isOpen; 
+                document.getElementById('shop-status-text').innerText = `Currently ${!isOpen ? 'Open' : 'Closed'}`;
             }
+        };
 
-            // Derive category and set a beautiful fallback image based on the partner type
-            let cat = 'Services';
-            let subCat = null;
-            if(currentUser.category === 'Food Owner') cat = 'Food';
-            if(currentUser.category === 'Grocery Owner') cat = 'Grocery';
-            if(currentUser.category === 'Service Provider') {
-                cat = 'Services';
-                subCat = currentUser.skill;
+        window.togglePartnerStock = async (productId, currentInStock) => {
+            try {
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', productId), { inStock: !currentInStock });
+                showToast(currentInStock ? "Marked Out of Stock" : "Marked In Stock", "success");
+            } catch(e) {
+                showToast("Error updating stock", "error");
             }
+        };
+
+        // --- Admin Actions --- //
+
+        window.adminAddVariantRow = () => {
+            const container = document.getElementById('admin-variant-container');
+            const row = document.createElement('div');
+            row.className = "flex gap-3 admin-variant-row mt-2";
+            row.innerHTML = `
+                <input class="input-field !bg-white w-1/2 var-qty" placeholder="Unit (e.g. 5 kg)">
+                <input type="number" class="input-field !bg-white w-1/2 var-price" placeholder="Price (₹)">
+                <button type="button" onclick="this.parentElement.remove()" class="w-12 flex-shrink-0 bg-red-100 text-red-500 rounded-xl flex justify-center items-center hover:bg-red-200 transition"><i class="fa-solid fa-xmark"></i></button>
+            `;
+            container.appendChild(row);
+        };
+
+        window.adminAddProduct = () => {
+            if(currentUser.role !== 'Admin') return;
+            const name = document.getElementById('admin-prod-name').value.trim();
+            const cat = document.getElementById('admin-prod-cat').value;
+            const partnerPhone = document.getElementById('admin-prod-partner-phone').value.trim();
+            const shopName = document.getElementById('admin-prod-shop-name').value.trim();
+
+            if(!name || !partnerPhone || !shopName) return showToast("Fill all details.", "error");
+
+            const rows = document.querySelectorAll('.admin-variant-row');
+            let variants = [];
+            rows.forEach(row => {
+                const qty = row.querySelector('.var-qty').value.trim();
+                const price = parseInt(row.querySelector('.var-price').value);
+                if(qty && !isNaN(price)) variants.push({ qty, price });
+            });
+
+            if(variants.length === 0) return showToast("Add at least one valid unit and price.", "error");
 
             let defaultImg = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=80';
             if (cat === 'Food') defaultImg = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80';
@@ -1157,34 +1271,35 @@
 
             const btn = document.getElementById('btn-add-prod');
             const originalText = btn.innerText;
-            btn.innerText = "Adding...";
+            btn.innerText = "Publishing...";
             btn.disabled = true;
 
             addDoc(getCol('products'), {
-                name, price, qty,
+                name, variants,
+                price: variants[0].price, 
+                qty: variants[0].qty,     
                 category: cat,
-                subCategory: subCat,
-                partnerId: currentUser.phone,
-                shopName: currentUser.shopName,
+                partnerId: partnerPhone,
+                shopName: shopName,
                 image: defaultImg,
+                inStock: true,
+                shopStatus: 'Open',
                 created: new Date().toISOString()
             }).then(() => {
-                document.getElementById('prod-name').value = '';
-                document.getElementById('prod-price').value = '';
-                document.getElementById('prod-qty').value = '';
-                showToast("Successfully added to your catalog!", "success");
+                document.getElementById('admin-prod-name').value = '';
+                document.getElementById('admin-variant-container').innerHTML = `
+                    <div class="flex gap-3 admin-variant-row">
+                        <input class="input-field !bg-white w-1/2 var-qty" placeholder="Unit (e.g. 1 kg)">
+                        <input type="number" class="input-field !bg-white w-1/2 var-price" placeholder="Price (₹)">
+                    </div>
+                `;
+                showToast("Product Published to Marketplace!", "success");
             }).catch(e => {
-                showToast("Network delayed. Saving in background.", "info");
+                showToast("Error publishing product.", "error");
             }).finally(() => {
                 btn.innerText = originalText;
                 btn.disabled = false;
             });
-        };
-
-        window.deletePartnerProduct = (productId) => {
-            deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', productId))
-                .then(() => showToast("Product removed from catalog.", "success"))
-                .catch(e => showToast("Error removing product.", "error"));
         };
 
         // --- Cart & Order Logic --- //
@@ -1197,7 +1312,6 @@
             renderCartUI();
             showToast(`${name} added to cart!`, "success");
             
-            // Notify via bottom nav indicator conceptually
             const cartBtn = document.getElementById('nav-btn-Cart');
             if(cartBtn) {
                 cartBtn.classList.add('scale-110', 'text-emerald-500');
@@ -1288,29 +1402,6 @@
                 btn.innerText = originalText;
                 btn.disabled = false;
             });
-        };
-
-        // --- Partner Actions --- //
-
-        window.acceptOrder = (orderId) => {
-            if(currentUser.role !== 'Partner') return;
-            
-            const orderRef = doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId);
-            updateDoc(orderRef, {
-                status: 'Accepted',
-                partnerId: currentUser.phone,
-                partnerName: currentUser.name
-            }).then(() => {
-                showToast("Order Accepted! Please head to pickup.", "success");
-            }).catch(e => showToast("Network delayed. Status syncing.", "info"));
-        };
-
-        window.markDelivered = (orderId) => {
-            if(currentUser.role !== 'Partner') return;
-            const orderRef = doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId);
-            updateDoc(orderRef, { status: 'Delivered' })
-                .then(() => showToast("Delivery Completed. Great job!", "success"))
-                .catch(e => showToast("Network delayed. Syncing.", "info"));
         };
 
         // Init
