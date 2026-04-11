@@ -43,6 +43,17 @@
             animation: wiggle 0.4s ease-in-out infinite;
         }
 
+        /* Marquee Animation */
+        @keyframes marquee {
+            0% { transform: translateX(100vw); }
+            100% { transform: translateX(-100%); }
+        }
+        .animate-marquee {
+            display: inline-block;
+            white-space: nowrap;
+            animation: marquee 25s linear infinite;
+        }
+
         .input-field {
             @apply w-full px-5 py-4 bg-gray-50/50 rounded-2xl border border-gray-200 outline-none focus:bg-white focus:ring-2 ring-emerald-500/50 focus:border-emerald-500 transition-all text-sm font-medium text-gray-800;
         }
@@ -118,8 +129,15 @@
         </div>
     </nav>
 
+    <!-- Scrolling Marquee Tagline -->
+    <div class="fixed top-[72px] w-full bg-gray-900 border-b border-gray-800 z-30 overflow-hidden py-2 flex items-center shadow-md">
+        <span class="animate-marquee text-[11px] font-black text-emerald-400 uppercase tracking-widest">
+            🌟 WHY SHOULD CITIES HAVE ALL THE FUN? &nbsp;&nbsp;|&nbsp;&nbsp; City-style convenience, now in every village. &nbsp;&nbsp;|&nbsp;&nbsp; Food, grocery, rides, and daily essentials—everything your village needs, now just one tap away with Gramzo! 🚀
+        </span>
+    </div>
+
     <!-- Main Content Area -->
-    <main class="pt-24 px-4 pb-10 max-w-md mx-auto sm:max-w-4xl sm:px-6">
+    <main class="pt-32 px-4 pb-10 max-w-md mx-auto sm:max-w-4xl sm:px-6">
         
         <!-- ========================================== -->
         <!-- VIEW: USER (Marketplace & Services)        -->
@@ -160,7 +178,25 @@
 
             <div>
                 <h2 class="text-lg font-black mb-4 text-gray-900">What are you looking for?</h2>
-                <div class="flex overflow-x-auto no-scrollbar gap-4 sm:gap-8 pb-2">
+                <div class="flex overflow-x-auto no-scrollbar gap-4 sm:gap-8 pb-4 px-1 snap-x">
+                    <!-- Food -->
+                    <div class="snap-center shrink-0 cursor-pointer group group-hover:animate-wiggle" onclick="filterCategory('Food')">
+                        <div class="w-[105px] h-[140px] sm:w-32 sm:h-40 rounded-[2rem] bg-gradient-to-b from-orange-100 to-orange-50 border-2 border-orange-200 flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-xl group-hover:shadow-orange-500/20">
+                            <span class="absolute top-3 bg-orange-500 text-white text-[8px] sm:text-[9px] font-black uppercase px-2.5 py-1 rounded-full shadow-sm animate-pulse">U Hungry? 🤤</span>
+                            <i class="fa-solid fa-burger text-4xl sm:text-5xl text-orange-500 mt-5 transition-transform duration-300 group-hover:scale-110"></i>
+                            <span class="mt-3 text-sm font-black text-gray-800 tracking-tight">Food</span>
+                        </div>
+                    </div>
+
+                    <!-- Grocery -->
+                    <div class="snap-center shrink-0 cursor-pointer group group-hover:animate-wiggle" onclick="filterCategory('Grocery')">
+                        <div class="w-[105px] h-[140px] sm:w-32 sm:h-40 rounded-[2rem] bg-gradient-to-b from-emerald-100 to-emerald-50 border-2 border-emerald-200 flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-xl group-hover:shadow-emerald-500/20">
+                            <span class="absolute top-3 bg-emerald-500 text-white text-[8px] sm:text-[9px] font-black uppercase px-2.5 py-1 rounded-full shadow-sm">Empty Fridge? 🛒</span>
+                            <i class="fa-solid fa-basket-shopping text-4xl sm:text-5xl text-emerald-500 mt-5 transition-transform duration-300 group-hover:scale-110"></i>
+                            <span class="mt-3 text-sm font-black text-gray-800 tracking-tight">Grocery</span>
+                        </div>
+                    </div>
+
                     <!-- Ride -->
                     <div class="snap-center shrink-0 cursor-pointer group group-hover:animate-wiggle" onclick="openRideBooking()">
                         <div class="w-[105px] h-[140px] sm:w-32 sm:h-40 rounded-[2rem] bg-gradient-to-b from-blue-100 to-blue-50 border-2 border-blue-200 flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-xl group-hover:shadow-blue-500/20">
@@ -178,16 +214,6 @@
                             <span class="mt-3 text-sm font-black text-gray-800 tracking-tight">Services</span>
                         </div>
                     </div>
-
-                    <!-- Pharmacy / SOS -->
-                    <div class="snap-center shrink-0 cursor-pointer group group-hover:animate-wiggle" onclick="filterCategory('Pharmacy')">
-                        <div class="w-[105px] h-[140px] sm:w-32 sm:h-40 rounded-[2rem] bg-gradient-to-b from-red-100 to-red-50 border-2 border-red-200 flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-xl group-hover:shadow-red-500/20">
-                            <span class="absolute top-3 bg-red-600 text-white text-[8px] sm:text-[9px] font-black uppercase px-2.5 py-1 rounded-full shadow-md animate-pulse">Emergency! 🚨</span>
-                            <i class="fa-solid fa-truck-medical text-4xl sm:text-5xl text-red-500 mt-5 transition-transform duration-300 group-hover:scale-110"></i>
-                            <span class="mt-3 text-sm font-black text-gray-800 tracking-tight">Meds & SOS</span>
-                        </div>
-                    </div>
-
                 </div>
 
                 <!-- Hidden Sub-Tabs for Services (UrbanClap style) -->
@@ -198,15 +224,6 @@
                     <button type="button" onclick="filterCategory('Services', 'Cleaner')" data-subcat="Cleaner" class="subtab-btn px-5 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition hover:bg-gray-50 active:scale-95">🧹 Cleaner</button>
                     <button type="button" onclick="filterCategory('Services', 'Cook')" data-subcat="Cook" class="subtab-btn px-5 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition hover:bg-gray-50 active:scale-95">👨‍🍳 Cook</button>
                 </div>
-            </div>
-
-            <!-- Promotional Banner -->
-            <div class="relative w-full h-36 rounded-3xl overflow-hidden bg-gradient-to-r from-emerald-600 to-teal-500 shadow-lg flex items-center p-6">
-                <div class="relative z-10 w-2/3">
-                    <span class="bg-white/20 text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider backdrop-blur-md">Gramzo Launch</span>
-                    <h3 class="text-xl font-black text-white mt-2 leading-tight">Zero Delivery Fees in your area!</h3>
-                </div>
-                <i class="fa-solid fa-gift absolute -right-4 -bottom-4 text-9xl text-white opacity-20"></i>
             </div>
 
             <!-- Marketplace List -->
@@ -266,9 +283,12 @@
                 
                 <button type="button" onclick="calculateRideFares()" id="btn-find-rides" class="w-full bg-gray-900 text-white py-4 rounded-2xl font-bold mt-6 hover:bg-gray-800 transition-colors active:scale-95">Find Rides</button>
                 
-                <button type="button" onclick="bookAmbulance()" class="w-full bg-red-500 text-white py-4 rounded-2xl font-bold mt-4 hover:bg-red-600 transition-colors active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-red-500/30">
-                    <i class="fa-solid fa-truck-medical text-xl animate-pulse"></i> Emergency Ambulance (SOS)
-                </button>
+                <!-- SMALL AMBULANCE SOS BUTTON -->
+                <div class="text-right mt-3">
+                    <button type="button" onclick="bookAmbulance()" class="text-xs text-red-600 bg-red-50 px-3 py-2 rounded-lg font-bold hover:bg-red-100 transition-colors active:scale-95 inline-flex items-center gap-1.5 border border-red-100 shadow-sm">
+                        <i class="fa-solid fa-truck-medical animate-pulse"></i> Emergency Ambulance (SOS)
+                    </button>
+                </div>
             </div>
 
             <div id="ride-options-container" class="hidden space-y-4 animate-fadeIn">
@@ -373,7 +393,7 @@
                     <button type="button" onclick="submitPartnerProfile()" id="btn-submit-profile" class="w-full bg-gray-900 text-white px-6 py-4 rounded-2xl font-bold active:scale-95 transition">Submit Profile for Verification</button>
                 </div>
 
-                <!-- Shop Status Toggle (Hidden for Riders) -->
+                <!-- Shop Status Toggle -->
                 <div id="shop-status-container" class="mt-6 flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100 hidden">
                     <div>
                         <p class="font-bold text-sm text-gray-900">Accepting Orders</p>
@@ -392,7 +412,7 @@
                 <p class="text-sm text-orange-800 font-bold" id="approval-warning-text">Your profile is under review by the Admin. You can manage products once approved.</p>
             </div>
 
-            <!-- Add Product (Locked until approved) -->
+            <!-- Add Product -->
             <div id="add-product-container" class="bg-emerald-50 rounded-[2rem] p-6 border border-emerald-100 relative overflow-hidden hidden">
                 <div class="relative z-10">
                     <h3 class="font-bold text-emerald-800 mb-4">Add to Catalog</h3>
@@ -623,15 +643,29 @@
             }
         }
 
+        // --- Improved Geolocation with Sandboxed Iframe Fallback ---
         window.getCurrentLocation = (inputId) => {
             const input = document.getElementById(inputId);
             const originalVal = input.value;
             input.value = "Locating safely via GPS...";
             
+            let locationFound = false;
+            
+            // Fallback timer if iframe silently blocks the prompt
+            const fallbackTimer = setTimeout(() => {
+                if (locationFound) return;
+                input.value = "Main Street, Gramzo Village Center";
+                showToast("Browser sandbox blocked GPS. Using default location.", "info");
+            }, 3500);
+            
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(async (pos) => {
+                    locationFound = true;
+                    clearTimeout(fallbackTimer);
                     try {
-                        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`);
+                        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`, {
+                            headers: { 'Accept': 'application/json' }
+                        });
                         const data = await res.json();
                         input.value = data.display_name || `${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`;
                         showToast("Location detected successfully!", "success");
@@ -639,11 +673,14 @@
                         input.value = `${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`;
                         showToast("GPS coordinates acquired.", "success");
                     }
-                }, () => {
-                    input.value = originalVal; 
-                    showToast("Location access denied by user.", "error");
-                });
+                }, (err) => {
+                    locationFound = true;
+                    clearTimeout(fallbackTimer);
+                    input.value = "Main Street, Gramzo Village Center"; 
+                    showToast("Browser blocked GPS. Using default location.", "info");
+                }, { timeout: 5000, maximumAge: 10000 });
             } else {
+                clearTimeout(fallbackTimer);
                 input.value = originalVal;
                 showToast("Geolocation not supported by device.", "error");
             }
@@ -1219,7 +1256,7 @@
                 subtabs.classList.remove('hidden');
                 document.querySelectorAll('.subtab-btn').forEach(btn => {
                     const isActive = btn.dataset.subcat === (subCat || 'All');
-                    btn.className = `subtab-btn px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition ${isActive ? 'bg-emerald-500 text-white' : 'bg-gray-50 text-gray-700'}`;
+                    btn.className = `subtab-btn px-5 py-2.5 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition active:scale-95 ${isActive ? 'bg-emerald-500 text-white border-transparent' : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'}`;
                 });
             } else {
                 subtabs.classList.add('hidden');
@@ -1436,7 +1473,6 @@
 
                 const newStatus = currentUser.approvalStatus === 'Approved' ? 'Approved' : 'Pending';
 
-                // Securely create/merge document so it cannot throw "Not found" error
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.phone), { 
                     shopName: isRider ? currentUser.name : shopName, 
                     doc1: doc1Base64,
