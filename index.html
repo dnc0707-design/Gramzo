@@ -498,7 +498,10 @@
         <!-- VIEW: ADMIN DASHBOARD                      -->
         <!-- ========================================== -->
         <div id="view-Admin" class="view-section space-y-6">
-            <h2 class="text-2xl font-black text-gray-900">System Overview</h2>
+            <div class="flex justify-between items-center">
+                <h2 class="text-2xl font-black text-gray-900">System Overview</h2>
+                <span id="admin-id-badge" class="bg-purple-100 text-purple-700 text-[10px] font-black uppercase px-2 py-1 rounded-full tracking-widest shadow-sm"></span>
+            </div>
             
             <div class="grid grid-cols-2 gap-4">
                 <div class="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group">
@@ -762,13 +765,6 @@
             });
         };
 
-        const safeGetDoc = async (ref, ms = 5000) => {
-            return Promise.race([
-                getDoc(ref),
-                new Promise((_, reject) => setTimeout(() => reject(new Error("Database connection timed out.")), ms))
-            ]);
-        };
-
         async function startApp() {
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -964,15 +960,13 @@
 
                     const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', phone);
                     
-                    let snap;
                     try {
-                        snap = await safeGetDoc(userRef, 3000);
+                        const snap = await getDoc(userRef);
+                        if (snap && snap.exists()) {
+                            throw new Error("Number already registered. Please login.");
+                        }
                     } catch(e) {
-                        console.warn("DB check timed out or failed. Proceeding.", e);
-                    }
-
-                    if (snap && snap.exists()) {
-                        throw new Error("Number already registered. Please login.");
+                        if(e.message.includes("registered")) throw e;
                     }
 
                     const userData = { 
@@ -985,7 +979,7 @@
                         ...(currentAuthRole === 'Partner' && { category: partnerCategory, skill: skillStr, shopName: null, doc1: null, doc2: null })
                     };
                     
-                    setDoc(userRef, userData, { merge: true }).catch(err => console.warn("Background save delayed:", err));
+                    await setDoc(userRef, userData, { merge: true });
                     
                     currentUser = { ...userData, docId: phone };
                     finalizeLoginSequence();
@@ -994,8 +988,8 @@
                     const phone = document.getElementById('login-phone').value.trim();
                     const pass = document.getElementById('login-pass').value.trim();
 
-                    if (phone === '12345' && pass === 'Pass@123') {
-                        currentUser = { name: 'Super Admin', role: 'Admin', phone: '12345', docId: 'admin' };
+                    if (phone === '7980230656' && pass === '1234') {
+                        currentUser = { name: 'Super Admin', role: 'Admin', phone: '7980230656', docId: 'admin' };
                         btn.innerText = originalText; btn.disabled = false;
                         return finalizeLoginSequence();
                     }
@@ -1007,7 +1001,7 @@
                     const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', phone);
                     let snap;
                     try {
-                        snap = await safeGetDoc(userRef, 6000);
+                        snap = await getDoc(userRef);
                     } catch (e) {
                         throw new Error("Failed to reach database. Are you online?");
                     }
@@ -1025,7 +1019,6 @@
                     finalizeLoginSequence();
                 }
             } catch (e) {
-                console.error("Auth Error:", e);
                 msgEl.className = "text-xs text-center font-bold mb-4 min-h-[1.5rem] px-4 rounded-lg py-2 bg-red-50 text-red-600 block";
                 msgEl.innerText = e.message || "System error during authentication. Please try again.";
             } finally {
@@ -1049,10 +1042,15 @@
             roleSpan.className = `text-[9px] font-bold uppercase ${currentUser.role === 'Admin' ? 'text-purple-500' : currentUser.role === 'Partner' ? 'text-orange-500' : 'text-blue-500'}`;
 
             document.getElementById('menu-name').innerText = currentUser.name;
-            document.getElementById('menu-phone').innerText = `+91 ${currentUser.phone}`;
+            document.getElementById('menu-phone').innerText = currentUser.role === 'Admin' ? `Admin ID: ${currentUser.phone}` : `+91 ${currentUser.phone}`;
 
             setupBottomNav(currentUser.role);
             switchMainView(currentUser.role === 'Admin' ? 'Admin' : currentUser.role === 'Partner' ? 'Partner' : 'User');
+
+            if (currentUser.role === 'Admin') {
+                const adminBadge = document.getElementById('admin-id-badge');
+                if (adminBadge) adminBadge.innerText = `Admin ID: ${currentUser.phone}`;
+            }
 
             if (currentUser.role === 'Partner') {
                 document.getElementById('partner-welcome').innerText = `Hello, ${currentUser.name.split(' ')[0]}!`;
