@@ -89,7 +89,7 @@
 
     <!-- Version Identifier -->
     <div class="bg-emerald-50 text-[10px] text-emerald-700 py-1.5 px-4 text-center border-b border-emerald-100 font-bold uppercase tracking-widest">
-        Ver 2.1 • Last Sync: Thursday, April 16, 2026, 1:35 PM IST
+        Ver 2.2 • Last Sync: Thursday, April 16, 2026, 1:40 PM IST
     </div>
 
     <!-- Header / Navbar -->
@@ -114,7 +114,7 @@
                     </div>
                 </div>
 
-                <!-- User-Only Auth Modal -->
+                <!-- Auth Modal -->
                 <div id="auth-modal" class="auth-dropdown bg-white rounded-[2.5rem] shadow-[0_30px_60px_rgba(0,0,0,0.15)] border border-gray-100 p-8">
                     <!-- Role Switcher -->
                     <div class="flex bg-gray-100 p-1.5 rounded-[1.25rem] mb-8">
@@ -125,27 +125,27 @@
 
                     <div id="auth-view-login">
                         <h3 class="font-extrabold text-2xl mb-2 text-gray-900" id="login-title">Hey there! 👋</h3>
-                        <p class="text-gray-400 text-xs font-bold mb-6">Welcome back to the future of rural commerce.</p>
+                        <p class="text-gray-400 text-xs font-bold mb-6">Access your Gramzo account instantly.</p>
                         <div class="space-y-4">
                             <input id="login-phone" type="tel" placeholder="Mobile Number" maxlength="10">
                             <input id="login-pass" type="password" placeholder="Password">
-                            <button onclick="handleAuth('login')" class="w-full btn-primary py-4 text-sm">Let's Go</button>
+                            <button onclick="handleAuth('login')" class="w-full btn-primary py-4 text-sm">Sign In</button>
                             <p id="reg-toggle-text" class="text-center text-xs font-bold text-gray-400 mt-6">
-                                First time? <button onclick="toggleAuthView('register')" class="text-emerald-500 font-extrabold hover:underline">Join the club</button>
+                                First time? <button onclick="toggleAuthView('register')" class="text-emerald-500 font-extrabold hover:underline">Register now</button>
                             </p>
                         </div>
                     </div>
 
                     <div id="auth-view-register" class="hidden">
                         <h3 class="font-extrabold text-2xl mb-2 text-gray-900" id="reg-title">Create Account</h3>
-                        <p class="text-gray-400 text-xs font-bold mb-6">Join 10,000+ users in your village.</p>
+                        <p class="text-gray-400 text-xs font-bold mb-6">Enter your details to get started.</p>
                         <div class="space-y-3">
-                            <input id="reg-name" type="text" placeholder="Full Name">
+                            <input id="reg-name" type="text" placeholder="Full Name / Shop Name">
                             <input id="reg-phone" type="tel" placeholder="10-Digit Mobile" maxlength="10">
                             <input id="reg-village" type="text" placeholder="Village Name">
                             <input id="reg-pincode" type="tel" placeholder="Pin Code" maxlength="6">
                             <input id="reg-pass" type="password" placeholder="Create Password">
-                            <button onclick="handleAuth('register')" class="w-full btn-primary py-4 text-sm">Register & Start</button>
+                            <button onclick="handleAuth('register')" class="w-full btn-primary py-4 text-sm">Submit Registration</button>
                             <p class="text-center text-xs font-bold text-gray-400 mt-6">
                                 Got an account? <button onclick="toggleAuthView('login')" class="text-emerald-500 font-extrabold hover:underline">Sign In</button>
                             </p>
@@ -202,7 +202,7 @@
         <!-- Premium Ad Banner -->
         <div id="promo-banner" class="w-full h-44 ad-gradient rounded-[3rem] flex items-center justify-center overflow-hidden shadow-2xl relative transition-all duration-700 p-8 text-center">
             <div class="absolute top-0 left-0 w-full h-full opacity-10 bg-[radial-gradient(circle,white_1px,transparent_1px)] bg-[size:20px_20px]"></div>
-            <p class="text-white font-black italic tracking-tighter text-3xl z-10 leading-tight drop-shadow-md">GRAMZO RURAL SUPER APP <br><span class="text-sm not-italic opacity-80 uppercase tracking-widest font-extrabold mt-2 block">Powered by Local Partners</span></p>
+            <p class="text-white font-black italic tracking-tighter text-3xl z-10 leading-tight drop-shadow-md text-center">GRAMZO RURAL SUPER APP <br><span class="text-sm not-italic opacity-80 uppercase tracking-widest font-extrabold mt-2 block">Your Village, Your Delivery</span></p>
         </div>
 
         <div id="view-container">
@@ -212,9 +212,9 @@
                     <div class="flex justify-between items-end mb-8 px-2">
                         <div>
                             <h3 class="font-extrabold text-3xl text-gray-900">Nearby Market</h3>
-                            <p class="text-xs text-gray-400 font-bold tracking-wide mt-1">Get it delivered in minutes</p>
+                            <p class="text-xs text-gray-400 font-bold tracking-wide mt-1">Delivery in 30-60 mins</p>
                         </div>
-                        <span id="active-filter" class="text-[10px] bg-emerald-50 text-emerald-600 px-4 py-2 rounded-full font-black tracking-widest border border-emerald-100 uppercase">Flash Deals</span>
+                        <span id="active-filter" class="text-[10px] bg-emerald-50 text-emerald-600 px-4 py-2 rounded-full font-black tracking-widest border border-emerald-100 uppercase">Flash Listings</span>
                     </div>
                     <div id="market-list" class="grid grid-cols-1 sm:grid-cols-2 gap-8"></div>
                 </div>
@@ -223,8 +223,8 @@
                 <div id="cart-box" class="opacity-40 pointer-events-none transition-all duration-700 scale-95 origin-top blur-[1px]">
                     <div class="bg-white rounded-[3rem] p-10 shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-gray-50">
                         <div class="flex justify-between items-center mb-10">
-                            <h3 class="font-extrabold text-2xl">Confirm Booking</h3>
-                            <span class="bg-emerald-100 text-emerald-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">Flash Checkout</span>
+                            <h3 class="font-extrabold text-2xl">Your Basket</h3>
+                            <span class="bg-emerald-100 text-emerald-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">Cod Payment</span>
                         </div>
                         <div id="cart-items-list" class="space-y-4 mb-10"></div>
                         <div class="space-y-6 pt-10 border-t-2 border-gray-50">
@@ -236,11 +236,11 @@
                                 </select>
                             </div>
                             <div class="flex justify-between items-center py-2">
-                                <span class="text-gray-400 font-bold uppercase text-[11px] tracking-widest">Grand Total</span>
+                                <span class="text-gray-400 font-bold uppercase text-[11px] tracking-widest">Total to Pay</span>
                                 <span id="cart-total" class="text-5xl font-black text-emerald-500 tracking-tighter">₹0</span>
                             </div>
-                            <input id="cart-address" placeholder="Exact Landmark (e.g. Near Primary School)">
-                            <button onclick="placeOrder()" class="w-full btn-primary py-6 text-xl">PLACE ORDER</button>
+                            <input id="cart-address" placeholder="Delivery Point Landmark">
+                            <button onclick="placeOrder()" class="w-full btn-primary py-6 text-xl uppercase tracking-tighter">Place Order Now</button>
                         </div>
                     </div>
                 </div>
@@ -251,14 +251,14 @@
                 <div id="partner-dashboard" class="bg-white p-10 rounded-[3rem] shadow-xl border border-gray-50">
                     <div class="flex justify-between items-start mb-10">
                         <div>
-                            <h3 class="font-extrabold text-3xl">Partner Dashboard</h3>
-                            <p id="partner-status" class="text-[11px] font-black text-orange-500 uppercase tracking-widest mt-1">Awaiting Verification</p>
+                            <h3 class="font-extrabold text-3xl">Manage Business</h3>
+                            <p id="partner-status" class="text-[11px] font-black text-orange-500 uppercase tracking-widest mt-1">Pending Approval</p>
                         </div>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10">
                         <div class="space-y-2">
-                            <label class="text-[10px] font-black uppercase text-gray-400 ml-4 tracking-widest">Service Name</label>
-                            <input id="item-name" placeholder="E.g. Fresh Milk, Ride to Santuri">
+                            <label class="text-[10px] font-black uppercase text-gray-400 ml-4 tracking-widest">Item Name</label>
+                            <input id="item-name" placeholder="E.g. Fresh Milk">
                         </div>
                         <div class="space-y-2">
                             <label class="text-[10px] font-black uppercase text-gray-400 ml-4 tracking-widest">Price (₹)</label>
@@ -266,14 +266,14 @@
                         </div>
                         <div class="space-y-2">
                             <label class="text-[10px] font-black uppercase text-gray-400 ml-4 tracking-widest">Quantity/Unit</label>
-                            <input id="item-qty" placeholder="E.g. 1kg, 1 hour">
+                            <input id="item-qty" placeholder="E.g. 1kg">
                         </div>
                         <div class="space-y-2">
                             <label class="text-[10px] font-black uppercase text-gray-400 ml-4 tracking-widest">Image URL</label>
                             <input id="item-img" placeholder="https://...">
                         </div>
                     </div>
-                    <button onclick="addItem()" class="w-full bg-black text-white p-6 rounded-[2rem] font-extrabold text-sm uppercase tracking-widest shadow-2xl active:scale-95 transition-all">List Item Globally</button>
+                    <button onclick="addItem()" class="w-full bg-black text-white p-6 rounded-[2rem] font-extrabold text-sm uppercase tracking-widest active:scale-95 transition-all">Add to Home Screen</button>
                     <div id="partner-order-list" class="mt-16 space-y-6"></div>
                 </div>
             </div>
@@ -283,16 +283,16 @@
                 <!-- Admin Tabs -->
                 <div class="flex bg-gray-100 p-2 rounded-[2rem] mb-10 overflow-x-auto custom-scroll">
                     <button onclick="switchAdminSubTab('dashboard')" id="adm-t-dashboard" class="flex-1 py-4 px-6 text-[11px] font-black rounded-[1.5rem] admin-tab-active transition whitespace-nowrap uppercase tracking-widest">Analytics</button>
-                    <button onclick="switchAdminSubTab('partners')" id="adm-t-partners" class="flex-1 py-4 px-6 text-[11px] font-black text-gray-500 rounded-[1.5rem] transition whitespace-nowrap uppercase tracking-widest">Partners</button>
+                    <button onclick="switchAdminSubTab('partners')" id="adm-t-partners" class="flex-1 py-4 px-6 text-[11px] font-black text-gray-500 rounded-[1.5rem] transition whitespace-nowrap uppercase tracking-widest">Verifications</button>
                     <button onclick="switchAdminSubTab('ads')" id="adm-t-ads" class="flex-1 py-4 px-6 text-[11px] font-black text-gray-500 rounded-[1.5rem] transition whitespace-nowrap uppercase tracking-widest">Ad Engine</button>
-                    <button onclick="switchAdminSubTab('logs')" id="adm-t-logs" class="flex-1 py-4 px-6 text-[11px] font-black text-gray-500 rounded-[1.5rem] transition whitespace-nowrap uppercase tracking-widest">Txns</button>
+                    <button onclick="switchAdminSubTab('logs')" id="adm-t-logs" class="flex-1 py-4 px-6 text-[11px] font-black text-gray-500 rounded-[1.5rem] transition whitespace-nowrap uppercase tracking-widest">Ledger</button>
                 </div>
 
                 <!-- Sub-Tab: Dashboard -->
                 <div id="adm-v-dashboard" class="space-y-8">
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-8">
                         <div class="bg-white p-10 rounded-[3rem] border border-gray-50 text-center shadow-sm">
-                            <p class="text-[10px] font-black text-gray-400 mb-2 uppercase tracking-widest">Platform GTV</p>
+                            <p class="text-[10px] font-black text-gray-400 mb-2 uppercase tracking-widest">Total GTV</p>
                             <h4 id="stat-rev" class="text-4xl font-black text-emerald-500 tracking-tighter">₹0</h4>
                         </div>
                         <div class="bg-white p-10 rounded-[3rem] border border-gray-50 text-center shadow-sm">
@@ -300,7 +300,7 @@
                             <h4 id="stat-ord" class="text-4xl font-black text-black tracking-tighter">0</h4>
                         </div>
                         <div class="bg-white p-10 rounded-[3rem] border border-gray-50 text-center shadow-sm">
-                            <p class="text-[10px] font-black text-gray-400 mb-2 uppercase tracking-widest">Active Fleet</p>
+                            <p class="text-[10px] font-black text-gray-400 mb-2 uppercase tracking-widest">Partner Fleet</p>
                             <h4 id="stat-partners" class="text-4xl font-black text-orange-500 tracking-tighter">0</h4>
                         </div>
                     </div>
@@ -308,23 +308,23 @@
 
                 <!-- Sub-Tab: Partner Verification -->
                 <div id="adm-v-partners" class="hidden space-y-6">
-                    <div class="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm">
+                    <div class="bg-white p-10 rounded-[3rem] border border-gray-50 shadow-sm">
                         <h4 class="font-extrabold text-2xl mb-8">Verification Queue</h4>
-                        <div id="admin-verification-list" class="space-y-4"></div>
+                        <div id="admin-verification-list" class="space-y-4 text-center text-gray-400 italic py-10">Searching for new partners...</div>
                     </div>
                 </div>
 
                 <!-- Sub-Tab: Ads Engine -->
                 <div id="adm-v-ads" class="hidden space-y-6">
-                    <div class="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm">
-                        <h4 class="font-extrabold text-2xl mb-8">Home Ad Manager</h4>
+                    <div class="bg-white p-10 rounded-[3rem] border border-gray-50 shadow-sm">
+                        <h4 class="font-extrabold text-2xl mb-8">Ad Banner Controller</h4>
                         <div class="space-y-5">
-                            <input id="ad-text-input" placeholder="Headline Message">
+                            <input id="ad-text-input" placeholder="Banner Heading">
                             <div class="flex items-center gap-6 ml-4">
-                                <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest">Campaign Color</label>
+                                <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest">Theme Color</label>
                                 <input id="ad-color-input" type="color" value="#10b981" class="h-14 w-24 p-1 rounded-2xl cursor-pointer">
                             </div>
-                            <button onclick="pushAd()" class="w-full bg-emerald-500 text-white p-5 rounded-[2rem] font-black tracking-widest shadow-xl shadow-emerald-200">BROADCAST CAMPAIGN</button>
+                            <button onclick="pushAd()" class="w-full bg-emerald-500 text-white p-5 rounded-[2rem] font-black tracking-widest shadow-xl">Update Global Banner</button>
                         </div>
                     </div>
                 </div>
@@ -332,12 +332,11 @@
                 <!-- Sub-Tab: Logs -->
                 <div id="adm-v-logs" class="hidden bg-white rounded-[3rem] overflow-hidden border border-gray-100 shadow-sm">
                     <table class="w-full text-left text-xs">
-                        <thead class="bg-gray-50 border-b border-gray-100">
+                        <thead class="bg-gray-50 border-b border-gray-100 font-black text-gray-400 uppercase tracking-widest">
                             <tr>
-                                <th class="p-8 font-black uppercase text-gray-400 tracking-widest">Customer</th>
-                                <th class="p-8 font-black uppercase text-gray-400 tracking-widest">Area</th>
-                                <th class="p-8 font-black uppercase text-gray-400 tracking-widest text-center">Amount</th>
-                                <th class="p-8 font-black uppercase text-gray-400 tracking-widest text-right">Status</th>
+                                <th class="p-8">Buyer</th>
+                                <th class="p-8 text-center">Amount</th>
+                                <th class="p-8 text-right">Status</th>
                             </tr>
                         </thead>
                         <tbody id="admin-log-body" class="divide-y divide-gray-50"></tbody>
@@ -347,7 +346,7 @@
         </div>
     </main>
 
-    <div id="ui-msg" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-black text-white px-8 py-4 rounded-full text-sm font-bold z-[200] hidden shadow-2xl animate-bounce"></div>
+    <div id="ui-msg" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-black text-white px-8 py-4 rounded-full text-sm font-bold z-[200] hidden shadow-2xl"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -367,7 +366,7 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const currentAppId = 'gramzo-final-v21';
+        const currentAppId = 'gramzo-final-v22';
 
         const getCol = (name) => collection(db, 'artifacts', currentAppId, 'public', 'data', name);
 
@@ -393,18 +392,18 @@
             } catch (e) { console.error(e); }
         }
 
-        // IMPROVED: High-Speed Retry for Data Writes
-        const safeWrite = async (ref, data, attempts = 5) => {
+        // AGGRESSIVE: Handshake-First persistence logic
+        const safeWrite = async (ref, data, attempts = 3) => {
             for (let i = 0; i < attempts; i++) {
                 try {
                     await setDoc(ref, data);
                     return true;
                 } catch (e) {
-                    if (i === attempts - 1) throw e;
-                    console.warn(`Retry ${i+1} due to sync delay...`);
-                    await new Promise(r => setTimeout(r, 600)); // Faster retries
+                    console.warn("Handshake retry triggered...");
+                    await new Promise(r => setTimeout(r, 400));
                 }
             }
+            return false;
         };
 
         window.toggleAuthModal = () => document.getElementById('auth-modal').classList.toggle('active');
@@ -414,8 +413,8 @@
             ['User', 'Partner', 'Admin'].forEach(r => {
                 document.getElementById(`tab-${r}`).className = r === role ? 'flex-1 py-2.5 rounded-[1rem] text-xs font-bold transition-all role-tab-active' : 'flex-1 py-2.5 rounded-[1rem] text-xs font-bold text-gray-500 transition-all';
             });
-            document.getElementById('login-title').innerText = role === 'User' ? 'Hey there! 👋' : role + ' Portal';
-            document.getElementById('reg-title').innerText = `Join as ${role}`;
+            document.getElementById('login-title').innerText = role === 'User' ? 'Welcome Back! 👋' : role + ' Dashboard';
+            document.getElementById('reg-title').innerText = `New ${role} Signup`;
             document.getElementById('reg-toggle-text').classList.toggle('hidden', role === 'Admin');
         };
 
@@ -427,7 +426,7 @@
 
         window.handleAuth = async (type) => {
             const msgEl = document.getElementById('auth-msg');
-            msgEl.innerText = "Connecting to Gramzo Network...";
+            msgEl.innerText = "Syncing with cloud...";
             msgEl.className = "text-[11px] text-center font-bold mt-4 text-emerald-500";
 
             const id = document.getElementById(type === 'login' ? 'login-phone' : 'reg-phone').value.trim();
@@ -438,17 +437,13 @@
                     currentUser = { name: 'Master Admin', role: 'Admin', phone: '7980230656' };
                     return finishLogin();
                 }
-                msgEl.innerText = "Invalid Master Login.";
+                msgEl.innerText = "Access Denied.";
                 msgEl.className = "text-[11px] text-center font-bold mt-4 text-rose-500";
                 return;
             }
 
             try {
-                // Ensure auth is definitely ready
-                if (!auth.currentUser) {
-                    await signInAnonymously(auth);
-                    await new Promise(r => setTimeout(r, 500));
-                }
+                if (!auth.currentUser) await signInAnonymously(auth);
 
                 const userRef = doc(db, 'artifacts', currentAppId, 'public', 'data', 'users', id);
                 if (type === 'register') {
@@ -457,30 +452,35 @@
                     const pincode = document.getElementById('reg-pincode').value.trim();
                     
                     if (!name || id.length !== 10 || pass.length < 4) {
-                        msgEl.innerText = "Check entries: 10-digit mobile required.";
+                        msgEl.innerText = "Error: Fill 10-digit mobile & 4-digit PIN.";
                         msgEl.className = "text-[11px] text-center font-bold mt-4 text-rose-500";
                         return;
                     }
 
-                    const userData = { name, phone: id, village, pincode, pin: pass, role: currentRole, status: currentRole === 'Partner' ? 'Pending' : 'Active', created: new Date().toISOString() };
+                    const userData = { 
+                        name, phone: id, village, pincode, pin: pass, 
+                        role: currentRole, status: currentRole === 'Partner' ? 'Pending' : 'Active', 
+                        created: new Date().toISOString() 
+                    };
                     
                     const success = await safeWrite(userRef, userData);
                     if (success) {
-                        showMsg("Welcome Aboard! Account Created.");
+                        showMsg("Account Active! Loading...");
                         currentUser = userData;
+                        finishLogin();
                     } else {
-                        throw new Error("Handshake failure");
+                        throw new Error("Cloud sync failed");
                     }
                 } else {
                     const snap = await getDoc(userRef);
                     if (!snap.exists() || snap.data().pin !== pass || snap.data().role !== currentRole) {
-                        msgEl.innerText = "Verification failed. Check credentials.";
+                        msgEl.innerText = "Error: Check details or account type.";
                         msgEl.className = "text-[11px] text-center font-bold mt-4 text-rose-500";
                         return;
                     }
                     currentUser = snap.data();
+                    finishLogin();
                 }
-                finishLogin();
             } catch (e) { 
                 console.error(e);
                 msgEl.innerText = "Handshake timeout. Please click submit again."; 
@@ -500,7 +500,7 @@
 
             if (currentUser.role === 'Partner') {
                 document.getElementById('partner-status').innerText = currentUser.status || "Pending";
-                document.getElementById('partner-status').className = currentUser.status === 'Verified' ? "text-[11px] font-black text-emerald-500 uppercase tracking-widest" : "text-[11px] font-black text-orange-500 uppercase tracking-widest";
+                document.getElementById('partner-status').className = currentUser.status === 'Verified' ? "text-[11px] font-black text-emerald-500 uppercase tracking-widest mt-1" : "text-[11px] font-black text-orange-500 uppercase tracking-widest mt-1";
             }
 
             if (currentUser.role === 'User') {
@@ -508,7 +508,6 @@
                 document.getElementById('cart-address').value = currentUser.village || "";
             }
             initRealtimeListeners();
-            showMsg(`Hi, ${currentUser.name}!`);
         };
 
         function loadGuestData() {
@@ -519,14 +518,14 @@
                     <div class="card-modern">
                         <img src="${p.image}" onerror="this.src='https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=80'" class="h-64 w-full object-cover">
                         <div class="p-8">
-                            <div class="flex justify-between items-start mb-2">
+                            <div class="flex justify-between items-start mb-1">
                                 <h4 class="font-extrabold text-2xl tracking-tight">${p.name}</h4>
-                                <span class="bg-gray-100 px-2 py-1 rounded-lg text-[9px] font-black uppercase text-gray-500 border border-gray-200 tracking-tighter">${p.category}</span>
+                                <span class="bg-gray-50 px-2 py-1 rounded-lg text-[9px] font-black uppercase text-gray-400 border border-gray-100 tracking-tighter">${p.category}</span>
                             </div>
-                            <p class="text-[11px] text-gray-400 font-bold uppercase mb-8">${p.qty || '1 unit'} • From ${p.shopName || 'Gramzo Hub'}</p>
+                            <p class="text-[11px] text-gray-400 font-bold uppercase mb-8">${p.qty || '1 unit'} • Via ${p.shopName || 'Gramzo Partner'}</p>
                             <div class="flex justify-between items-center">
                                 <span class="text-4xl font-black text-black tracking-tighter">₹${p.price}</span>
-                                <button onclick="addToCart('${p.name}', ${p.price})" class="h-14 w-14 bg-emerald-500 text-white rounded-[1.5rem] shadow-xl transition active:scale-90 flex items-center justify-center">
+                                <button onclick="addToCart('${p.name}', ${p.price}, '${p.shopName || 'Gramzo'}')" class="h-14 w-14 bg-emerald-500 text-white rounded-[1.5rem] shadow-xl transition active:scale-90 flex items-center justify-center">
                                     <i class="fa-solid fa-plus text-xl"></i>
                                 </button>
                             </div>
@@ -541,7 +540,7 @@
                 if (ads[0]) {
                     banner.style.background = ads[0].color || '#10b981';
                     banner.innerHTML = `<div class="absolute top-0 left-0 w-full h-full opacity-10 bg-[radial-gradient(circle,white_1px,transparent_1px)] bg-[size:20px_20px]"></div>
-                                        <p class="text-white font-black italic tracking-tighter text-3xl z-10 uppercase drop-shadow-md px-6">${ads[0].text}</p>`;
+                                        <p class="text-white font-black italic tracking-tighter text-3xl z-10 uppercase drop-shadow-md px-10 text-center">${ads[0].text}</p>`;
                 }
             });
         }
@@ -555,26 +554,25 @@
                     const o = docSnap.data();
                     rev += o.total; count++;
                     if(adminLog) adminLog.innerHTML += `<tr>
-                        <td class="p-8 font-extrabold text-sm">${o.customer}</td>
-                        <td class="p-8 text-gray-400 font-bold uppercase text-[10px] tracking-widest">${o.village}</td>
+                        <td class="p-8 font-extrabold text-sm">${o.customer} <br><span class="text-[9px] text-gray-400 uppercase tracking-widest">${o.village}</span></td>
                         <td class="p-8 font-black text-base text-center">₹${o.total}</td>
-                        <td class="p-8 text-right"><span class="bg-black text-white px-3 py-1 rounded-full font-black text-[9px] uppercase">${o.status}</span></td>
+                        <td class="p-8 text-right"><span class="bg-black text-white px-3 py-1 rounded-full font-black text-[9px] uppercase tracking-tighter">${o.status}</span></td>
                     </tr>`;
                 });
                 if(document.getElementById('stat-rev')) document.getElementById('stat-rev').innerText = `₹${rev}`;
                 if(document.getElementById('stat-ord')) document.getElementById('stat-ord').innerText = count;
             });
 
-            if (currentUser.role === 'Admin') {
+            if (currentUser && currentUser.role === 'Admin') {
                 onSnapshot(getCol('users'), (snap) => {
                     const partners = snap.docs.filter(d => d.data().role === 'Partner');
                     document.getElementById('stat-partners').innerText = partners.length;
                     document.getElementById('admin-verification-list').innerHTML = partners.map(p => `
-                        <div class="flex justify-between items-center p-6 bg-gray-50 rounded-[2rem] border border-gray-100">
-                            <div><p class="font-extrabold text-lg flex items-center">${p.data().name} ${p.data().status === 'Verified' ? '<span class="verified-badge">Verified</span>' : ''}</p><p class="text-[10px] text-gray-400 font-bold tracking-widest">ID: ${p.id} • ${p.data().village}</p></div>
+                        <div class="flex justify-between items-center p-6 bg-gray-50 rounded-[2.5rem] border border-gray-100">
+                            <div><p class="font-extrabold text-lg flex items-center">${p.data().name} ${p.data().status === 'Verified' ? '<span class="verified-badge">Live</span>' : ''}</p><p class="text-[10px] text-gray-400 font-bold tracking-widest">ID: ${p.id} • ${p.data().village}</p></div>
                             <div class="flex gap-3">
-                                <button onclick="verifyPartner('${p.id}', 'Verified')" class="bg-emerald-500 text-white px-5 py-2.5 rounded-xl text-[11px] font-black uppercase shadow-lg shadow-emerald-100">Verify</button>
-                                <button onclick="verifyPartner('${p.id}', 'Rejected')" class="bg-rose-50 text-rose-500 px-5 py-2.5 rounded-xl text-[11px] font-black uppercase">Block</button>
+                                <button onclick="verifyPartner('${p.id}', 'Verified')" class="bg-black text-white px-5 py-2.5 rounded-xl text-[11px] font-black uppercase shadow-lg">Verify</button>
+                                <button onclick="verifyPartner('${p.id}', 'Blocked')" class="bg-rose-50 text-rose-500 px-5 py-2.5 rounded-xl text-[11px] font-black uppercase">Block</button>
                             </div>
                         </div>
                     `).join('');
@@ -584,7 +582,7 @@
 
         window.verifyPartner = async (id, status) => {
             await updateDoc(doc(db, 'artifacts', currentAppId, 'public', 'data', 'users', id), { status });
-            showMsg(`Partner ${status}`);
+            showMsg(`Fleet Updated to ${status}`);
         };
 
         window.pushAd = async () => {
@@ -592,7 +590,7 @@
             const color = document.getElementById('ad-color-input').value;
             if(!text) return;
             await addDoc(getCol('ads'), { text, color, created: new Date().toISOString() });
-            showMsg("Broadcast Live!");
+            showMsg("Broadcasting Home Ad!");
             document.getElementById('ad-text-input').value = "";
         };
 
@@ -603,10 +601,11 @@
             });
         };
 
-        window.addToCart = (name, price) => {
-            if(!currentUser) return toggleAuthModal();
-            cart.push({name, price});
+        window.addToCart = (name, price, shopName) => {
+            if(!currentUser) { toggleAuthModal(); return; }
+            cart.push({name, price, shopName});
             renderCartUI();
+            showMsg(`Picked: ${name}`);
         };
 
         window.renderCartUI = () => {
@@ -618,9 +617,9 @@
 
         window.placeOrder = async () => {
             const addr = document.getElementById('cart-address').value.trim();
-            if(!addr) return showMsg("Landmark needed");
+            if(!addr) return showMsg("Landmark needed for delivery");
             await addDoc(getCol('orders'), { customer: currentUser.name, village: currentUser.village, phone: currentUser.phone, items: cart, total: cart.reduce((s,i)=>s+i.price,0), gp: document.getElementById('cart-gp').value, address: addr, status: 'Placed', time: serverTimestamp() });
-            cart = []; renderCartUI(); showMsg("Order Sent!");
+            cart = []; renderCartUI(); showMsg("Confirmed! Coming Soon.");
         };
 
         window.addItem = async () => {
@@ -628,14 +627,14 @@
             const price = Number(document.getElementById('item-price').value);
             const qty = document.getElementById('item-qty').value;
             const img = document.getElementById('item-img').value;
-            if(!name || !price) return showMsg("Fill details");
+            if(!name || !price) return showMsg("Fill item details");
             await addDoc(getCol('products'), { name, price, qty, image: img || 'https://via.placeholder.com/500', category: 'Misc', shopName: currentUser.name, created: new Date().toISOString() });
-            showMsg("Item Listed!");
+            showMsg("Listing Live on Gramzo!");
         };
 
         window.filterBy = (cat) => {
             currentFilter = (currentFilter === cat) ? null : cat;
-            document.getElementById('active-filter').innerText = currentFilter ? currentFilter.toUpperCase() : "FLASH DEALS";
+            document.getElementById('active-filter').innerText = currentFilter ? currentFilter.toUpperCase() : "FLASH LISTINGS";
             loadGuestData();
         };
 
