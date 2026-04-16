@@ -54,13 +54,13 @@
             @apply w-full p-4 bg-gray-50 rounded-[1.25rem] border-2 border-transparent outline-none focus:border-emerald-500 focus:bg-white transition-all text-sm font-semibold; 
         }
 
-        /* Zepto Style Service Buttons */
+        /* BIGGER Zepto Style Service Buttons */
         .service-btn {
-            @apply h-24 w-24 bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 flex flex-col items-center justify-center transition-all duration-300;
+            @apply h-28 w-28 bg-white rounded-[2.5rem] shadow-[0_12px_40px_rgba(0,0,0,0.06)] border border-gray-100 flex flex-col items-center justify-center transition-all duration-300;
         }
-        .service-btn i { @apply text-3xl mb-1; }
+        .service-btn i { @apply text-5xl mb-1; } /* Super big icons */
         .service-btn:hover {
-            @apply shadow-[0_20px_40px_rgba(16,185,129,0.1)] -translate-y-1 scale-105 border-emerald-100;
+            @apply shadow-[0_25px_50px_rgba(16,185,129,0.15)] -translate-y-2 scale-105 border-emerald-200;
         }
 
         .card-modern {
@@ -77,8 +77,6 @@
         .admin-tab-active { @apply bg-black text-white shadow-xl; }
         .role-tab-active { @apply bg-emerald-500 text-white shadow-md font-bold; }
         
-        .verified-badge { @apply bg-blue-500 text-white px-2 py-0.5 rounded-full text-[7px] font-black uppercase ml-1; }
-        
         /* Modern Ad Banner */
         .ad-gradient {
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
@@ -89,7 +87,7 @@
 
     <!-- Version Identifier -->
     <div class="bg-emerald-50 text-[10px] text-emerald-700 py-1.5 px-4 text-center border-b border-emerald-100 font-bold uppercase tracking-widest">
-        Ver 2.2 • Last Sync: Thursday, April 16, 2026, 1:40 PM IST
+        Ver 3.3 • Last Sync: Thursday, April 16, 2026, 2:05 PM IST
     </div>
 
     <!-- Header / Navbar -->
@@ -117,39 +115,72 @@
                 <!-- Auth Modal -->
                 <div id="auth-modal" class="auth-dropdown bg-white rounded-[2.5rem] shadow-[0_30px_60px_rgba(0,0,0,0.15)] border border-gray-100 p-8">
                     <!-- Role Switcher -->
-                    <div class="flex bg-gray-100 p-1.5 rounded-[1.25rem] mb-8">
+                    <div id="role-switcher" class="flex bg-gray-100 p-1.5 rounded-[1.25rem] mb-8">
                         <button onclick="switchAuthRole('User')" id="tab-User" class="flex-1 py-2.5 rounded-[1rem] text-xs font-bold transition-all role-tab-active">User</button>
                         <button onclick="switchAuthRole('Partner')" id="tab-Partner" class="flex-1 py-2.5 rounded-[1rem] text-xs font-bold text-gray-500 transition-all">Partner</button>
                         <button onclick="switchAuthRole('Admin')" id="tab-Admin" class="flex-1 py-2.5 rounded-[1rem] text-xs font-bold text-gray-500 transition-all">Admin</button>
                     </div>
 
+                    <!-- Login View -->
                     <div id="auth-view-login">
                         <h3 class="font-extrabold text-2xl mb-2 text-gray-900" id="login-title">Hey there! 👋</h3>
-                        <p class="text-gray-400 text-xs font-bold mb-6">Access your Gramzo account instantly.</p>
+                        <p id="login-desc" class="text-gray-400 text-xs font-bold mb-6">Enter your credentials to continue.</p>
                         <div class="space-y-4">
-                            <input id="login-phone" type="tel" placeholder="Mobile Number" maxlength="10">
+                            <input id="login-phone" type="tel" placeholder="Mobile Number / ID" maxlength="10">
                             <input id="login-pass" type="password" placeholder="Password">
                             <button onclick="handleAuth('login')" class="w-full btn-primary py-4 text-sm">Sign In</button>
-                            <p id="reg-toggle-text" class="text-center text-xs font-bold text-gray-400 mt-6">
-                                First time? <button onclick="toggleAuthView('register')" class="text-emerald-500 font-extrabold hover:underline">Register now</button>
-                            </p>
+                            
+                            <div class="flex flex-col gap-3 mt-6 text-center">
+                                <button onclick="toggleAuthView('forgot')" class="text-gray-400 text-xs font-bold hover:text-emerald-500 transition-colors">Forgot Password?</button>
+                                <div id="reg-toggle-container">
+                                    <p class="text-xs font-bold text-gray-400">
+                                        New user? <button onclick="toggleAuthView('register')" class="text-emerald-500 font-extrabold hover:underline">Register Here</button>
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
+                    <!-- Register View -->
                     <div id="auth-view-register" class="hidden">
-                        <h3 class="font-extrabold text-2xl mb-2 text-gray-900" id="reg-title">Create Account</h3>
-                        <p class="text-gray-400 text-xs font-bold mb-6">Enter your details to get started.</p>
+                        <h3 class="font-extrabold text-2xl mb-2 text-gray-900">User Signup</h3>
+                        <p class="text-gray-400 text-xs font-bold mb-6">Start your journey with Gramzo today.</p>
                         <div class="space-y-3">
-                            <input id="reg-name" type="text" placeholder="Full Name / Shop Name">
+                            <input id="reg-name" type="text" placeholder="Full Name">
                             <input id="reg-phone" type="tel" placeholder="10-Digit Mobile" maxlength="10">
                             <input id="reg-village" type="text" placeholder="Village Name">
                             <input id="reg-pincode" type="tel" placeholder="Pin Code" maxlength="6">
                             <input id="reg-pass" type="password" placeholder="Create Password">
                             <button onclick="handleAuth('register')" class="w-full btn-primary py-4 text-sm">Submit Registration</button>
                             <p class="text-center text-xs font-bold text-gray-400 mt-6">
-                                Got an account? <button onclick="toggleAuthView('login')" class="text-emerald-500 font-extrabold hover:underline">Sign In</button>
+                                Already registered? <button onclick="toggleAuthView('login')" class="text-emerald-500 font-extrabold hover:underline">Sign In</button>
                             </p>
                         </div>
+                    </div>
+
+                    <!-- Forgot Password View -->
+                    <div id="auth-view-forgot" class="hidden">
+                        <h3 class="font-extrabold text-2xl mb-2 text-gray-900">Reset Password</h3>
+                        <p class="text-gray-400 text-xs font-bold mb-6" id="forgot-desc">Enter your mobile to find account.</p>
+                        <div id="forgot-step-1" class="space-y-4">
+                            <input id="forgot-phone" type="tel" placeholder="Registered Mobile" maxlength="10">
+                            <button onclick="handleForgotPassword('verify-user')" class="w-full btn-primary py-4 text-sm">Verify Account</button>
+                        </div>
+                        <div id="forgot-step-2" class="hidden space-y-4">
+                            <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-100">
+                                <p class="text-[10px] text-emerald-600 font-black uppercase tracking-widest mb-1">Security Question</p>
+                                <p class="text-xs font-bold text-emerald-800">What is your registered Village Name?</p>
+                            </div>
+                            <input id="forgot-village" type="text" placeholder="Your Village Name">
+                            <button onclick="handleForgotPassword('verify-village')" class="w-full btn-primary py-4 text-sm">Verify Identity</button>
+                        </div>
+                        <div id="forgot-step-3" class="hidden space-y-4">
+                            <input id="forgot-new-pass" type="password" placeholder="Enter New Password">
+                            <button onclick="handleForgotPassword('reset-pass')" class="w-full btn-primary py-4 text-sm">Change Password</button>
+                        </div>
+                        <p class="text-center text-xs font-bold text-gray-400 mt-6">
+                            Remembered? <button onclick="toggleAuthView('login')" class="text-emerald-500 font-extrabold hover:underline">Sign In</button>
+                        </p>
                     </div>
                     <p id="auth-msg" class="text-[11px] text-center font-bold mt-4 min-h-[1rem]"></p>
                 </div>
@@ -159,7 +190,7 @@
             <div onclick="location.reload()" class="cursor-pointer group text-right">
                 <div class="flex items-center gap-2 justify-end">
                     <h1 class="text-2xl font-black text-emerald-500 tracking-tighter group-hover:scale-105 transition flex items-center gap-1">
-                        GRAMZO <span class="text-black">.</span>
+                        GRAMZO<span class="text-black">.</span>
                     </h1>
                     <div id="status-dot" class="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></div>
                 </div>
@@ -169,40 +200,40 @@
 
     <main class="max-w-4xl mx-auto p-4 space-y-12 mt-4">
         
-        <!-- Premium Service Selection -->
+        <!-- BIGGER Service Selection for Mobile -->
         <section id="service-selector" class="text-center">
-            <div class="flex justify-center gap-4 sm:gap-8 overflow-x-auto custom-scroll px-4 pb-4">
+            <div class="flex justify-center gap-6 sm:gap-10 overflow-x-auto custom-scroll px-4 pb-6">
                 <div class="flex-shrink-0 group cursor-pointer text-center" onclick="filterBy('Food')">
                     <div class="service-btn text-orange-500">
                         <i class="fa-solid fa-utensils"></i>
                     </div>
-                    <p class="text-[11px] font-extrabold mt-3 text-gray-500 tracking-tight uppercase">Food</p>
+                    <p class="text-xs font-extrabold mt-3 text-gray-500 tracking-tight uppercase">Food</p>
                 </div>
                 <div class="flex-shrink-0 group cursor-pointer text-center" onclick="filterBy('Grocery')">
                     <div class="service-btn text-emerald-500">
                         <i class="fa-solid fa-basket-shopping"></i>
                     </div>
-                    <p class="text-[11px] font-extrabold mt-3 text-gray-500 tracking-tight uppercase">Grocery</p>
+                    <p class="text-xs font-extrabold mt-3 text-gray-500 tracking-tight uppercase">Grocery</p>
                 </div>
                 <div class="flex-shrink-0 group cursor-pointer text-center" onclick="filterBy('Ride')">
                     <div class="service-btn text-blue-500">
                         <i class="fa-solid fa-motorcycle"></i>
                     </div>
-                    <p class="text-[11px] font-extrabold mt-3 text-gray-500 tracking-tight uppercase">Ride</p>
+                    <p class="text-xs font-extrabold mt-3 text-gray-500 tracking-tight uppercase">Ride</p>
                 </div>
                 <div class="flex-shrink-0 group cursor-pointer text-center" onclick="filterBy('Services')">
                     <div class="service-btn text-indigo-500">
                         <i class="fa-solid fa-wand-magic-sparkles"></i>
                     </div>
-                    <p class="text-[11px] font-extrabold mt-3 text-gray-500 tracking-tight uppercase">Services</p>
+                    <p class="text-xs font-extrabold mt-3 text-gray-500 tracking-tight uppercase">Services</p>
                 </div>
             </div>
         </section>
 
         <!-- Premium Ad Banner -->
-        <div id="promo-banner" class="w-full h-44 ad-gradient rounded-[3rem] flex items-center justify-center overflow-hidden shadow-2xl relative transition-all duration-700 p-8 text-center">
+        <div id="promo-banner" class="w-full h-48 ad-gradient rounded-[3rem] flex items-center justify-center overflow-hidden shadow-2xl relative transition-all duration-700 p-8 text-center">
             <div class="absolute top-0 left-0 w-full h-full opacity-10 bg-[radial-gradient(circle,white_1px,transparent_1px)] bg-[size:20px_20px]"></div>
-            <p class="text-white font-black italic tracking-tighter text-3xl z-10 leading-tight drop-shadow-md text-center">GRAMZO RURAL SUPER APP <br><span class="text-sm not-italic opacity-80 uppercase tracking-widest font-extrabold mt-2 block">Your Village, Your Delivery</span></p>
+            <p id="banner-text" class="text-white font-black italic tracking-tighter text-3xl z-10 leading-tight drop-shadow-md text-center uppercase">GRAMZO RURAL SUPER APP</p>
         </div>
 
         <div id="view-container">
@@ -212,35 +243,29 @@
                     <div class="flex justify-between items-end mb-8 px-2">
                         <div>
                             <h3 class="font-extrabold text-3xl text-gray-900">Nearby Market</h3>
-                            <p class="text-xs text-gray-400 font-bold tracking-wide mt-1">Delivery in 30-60 mins</p>
+                            <p class="text-xs text-gray-400 font-bold tracking-wide mt-1">Instant Village Delivery</p>
                         </div>
-                        <span id="active-filter" class="text-[10px] bg-emerald-50 text-emerald-600 px-4 py-2 rounded-full font-black tracking-widest border border-emerald-100 uppercase">Flash Listings</span>
+                        <span id="active-filter" class="text-[10px] bg-emerald-50 text-emerald-600 px-4 py-2 rounded-full font-black tracking-widest border border-emerald-100 uppercase">Flash Deals</span>
                     </div>
                     <div id="market-list" class="grid grid-cols-1 sm:grid-cols-2 gap-8"></div>
                 </div>
 
-                <!-- Checkout Component -->
                 <div id="cart-box" class="opacity-40 pointer-events-none transition-all duration-700 scale-95 origin-top blur-[1px]">
                     <div class="bg-white rounded-[3rem] p-10 shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-gray-50">
-                        <div class="flex justify-between items-center mb-10">
-                            <h3 class="font-extrabold text-2xl">Your Basket</h3>
-                            <span class="bg-emerald-100 text-emerald-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">Cod Payment</span>
-                        </div>
+                        <h3 class="font-extrabold text-2xl mb-10 text-emerald-600">Flash Checkout</h3>
                         <div id="cart-items-list" class="space-y-4 mb-10"></div>
                         <div class="space-y-6 pt-10 border-t-2 border-gray-50">
-                            <div class="flex gap-4">
-                                <select id="cart-gp" class="flex-1">
-                                    <option value="Santuri">Santuri Hub (+₹10)</option>
-                                    <option value="Muradi">Muradi Center (+₹20)</option>
-                                    <option value="Tarabari">Tarabari Outpost (+₹25)</option>
-                                </select>
+                            <select id="cart-gp" class="flex-1">
+                                <option value="Santuri">Santuri Hub (+₹10)</option>
+                                <option value="Muradi">Muradi Center (+₹20)</option>
+                                <option value="Tarabari">Tarabari Outpost (+₹25)</option>
+                            </select>
+                            <div class="flex justify-between items-center py-2 text-3xl font-black">
+                                <span class="text-gray-400 text-sm uppercase">To Pay</span>
+                                <span id="cart-total" class="text-black tracking-tighter text-4xl">₹0</span>
                             </div>
-                            <div class="flex justify-between items-center py-2">
-                                <span class="text-gray-400 font-bold uppercase text-[11px] tracking-widest">Total to Pay</span>
-                                <span id="cart-total" class="text-5xl font-black text-emerald-500 tracking-tighter">₹0</span>
-                            </div>
-                            <input id="cart-address" placeholder="Delivery Point Landmark">
-                            <button onclick="placeOrder()" class="w-full btn-primary py-6 text-xl uppercase tracking-tighter">Place Order Now</button>
+                            <input id="cart-address" placeholder="Delivery Landmark">
+                            <button onclick="placeOrder()" class="w-full btn-primary py-6 text-xl uppercase tracking-tighter">Place Order</button>
                         </div>
                     </div>
                 </div>
@@ -249,95 +274,76 @@
             <!-- 2. PARTNER VIEW -->
             <div id="view-Partner" class="hidden space-y-8">
                 <div id="partner-dashboard" class="bg-white p-10 rounded-[3rem] shadow-xl border border-gray-50">
-                    <div class="flex justify-between items-start mb-10">
-                        <div>
-                            <h3 class="font-extrabold text-3xl">Manage Business</h3>
-                            <p id="partner-status" class="text-[11px] font-black text-orange-500 uppercase tracking-widest mt-1">Pending Approval</p>
-                        </div>
-                    </div>
+                    <h3 class="font-extrabold text-3xl mb-10">Merchant Portal</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10">
-                        <div class="space-y-2">
-                            <label class="text-[10px] font-black uppercase text-gray-400 ml-4 tracking-widest">Item Name</label>
-                            <input id="item-name" placeholder="E.g. Fresh Milk">
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-[10px] font-black uppercase text-gray-400 ml-4 tracking-widest">Price (₹)</label>
-                            <input id="item-price" type="number" placeholder="0">
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-[10px] font-black uppercase text-gray-400 ml-4 tracking-widest">Quantity/Unit</label>
-                            <input id="item-qty" placeholder="E.g. 1kg">
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-[10px] font-black uppercase text-gray-400 ml-4 tracking-widest">Image URL</label>
-                            <input id="item-img" placeholder="https://...">
-                        </div>
+                        <input id="item-name" placeholder="Item/Service Name">
+                        <input id="item-price" type="number" placeholder="Price (₹)">
+                        <input id="item-qty" placeholder="Unit (e.g. 1kg)">
+                        <input id="item-img" placeholder="Image URL">
                     </div>
-                    <button onclick="addItem()" class="w-full bg-black text-white p-6 rounded-[2rem] font-extrabold text-sm uppercase tracking-widest active:scale-95 transition-all">Add to Home Screen</button>
+                    <button onclick="addItem()" class="w-full bg-black text-white p-6 rounded-[2rem] font-extrabold active:scale-95 transition-all uppercase tracking-widest">Update Marketplace</button>
                     <div id="partner-order-list" class="mt-16 space-y-6"></div>
                 </div>
             </div>
 
             <!-- 3. ADVANCED ADMIN GOVERNANCE -->
             <div id="view-Admin" class="hidden space-y-8">
-                <!-- Admin Tabs -->
                 <div class="flex bg-gray-100 p-2 rounded-[2rem] mb-10 overflow-x-auto custom-scroll">
                     <button onclick="switchAdminSubTab('dashboard')" id="adm-t-dashboard" class="flex-1 py-4 px-6 text-[11px] font-black rounded-[1.5rem] admin-tab-active transition whitespace-nowrap uppercase tracking-widest">Analytics</button>
-                    <button onclick="switchAdminSubTab('partners')" id="adm-t-partners" class="flex-1 py-4 px-6 text-[11px] font-black text-gray-500 rounded-[1.5rem] transition whitespace-nowrap uppercase tracking-widest">Verifications</button>
-                    <button onclick="switchAdminSubTab('ads')" id="adm-t-ads" class="flex-1 py-4 px-6 text-[11px] font-black text-gray-500 rounded-[1.5rem] transition whitespace-nowrap uppercase tracking-widest">Ad Engine</button>
+                    <button onclick="switchAdminSubTab('reg-partner')" id="adm-t-reg-partner" class="flex-1 py-4 px-6 text-[11px] font-black text-gray-500 rounded-[1.5rem] transition whitespace-nowrap uppercase tracking-widest">New Partner</button>
+                    <button onclick="switchAdminSubTab('ads')" id="adm-t-ads" class="flex-1 py-4 px-6 text-[11px] font-black text-gray-500 rounded-[1.5rem] transition whitespace-nowrap uppercase tracking-widest">Ads</button>
                     <button onclick="switchAdminSubTab('logs')" id="adm-t-logs" class="flex-1 py-4 px-6 text-[11px] font-black text-gray-500 rounded-[1.5rem] transition whitespace-nowrap uppercase tracking-widest">Ledger</button>
                 </div>
-
-                <!-- Sub-Tab: Dashboard -->
-                <div id="adm-v-dashboard" class="space-y-8">
+                <div id="adm-v-dashboard" class="space-y-8 text-center">
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-8">
-                        <div class="bg-white p-10 rounded-[3rem] border border-gray-50 text-center shadow-sm">
-                            <p class="text-[10px] font-black text-gray-400 mb-2 uppercase tracking-widest">Total GTV</p>
+                        <div class="bg-white p-10 rounded-[3rem] shadow-sm border border-gray-50">
+                            <p class="text-[10px] font-black text-gray-400 mb-2 uppercase">GTV</p>
                             <h4 id="stat-rev" class="text-4xl font-black text-emerald-500 tracking-tighter">₹0</h4>
                         </div>
-                        <div class="bg-white p-10 rounded-[3rem] border border-gray-50 text-center shadow-sm">
-                            <p class="text-[10px] font-black text-gray-400 mb-2 uppercase tracking-widest">Total Orders</p>
+                        <div class="bg-white p-10 rounded-[3rem] shadow-sm border border-gray-50">
+                            <p class="text-[10px] font-black text-gray-400 mb-2 uppercase">Orders</p>
                             <h4 id="stat-ord" class="text-4xl font-black text-black tracking-tighter">0</h4>
                         </div>
-                        <div class="bg-white p-10 rounded-[3rem] border border-gray-50 text-center shadow-sm">
-                            <p class="text-[10px] font-black text-gray-400 mb-2 uppercase tracking-widest">Partner Fleet</p>
+                        <div class="bg-white p-10 rounded-[3rem] shadow-sm border border-gray-50">
+                            <p class="text-[10px] font-black text-gray-400 mb-2 uppercase tracking-widest">Partners</p>
                             <h4 id="stat-partners" class="text-4xl font-black text-orange-500 tracking-tighter">0</h4>
                         </div>
                     </div>
                 </div>
-
-                <!-- Sub-Tab: Partner Verification -->
-                <div id="adm-v-partners" class="hidden space-y-6">
-                    <div class="bg-white p-10 rounded-[3rem] border border-gray-50 shadow-sm">
-                        <h4 class="font-extrabold text-2xl mb-8">Verification Queue</h4>
-                        <div id="admin-verification-list" class="space-y-4 text-center text-gray-400 italic py-10">Searching for new partners...</div>
+                <div id="adm-v-reg-partner" class="hidden bg-white p-10 rounded-[3rem] border border-gray-100 shadow-xl">
+                    <h4 class="font-extrabold text-2xl mb-8">Create Partner ID</h4>
+                    <div class="space-y-4">
+                        <input id="p-reg-name" placeholder="Business Name">
+                        <input id="p-reg-phone" type="tel" placeholder="Mobile Number" maxlength="10">
+                        <select id="p-reg-type" onchange="toggleOtherService(this.value)">
+                            <option value="">Select Type</option>
+                            <option value="Food">Food Shop Owner</option>
+                            <option value="Grocery">Grocery Shop</option>
+                            <option value="Rider-Bike">Rider (Bike)</option>
+                            <option value="Service-Plumber">Service: Plumber</option>
+                            <option value="Other">Other Service</option>
+                        </select>
+                        <input id="p-reg-other" class="hidden" placeholder="Specify Service">
+                        <input id="p-reg-pass" type="password" placeholder="Password" value="1234">
+                        <button onclick="registerPartnerByAdmin()" class="w-full btn-primary py-5 mt-4 uppercase tracking-widest">Generate Account</button>
                     </div>
+                    <div id="admin-partner-list" class="mt-12 space-y-3"></div>
                 </div>
-
-                <!-- Sub-Tab: Ads Engine -->
-                <div id="adm-v-ads" class="hidden space-y-6">
-                    <div class="bg-white p-10 rounded-[3rem] border border-gray-50 shadow-sm">
-                        <h4 class="font-extrabold text-2xl mb-8">Ad Banner Controller</h4>
-                        <div class="space-y-5">
-                            <input id="ad-text-input" placeholder="Banner Heading">
-                            <div class="flex items-center gap-6 ml-4">
-                                <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest">Theme Color</label>
-                                <input id="ad-color-input" type="color" value="#10b981" class="h-14 w-24 p-1 rounded-2xl cursor-pointer">
-                            </div>
-                            <button onclick="pushAd()" class="w-full bg-emerald-500 text-white p-5 rounded-[2rem] font-black tracking-widest shadow-xl">Update Global Banner</button>
+                <div id="adm-v-ads" class="hidden bg-white p-10 rounded-[3rem] border border-gray-100">
+                    <h4 class="font-extrabold text-2xl mb-8">Home Ad Manager</h4>
+                    <div class="space-y-5">
+                        <input id="ad-text-input" placeholder="Headline">
+                        <div class="flex items-center gap-6 ml-4">
+                            <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest">Color</label>
+                            <input id="ad-color-input" type="color" value="#10b981" class="h-14 w-24 p-1 rounded-2xl cursor-pointer">
                         </div>
+                        <button onclick="pushAd()" class="w-full btn-primary py-5 mt-4">Update Banner</button>
                     </div>
                 </div>
-
-                <!-- Sub-Tab: Logs -->
-                <div id="adm-v-logs" class="hidden bg-white rounded-[3rem] overflow-hidden border border-gray-100 shadow-sm">
+                <div id="adm-v-logs" class="hidden bg-white rounded-[3rem] overflow-hidden border">
                     <table class="w-full text-left text-xs">
                         <thead class="bg-gray-50 border-b border-gray-100 font-black text-gray-400 uppercase tracking-widest">
-                            <tr>
-                                <th class="p-8">Buyer</th>
-                                <th class="p-8 text-center">Amount</th>
-                                <th class="p-8 text-right">Status</th>
-                            </tr>
+                            <tr><th class="p-8">User</th><th class="p-8 text-center">Amt</th><th class="p-8 text-right">Status</th></tr>
                         </thead>
                         <tbody id="admin-log-body" class="divide-y divide-gray-50"></tbody>
                     </table>
@@ -346,14 +352,14 @@
         </div>
     </main>
 
-    <div id="ui-msg" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-black text-white px-8 py-4 rounded-full text-sm font-bold z-[200] hidden shadow-2xl"></div>
+    <div id="ui-msg" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-black text-white px-8 py-4 rounded-full text-sm font-bold z-[200] hidden shadow-2xl animate-bounce text-center"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, getDoc, setDoc, onSnapshot, addDoc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase Config
+        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCA4U4jva7HHeMP-yk1VJy3l_BBct3Gohg",
             authDomain: "gramzo.firebaseapp.com",
@@ -366,7 +372,7 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const currentAppId = 'gramzo-final-v22';
+        const currentAppId = 'gramzo-master-v22';
 
         const getCol = (name) => collection(db, 'artifacts', currentAppId, 'public', 'data', name);
 
@@ -375,6 +381,8 @@
         let currentFilter = null;
         let cart = [];
         const fees = { Santuri: 10, Muradi: 20, Tarabari: 25 };
+        
+        let tempForgotUser = null;
 
         async function startApp() {
             try {
@@ -392,14 +400,12 @@
             } catch (e) { console.error(e); }
         }
 
-        // AGGRESSIVE: Handshake-First persistence logic
         const safeWrite = async (ref, data, attempts = 3) => {
             for (let i = 0; i < attempts; i++) {
                 try {
                     await setDoc(ref, data);
                     return true;
                 } catch (e) {
-                    console.warn("Handshake retry triggered...");
                     await new Promise(r => setTimeout(r, 400));
                 }
             }
@@ -413,22 +419,56 @@
             ['User', 'Partner', 'Admin'].forEach(r => {
                 document.getElementById(`tab-${r}`).className = r === role ? 'flex-1 py-2.5 rounded-[1rem] text-xs font-bold transition-all role-tab-active' : 'flex-1 py-2.5 rounded-[1rem] text-xs font-bold text-gray-500 transition-all';
             });
-            document.getElementById('login-title').innerText = role === 'User' ? 'Welcome Back! 👋' : role + ' Dashboard';
-            document.getElementById('reg-title').innerText = `New ${role} Signup`;
-            document.getElementById('reg-toggle-text').classList.toggle('hidden', role === 'Admin');
+            document.getElementById('login-title').innerText = role === 'User' ? 'Hey there! 👋' : role + ' Dashboard';
+            document.getElementById('reg-toggle-container').classList.toggle('hidden', role !== 'User');
+            toggleAuthView('login');
         };
 
         window.toggleAuthView = (view) => {
-            document.getElementById('auth-view-login').classList.toggle('hidden', view === 'register');
-            document.getElementById('auth-view-register').classList.toggle('hidden', view === 'login');
+            document.getElementById('auth-view-login').classList.toggle('hidden', view !== 'login');
+            document.getElementById('auth-view-register').classList.toggle('hidden', view !== 'register');
+            document.getElementById('auth-view-forgot').classList.toggle('hidden', view !== 'forgot');
             document.getElementById('auth-msg').innerText = "";
+            
+            if (view === 'forgot') {
+                document.getElementById('forgot-step-1').classList.remove('hidden');
+                document.getElementById('forgot-step-2').classList.add('hidden');
+                document.getElementById('forgot-step-3').classList.add('hidden');
+            }
+        };
+
+        window.handleForgotPassword = async (step) => {
+            const msgEl = document.getElementById('auth-msg');
+            try {
+                if (step === 'verify-user') {
+                    const phone = document.getElementById('forgot-phone').value.trim();
+                    if (phone.length !== 10) return showMsg("Invalid mobile.");
+                    msgEl.innerText = "Finding account...";
+                    const snap = await getDoc(doc(db, 'artifacts', currentAppId, 'public', 'data', 'users', phone));
+                    if (!snap.exists()) { msgEl.innerText = "Not found."; return; }
+                    tempForgotUser = { phone, ...snap.data() };
+                    document.getElementById('forgot-step-1').classList.add('hidden');
+                    document.getElementById('forgot-step-2').classList.remove('hidden');
+                    msgEl.innerText = "";
+                } else if (step === 'verify-village') {
+                    const answer = document.getElementById('forgot-village').value.trim().toLowerCase();
+                    if (answer === (tempForgotUser.village || "").toLowerCase()) {
+                        document.getElementById('forgot-step-2').classList.add('hidden');
+                        document.getElementById('forgot-step-3').classList.remove('hidden');
+                        msgEl.innerText = "";
+                    } else { msgEl.innerText = "Wrong Village."; }
+                } else if (step === 'reset-pass') {
+                    const newPass = document.getElementById('forgot-new-pass').value.trim();
+                    await updateDoc(doc(db, 'artifacts', currentAppId, 'public', 'data', 'users', tempForgotUser.phone), { pin: newPass });
+                    showMsg("Success!"); toggleAuthView('login');
+                }
+            } catch (e) { msgEl.innerText = "Sync issue."; }
         };
 
         window.handleAuth = async (type) => {
             const msgEl = document.getElementById('auth-msg');
-            msgEl.innerText = "Syncing with cloud...";
+            msgEl.innerText = "Handshaking...";
             msgEl.className = "text-[11px] text-center font-bold mt-4 text-emerald-500";
-
             const id = document.getElementById(type === 'login' ? 'login-phone' : 'reg-phone').value.trim();
             const pass = document.getElementById(type === 'login' ? 'login-pass' : 'reg-pass').value.trim();
 
@@ -437,55 +477,28 @@
                     currentUser = { name: 'Master Admin', role: 'Admin', phone: '7980230656' };
                     return finishLogin();
                 }
-                msgEl.innerText = "Access Denied.";
-                msgEl.className = "text-[11px] text-center font-bold mt-4 text-rose-500";
-                return;
+                msgEl.innerText = "Denied."; return;
             }
 
             try {
                 if (!auth.currentUser) await signInAnonymously(auth);
-
                 const userRef = doc(db, 'artifacts', currentAppId, 'public', 'data', 'users', id);
                 if (type === 'register') {
                     const name = document.getElementById('reg-name').value.trim();
                     const village = document.getElementById('reg-village').value.trim();
                     const pincode = document.getElementById('reg-pincode').value.trim();
-                    
-                    if (!name || id.length !== 10 || pass.length < 4) {
-                        msgEl.innerText = "Error: Fill 10-digit mobile & 4-digit PIN.";
-                        msgEl.className = "text-[11px] text-center font-bold mt-4 text-rose-500";
-                        return;
-                    }
-
-                    const userData = { 
-                        name, phone: id, village, pincode, pin: pass, 
-                        role: currentRole, status: currentRole === 'Partner' ? 'Pending' : 'Active', 
-                        created: new Date().toISOString() 
-                    };
-                    
+                    if (!name || id.length !== 10 || pass.length < 4) { msgEl.innerText = "Error: Fill all fields."; return; }
+                    const userData = { name, phone: id, village, pincode, pin: pass, role: currentRole, status: 'Active', created: new Date().toISOString() };
                     const success = await safeWrite(userRef, userData);
-                    if (success) {
-                        showMsg("Account Active! Loading...");
-                        currentUser = userData;
-                        finishLogin();
-                    } else {
-                        throw new Error("Cloud sync failed");
-                    }
+                    if (success) { showMsg("Account Active!"); currentUser = userData; finishLogin(); }
                 } else {
                     const snap = await getDoc(userRef);
                     if (!snap.exists() || snap.data().pin !== pass || snap.data().role !== currentRole) {
-                        msgEl.innerText = "Error: Check details or account type.";
-                        msgEl.className = "text-[11px] text-center font-bold mt-4 text-rose-500";
-                        return;
+                        msgEl.innerText = "Error: Check details."; return;
                     }
-                    currentUser = snap.data();
-                    finishLogin();
+                    currentUser = snap.data(); finishLogin();
                 }
-            } catch (e) { 
-                console.error(e);
-                msgEl.innerText = "Handshake timeout. Please click submit again."; 
-                msgEl.className = "text-[11px] text-center font-bold mt-4 text-rose-500";
-            }
+            } catch (e) { msgEl.innerText = "Timeout. Try Submit again."; }
         };
 
         const finishLogin = () => {
@@ -494,20 +507,31 @@
             document.getElementById('authed-ui').classList.remove('hidden');
             document.getElementById('display-name').innerText = currentUser.name;
             document.getElementById('display-role').innerText = currentUser.role;
-
             document.querySelectorAll('#view-container > div').forEach(div => div.classList.add('hidden'));
             document.getElementById(`view-${currentUser.role}`).classList.remove('hidden');
-
-            if (currentUser.role === 'Partner') {
-                document.getElementById('partner-status').innerText = currentUser.status || "Pending";
-                document.getElementById('partner-status').className = currentUser.status === 'Verified' ? "text-[11px] font-black text-emerald-500 uppercase tracking-widest mt-1" : "text-[11px] font-black text-orange-500 uppercase tracking-widest mt-1";
-            }
-
             if (currentUser.role === 'User') {
                 document.getElementById('cart-box').classList.remove('opacity-40', 'pointer-events-none', 'scale-95', 'blur-[1px]');
                 document.getElementById('cart-address').value = currentUser.village || "";
             }
             initRealtimeListeners();
+            showMsg(`Hi, ${currentUser.name}!`);
+        };
+
+        window.toggleOtherService = (val) => document.getElementById('p-reg-other').classList.toggle('hidden', val !== 'Other');
+
+        window.registerPartnerByAdmin = async () => {
+            const name = document.getElementById('p-reg-name').value.trim();
+            const phone = document.getElementById('p-reg-phone').value.trim();
+            let type = document.getElementById('p-reg-type').value;
+            const pass = document.getElementById('p-reg-pass').value.trim();
+            if (type === 'Other') type = document.getElementById('p-reg-other').value.trim();
+            if (!name || phone.length !== 10 || !type) return showMsg("Complete details.");
+            try {
+                const pData = { name, phone, businessType: type, pin: pass, role: 'Partner', status: 'Verified', created: new Date().toISOString(), village: 'Admin Created' };
+                await safeWrite(doc(db, 'artifacts', currentAppId, 'public', 'data', 'users', phone), pData);
+                showMsg(`Partner ${name} Created!`);
+                ['p-reg-name', 'p-reg-phone', 'p-reg-other'].forEach(id => document.getElementById(id).value = "");
+            } catch (e) { showMsg("Error."); }
         };
 
         function loadGuestData() {
@@ -522,18 +546,17 @@
                                 <h4 class="font-extrabold text-2xl tracking-tight">${p.name}</h4>
                                 <span class="bg-gray-50 px-2 py-1 rounded-lg text-[9px] font-black uppercase text-gray-400 border border-gray-100 tracking-tighter">${p.category}</span>
                             </div>
-                            <p class="text-[11px] text-gray-400 font-bold uppercase mb-8">${p.qty || '1 unit'} • Via ${p.shopName || 'Gramzo Partner'}</p>
+                            <p class="text-[11px] text-gray-400 font-bold uppercase mb-8">${p.qty || '1 unit'} • From ${p.shopName || 'Gramzo Hub'}</p>
                             <div class="flex justify-between items-center">
                                 <span class="text-4xl font-black text-black tracking-tighter">₹${p.price}</span>
-                                <button onclick="addToCart('${p.name}', ${p.price}, '${p.shopName || 'Gramzo'}')" class="h-14 w-14 bg-emerald-500 text-white rounded-[1.5rem] shadow-xl transition active:scale-90 flex items-center justify-center">
-                                    <i class="fa-solid fa-plus text-xl"></i>
+                                <button onclick="addToCart('${p.name}', ${p.price}, '${p.shopName || 'Gramzo'}')" class="h-16 w-16 bg-emerald-50 text-emerald-500 rounded-[1.5rem] shadow-xl transition active:scale-90 flex items-center justify-center">
+                                    <i class="fa-solid fa-plus text-2xl"></i>
                                 </button>
                             </div>
                         </div>
                     </div>
                 `).join('');
             });
-
             onSnapshot(getCol('ads'), (snap) => {
                 const banner = document.getElementById('promo-banner');
                 const ads = snap.docs.map(d => d.data());
@@ -553,49 +576,35 @@
                 snap.docs.forEach(docSnap => {
                     const o = docSnap.data();
                     rev += o.total; count++;
-                    if(adminLog) adminLog.innerHTML += `<tr>
-                        <td class="p-8 font-extrabold text-sm">${o.customer} <br><span class="text-[9px] text-gray-400 uppercase tracking-widest">${o.village}</span></td>
-                        <td class="p-8 font-black text-base text-center">₹${o.total}</td>
-                        <td class="p-8 text-right"><span class="bg-black text-white px-3 py-1 rounded-full font-black text-[9px] uppercase tracking-tighter">${o.status}</span></td>
-                    </tr>`;
+                    if(adminLog) adminLog.innerHTML += `<tr><td class="p-8 font-extrabold text-sm">${o.customer} <br><span class="text-[9px] text-gray-400 uppercase tracking-widest">${o.village || ''}</span></td><td class="p-8 font-black text-base text-center">₹${o.total}</td><td class="p-8 text-right"><span class="bg-black text-white px-3 py-1 rounded-full font-black text-[9px] uppercase tracking-tighter">${o.status}</span></td></tr>`;
                 });
                 if(document.getElementById('stat-rev')) document.getElementById('stat-rev').innerText = `₹${rev}`;
                 if(document.getElementById('stat-ord')) document.getElementById('stat-ord').innerText = count;
             });
-
             if (currentUser && currentUser.role === 'Admin') {
                 onSnapshot(getCol('users'), (snap) => {
                     const partners = snap.docs.filter(d => d.data().role === 'Partner');
                     document.getElementById('stat-partners').innerText = partners.length;
-                    document.getElementById('admin-verification-list').innerHTML = partners.map(p => `
-                        <div class="flex justify-between items-center p-6 bg-gray-50 rounded-[2.5rem] border border-gray-100">
-                            <div><p class="font-extrabold text-lg flex items-center">${p.data().name} ${p.data().status === 'Verified' ? '<span class="verified-badge">Live</span>' : ''}</p><p class="text-[10px] text-gray-400 font-bold tracking-widest">ID: ${p.id} • ${p.data().village}</p></div>
-                            <div class="flex gap-3">
-                                <button onclick="verifyPartner('${p.id}', 'Verified')" class="bg-black text-white px-5 py-2.5 rounded-xl text-[11px] font-black uppercase shadow-lg">Verify</button>
-                                <button onclick="verifyPartner('${p.id}', 'Blocked')" class="bg-rose-50 text-rose-500 px-5 py-2.5 rounded-xl text-[11px] font-black uppercase">Block</button>
-                            </div>
+                    document.getElementById('admin-partner-list').innerHTML = partners.map(p => `
+                        <div class="flex justify-between items-center p-5 bg-gray-50 rounded-2xl border border-gray-100">
+                            <div><p class="font-extrabold">${p.data().name}</p><p class="text-[9px] text-gray-400 font-black uppercase">${p.data().businessType} • ${p.id}</p></div>
                         </div>
                     `).join('');
                 });
             }
         }
 
-        window.verifyPartner = async (id, status) => {
-            await updateDoc(doc(db, 'artifacts', currentAppId, 'public', 'data', 'users', id), { status });
-            showMsg(`Fleet Updated to ${status}`);
-        };
-
         window.pushAd = async () => {
             const text = document.getElementById('ad-text-input').value;
             const color = document.getElementById('ad-color-input').value;
             if(!text) return;
             await addDoc(getCol('ads'), { text, color, created: new Date().toISOString() });
-            showMsg("Broadcasting Home Ad!");
+            showMsg("Broadcasting Live Banner!");
             document.getElementById('ad-text-input').value = "";
         };
 
         window.switchAdminSubTab = (t) => {
-            ['dashboard', 'partners', 'ads', 'logs'].forEach(tab => {
+            ['dashboard', 'reg-partner', 'ads', 'logs'].forEach(tab => {
                 document.getElementById(`adm-v-${tab}`).classList.toggle('hidden', tab !== t);
                 document.getElementById(`adm-t-${tab}`).className = tab === t ? 'flex-1 py-4 px-6 text-[11px] font-black rounded-[1.5rem] admin-tab-active transition whitespace-nowrap uppercase tracking-widest' : 'flex-1 py-4 px-6 text-[11px] font-black text-gray-500 rounded-[1.5rem] transition whitespace-nowrap uppercase tracking-widest';
             });
@@ -605,7 +614,7 @@
             if(!currentUser) { toggleAuthModal(); return; }
             cart.push({name, price, shopName});
             renderCartUI();
-            showMsg(`Picked: ${name}`);
+            showMsg(`Added: ${name}`);
         };
 
         window.renderCartUI = () => {
@@ -617,9 +626,9 @@
 
         window.placeOrder = async () => {
             const addr = document.getElementById('cart-address').value.trim();
-            if(!addr) return showMsg("Landmark needed for delivery");
+            if(!addr) return showMsg("Exact landmark needed.");
             await addDoc(getCol('orders'), { customer: currentUser.name, village: currentUser.village, phone: currentUser.phone, items: cart, total: cart.reduce((s,i)=>s+i.price,0), gp: document.getElementById('cart-gp').value, address: addr, status: 'Placed', time: serverTimestamp() });
-            cart = []; renderCartUI(); showMsg("Confirmed! Coming Soon.");
+            cart = []; renderCartUI(); showMsg("Confirmed!");
         };
 
         window.addItem = async () => {
@@ -627,9 +636,9 @@
             const price = Number(document.getElementById('item-price').value);
             const qty = document.getElementById('item-qty').value;
             const img = document.getElementById('item-img').value;
-            if(!name || !price) return showMsg("Fill item details");
-            await addDoc(getCol('products'), { name, price, qty, image: img || 'https://via.placeholder.com/500', category: 'Misc', shopName: currentUser.name, created: new Date().toISOString() });
-            showMsg("Listing Live on Gramzo!");
+            if(!name || !price) return showMsg("Fill details");
+            await addDoc(getCol('products'), { name, price, qty, image: img || 'https://via.placeholder.com/500', category: 'General', shopName: currentUser.name, created: new Date().toISOString() });
+            showMsg("Item Added!");
         };
 
         window.filterBy = (cat) => {
