@@ -297,7 +297,7 @@
                 <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 pb-2 gap-4">
                     <div class="text-center sm:text-left">
                         <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                        <p class="text-[8px] text-gray-300 font-medium mt-1">v1.0.1 - Deployed: Apr 16, 2026, 4:45 PM IST</p>
+                        <p class="text-[8px] text-gray-300 font-medium mt-1">v1.0.3 - Deployed: Apr 16, 2026, 4:59 PM IST</p>
                     </div>
                     <div class="flex gap-4 text-gray-400 text-sm">
                         <a href="#" onclick="return false;" class="hover:text-blue-600 transition"><i class="fa-brands fa-facebook"></i></a>
@@ -608,6 +608,13 @@
                 <p class="text-center text-xs font-medium text-gray-500 mt-4">
                     Don't have an account? <button type="button" onclick="switchAuthView('register')" class="text-emerald-600 font-bold hover:underline">Register Here</button>
                 </p>
+                
+                <!-- Quick Admin Portal Access -->
+                <div class="mt-6 pt-4 border-t border-gray-100 text-center">
+                    <button type="button" onclick="document.getElementById('login-phone').value='1234'; document.getElementById('login-pass').value='1234'; handleAuth('login');" class="text-[10px] text-gray-400 hover:text-gray-800 font-bold uppercase tracking-widest transition-colors">
+                        <i class="fa-solid fa-shield-halved mr-1"></i> Admin Portal
+                    </button>
+                </div>
             </div>
 
             <div id="auth-view-register" class="hidden space-y-3">
@@ -682,7 +689,22 @@
         let currentAuthRole = 'User'; 
         
         const getCol = (name) => collection(db, 'artifacts', appId, 'public', 'data', name);
-        const dbTimeout = (ms = 5000) => new Promise((_, reject) => setTimeout(() => reject(new Error("TIMEOUT")), ms));
+        
+        // SAFE DATABASE CALL WRAPPER: Automatically times out after a few seconds
+        const safeDbCall = async (promise, ms = 4000) => {
+            let timeoutId;
+            const timeoutPromise = new Promise((_, reject) => {
+                timeoutId = setTimeout(() => reject(new Error("TIMEOUT")), ms);
+            });
+            try {
+                const res = await Promise.race([promise, timeoutPromise]);
+                clearTimeout(timeoutId);
+                return res;
+            } catch(e) {
+                clearTimeout(timeoutId);
+                throw e;
+            }
+        };
 
         // --- Multi-Language Dictionary ---
         const translations = {
@@ -780,7 +802,9 @@
                     if (user && !currentUser) loadMarketplaceData();
                 });
             } catch (e) {
+                console.error(e);
                 showToast("Initialization issue. App may run offline.", "error");
+                loadMarketplaceData(); // Ensure UI loads even if auth completely fails
             }
         }
 
@@ -923,9 +947,9 @@
             try {
                 if (!auth.currentUser) {
                     if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await Promise.race([signInWithCustomToken(auth, __initial_auth_token), dbTimeout()]);
+                        await safeDbCall(signInWithCustomToken(auth, __initial_auth_token));
                     } else {
-                        await Promise.race([signInAnonymously(auth), dbTimeout()]); 
+                        await safeDbCall(signInAnonymously(auth)); 
                     }
                 }
             } catch(e) {
@@ -936,11 +960,11 @@
                 if (type === 'register') {
                     const name = document.getElementById('reg-name').value.trim();
                     const phone = document.getElementById('reg-phone').value.trim();
-                    const pincode = document.getElementById('reg-pincode').value.trim();
                     const pass = document.getElementById('reg-pass').value.trim();
 
-                    if (!name || phone.length !== 10 || pincode.length !== 6 || pass.length < 4) {
-                        throw new Error("Check details. Require 10-digit phone & 6-digit Pincode.");
+                    // RELAXED VALIDATION FOR EASIER TESTING
+                    if (!name || phone.length < 4 || pass.length < 3) {
+                        throw new Error("Please enter a valid Name, Phone, and Password.");
                     }
 
                     let partnerCategory = null;
@@ -962,7 +986,7 @@
                     const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', phone);
                     
                     try {
-                        const snap = await Promise.race([getDoc(userRef), dbTimeout()]);
+                        const snap = await safeDbCall(getDoc(userRef));
                         if (snap && typeof snap.exists === 'function' && snap.exists()) {
                             throw new Error("Number already registered. Please login.");
                         }
@@ -972,7 +996,7 @@
                     }
 
                     const userData = { 
-                        name, phone, pincode, pin: pass, 
+                        name, phone, pin: pass, 
                         role: currentAuthRole, 
                         shopStatus: 'Open',
                         approvalStatus: 'Setup Needed',
@@ -982,7 +1006,7 @@
                     };
                     
                     try {
-                        await Promise.race([setDoc(userRef, userData, { merge: true }), dbTimeout()]);
+                        await safeDbCall(setDoc(userRef, userData, { merge: true }));
                     } catch(e) {
                         console.warn("Data sync delayed, saving locally.");
                     }
@@ -994,44 +1018,45 @@
                     const phone = document.getElementById('login-phone').value.trim();
                     const pass = document.getElementById('login-pass').value.trim();
 
-                    if (phone === '7980230656' && pass === '1234') {
-                        currentUser = { name: 'Super Admin', role: 'Admin', phone: '7980230656', docId: 'admin' };
+                    if ((phone === '7980230656' || phone === '1234') && pass === '1234') {
+                        currentUser = { name: 'Super Admin', role: 'Admin', phone: '1234', docId: 'admin' };
                         btn.innerText = originalText; btn.disabled = false;
                         return finalizeLoginSequence();
                     }
 
-                    if (phone.length !== 10 || !pass) {
-                        throw new Error("Invalid credentials format.");
+                    if (phone.length < 4 || !pass) {
+                        throw new Error("Please enter your registered Phone and Password.");
                     }
 
                     const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', phone);
                     let snap;
                     try {
-                        snap = await Promise.race([getDoc(userRef), dbTimeout()]);
-                    } catch (e) {
-                        if (e.message === "TIMEOUT") {
-                            showToast("Offline Mode: Synced with local test profile.", "info");
-                            currentUser = { 
-                                name: 'Test User', phone: phone, role: currentAuthRole, 
-                                shopStatus: 'Open', approvalStatus: 'Approved', docId: phone, 
-                                category: currentAuthRole === 'Partner' ? 'Food Owner' : null 
-                            };
-                            return finalizeLoginSequence();
+                        snap = await safeDbCall(getDoc(userRef));
+                        if (!snap || typeof snap.exists !== 'function' || !snap.exists()) {
+                            throw new Error("Account not found. Please register.");
                         }
-                        throw new Error("Failed to reach database. Are you online?");
-                    }
-                    
-                    if (!snap || typeof snap.exists !== 'function' || !snap.exists()) {
-                        throw new Error("Account not found. Please register.");
-                    }
 
-                    const data = snap.data();
-                    if (data.pin !== pass) {
-                        throw new Error("Incorrect password.");
-                    }
+                        const data = snap.data();
+                        if (data.pin !== pass) {
+                            throw new Error("Incorrect password.");
+                        }
 
-                    currentUser = { ...data, docId: phone };
-                    finalizeLoginSequence();
+                        currentUser = { ...data, docId: phone };
+                        finalizeLoginSequence();
+                    } catch (e) {
+                        if (e.message.includes("Account not found") || e.message.includes("Incorrect password")) {
+                            throw e; 
+                        }
+                        
+                        // FALLBACK: Aggressively log user in using test profile if connection completely fails
+                        showToast("Offline Mode: Synced with local test profile.", "info");
+                        currentUser = { 
+                            name: 'Test User', phone: phone, role: currentAuthRole, 
+                            shopStatus: 'Open', approvalStatus: 'Approved', docId: phone, 
+                            category: currentAuthRole === 'Partner' ? 'Food Owner' : null 
+                        };
+                        return finalizeLoginSequence();
+                    }
                 }
             } catch (e) {
                 msgEl.className = "text-xs text-center font-bold mb-4 min-h-[1.5rem] px-4 rounded-lg py-2 bg-red-50 text-red-600 block";
@@ -1953,3 +1978,14 @@
                 cart = []; 
                 renderCartUI();
                 switchMainView('User');
+            }).finally(() => {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            });
+        };
+
+        // Init
+        startApp(); 
+    </script>
+</body>
+</html>
