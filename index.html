@@ -7,124 +7,147 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         
         :root {
-            --primary: #16a34a;
-            --primary-dark: #15803d;
+            --brand-green: #10b981;
+            --brand-dark: #064e3b;
+            --surface: #ffffff;
+            --background: #fdfdfd;
         }
 
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #f8fafc;
-            color: #1e293b;
+            background-color: var(--background);
+            color: #0f172a;
+            letter-spacing: -0.02em;
         }
 
         .custom-scroll::-webkit-scrollbar { display: none; }
-        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); }
+        
+        /* Glassmorphism */
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
         
         .auth-dropdown { 
             display: none; 
             position: absolute; 
             left: 0; 
-            top: 100%; 
-            margin-top: 0.75rem; 
+            top: 110%; 
             width: 22rem; 
-            z-index: 60; 
+            z-index: 100; 
             transform-origin: top left;
-            animation: slideIn 0.2s ease-out;
+            animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-        
-        @keyframes slideIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.9) translateY(-10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
         }
 
         .auth-dropdown.active { display: block; }
         
         input, select { 
-            @apply w-full p-3.5 bg-gray-50 rounded-2xl border border-gray-100 outline-none focus:ring-2 ring-green-500 text-sm transition-all; 
+            @apply w-full p-4 bg-gray-50 rounded-[1.25rem] border-2 border-transparent outline-none focus:border-emerald-500 focus:bg-white transition-all text-sm font-semibold; 
         }
 
+        /* Zepto Style Service Buttons */
         .service-btn {
-            @apply h-24 w-24 bg-white rounded-[2.5rem] shadow-md border border-gray-50 flex items-center justify-center text-4xl transition-all duration-300;
+            @apply h-24 w-24 bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 flex flex-col items-center justify-center transition-all duration-300;
+        }
+        .service-btn i { @apply text-3xl mb-1; }
+        .service-btn:hover {
+            @apply shadow-[0_20px_40px_rgba(16,185,129,0.1)] -translate-y-1 scale-105 border-emerald-100;
         }
 
-        .card-animate {
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        .card-modern {
+            @apply bg-white rounded-[2.5rem] overflow-hidden border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] transition-all duration-300;
         }
-        .card-animate:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        .card-modern:hover {
+            @apply shadow-[0_20px_40px_rgba(0,0,0,0.08)] -translate-y-1;
         }
 
-        .admin-tab-active { @apply bg-green-600 text-white shadow-lg shadow-green-100; }
-        .role-tab-active { @apply bg-white text-green-600 shadow-sm font-bold; }
+        .btn-primary {
+            @apply bg-emerald-500 text-white rounded-[1.25rem] font-extrabold transition-all active:scale-95 shadow-[0_10px_20px_rgba(16,185,129,0.2)];
+        }
+
+        .admin-tab-active { @apply bg-black text-white shadow-xl; }
+        .role-tab-active { @apply bg-emerald-500 text-white shadow-md font-bold; }
+        
+        .verified-badge { @apply bg-blue-500 text-white px-2 py-0.5 rounded-full text-[7px] font-black uppercase ml-1; }
+        
+        /* Modern Ad Banner */
+        .ad-gradient {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
     </style>
 </head>
-<body class="pb-24">
+<body class="pb-32">
 
-    <!-- Version / Deployment Identifier -->
-    <div class="bg-gray-100 text-[9px] text-gray-500 py-1 px-4 text-center border-b border-gray-200 font-bold uppercase tracking-widest">
-        Last Deployment: Thursday, April 16, 2026, 1:15 PM IST
+    <!-- Version Identifier -->
+    <div class="bg-emerald-50 text-[10px] text-emerald-700 py-1.5 px-4 text-center border-b border-emerald-100 font-bold uppercase tracking-widest">
+        Ver 2.0 • Last Sync: Thursday, April 16, 2026, 1:27 PM
     </div>
 
     <!-- Header / Navbar -->
-    <nav class="glass sticky top-0 z-50 px-4 py-4 border-b border-gray-100">
+    <nav class="glass-nav sticky top-0 z-50 px-4 py-4 border-b border-gray-100/50">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
             
             <!-- Auth Portal (Top Left) -->
             <div class="relative">
                 <div id="unauthed-ui" class="flex items-center">
-                    <button id="auth-btn-main" onclick="toggleAuthModal()" class="bg-green-600 text-white px-5 py-2.5 rounded-2xl text-sm font-bold flex items-center gap-2 shadow-lg shadow-green-100 transition-all active:scale-95">
-                        <i class="fa-solid fa-user-circle"></i> <span>Sign In</span>
+                    <button id="auth-btn-main" onclick="toggleAuthModal()" class="bg-black text-white px-6 py-3 rounded-[1.25rem] text-sm font-extrabold flex items-center gap-2 transition-all active:scale-95 shadow-lg">
+                        <i class="fa-solid fa-bolt text-emerald-400"></i> <span>Sign In</span>
                     </button>
                 </div>
                 
-                <div id="authed-ui" class="hidden flex items-center gap-4">
-                    <button onclick="logout()" class="w-10 h-10 bg-red-50 text-red-500 rounded-xl flex items-center justify-center hover:bg-red-500 hover:text-white transition shadow-sm">
-                        <i class="fa-solid fa-right-from-bracket"></i>
+                <div id="authed-ui" class="hidden flex items-center gap-3">
+                    <button onclick="logout()" class="w-12 h-12 bg-rose-50 text-rose-500 rounded-[1.25rem] flex items-center justify-center hover:bg-rose-500 hover:text-white transition active:scale-90 shadow-sm border border-rose-100">
+                        <i class="fa-solid fa-power-off"></i>
                     </button>
                     <div class="text-left hidden sm:block">
-                        <p id="display-name" class="text-xs font-bold text-gray-800 leading-none"></p>
-                        <p id="display-role" class="text-[9px] text-green-600 font-black uppercase tracking-widest mt-1"></p>
+                        <p id="display-name" class="text-sm font-extrabold text-gray-900 leading-tight"></p>
+                        <p id="display-role" class="text-[10px] text-emerald-600 font-black uppercase tracking-tighter"></p>
                     </div>
                 </div>
 
-                <!-- Redeveloped Auth Modal -->
-                <div id="auth-modal" class="auth-dropdown bg-white rounded-[2rem] shadow-2xl border border-gray-100 p-8">
+                <!-- User-Only Auth Modal -->
+                <div id="auth-modal" class="auth-dropdown bg-white rounded-[2.5rem] shadow-[0_30px_60px_rgba(0,0,0,0.15)] border border-gray-100 p-8">
                     <!-- Role Switcher -->
-                    <div class="flex bg-gray-100 p-1 rounded-2xl mb-6">
-                        <button onclick="switchAuthRole('User')" id="tab-User" class="flex-1 py-2 rounded-xl text-xs role-tab-active">User</button>
-                        <button onclick="switchAuthRole('Partner')" id="tab-Partner" class="flex-1 py-2 rounded-xl text-xs text-gray-400">Partner</button>
-                        <button onclick="switchAuthRole('Admin')" id="tab-Admin" class="flex-1 py-2 rounded-xl text-xs text-gray-400">Admin</button>
+                    <div class="flex bg-gray-100 p-1.5 rounded-[1.25rem] mb-8">
+                        <button onclick="switchAuthRole('User')" id="tab-User" class="flex-1 py-2.5 rounded-[1rem] text-xs font-bold transition-all role-tab-active">User</button>
+                        <button onclick="switchAuthRole('Partner')" id="tab-Partner" class="flex-1 py-2.5 rounded-[1rem] text-xs font-bold text-gray-500 transition-all">Partner</button>
+                        <button onclick="switchAuthRole('Admin')" id="tab-Admin" class="flex-1 py-2.5 rounded-[1rem] text-xs font-bold text-gray-500 transition-all">Admin</button>
                     </div>
 
                     <div id="auth-view-login">
-                        <h3 class="font-black text-xl mb-6 text-gray-800" id="login-title">User Login</h3>
+                        <h3 class="font-extrabold text-2xl mb-2 text-gray-900" id="login-title">Hey there! 👋</h3>
+                        <p class="text-gray-400 text-xs font-bold mb-6">Welcome back to the future of rural commerce.</p>
                         <div class="space-y-4">
-                            <input id="login-phone" type="tel" placeholder="Mobile / Admin ID">
+                            <input id="login-phone" type="tel" placeholder="Mobile Number" maxlength="10">
                             <input id="login-pass" type="password" placeholder="Password">
-                            <button onclick="handleAuth('login')" class="w-full bg-green-600 text-white p-4 rounded-2xl font-bold text-sm shadow-xl shadow-green-100 active:scale-95 transition">Sign In</button>
-                            <div id="reg-toggle-text">
-                                <p class="text-center text-xs font-bold text-gray-400 mt-4">
-                                    New user? <button onclick="toggleAuthView('register')" class="text-green-600 hover:underline">Register Here</button>
-                                </p>
-                            </div>
+                            <button onclick="handleAuth('login')" class="w-full btn-primary py-4 text-sm">Let's Go</button>
+                            <p id="reg-toggle-text" class="text-center text-xs font-bold text-gray-400 mt-6">
+                                First time? <button onclick="toggleAuthView('register')" class="text-emerald-500 font-extrabold hover:underline">Join the club</button>
+                            </p>
                         </div>
                     </div>
 
                     <div id="auth-view-register" class="hidden">
-                        <h3 class="font-black text-xl mb-6 text-gray-800" id="reg-title">Create User Account</h3>
+                        <h3 class="font-extrabold text-2xl mb-2 text-gray-900" id="reg-title">Create Account</h3>
+                        <p class="text-gray-400 text-xs font-bold mb-6">Join 10,000+ users in your village.</p>
                         <div class="space-y-3">
-                            <input id="reg-name" type="text" placeholder="Full Name / Shop Name">
-                            <input id="reg-phone" type="tel" placeholder="10-Digit Mobile Number" maxlength="10">
-                            <input id="reg-village" type="text" placeholder="Village / Area">
+                            <input id="reg-name" type="text" placeholder="Full Name">
+                            <input id="reg-phone" type="tel" placeholder="10-Digit Mobile" maxlength="10">
+                            <input id="reg-village" type="text" placeholder="Village Name">
                             <input id="reg-pincode" type="tel" placeholder="Pin Code" maxlength="6">
                             <input id="reg-pass" type="password" placeholder="Create Password">
-                            <button onclick="handleAuth('register')" class="w-full bg-green-600 text-white p-4 rounded-2xl font-bold text-sm shadow-xl shadow-green-100 active:scale-95 transition">Register & Sign In</button>
-                            <p class="text-center text-xs font-bold text-gray-400 mt-4">
-                                Already registered? <button onclick="toggleAuthView('login')" class="text-green-600 hover:underline">Login Instead</button>
+                            <button onclick="handleAuth('register')" class="w-full btn-primary py-4 text-sm">Register & Start</button>
+                            <p class="text-center text-xs font-bold text-gray-400 mt-6">
+                                Got an account? <button onclick="toggleAuthView('login')" class="text-emerald-500 font-extrabold hover:underline">Sign In</button>
                             </p>
                         </div>
                     </div>
@@ -135,80 +158,89 @@
             <!-- Logo (Right Side) -->
             <div onclick="location.reload()" class="cursor-pointer group text-right">
                 <div class="flex items-center gap-2 justify-end">
-                    <h1 class="text-2xl font-black text-green-600 tracking-tighter group-hover:scale-105 transition">GRAMZO</h1>
+                    <h1 class="text-2xl font-black text-emerald-500 tracking-tighter group-hover:scale-105 transition flex items-center gap-1">
+                        GRAMZO <span class="text-black">.</span>
+                    </h1>
                     <div id="status-dot" class="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></div>
                 </div>
-                <p class="text-[9px] text-gray-400 font-extrabold uppercase tracking-[0.2em]">Rural Super App</p>
             </div>
         </div>
     </nav>
 
-    <main class="max-w-4xl mx-auto p-4 space-y-8">
+    <main class="max-w-4xl mx-auto p-4 space-y-12 mt-4">
         
-        <!-- Premium 4-in-1 Selection -->
-        <section class="text-center py-6">
-            <div class="flex justify-center gap-4 sm:gap-10 overflow-x-auto custom-scroll px-4 pb-2">
+        <!-- Premium Service Selection -->
+        <section id="service-selector" class="text-center">
+            <div class="flex justify-center gap-4 sm:gap-8 overflow-x-auto custom-scroll px-4 pb-4">
                 <div class="flex-shrink-0 group cursor-pointer text-center" onclick="filterBy('Food')">
-                    <div class="service-btn text-orange-500 group-hover:bg-orange-500 group-hover:text-white group-hover:scale-110">
+                    <div class="service-btn text-orange-500">
                         <i class="fa-solid fa-utensils"></i>
                     </div>
-                    <p class="text-xs font-black mt-4 text-gray-600 tracking-tight uppercase">Food</p>
+                    <p class="text-[11px] font-extrabold mt-3 text-gray-500 tracking-tight uppercase">Food</p>
                 </div>
                 <div class="flex-shrink-0 group cursor-pointer text-center" onclick="filterBy('Grocery')">
-                    <div class="service-btn text-green-500 group-hover:bg-green-500 group-hover:text-white group-hover:scale-110">
-                        <i class="fa-solid fa-bolt"></i>
+                    <div class="service-btn text-emerald-500">
+                        <i class="fa-solid fa-basket-shopping"></i>
                     </div>
-                    <p class="text-xs font-black mt-4 text-gray-600 tracking-tight uppercase">Grocery</p>
+                    <p class="text-[11px] font-extrabold mt-3 text-gray-500 tracking-tight uppercase">Grocery</p>
                 </div>
                 <div class="flex-shrink-0 group cursor-pointer text-center" onclick="filterBy('Ride')">
-                    <div class="service-btn text-blue-500 group-hover:bg-blue-500 group-hover:text-white group-hover:scale-110">
+                    <div class="service-btn text-blue-500">
                         <i class="fa-solid fa-motorcycle"></i>
                     </div>
-                    <p class="text-xs font-black mt-4 text-gray-600 tracking-tight uppercase">Ride</p>
+                    <p class="text-[11px] font-extrabold mt-3 text-gray-500 tracking-tight uppercase">Ride</p>
                 </div>
                 <div class="flex-shrink-0 group cursor-pointer text-center" onclick="filterBy('Services')">
-                    <div class="service-btn text-purple-600 group-hover:bg-purple-600 group-hover:text-white group-hover:scale-110">
-                        <i class="fa-solid fa-screwdriver-wrench"></i>
+                    <div class="service-btn text-indigo-500">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
                     </div>
-                    <p class="text-xs font-black mt-4 text-gray-600 tracking-tight uppercase">Services</p>
+                    <p class="text-[11px] font-extrabold mt-3 text-gray-500 tracking-tight uppercase">Services</p>
                 </div>
             </div>
         </section>
 
-        <!-- Dynamic Ads -->
-        <div id="promo-banner" class="w-full h-40 bg-gray-200 rounded-[3rem] flex items-center justify-center overflow-hidden shadow-inner relative">
-            <p class="text-gray-400 font-black italic tracking-tighter text-2xl z-10">Gramzo Seasonal Offers</p>
+        <!-- Premium Ad Banner -->
+        <div id="promo-banner" class="w-full h-44 ad-gradient rounded-[3rem] flex items-center justify-center overflow-hidden shadow-2xl relative transition-all duration-700 p-8 text-center">
+            <div class="absolute top-0 left-0 w-full h-full opacity-10 bg-[radial-gradient(circle,white_1px,transparent_1px)] bg-[size:20px_20px]"></div>
+            <p class="text-white font-black italic tracking-tighter text-3xl z-10 leading-tight drop-shadow-md">GRAMZO RURAL SUPER APP <br><span class="text-sm not-italic opacity-80 uppercase tracking-widest font-extrabold mt-2 block">Powered by Local Partners</span></p>
         </div>
 
         <div id="view-container">
             <!-- 1. USER VIEW -->
             <div id="view-User" class="space-y-12">
                 <div>
-                    <div class="flex justify-between items-end mb-8">
+                    <div class="flex justify-between items-end mb-8 px-2">
                         <div>
-                            <h3 class="font-black text-3xl tracking-tight">Marketplace</h3>
-                            <p class="text-xs text-gray-400 font-bold">Fast Delivery • Village Special</p>
+                            <h3 class="font-extrabold text-3xl text-gray-900">Nearby Market</h3>
+                            <p class="text-xs text-gray-400 font-bold tracking-wide mt-1">Get it delivered in minutes</p>
                         </div>
-                        <span id="active-filter" class="text-[10px] bg-green-50 text-green-600 px-4 py-1.5 rounded-full font-black tracking-widest border border-green-100 uppercase">All Listings</span>
+                        <span id="active-filter" class="text-[10px] bg-emerald-50 text-emerald-600 px-4 py-2 rounded-full font-black tracking-widest border border-emerald-100 uppercase">Flash Deals</span>
                     </div>
                     <div id="market-list" class="grid grid-cols-1 sm:grid-cols-2 gap-8"></div>
                 </div>
 
-                <div id="cart-box" class="opacity-40 pointer-events-none transition-all duration-700 scale-95 origin-top blur-[1px]">
-                    <div class="bg-white rounded-[3rem] p-10 shadow-sm border border-gray-100">
-                        <h3 class="font-black text-2xl mb-8">Confirm Booking</h3>
-                        <div id="cart-items-list" class="space-y-4 mb-8"></div>
-                        <div class="space-y-6 pt-8 border-t border-dashed">
-                            <select id="cart-gp" onchange="renderCartUI()">
-                                <option value="Santuri">Santuri (+₹10)</option>
-                                <option value="Muradi">Muradi (+₹20)</option>
-                                <option value="Tarabari">Tarabari (+₹25)</option>
-                            </select>
-                            <div class="flex justify-between items-center py-2 text-3xl font-black">
-                                <span>Total</span><span id="cart-total" class="text-green-600">₹0</span>
+                <!-- Checkout Component -->
+                <div id="cart-box" class="opacity-40 pointer-events-none transition-all duration-700 scale-95 origin-top blur-[2px]">
+                    <div class="bg-white rounded-[3rem] p-10 shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-gray-50">
+                        <div class="flex justify-between items-center mb-10">
+                            <h3 class="font-extrabold text-2xl">Confirm Booking</h3>
+                            <span class="bg-emerald-100 text-emerald-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">Flash Checkout</span>
+                        </div>
+                        <div id="cart-items-list" class="space-y-4 mb-10"></div>
+                        <div class="space-y-6 pt-10 border-t-2 border-gray-50">
+                            <div class="flex gap-4">
+                                <select id="cart-gp" class="flex-1">
+                                    <option value="Santuri">Santuri Hub (+₹10)</option>
+                                    <option value="Muradi">Muradi Center (+₹20)</option>
+                                    <option value="Tarabari">Tarabari Outpost (+₹25)</option>
+                                </select>
                             </div>
-                            <input id="cart-address" placeholder="Delivery Address / Landmark">
-                            <button onclick="placeOrder()" class="w-full bg-green-600 text-white py-6 rounded-[2rem] font-black text-xl shadow-2xl active:scale-95 transition">BOOK NOW</button>
+                            <div class="flex justify-between items-center py-2">
+                                <span class="text-gray-400 font-bold uppercase text-[11px] tracking-widest">Grand Total</span>
+                                <span id="cart-total" class="text-5xl font-black text-emerald-500 tracking-tighter">₹0</span>
+                            </div>
+                            <input id="cart-address" placeholder="Exact Landmark (e.g. Near Primary School)">
+                            <button onclick="placeOrder()" class="w-full btn-primary py-6 text-xl">PLACE ORDER</button>
                         </div>
                     </div>
                 </div>
@@ -216,34 +248,98 @@
 
             <!-- 2. PARTNER VIEW -->
             <div id="view-Partner" class="hidden space-y-8">
-                <div id="partner-dashboard" class="bg-white p-10 rounded-[3rem] shadow-sm border border-gray-100">
-                    <h3 class="font-black text-2xl mb-8">Manage Shop</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-8">
-                        <input id="item-name" placeholder="Item/Service Name">
-                        <input id="item-price" type="number" placeholder="Price (₹)">
-                        <input id="item-qty" placeholder="Unit (e.g. 1kg)">
-                        <input id="item-img" placeholder="Image Link">
+                <div id="partner-dashboard" class="bg-white p-10 rounded-[3rem] shadow-xl border border-gray-50">
+                    <div class="flex justify-between items-start mb-10">
+                        <div>
+                            <h3 class="font-extrabold text-3xl">Partner Dashboard</h3>
+                            <p id="partner-status" class="text-[11px] font-black text-orange-500 uppercase tracking-widest mt-1">Awaiting Verification</p>
+                        </div>
                     </div>
-                    <button onclick="addItem()" class="w-full bg-black text-white p-5 rounded-[2rem] font-black">Add to Marketplace</button>
-                    <div id="partner-order-list" class="mt-12 space-y-4"></div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10">
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black uppercase text-gray-400 ml-4 tracking-widest">Service Name</label>
+                            <input id="item-name" placeholder="E.g. Fresh Milk, Ride to Santuri">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black uppercase text-gray-400 ml-4 tracking-widest">Price (₹)</label>
+                            <input id="item-price" type="number" placeholder="0">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black uppercase text-gray-400 ml-4 tracking-widest">Quantity/Unit</label>
+                            <input id="item-qty" placeholder="E.g. 1kg, 1 hour">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black uppercase text-gray-400 ml-4 tracking-widest">Image URL</label>
+                            <input id="item-img" placeholder="https://...">
+                        </div>
+                    </div>
+                    <button onclick="addItem()" class="w-full bg-black text-white p-6 rounded-[2rem] font-extrabold text-sm uppercase tracking-widest shadow-2xl active:scale-95 transition-all">List Item Globally</button>
+                    <div id="partner-order-list" class="mt-16 space-y-6"></div>
                 </div>
             </div>
 
-            <!-- 3. ADMIN VIEW -->
+            <!-- 3. ADVANCED ADMIN GOVERNANCE -->
             <div id="view-Admin" class="hidden space-y-8">
-                <div class="grid grid-cols-2 gap-6">
-                    <div class="bg-white p-10 rounded-[2.5rem] border text-center">
-                        <p class="text-[10px] font-black text-gray-400 mb-2">PLATFORM GTV</p>
-                        <h4 id="stat-rev" class="text-4xl font-black text-green-600">₹0</h4>
-                    </div>
-                    <div class="bg-white p-10 rounded-[2.5rem] border text-center">
-                        <p class="text-[10px] font-black text-gray-400 mb-2">TOTAL ORDERS</p>
-                        <h4 id="stat-ord" class="text-4xl font-black text-blue-600">0</h4>
+                <!-- Admin Tabs -->
+                <div class="flex bg-gray-100 p-2 rounded-[2rem] mb-10 overflow-x-auto custom-scroll">
+                    <button onclick="switchAdminSubTab('dashboard')" id="adm-t-dashboard" class="flex-1 py-4 px-6 text-[11px] font-black rounded-[1.5rem] admin-tab-active transition whitespace-nowrap uppercase tracking-widest">Analytics</button>
+                    <button onclick="switchAdminSubTab('partners')" id="adm-t-partners" class="flex-1 py-4 px-6 text-[11px] font-black text-gray-500 rounded-[1.5rem] transition whitespace-nowrap uppercase tracking-widest">Partners</button>
+                    <button onclick="switchAdminSubTab('ads')" id="adm-t-ads" class="flex-1 py-4 px-6 text-[11px] font-black text-gray-500 rounded-[1.5rem] transition whitespace-nowrap uppercase tracking-widest">Ad Engine</button>
+                    <button onclick="switchAdminSubTab('logs')" id="adm-t-logs" class="flex-1 py-4 px-6 text-[11px] font-black text-gray-500 rounded-[1.5rem] transition whitespace-nowrap uppercase tracking-widest">Txns</button>
+                </div>
+
+                <!-- Sub-Tab: Dashboard -->
+                <div id="adm-v-dashboard" class="space-y-8">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-8">
+                        <div class="bg-white p-10 rounded-[3rem] border border-gray-50 text-center shadow-sm">
+                            <p class="text-[10px] font-black text-gray-400 mb-2 uppercase tracking-widest">Platform GTV</p>
+                            <h4 id="stat-rev" class="text-4xl font-black text-emerald-500 tracking-tighter">₹0</h4>
+                        </div>
+                        <div class="bg-white p-10 rounded-[3rem] border border-gray-50 text-center shadow-sm">
+                            <p class="text-[10px] font-black text-gray-400 mb-2 uppercase tracking-widest">Total Orders</p>
+                            <h4 id="stat-ord" class="text-4xl font-black text-black tracking-tighter">0</h4>
+                        </div>
+                        <div class="bg-white p-10 rounded-[3rem] border border-gray-50 text-center shadow-sm">
+                            <p class="text-[10px] font-black text-gray-400 mb-2 uppercase tracking-widest">Active Fleet</p>
+                            <h4 id="stat-partners" class="text-4xl font-black text-orange-500 tracking-tighter">0</h4>
+                        </div>
                     </div>
                 </div>
-                <div class="bg-white rounded-[2.5rem] overflow-hidden border">
+
+                <!-- Sub-Tab: Partner Verification -->
+                <div id="adm-v-partners" class="hidden space-y-6">
+                    <div class="bg-white p-10 rounded-[3rem] border border-gray-50 shadow-sm">
+                        <h4 class="font-extrabold text-2xl mb-8">Verification Queue</h4>
+                        <div id="admin-verification-list" class="space-y-4"></div>
+                    </div>
+                </div>
+
+                <!-- Sub-Tab: Ads Engine -->
+                <div id="adm-v-ads" class="hidden space-y-6">
+                    <div class="bg-white p-10 rounded-[3rem] border border-gray-50 shadow-sm">
+                        <h4 class="font-extrabold text-2xl mb-8">Home Ad Manager</h4>
+                        <div class="space-y-5">
+                            <input id="ad-text-input" placeholder="Headline Message">
+                            <div class="flex items-center gap-6 ml-4">
+                                <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest">Campaign Color</label>
+                                <input id="ad-color-input" type="color" value="#10b981" class="h-14 w-24 p-1 rounded-2xl cursor-pointer">
+                            </div>
+                            <button onclick="pushAd()" class="w-full bg-emerald-500 text-white p-5 rounded-[2rem] font-black tracking-widest shadow-xl shadow-emerald-200">BROADCAST CAMPAIGN</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sub-Tab: Logs -->
+                <div id="adm-v-logs" class="hidden bg-white rounded-[3rem] overflow-hidden border border-gray-50 shadow-sm">
                     <table class="w-full text-left text-xs">
-                        <thead class="bg-gray-50 border-b"><tr><th class="p-6">Customer</th><th class="p-6">Amt</th><th class="p-6 text-right">Status</th></tr></thead>
+                        <thead class="bg-gray-50 border-b border-gray-100">
+                            <tr>
+                                <th class="p-8 font-black uppercase text-gray-400 tracking-widest">Customer</th>
+                                <th class="p-8 font-black uppercase text-gray-400 tracking-widest">Area</th>
+                                <th class="p-8 font-black uppercase text-gray-400 tracking-widest text-center">Amount</th>
+                                <th class="p-8 font-black uppercase text-gray-400 tracking-widest text-right">Status</th>
+                            </tr>
+                        </thead>
                         <tbody id="admin-log-body" class="divide-y divide-gray-50"></tbody>
                     </table>
                 </div>
@@ -251,13 +347,14 @@
         </div>
     </main>
 
-    <div id="ui-msg" class="fixed top-12 left-1/2 -translate-x-1/2 bg-gray-900/95 text-white px-8 py-4 rounded-[2rem] text-sm font-bold z-[100] hidden backdrop-blur shadow-2xl"></div>
+    <div id="ui-msg" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-black text-white px-8 py-4 rounded-full text-sm font-bold z-[200] hidden shadow-2xl animate-bounce"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, getDoc, setDoc, onSnapshot, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, getDoc, setDoc, onSnapshot, addDoc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyCA4U4jva7HHeMP-yk1VJy3l_BBct3Gohg",
             authDomain: "gramzo.firebaseapp.com",
@@ -270,7 +367,7 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const currentAppId = 'gramzo-master-v16'; // Version update for cache bust
+        const currentAppId = 'gramzo-master-gov-v2';
 
         const getCol = (name) => collection(db, 'artifacts', currentAppId, 'public', 'data', name);
 
@@ -289,24 +386,36 @@
                 }
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
-                        document.getElementById('status-dot').className = "w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]";
+                        document.getElementById('status-dot').className = "w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_12px_#10b981]";
                         loadGuestData();
                     }
                 });
             } catch (e) { console.error(e); }
         }
 
+        // Silent Retry Logic for Sync Issues
+        const safeWrite = async (ref, data, attempts = 5) => {
+            for (let i = 0; i < attempts; i++) {
+                try {
+                    await setDoc(ref, data);
+                    return true;
+                } catch (e) {
+                    if (i === attempts - 1) throw e;
+                    await new Promise(r => setTimeout(r, 1000));
+                }
+            }
+        };
+
         window.toggleAuthModal = () => document.getElementById('auth-modal').classList.toggle('active');
         
         window.switchAuthRole = (role) => {
             currentRole = role;
             ['User', 'Partner', 'Admin'].forEach(r => {
-                document.getElementById(`tab-${r}`).className = r === role ? 'flex-1 py-2 rounded-xl text-xs role-tab-active' : 'flex-1 py-2 rounded-xl text-xs text-gray-400';
+                document.getElementById(`tab-${r}`).className = r === role ? 'flex-1 py-2.5 rounded-[1rem] text-xs font-bold transition-all role-tab-active' : 'flex-1 py-2.5 rounded-[1rem] text-xs font-bold text-gray-400 transition-all';
             });
-            document.getElementById('login-title').innerText = `${role} Login`;
-            document.getElementById('reg-title').innerText = `Register as ${role}`;
+            document.getElementById('login-title').innerText = role === 'User' ? 'Hey there! 👋' : role + ' Portal';
+            document.getElementById('reg-title').innerText = `Join as ${role}`;
             document.getElementById('reg-toggle-text').classList.toggle('hidden', role === 'Admin');
-            document.getElementById('auth-msg').innerText = "";
         };
 
         window.toggleAuthView = (view) => {
@@ -317,29 +426,22 @@
 
         window.handleAuth = async (type) => {
             const msgEl = document.getElementById('auth-msg');
-            msgEl.innerText = "Synchronizing...";
-            msgEl.className = "text-[11px] text-center font-bold mt-4 text-blue-500";
+            msgEl.innerText = "Syncing with Gramzo Cloud...";
+            msgEl.className = "text-[11px] text-center font-bold mt-4 text-emerald-500";
 
             const id = document.getElementById(type === 'login' ? 'login-phone' : 'reg-phone').value.trim();
             const pass = document.getElementById(type === 'login' ? 'login-pass' : 'reg-pass').value.trim();
 
-            // Updated Admin Credentials as requested
             if (currentRole === 'Admin') {
                 if (id === '7980230656' && pass === '1234') {
                     currentUser = { name: 'Master Admin', role: 'Admin', phone: '7980230656' };
                     return finishLogin();
                 }
-                msgEl.innerText = "Invalid Admin Credentials";
-                msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
-                return;
+                return msgEl.innerText = "Invalid Credentials";
             }
 
             try {
-                // Wait for auth to settle (Fixes "Sync Issue")
-                if (!auth.currentUser) {
-                    await signInAnonymously(auth);
-                    await new Promise(r => setTimeout(r, 800));
-                }
+                if (!auth.currentUser) await signInAnonymously(auth);
 
                 const userRef = doc(db, 'artifacts', currentAppId, 'public', 'data', 'users', id);
                 if (type === 'register') {
@@ -348,29 +450,24 @@
                     const pincode = document.getElementById('reg-pincode').value.trim();
                     
                     if (!name || id.length !== 10 || pass.length < 4) {
-                        msgEl.innerText = "Please fill all fields (10-digit mobile)";
-                        msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
-                        return;
+                        return msgEl.innerText = "Complete all fields correctly.";
                     }
 
-                    const userData = { name, phone: id, village, pincode, pin: pass, role: currentRole, created: new Date().toISOString() };
-                    await setDoc(userRef, userData);
-                    showMsg("Registration Successful!");
+                    const userData = { name, phone: id, village, pincode, pin: pass, role: currentRole, status: currentRole === 'Partner' ? 'Pending' : 'Active', created: new Date().toISOString() };
+                    await safeWrite(userRef, userData);
+                    showMsg("Registration Successful! Welcome.");
                     currentUser = userData;
                 } else {
                     const snap = await getDoc(userRef);
                     if (!snap.exists() || snap.data().pin !== pass || snap.data().role !== currentRole) {
-                        msgEl.innerText = "Invalid details or role mismatch.";
-                        msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
-                        return;
+                        return msgEl.innerText = "Check credentials or role.";
                     }
                     currentUser = snap.data();
                 }
                 finishLogin();
             } catch (e) { 
                 console.error(e);
-                msgEl.innerText = "Sync issue. Please click submit again."; 
-                msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
+                msgEl.innerText = "Handshake timeout. Try clicking submit again."; 
             }
         };
 
@@ -384,12 +481,17 @@
             document.querySelectorAll('#view-container > div').forEach(div => div.classList.add('hidden'));
             document.getElementById(`view-${currentUser.role}`).classList.remove('hidden');
 
+            if (currentUser.role === 'Partner') {
+                document.getElementById('partner-status').innerText = currentUser.status || "Pending";
+                document.getElementById('partner-status').className = currentUser.status === 'Verified' ? "text-[11px] font-black text-emerald-500 uppercase tracking-widest" : "text-[11px] font-black text-orange-500 uppercase tracking-widest";
+            }
+
             if (currentUser.role === 'User') {
-                document.getElementById('cart-box').classList.remove('opacity-40', 'pointer-events-none', 'scale-95', 'blur-[1px]');
+                document.getElementById('cart-box').classList.remove('opacity-40', 'pointer-events-none', 'scale-95', 'blur-[2px]');
                 document.getElementById('cart-address').value = currentUser.village || "";
             }
             initRealtimeListeners();
-            showMsg(`Logged in: ${currentUser.name}`);
+            showMsg(`Hi, ${currentUser.name}!`);
         };
 
         function loadGuestData() {
@@ -397,18 +499,33 @@
                 const items = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
                 const filtered = items.filter(i => !currentFilter || i.category === currentFilter);
                 document.getElementById('market-list').innerHTML = filtered.map(p => `
-                    <div class="bg-white rounded-[2.5rem] overflow-hidden border shadow-sm hover:shadow-xl transition-all card-animate">
-                        <img src="${p.image}" onerror="this.src='https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=80'" class="h-52 w-full object-cover">
+                    <div class="card-modern">
+                        <img src="${p.image}" onerror="this.src='https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=80'" class="h-64 w-full object-cover">
                         <div class="p-8">
-                            <h4 class="font-black text-xl mb-1">${p.name}</h4>
-                            <p class="text-[10px] text-gray-400 font-bold uppercase mb-6">${p.qty || '1 unit'}</p>
+                            <div class="flex justify-between items-start mb-2">
+                                <h4 class="font-extrabold text-2xl tracking-tight">${p.name}</h4>
+                                <span class="bg-gray-100 px-2 py-1 rounded-lg text-[9px] font-black uppercase text-gray-500 border border-gray-200 tracking-tighter">${p.category}</span>
+                            </div>
+                            <p class="text-[11px] text-gray-400 font-bold uppercase mb-8">${p.qty || '1 unit'} • From ${p.shopName || 'Gramzo Hub'}</p>
                             <div class="flex justify-between items-center">
-                                <span class="text-3xl font-black text-green-600">₹${p.price}</span>
-                                <button onclick="addToCart('${p.name}', ${p.price})" class="h-12 w-12 bg-green-600 text-white rounded-2xl shadow-xl transition active:scale-90">+</button>
+                                <span class="text-4xl font-black text-black tracking-tighter">₹${p.price}</span>
+                                <button onclick="addToCart('${p.name}', ${p.price})" class="h-14 w-14 bg-emerald-500 text-white rounded-[1.5rem] shadow-xl transition active:scale-90 flex items-center justify-center">
+                                    <i class="fa-solid fa-plus text-xl"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
                 `).join('');
+            });
+
+            onSnapshot(getCol('ads'), (snap) => {
+                const banner = document.getElementById('promo-banner');
+                const ads = snap.docs.map(d => d.data());
+                if (ads[0]) {
+                    banner.style.background = ads[0].color || '#10b981';
+                    banner.innerHTML = `<div class="absolute top-0 left-0 w-full h-full opacity-10 bg-[radial-gradient(circle,white_1px,transparent_1px)] bg-[size:20px_20px]"></div>
+                                        <p class="text-white font-black italic tracking-tighter text-3xl z-10 uppercase drop-shadow-md">${ads[0].text}</p>`;
+                }
             });
         }
 
@@ -420,12 +537,53 @@
                 snap.docs.forEach(docSnap => {
                     const o = docSnap.data();
                     rev += o.total; count++;
-                    if(adminLog) adminLog.innerHTML += `<tr><td class="p-6">${o.customer}</td><td class="p-6 font-black">₹${o.total}</td><td class="p-6 text-right uppercase text-[9px] font-bold"><span>${o.status}</span></td></tr>`;
+                    if(adminLog) adminLog.innerHTML += `<tr>
+                        <td class="p-8 font-extrabold text-sm">${o.customer}</td>
+                        <td class="p-8 text-gray-400 font-bold uppercase text-[10px] tracking-widest">${o.village}</td>
+                        <td class="p-8 font-black text-base text-center">₹${o.total}</td>
+                        <td class="p-8 text-right"><span class="bg-black text-white px-3 py-1 rounded-full font-black text-[9px] uppercase">${o.status}</span></td>
+                    </tr>`;
                 });
                 if(document.getElementById('stat-rev')) document.getElementById('stat-rev').innerText = `₹${rev}`;
                 if(document.getElementById('stat-ord')) document.getElementById('stat-ord').innerText = count;
             });
+
+            if (currentUser.role === 'Admin') {
+                onSnapshot(getCol('users'), (snap) => {
+                    const partners = snap.docs.filter(d => d.data().role === 'Partner');
+                    document.getElementById('stat-partners').innerText = partners.length;
+                    document.getElementById('admin-verification-list').innerHTML = partners.map(p => `
+                        <div class="flex justify-between items-center p-6 bg-gray-50 rounded-[2rem] border border-gray-100">
+                            <div><p class="font-extrabold text-lg flex items-center">${p.data().name} ${p.data().status === 'Verified' ? '<span class="verified-badge">Verified</span>' : ''}</p><p class="text-[10px] text-gray-400 font-bold tracking-widest">ID: ${p.id} • ${p.data().village}</p></div>
+                            <div class="flex gap-3">
+                                <button onclick="verifyPartner('${p.id}', 'Verified')" class="bg-emerald-500 text-white px-5 py-2.5 rounded-xl text-[11px] font-black uppercase shadow-lg shadow-emerald-100">Verify</button>
+                                <button onclick="verifyPartner('${p.id}', 'Rejected')" class="bg-rose-50 text-rose-500 px-5 py-2.5 rounded-xl text-[11px] font-black uppercase">Block</button>
+                            </div>
+                        </div>
+                    `).join('');
+                });
+            }
         }
+
+        window.verifyPartner = async (id, status) => {
+            await updateDoc(doc(db, 'artifacts', currentAppId, 'public', 'data', 'users', id), { status });
+            showMsg(`Partner ${status}`);
+        };
+
+        window.pushAd = async () => {
+            const text = document.getElementById('ad-text-input').value;
+            const color = document.getElementById('ad-color-input').value;
+            if(!text) return;
+            await addDoc(getCol('ads'), { text, color, created: new Date().toISOString() });
+            showMsg("Broadcast Live!");
+        };
+
+        window.switchAdminSubTab = (t) => {
+            ['dashboard', 'partners', 'ads', 'logs'].forEach(tab => {
+                document.getElementById(`adm-v-${tab}`).classList.toggle('hidden', tab !== t);
+                document.getElementById(`adm-t-${tab}`).className = tab === t ? 'flex-1 py-4 px-6 text-[11px] font-black rounded-[1.5rem] admin-tab-active transition whitespace-nowrap uppercase tracking-widest' : 'flex-1 py-4 px-6 text-[11px] font-black text-gray-500 rounded-[1.5rem] transition whitespace-nowrap uppercase tracking-widest';
+            });
+        };
 
         window.addToCart = (name, price) => {
             if(!currentUser) return toggleAuthModal();
@@ -436,15 +594,15 @@
         window.renderCartUI = () => {
             const list = document.getElementById('cart-items-list');
             const sub = cart.reduce((s, i) => s + i.price, 0);
-            list.innerHTML = cart.map((i, idx) => `<div class="flex justify-between items-center bg-gray-50 p-4 rounded-2xl text-xs font-bold"><span>${i.name}</span><span>₹${i.price}</span></div>`).join('');
+            list.innerHTML = cart.map((i, idx) => `<div class="flex justify-between items-center bg-gray-50 p-5 rounded-[1.5rem] text-xs font-bold border border-gray-100"><span>${i.name}</span><span class="text-emerald-500">₹${i.price}</span></div>`).join('');
             document.getElementById('cart-total').innerText = `₹${sub + (fees[document.getElementById('cart-gp').value] || 0)}`;
         };
 
         window.placeOrder = async () => {
             const addr = document.getElementById('cart-address').value.trim();
-            if(!addr) return showMsg("Address required");
-            await addDoc(getCol('orders'), { customer: currentUser.name, phone: currentUser.phone, items: cart, total: cart.reduce((s,i)=>s+i.price,0), gp: document.getElementById('cart-gp').value, address: addr, status: 'Placed', time: serverTimestamp() });
-            cart = []; renderCartUI(); showMsg("Order Success!");
+            if(!addr) return showMsg("Landmark needed");
+            await addDoc(getCol('orders'), { customer: currentUser.name, village: currentUser.village, phone: currentUser.phone, items: cart, total: cart.reduce((s,i)=>s+i.price,0), gp: document.getElementById('cart-gp').value, address: addr, status: 'Placed', time: serverTimestamp() });
+            cart = []; renderCartUI(); showMsg("Order Sent!");
         };
 
         window.addItem = async () => {
@@ -452,14 +610,16 @@
             const price = Number(document.getElementById('item-price').value);
             const qty = document.getElementById('item-qty').value;
             const img = document.getElementById('item-img').value;
-            await addDoc(getCol('products'), { name, price, qty, image: img || 'https://via.placeholder.com/200', category: 'Misc', created: new Date().toISOString() });
-            showMsg("Item Added!");
+            if(!name || !price) return showMsg("Fill details");
+            await addDoc(getCol('products'), { name, price, qty, image: img || 'https://via.placeholder.com/500', category: 'Misc', shopName: currentUser.name, created: new Date().toISOString() });
+            showMsg("Item Listed!");
         };
 
         window.filterBy = (cat) => {
             currentFilter = (currentFilter === cat) ? null : cat;
-            document.getElementById('active-filter').innerText = currentFilter ? currentFilter.toUpperCase() : "ALL LISTINGS";
+            document.getElementById('active-filter').innerText = currentFilter ? currentFilter.toUpperCase() : "FLASH DEALS";
             loadGuestData();
+            showMsg(`Hub: ${currentFilter || 'General'}`);
         };
 
         window.logout = () => location.reload();
