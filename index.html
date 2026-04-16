@@ -66,7 +66,7 @@
 
     <!-- Version / Deployment Identifier -->
     <div class="bg-gray-100 text-[9px] text-gray-500 py-1 px-4 text-center border-b border-gray-200 font-bold uppercase tracking-widest">
-        Last Deployment: Thursday, April 16, 2026, 1:10 PM IST
+        Last Deployment: Thursday, April 16, 2026, 1:15 PM IST
     </div>
 
     <!-- Header / Navbar -->
@@ -106,9 +106,11 @@
                             <input id="login-phone" type="tel" placeholder="Mobile / Admin ID">
                             <input id="login-pass" type="password" placeholder="Password">
                             <button onclick="handleAuth('login')" class="w-full bg-green-600 text-white p-4 rounded-2xl font-bold text-sm shadow-xl shadow-green-100 active:scale-95 transition">Sign In</button>
-                            <p class="text-center text-xs font-bold text-gray-400 mt-4">
-                                New user? <button onclick="toggleAuthView('register')" class="text-green-600 hover:underline">Register Here</button>
-                            </p>
+                            <div id="reg-toggle-text">
+                                <p class="text-center text-xs font-bold text-gray-400 mt-4">
+                                    New user? <button onclick="toggleAuthView('register')" class="text-green-600 hover:underline">Register Here</button>
+                                </p>
+                            </div>
                         </div>
                     </div>
 
@@ -268,7 +270,7 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const currentAppId = 'gramzo-master-final';
+        const currentAppId = 'gramzo-master-v16'; // Version update for cache bust
 
         const getCol = (name) => collection(db, 'artifacts', currentAppId, 'public', 'data', name);
 
@@ -304,6 +306,7 @@
             document.getElementById('login-title').innerText = `${role} Login`;
             document.getElementById('reg-title').innerText = `Register as ${role}`;
             document.getElementById('reg-toggle-text').classList.toggle('hidden', role === 'Admin');
+            document.getElementById('auth-msg').innerText = "";
         };
 
         window.toggleAuthView = (view) => {
@@ -320,15 +323,24 @@
             const id = document.getElementById(type === 'login' ? 'login-phone' : 'reg-phone').value.trim();
             const pass = document.getElementById(type === 'login' ? 'login-pass' : 'reg-pass').value.trim();
 
+            // Updated Admin Credentials as requested
             if (currentRole === 'Admin') {
-                if (id === '12345' && pass === 'Pass@123') {
-                    currentUser = { name: 'Master Admin', role: 'Admin', phone: '12345' };
+                if (id === '7980230656' && pass === '1234') {
+                    currentUser = { name: 'Master Admin', role: 'Admin', phone: '7980230656' };
                     return finishLogin();
                 }
-                return msgEl.innerText = "Invalid Admin Credentials";
+                msgEl.innerText = "Invalid Admin Credentials";
+                msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
+                return;
             }
 
             try {
+                // Wait for auth to settle (Fixes "Sync Issue")
+                if (!auth.currentUser) {
+                    await signInAnonymously(auth);
+                    await new Promise(r => setTimeout(r, 800));
+                }
+
                 const userRef = doc(db, 'artifacts', currentAppId, 'public', 'data', 'users', id);
                 if (type === 'register') {
                     const name = document.getElementById('reg-name').value.trim();
@@ -336,7 +348,9 @@
                     const pincode = document.getElementById('reg-pincode').value.trim();
                     
                     if (!name || id.length !== 10 || pass.length < 4) {
-                        return msgEl.innerText = "Please fill all fields (10-digit mobile)";
+                        msgEl.innerText = "Please fill all fields (10-digit mobile)";
+                        msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
+                        return;
                     }
 
                     const userData = { name, phone: id, village, pincode, pin: pass, role: currentRole, created: new Date().toISOString() };
@@ -346,12 +360,18 @@
                 } else {
                     const snap = await getDoc(userRef);
                     if (!snap.exists() || snap.data().pin !== pass || snap.data().role !== currentRole) {
-                        return msgEl.innerText = "Invalid phone, password, or role.";
+                        msgEl.innerText = "Invalid details or role mismatch.";
+                        msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
+                        return;
                     }
                     currentUser = snap.data();
                 }
                 finishLogin();
-            } catch (e) { msgEl.innerText = "Sync issue. Please click submit again."; }
+            } catch (e) { 
+                console.error(e);
+                msgEl.innerText = "Sync issue. Please click submit again."; 
+                msgEl.className = "text-[11px] text-center font-bold mt-4 text-red-500";
+            }
         };
 
         const finishLogin = () => {
@@ -369,7 +389,7 @@
                 document.getElementById('cart-address').value = currentUser.village || "";
             }
             initRealtimeListeners();
-            showMsg(`Logged in as ${currentUser.name}`);
+            showMsg(`Logged in: ${currentUser.name}`);
         };
 
         function loadGuestData() {
@@ -432,7 +452,7 @@
             const price = Number(document.getElementById('item-price').value);
             const qty = document.getElementById('item-qty').value;
             const img = document.getElementById('item-img').value;
-            await addDoc(getCol('products'), { name, price, qty, image: img || 'https://via.placeholder.com/200', category: currentUser.role === 'Partner' ? 'Misc' : 'Misc', created: new Date().toISOString() });
+            await addDoc(getCol('products'), { name, price, qty, image: img || 'https://via.placeholder.com/200', category: 'Misc', created: new Date().toISOString() });
             showMsg("Item Added!");
         };
 
