@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gramzo | The Rural Super App</title>
+    <title>GRAMZO.in | The Rural Super App</title>
     <!-- Frameworks & Design Tokens -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -26,14 +26,16 @@
             color: #0f172a;
             letter-spacing: -0.01em;
             -webkit-tap-highlight-color: transparent;
+            user-select: none;
         }
 
         .logo-font { font-family: 'Zen Dots', cursive; }
         .bg-blue-grade { background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); }
+        .bg-funky-green { background: #00ff88; color: #000; }
         
         *::-webkit-scrollbar { display: none; }
 
-        /* Mobile Viewport Constraint (Zepto/CRED Style) */
+        /* Mobile Viewport Constraint (Zepto/Swiggy Style) */
         .app-shell {
             @apply min-h-screen w-full max-w-[480px] mx-auto bg-white relative shadow-2xl overflow-x-hidden;
         }
@@ -41,7 +43,7 @@
         /* Slide Sheets */
         .sheet-overlay {
             display: none;
-            @apply fixed inset-0 z-[2000] bg-black/60 backdrop-blur-sm flex items-end justify-center;
+            @apply fixed inset-0 z-[2000] bg-black/70 backdrop-blur-sm flex items-end justify-center;
         }
         .sheet-overlay.active { display: flex; }
         .sheet-content {
@@ -50,32 +52,32 @@
         }
         @keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
-        /* Super App Tiles */
+        /* Funky Super App Tiles */
         .service-tile {
-            @apply h-24 w-24 bg-white rounded-[2.2rem] flex flex-col items-center justify-center transition-all duration-300 border border-slate-100;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.03);
+            @apply h-24 w-24 bg-white rounded-[2.5rem] flex flex-col items-center justify-center transition-all duration-300 relative border-2 border-slate-50;
+            box-shadow: 0 12px 30px -5px rgba(0,0,0,0.06);
         }
-        .service-tile:active { @apply scale-90 bg-slate-50; }
+        .service-tile:active { @apply scale-90 bg-emerald-50 border-emerald-100; }
         .service-tile i { @apply text-4xl mb-1; }
+        .service-tile span { @apply text-[9px] font-black uppercase tracking-widest text-slate-400; }
 
         /* Premium Cards */
         .card-pro {
-            @apply bg-white rounded-[2.5rem] border border-slate-100 overflow-hidden transition-all duration-300;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+            @apply bg-white rounded-[2.8rem] border border-slate-100 overflow-hidden transition-all duration-300;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.03);
         }
-        .card-pro:hover { @apply -translate-y-1; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.06); }
+        .card-pro:hover { @apply -translate-y-1; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.08); }
 
         /* Bottom Nav */
         .bottom-nav {
-            @apply fixed bottom-0 w-full max-w-[480px] h-20 bg-white/90 backdrop-blur-xl border-t border-slate-100 flex items-center justify-around pb-2 z-[1400];
+            @apply fixed bottom-0 w-full max-w-[480px] h-20 bg-white/95 backdrop-blur-xl border-t border-slate-100 flex items-center justify-around pb-2 z-[1400];
         }
         .nav-item { @apply flex flex-col items-center gap-1 text-slate-300 transition-all; }
-        .nav-item-active { @apply text-blue-600 font-bold; }
+        .nav-item-active { @apply text-blue-600 font-black; }
 
         /* Auth UI */
-        .lang-active { @apply bg-blue-600 text-white shadow-lg; }
-        .btn-brand { @apply w-full p-4 bg-blue-600 text-white rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl active:scale-95 transition-all; }
-        .input-pro { @apply w-full p-4 bg-slate-50 border-2 border-transparent rounded-2xl outline-none focus:border-blue-500/20 focus:bg-white transition-all text-sm font-semibold; }
+        .btn-brand { @apply w-full p-5 bg-blue-600 text-white rounded-[1.5rem] font-black uppercase text-sm tracking-widest shadow-xl active:scale-95 transition-all; }
+        .input-funky { @apply w-full p-5 bg-slate-50 border-2 border-transparent rounded-[1.5rem] outline-none focus:border-blue-600/30 focus:bg-white transition-all text-sm font-bold; }
 
         .emergency-pulse { animation: pulse-red 2.5s infinite; }
         @keyframes pulse-red {
@@ -83,143 +85,181 @@
             70% { box-shadow: 0 0 0 20px rgba(225, 29, 72, 0); }
             100% { box-shadow: 0 0 0 0 rgba(225, 29, 72, 0); }
         }
+
+        .badge-live { @apply px-3 py-1 bg-emerald-100 text-emerald-600 rounded-full text-[8px] font-black uppercase tracking-widest; }
     </style>
 </head>
-<body class="bg-slate-50">
+<body class="bg-slate-200">
 
     <div class="app-shell">
 
-        <!-- Version Identifier -->
-        <div class="bg-emerald-50 text-[10px] text-emerald-700 py-1.5 px-4 text-center border-b border-emerald-100 font-bold uppercase tracking-widest">
-            Ver 3.5 • Stable Production Build • Last Sync: Thursday, April 16, 2026, 3:51 PM IST
-        </div>
-
-        <!-- Header -->
+        <!-- HEADER: User Focus -->
         <header class="fixed top-0 w-full max-w-[480px] h-20 bg-white/80 backdrop-blur-lg flex items-center justify-between px-6 z-[1500] border-b border-slate-50">
-            <div class="flex items-center gap-3">
-                <div onclick="location.reload()" class="h-10 w-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg cursor-pointer">
-                    <i class="fa-solid fa-rocket text-white text-xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-sm logo-font text-blue-700 leading-none">VillageKart</h1>
-                    <p id="header-loc" class="text-[8px] font-black uppercase text-slate-400 tracking-widest mt-1">Delivery to Doorstep</p>
-                </div>
+            <div class="flex items-center gap-2 cursor-pointer" onclick="location.reload()">
+                <h1 class="text-xl logo-font text-blue-700 leading-none tracking-tighter">GRAMZO<span class="text-emerald-500">.in</span></h1>
             </div>
-            <button onclick="openAuth()" class="h-10 w-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 border border-slate-100 active:scale-90">
-                <i class="fa-solid fa-circle-user text-xl"></i>
-            </button>
+            
+            <div id="user-header-actions" class="flex items-center gap-2">
+                <button onclick="openAuth('User')" class="px-4 py-2 bg-blue-50 text-blue-700 rounded-xl text-[10px] font-black uppercase border border-blue-100 active:scale-90 transition-all">
+                    Login / Join
+                </button>
+            </div>
         </header>
 
-        <!-- Main Viewport -->
-        <main id="view-stack" class="pt-24 px-6 space-y-12 pb-32">
+        <!-- Main Content -->
+        <main id="view-stack" class="pt-24 px-6 space-y-12 pb-10">
             
             <!-- HOME VIEW -->
-            <div id="view-home" class="space-y-10">
+            <div id="view-home" class="space-y-12">
                 
-                <!-- Ad/Festive Banner -->
+                <!-- Festive Hero Banner -->
                 <section>
-                    <div id="ad-banner" class="h-48 w-full rounded-[2.8rem] relative overflow-hidden flex flex-col justify-center px-10 text-white shadow-xl bg-blue-grade">
-                        <div class="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-3xl"></div>
-                        <span class="text-[9px] font-black uppercase tracking-[0.3em] mb-1 opacity-70">New Launch</span>
-                        <h2 id="ad-text" class="font-black italic tracking-tighter text-3xl leading-tight uppercase drop-shadow-lg">
-                            Smart Village. <br>Infinite Services.
+                    <div id="ad-banner" class="h-52 w-full rounded-[3rem] relative overflow-hidden flex flex-col justify-center px-10 text-white shadow-2xl bg-blue-grade">
+                        <div class="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+                        <span class="px-3 py-1 bg-funky-green text-[8px] font-black uppercase tracking-[0.2em] w-fit rounded-full mb-3 shadow-lg">New Delivery Tech</span>
+                        <h2 id="ad-text" class="font-black italic tracking-tighter text-4xl leading-none uppercase drop-shadow-lg">
+                            Smart Village. <br>Speedy Ops.
                         </h2>
                     </div>
                 </section>
 
-                <!-- Service Grid -->
+                <!-- Service Grid (Big Fonts, Funky Style) -->
                 <section class="space-y-6">
                     <div class="px-2">
-                        <p class="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-1">Village Fresh. City Fast.</p>
-                        <h3 class="text-2xl font-black tracking-tighter leading-none">Services & Stores</h3>
+                        <p class="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-1">Rural Super App</p>
+                        <h3 class="text-3xl font-black tracking-tighter leading-none">Instant <span class="text-emerald-500">Help.</span></h3>
                     </div>
                     <div class="grid grid-cols-4 gap-4">
-                        <div onclick="openSubMenu('Food')" class="flex flex-col items-center gap-2">
+                        <div onclick="openSubMenu('Food')" class="flex flex-col items-center gap-3">
                             <div class="service-tile text-orange-500"><i class="fa-solid fa-utensils"></i></div>
-                            <span class="text-[9px] font-black uppercase text-slate-400">Food</span>
+                            <span class="text-[10px] font-bold uppercase text-slate-400">Food</span>
                         </div>
-                        <div onclick="openSubMenu('Grocery')" class="flex flex-col items-center gap-2">
+                        <div onclick="openSubMenu('Grocery')" class="flex flex-col items-center gap-3">
                             <div class="service-tile text-emerald-500"><i class="fa-solid fa-basket-shopping"></i></div>
-                            <span class="text-[9px] font-black uppercase text-slate-400">Grocery</span>
+                            <span class="text-[10px] font-bold uppercase text-slate-400">Grocery</span>
                         </div>
-                        <div onclick="openSubMenu('Ride')" class="flex flex-col items-center gap-2">
+                        <div onclick="openSubMenu('Ride')" class="flex flex-col items-center gap-3">
                             <div class="service-tile text-blue-600"><i class="fa-solid fa-motorcycle"></i></div>
-                            <span class="text-[9px] font-black uppercase text-slate-400">Ride</span>
+                            <span class="text-[10px] font-bold uppercase text-slate-400">Ride</span>
                         </div>
-                        <div onclick="openSubMenu('Services')" class="flex flex-col items-center gap-2">
+                        <div onclick="openSubMenu('Services')" class="flex flex-col items-center gap-3">
                             <div class="service-tile text-indigo-500"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
-                            <span class="text-[9px] font-black uppercase text-slate-400">Services</span>
+                            <span class="text-[10px] font-bold uppercase text-slate-400">Service</span>
                         </div>
                     </div>
                 </section>
 
                 <!-- Dynamic Marketplace -->
-                <section class="space-y-6">
-                    <div class="flex justify-between items-end px-2 border-b border-slate-50 pb-4">
-                        <h3 class="text-xl font-black tracking-tighter uppercase tracking-widest">Village Market</h3>
-                        <div id="active-filter" class="hidden px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-[8px] font-black uppercase border border-blue-100">
-                            <span id="cat-label">All</span> <i onclick="clearFilter()" class="fa-solid fa-xmark ml-1 cursor-pointer"></i>
+                <section class="space-y-8">
+                    <div class="flex justify-between items-end px-2 border-b-4 border-slate-50 pb-6">
+                        <h3 class="text-2xl font-black tracking-tighter uppercase">Marketplace</h3>
+                        <div id="active-filter" class="hidden px-4 py-1.5 bg-blue-600 text-white rounded-full text-[9px] font-black uppercase shadow-lg">
+                            <span id="cat-label">All</span> <i onclick="clearFilter()" class="fa-solid fa-xmark ml-2 cursor-pointer"></i>
                         </div>
                     </div>
-                    <div id="market-grid" class="grid grid-cols-1 gap-6 pb-10">
+                    <div id="market-grid" class="grid grid-cols-1 gap-8 pb-10">
                         <!-- Products -->
                     </div>
                 </section>
+
+                <!-- BUSINESS FOOTER: Partner & Admin Entry -->
+                <footer class="mt-20 pt-10 border-t-2 border-slate-100 bg-slate-50 rounded-[3rem] -mx-6 px-10 pb-32">
+                    <h4 class="text-sm font-black uppercase tracking-widest text-slate-400 mb-6">Business Operations</h4>
+                    <div class="grid grid-cols-1 gap-4">
+                        <button onclick="openAuth('Partner')" class="flex items-center justify-between p-6 bg-white rounded-3xl border border-slate-200 shadow-sm active:scale-95 transition-all">
+                            <div class="flex items-center gap-4">
+                                <div class="h-12 w-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center text-xl">
+                                    <i class="fa-solid fa-store"></i>
+                                </div>
+                                <div class="text-left">
+                                    <p class="font-black text-sm uppercase">Partner Portal</p>
+                                    <p class="text-[10px] text-slate-400 font-bold">Register Business / Manage Shop</p>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-slate-300"></i>
+                        </button>
+                        
+                        <button onclick="openAuth('Admin')" class="flex items-center justify-between p-6 bg-slate-900 text-white rounded-3xl active:scale-95 transition-all">
+                            <div class="flex items-center gap-4">
+                                <div class="h-12 w-12 bg-slate-800 text-blue-400 rounded-2xl flex items-center justify-center text-xl">
+                                    <i class="fa-solid fa-user-shield"></i>
+                                </div>
+                                <div class="text-left">
+                                    <p class="font-black text-sm uppercase">Admin Console</p>
+                                    <p class="text-[10px] text-slate-500 font-bold">System Governance & Verification</p>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-slate-700"></i>
+                        </button>
+                    </div>
+                    <p class="text-[8px] text-center font-black text-slate-300 uppercase tracking-[0.4em] mt-10">© 2026 GRAMZO.in ECOSYSTEM</p>
+                </footer>
             </div>
 
             <!-- VIEW: Orders -->
             <div id="view-orders" class="hidden space-y-8 pb-32">
-                <h3 class="text-3xl font-black tracking-tighter">My History</h3>
+                <h3 class="text-4xl font-black tracking-tighter">Activity</h3>
                 <div id="user-orders-list" class="space-y-4"></div>
             </div>
 
-            <!-- VIEW: Partner Dashboard -->
+            <!-- VIEW: Partner Portal -->
             <div id="view-partner" class="hidden space-y-10 pb-32">
                 <div class="flex justify-between items-center">
-                    <h3 class="text-3xl font-black tracking-tighter">Business Hub</h3>
-                    <span id="p-status" class="px-3 py-1 rounded-full text-[9px] font-black uppercase bg-orange-100 text-orange-600">Pending</span>
+                    <h3 class="text-3xl font-black tracking-tighter">Business Console</h3>
+                    <span id="p-status" class="badge-live bg-orange-100 text-orange-600">Checking Compliance...</span>
                 </div>
 
-                <!-- Compliance -->
-                <div id="p-compliance" class="card-pro p-8 bg-slate-900 text-white space-y-6">
-                    <h4 class="text-xs font-black uppercase text-blue-400 tracking-widest">Verification Docs</h4>
-                    <p id="p-doc-instruction" class="text-[11px] text-slate-400 font-bold leading-relaxed"></p>
-                    <input id="p-doc-url" class="input-pro bg-slate-800 text-white border-slate-700" placeholder="Paste Image Link of Documents">
-                    <button onclick="uploadPartnerDocs()" class="btn-brand">Submit for Admin Review</button>
-                </div>
-
-                <!-- Verified Ops -->
-                <div id="p-ops" class="hidden space-y-8">
-                    <div class="card-pro p-8 space-y-6">
-                        <h4 class="text-xs font-black uppercase text-slate-400">Add Listing</h4>
-                        <div class="grid grid-cols-2 gap-4">
-                            <input id="p-itm-na" class="input-pro" placeholder="Item Name">
-                            <input id="p-itm-pr" type="number" class="input-pro" placeholder="Price (₹)">
-                        </div>
-                        <button onclick="addSku()" class="btn-brand">Live to Market</button>
+                <!-- Step 1: Verification -->
+                <div id="p-compliance" class="card-pro p-10 bg-slate-900 text-white space-y-8">
+                    <div class="flex items-center gap-4">
+                        <i class="fa-solid fa-file-shield text-blue-400 text-3xl"></i>
+                        <h4 class="text-xl font-black tracking-tight">Compliance Desk</h4>
                     </div>
-                    <div id="p-assigned-orders" class="space-y-4"></div>
+                    <p id="p-doc-instruction" class="text-xs text-slate-400 font-bold leading-relaxed"></p>
+                    <div class="space-y-4">
+                        <input id="p-doc-url" class="input-funky bg-slate-800 text-white border-none" placeholder="Enter Document Image URL">
+                        <button onclick="uploadPartnerDocs()" class="btn-brand bg-emerald-500">Submit Verification</button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Live Ops -->
+                <div id="p-ops" class="hidden space-y-10">
+                    <div class="card-pro p-10 space-y-8 border-2 border-emerald-50">
+                        <h4 class="text-sm font-black uppercase text-slate-400 tracking-widest">Inventory Manager</h4>
+                        <div class="grid grid-cols-1 gap-6">
+                            <input id="p-itm-na" class="input-funky" placeholder="Item Name (e.g. Fresh Milk 1L)">
+                            <input id="p-itm-pr" type="number" class="input-funky" placeholder="Price (₹)">
+                        </div>
+                        <button onclick="addSku()" class="btn-brand">Add to Live Hub</button>
+                    </div>
+                    <div id="p-assigned-orders" class="space-y-4">
+                        <h4 class="text-[10px] font-black uppercase text-slate-400 px-4">Incoming Requests</h4>
+                    </div>
                 </div>
             </div>
 
-            <!-- VIEW: Admin Control -->
+            <!-- VIEW: Admin -->
             <div id="view-admin" class="hidden space-y-10 pb-32">
-                <h3 class="text-3xl font-black tracking-tighter">System God-Mode</h3>
+                <h3 class="text-4xl font-black tracking-tighter">System <span class="text-blue-600">Ops.</span></h3>
                 
-                <div class="flex gap-2 bg-slate-100 p-1.5 rounded-2xl overflow-x-auto">
-                    <button onclick="setAdminTab('verify')" id="ab-verify" class="flex-1 py-3 rounded-xl bg-white shadow-sm text-blue-600 text-[10px] font-black uppercase">Verify Partners</button>
-                    <button onclick="setAdminTab('ads')" id="ab-ads" class="flex-1 py-3 rounded-xl text-slate-400 text-[10px] font-black uppercase">Ad Engine</button>
+                <div class="flex gap-2 bg-slate-100 p-2 rounded-3xl overflow-x-auto shadow-inner">
+                    <button onclick="setAdminTab('verify')" id="ab-verify" class="flex-1 py-4 rounded-2xl bg-white shadow-sm text-blue-600 text-[10px] font-black uppercase tracking-widest">Verifications</button>
+                    <button onclick="setAdminTab('ads')" id="ab-ads" class="flex-1 py-4 rounded-2xl text-slate-400 text-[10px] font-black uppercase tracking-widest">Ad Engine</button>
                 </div>
 
-                <div id="admin-subview-verify" class="space-y-4">
-                    <h4 class="text-[10px] font-black uppercase text-slate-400 px-2">Approval Queue</h4>
+                <div id="admin-subview-verify" class="space-y-6">
+                    <h4 class="text-[10px] font-black uppercase text-slate-400 px-4">Merchant Queue</h4>
                     <div id="admin-verify-stack" class="space-y-4"></div>
                 </div>
 
-                <div id="admin-subview-ads" class="hidden card-pro p-8 space-y-6">
-                    <input id="ad-inp-text" class="input-pro" placeholder="Global Headline">
-                    <input id="ad-inp-color" type="color" value="#1d4ed8" class="h-12 w-full rounded-xl p-1 bg-slate-50">
-                    <button onclick="adminBroadcast()" class="btn-brand">Launch Campaign</button>
+                <div id="admin-subview-ads" class="hidden card-pro p-10 space-y-8">
+                    <h4 class="text-lg font-black uppercase">Banner Controller</h4>
+                    <input id="ad-inp-text" class="input-funky" placeholder="Campaign Message">
+                    <div class="flex items-center gap-4 bg-slate-50 p-4 rounded-3xl">
+                        <span class="text-[10px] font-black text-slate-400 uppercase">Banner Color</span>
+                        <input id="ad-inp-color" type="color" value="#1d4ed8" class="h-12 w-24 rounded-xl cursor-pointer">
+                    </div>
+                    <button onclick="adminBroadcast()" class="btn-brand">Launch Globally</button>
                 </div>
             </div>
         </main>
@@ -227,100 +267,91 @@
         <!-- Bottom Navigation -->
         <nav class="bottom-nav">
             <button onclick="navTo('home')" class="nav-item nav-item-active" id="nb-home">
-                <i class="fa-solid fa-house"></i>
+                <i class="fa-solid fa-house-chimney"></i>
                 <span>Home</span>
             </button>
             <button onclick="navTo('orders')" class="nav-item" id="nb-orders">
                 <i class="fa-solid fa-receipt"></i>
                 <span>Orders</span>
             </button>
-            <button onclick="openSubMenu('Ride')" class="nav-item">
-                <i class="fa-solid fa-location-arrow"></i>
-                <span>Ride</span>
-            </button>
-            <button onclick="openAuth()" class="nav-item">
-                <i class="fa-solid fa-circle-user"></i>
-                <span>Me</span>
+            <button onclick="openAuth('User')" class="nav-item">
+                <i class="fa-solid fa-face-smile"></i>
+                <span>Profile</span>
             </button>
         </nav>
 
         <!-- SUB-MENU SHEET -->
         <div id="sub-menu-sheet" class="sheet-overlay" onclick="if(event.target == this) closeSubMenu()">
             <div class="sheet-content">
-                <div class="h-1.5 w-12 bg-slate-200 rounded-full mx-auto mb-8"></div>
+                <div class="h-1.5 w-12 bg-slate-200 rounded-full mx-auto mb-10"></div>
                 <h3 id="sub-title" class="text-3xl font-black tracking-tighter mb-10">Select Option</h3>
-                <div id="sub-grid" class="grid grid-cols-3 gap-6"></div>
+                <div id="sub-grid" class="grid grid-cols-3 gap-8 pb-4"></div>
             </div>
         </div>
 
-        <!-- AUTH SHEET -->
+        <!-- AUTH SHEET (Context Sensitive) -->
         <div id="auth-sheet" class="sheet-overlay" onclick="if(event.target == this) closeAuth()">
             <div class="sheet-content">
-                <div class="h-1.5 w-12 bg-slate-200 rounded-full mx-auto mb-6"></div>
+                <div class="h-1.5 w-12 bg-slate-200 rounded-full mx-auto mb-10"></div>
                 
-                <div class="flex bg-slate-100 p-1 rounded-2xl mb-10">
-                    <button onclick="setAuthRole('User')" id="rt-User" class="flex-1 py-3 rounded-xl text-[10px] font-black uppercase bg-white shadow text-blue-600">User</button>
-                    <button onclick="setAuthRole('Partner')" id="rt-Partner" class="flex-1 py-3 rounded-xl text-[10px] font-black uppercase text-slate-400">Partner</button>
-                    <button onclick="setAuthRole('Admin')" id="rt-Admin" class="flex-1 py-3 rounded-xl text-[10px] font-black uppercase text-slate-400">Admin</button>
-                </div>
+                <p id="auth-type-pill" class="tagline-pill mb-4"></p>
 
-                <!-- View: Login -->
+                <!-- View: Access -->
                 <div id="auth-v-login">
-                    <h3 class="text-3xl font-black tracking-tighter mb-2" id="auth-main-title">Access Portal</h3>
-                    <p class="text-xs text-slate-400 font-bold mb-10">Secure login with your Village ID.</p>
+                    <h3 class="text-4xl font-black tracking-tighter mb-4" id="auth-main-title">Authorize.</h3>
+                    <p class="text-xs text-slate-400 font-bold mb-10">Secure login for your GRAMZO account.</p>
                     <div class="space-y-4">
-                        <input id="li-ph" class="input-pro" type="tel" placeholder="Phone Number / ID" maxlength="10">
-                        <input id="li-ps" class="input-pro" type="password" placeholder="Account PIN">
-                        <button onclick="doAuth('login')" class="btn-brand py-5">Verify & Enter</button>
-                        <div class="flex justify-between items-center mt-8">
-                            <button onclick="setAuthV('forgot')" class="text-xs font-bold text-slate-400">Recovery</button>
-                            <button id="reg-link-btn" onclick="setAuthV('reg')" class="text-xs font-black text-blue-600 uppercase tracking-widest">New Signup</button>
+                        <input id="li-ph" class="input-funky" type="tel" placeholder="Phone Number / ID" maxlength="10">
+                        <input id="li-ps" class="input-funky" type="password" placeholder="Account PIN">
+                        <button onclick="doAuth('login')" class="btn-brand py-6">Enter Ecosystem</button>
+                        <div class="flex justify-between items-center mt-10 px-2">
+                            <button onclick="setAuthV('forgot')" class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Recovery</button>
+                            <button id="reg-link-btn" onclick="setAuthV('reg')" class="text-[10px] font-black text-blue-600 uppercase tracking-widest">Create Identity</button>
                         </div>
                     </div>
                 </div>
 
-                <!-- View: User Registration -->
-                <div id="auth-v-reg" class="hidden space-y-4">
-                    <h3 class="text-3xl font-black tracking-tighter">User Signup</h3>
-                    <input id="ru-na" class="input-pro" placeholder="Full Name">
-                    <input id="ru-ph" class="input-pro" placeholder="Mobile" maxlength="10">
-                    <input id="ru-vi" class="input-pro" placeholder="Village Name">
-                    <input id="ru-ps" class="input-pro" type="password" placeholder="Create Secret PIN">
-                    <button onclick="doAuth('reg-user')" class="btn-brand mt-4">Join Community</button>
+                <!-- View: User Signup -->
+                <div id="auth-view-reg" class="hidden space-y-4">
+                    <h3 class="text-3xl font-black tracking-tighter">New Signup</h3>
+                    <input id="ru-na" class="input-funky" placeholder="Your Full Name">
+                    <input id="ru-ph" class="input-funky" placeholder="10-Digit Mobile" maxlength="10">
+                    <input id="ru-vi" class="input-funky" placeholder="Village Name">
+                    <input id="ru-ps" class="input-funky" type="password" placeholder="Set Secure PIN">
+                    <button onclick="doAuth('reg-user')" class="btn-brand mt-6">Confirm Signup</button>
                 </div>
 
-                <!-- View: Partner Registration -->
-                <div id="auth-v-reg-p" class="hidden space-y-4">
-                    <h3 class="text-3xl font-black tracking-tighter">Business Account</h3>
-                    <input id="rp-na" class="input-pro" placeholder="Business Name">
-                    <input id="rp-ph" class="input-pro" placeholder="Mobile" maxlength="10">
-                    <select id="rp-ty" class="input-pro">
+                <!-- View: Partner Signup -->
+                <div id="auth-view-reg-p" class="hidden space-y-4">
+                    <h3 class="text-3xl font-black tracking-tighter uppercase italic">Merchant Apply</h3>
+                    <input id="rp-na" class="input-funky" placeholder="Business / Shop Name">
+                    <input id="rp-ph" class="input-funky" placeholder="Business Mobile" maxlength="10">
+                    <select id="rp-ty" class="input-funky">
                         <option value="Food">Food Kart</option>
-                        <option value="Grocery">Grocery Store</option>
-                        <option value="Rider">Independent Rider</option>
+                        <option value="Grocery">Grocery / Store</option>
+                        <option value="Rider">Rider (Bike/Car/Toto)</option>
                         <option value="Service">Professional Service</option>
                     </select>
-                    <input id="rp-ad" class="input-pro" placeholder="Full Address">
-                    <input id="rp-pi" class="input-pro" placeholder="Pincode" maxlength="6">
-                    <input id="rp-ps" class="input-pro" type="password" placeholder="Account PIN">
-                    <button onclick="doAuth('reg-partner')" class="btn-brand mt-4">Submit Application</button>
+                    <input id="rp-ad" class="input-funky" placeholder="Full Address">
+                    <input id="rp-ps" class="input-funky" type="password" placeholder="Create Secret PIN">
+                    <button onclick="doAuth('reg-partner')" class="btn-brand mt-6">Submit for Approval</button>
                 </div>
 
                 <!-- View: Recovery -->
-                <div id="auth-v-forgot" class="hidden space-y-4">
-                    <h3 class="text-3xl font-black tracking-tighter">PIN Override</h3>
-                    <div id="fg-s1">
-                        <input id="fg-ph" class="input-pro" placeholder="Registered Mobile">
-                        <button onclick="recovery('find')" class="btn-brand mt-6">Find Account</button>
+                <div id="auth-view-forgot" class="hidden space-y-6">
+                    <h3 class="text-3xl font-black tracking-tighter">Recovery.</h3>
+                    <div id="fg-s1" class="space-y-4">
+                        <input id="fg-ph" class="input-funky" placeholder="Registered Mobile">
+                        <button onclick="recovery('find')" class="btn-brand">Find Account</button>
                     </div>
                     <div id="fg-s2" class="hidden space-y-4">
-                        <p class="text-xs font-bold text-slate-400">Security Check: Your registered Village?</p>
-                        <input id="fg-vi" class="input-pro" placeholder="Village Name">
-                        <button onclick="recovery('check')" class="btn-brand mt-4">Confirm Identity</button>
+                        <p class="text-xs font-bold text-slate-400">Identity Check: What is your registered Village Name?</p>
+                        <input id="fg-vi" class="input-funky" placeholder="Answer Here">
+                        <button onclick="recovery('check')" class="btn-brand">Verify</button>
                     </div>
                     <div id="fg-s3" class="hidden space-y-4">
-                        <input id="fg-pa" class="input-pro" placeholder="New Secret PIN">
-                        <button onclick="recovery('reset')" class="btn-brand mt-4">Override Now</button>
+                        <input id="fg-pa" class="input-funky" placeholder="Set New PIN">
+                        <button onclick="recovery('reset')" class="btn-brand">Update</button>
                     </div>
                 </div>
 
@@ -338,17 +369,17 @@
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, getDoc, setDoc, onSnapshot, addDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase Setup
-        const firebaseConfig = {
+        // Setup
+        const fbConfig = {
             apiKey: "AIzaSyCA4U4jva7HHeMP-yk1VJy3l_BBct3Gohg",
             authDomain: "gramzo.firebaseapp.com", projectId: "gramzo",
             storageBucket: "gramzo.firebasestorage.app", messagingSenderId: "674262956986",
             appId: "1:674262956986:web:772f68694c77e15bf3fb83"
         };
-        const app = initializeApp(firebaseConfig);
+        const app = initializeApp(fbConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const pid = 'gramzo-enterprise-official-v4';
+        const pid = 'gramzo-zepto-style-official-v5';
 
         const getBase = (c) => collection(db, 'artifacts', pid, 'public', 'data', c);
 
@@ -365,51 +396,64 @@
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else { await signInAnonymously(auth); }
                 onAuthStateChanged(auth, (u) => { if(u) syncMarket(); });
-            } catch (e) { notify("Sync Failed."); }
+            } catch (e) { notify("Cloud Offline."); }
         }
 
         // --- AUTH ---
-        window.openAuth = () => document.getElementById('auth-sheet').classList.add('active');
+        window.openAuth = (role = 'User') => {
+            authRole = role;
+            document.getElementById('auth-type-pill').innerText = `${role} Portal`;
+            setAuthRole(role);
+            document.getElementById('auth-sheet').classList.add('active');
+        };
         window.closeAuth = () => document.getElementById('auth-sheet').classList.remove('active');
         
         window.setAuthRole = (r) => {
             authRole = r;
             ['User', 'Partner', 'Admin'].forEach(role => {
-                const btn = document.getElementById(`rt-${role}`);
-                btn.className = role === r ? "flex-1 py-3 rounded-xl text-[10px] font-black uppercase bg-white shadow text-blue-600 transition-all" : "flex-1 py-3 rounded-xl text-[10px] font-black uppercase text-slate-400 transition-all";
+                const b = document.getElementById(`rt-${role}`);
+                b.className = role === r ? "flex-1 py-3 rounded-xl text-[10px] font-black uppercase bg-white shadow text-blue-600 transition-all" : "flex-1 py-3 rounded-xl text-[10px] font-black uppercase text-slate-400 transition-all";
             });
-            document.getElementById('auth-main-title').innerText = r === 'User' ? 'Access Portal' : `${r} Console`;
             document.getElementById('reg-link-btn').classList.toggle('hidden', r === 'Admin');
             setAuthV('login');
         };
 
         window.setAuthV = (v) => {
-            const views = ['login', 'reg', 'reg-p', 'forgot'];
-            views.forEach(view => document.getElementById(`auth-view-${view}`).classList.toggle('hidden', (v === 'reg' && authRole === 'Partner' ? view !== 'reg-p' : view !== v)));
+            const screens = ['login', 'reg', 'reg-p', 'forgot'];
+            screens.forEach(s => {
+                let show = s === `auth-view-${v}`;
+                if(v === 'reg') show = s === (authRole === 'Partner' ? 'auth-view-reg-p' : 'auth-view-reg');
+                if(v === 'login') show = s === 'auth-view-login';
+                if(v === 'forgot') show = s === 'auth-view-forgot';
+                document.getElementById(s).classList.toggle('hidden', !show);
+            });
             document.getElementById('auth-log').innerText = "";
         };
 
         window.doAuth = async (type) => {
             const log = document.getElementById('auth-log');
-            log.innerText = "Processing Handshake...";
+            log.innerText = "Synchronizing Identity...";
             const ph = document.getElementById('li-ph').value.trim();
             const ps = document.getElementById('li-ps').value.trim();
 
             if (authRole === 'Admin') {
-                if (ph === '7980230656' && ps === '1234') { user = { name: 'Pichai (Admin)', role: 'Admin', phone: ph }; return finalLogin(); }
-                log.innerText = "ACCESS DENIED"; return;
+                if (ph === '7980230656' && ps === '1234') { user = { name: 'Admin', role: 'Admin', phone: ph }; return finalLogin(); }
+                log.innerText = "ADMIN ACCESS DENIED"; return;
             }
 
             try {
+                if (!auth.currentUser) await signInAnonymously(auth);
+                const userRef = doc(db, 'artifacts', pid, 'public', 'data', 'users', ph || 'x');
+                
                 if (type === 'reg-user' || type === 'reg-partner') {
                     const isP = type === 'reg-partner';
                     const n = document.getElementById(isP ? 'rp-na' : 'ru-na').value.trim();
                     const p = document.getElementById(isP ? 'rp-ph' : 'ru-ph').value.trim();
-                    const pa = document.getElementById(isP ? 'rp-ps' : 'ru-ps').value.trim();
-                    const v = document.getElementById(isP ? 'rp-ad' : 'ru-vi').value.trim();
+                    const pas = document.getElementById(isP ? 'rp-ps' : 'ru-ps').value.trim();
+                    const vil = document.getElementById(isP ? 'rp-ad' : 'ru-vi').value.trim();
 
-                    if(!n || p.length !== 10) return notify("Validate Mobile & Identity");
-                    const obj = { name: n, phone: p, pin: pa, role: authRole, village: v, status: isP ? 'Inactive' : 'Active', created: new Date().toISOString() };
+                    if(!p || p.length !== 10) return notify("10-Digit Mobile Required");
+                    const obj = { name: n, phone: p, pin: pas, role: authRole, village: vil, status: isP ? 'Inactive' : 'Active', created: new Date().toISOString() };
                     if(isP) obj.businessType = document.getElementById('rp-ty').value;
 
                     await setDoc(doc(db, 'artifacts', pid, 'public', 'data', 'users', p), obj);
@@ -420,12 +464,11 @@
                     user = snap.data();
                 }
                 finalLogin();
-            } catch (e) { log.innerText = "ECOSYSTEM SYNC FAILED."; }
+            } catch (e) { log.innerText = "HANDSHAKE FAILED."; }
         };
 
         const finalLogin = () => {
             closeAuth();
-            document.getElementById('header-loc').innerText = user.village || 'Hub';
             document.querySelectorAll('#view-stack > div').forEach(d => d.classList.add('hidden'));
             
             if(user.role === 'Admin') navTo('admin');
@@ -433,61 +476,32 @@
             else navTo('home');
             
             initEnterpriseStreams();
-            notify(`System Online: ${user.name}`);
-        };
-
-        // --- PARTNER ---
-        function syncPartnerUI() {
-            const s = user.status || 'Inactive';
-            const badge = document.getElementById('p-status-badge');
-            badge.innerText = s;
-            badge.className = `px-3 py-1 rounded-full text-[9px] font-black uppercase ${s === 'Verified' ? 'bg-emerald-100 text-emerald-600' : 'bg-orange-100 text-orange-600'}`;
-            
-            document.getElementById('p-compliance').classList.toggle('hidden', s === 'Verified');
-            document.getElementById('p-ops').classList.toggle('hidden', s !== 'Verified');
-            
-            const reqs = { Food: 'FSSAI Certificate', Grocery: 'GST / License', Rider: 'RC & DL', Service: 'ID Proof' };
-            document.getElementById('p-doc-instruction').innerText = `Role: ${user.businessType}. Action: Upload ${reqs[user.businessType] || 'Verification Docs'}`;
-        }
-
-        window.uploadPartnerDocs = async () => {
-            const url = document.getElementById('p-doc-url').value;
-            if(!url) return notify("URL Required");
-            await updateDoc(doc(db, 'artifacts', pid, 'public', 'data', 'users', user.phone), { verificationDoc: url, status: 'Pending Verification' });
-            user.status = 'Pending Verification'; syncPartnerUI(); notify("Received.");
-        };
-
-        window.addSku = async () => {
-            const n = document.getElementById('p-itm-na').value;
-            const p = Number(document.getElementById('p-itm-pr').value);
-            if(!n || !p) return;
-            await addDoc(getBase('products'), { name: n, price: p, category: user.businessType, shopName: user.name, created: new Date().toISOString() });
-            notify("Product Live!");
+            notify(`Logged in: ${user.name}`);
         };
 
         // --- SUB-MENUS ---
         const SUBS = {
             Ride: [
-                {n:'Bike', i:'fa-motorcycle', c:'blue-500'}, {n:'Toto', i:'fa-shuttle-van', c:'emerald-600'},
+                {n:'Bike', i:'fa-motorcycle', c:'blue-500'}, {n:'Toto', i:'fa-van-shuttle', c:'emerald-600'},
                 {n:'Car', i:'fa-car', c:'slate-900'}, {n:'Ambulance', i:'fa-truck-medical', c:'rose-500'},
-                {n:'SOS', i:'fa-triangle-exclamation', c:'rose-600'}
+                {n:'SOS', i:'fa-triangle-exclamation', c:'red-600'}
             ],
             Services: [
                 {n:'Plumber', i:'fa-faucet', c:'indigo-500'}, {n:'Electrician', i:'fa-plug', c:'orange-500'},
-                {n:'Help', i:'fa-broom', c:'emerald-500'}, {n:'Tutor', i:'fa-book-open', c:'blue-600'}
+                {n:'House Help', i:'fa-broom', c:'emerald-600'}, {n:'Repair', i:'fa-screwdriver-wrench', c:'blue-600'}
             ]
         };
 
         window.openSubMenu = (cat) => {
             if(cat === 'Food' || cat === 'Grocery') return filterMarket(cat);
             const grid = document.getElementById('sub-grid');
-            document.getElementById('sub-title').innerText = `${cat} Sub-Hub`;
+            document.getElementById('sub-title').innerText = `${cat} Options`;
             grid.innerHTML = SUBS[cat].map(m => `
-                <div onclick="filterMarket('${m.n}')" class="flex flex-col items-center gap-2 cursor-pointer group">
-                    <div class="h-20 w-20 bg-slate-50 rounded-[2.5rem] flex items-center justify-center transition-all shadow-sm group-active:scale-90 border border-slate-100">
+                <div onclick="filterMarket('${m.n}')" class="flex flex-col items-center gap-3 cursor-pointer group">
+                    <div class="h-20 w-20 bg-slate-50 rounded-[2rem] flex items-center justify-center transition-all shadow-sm group-active:scale-90 border border-slate-100">
                         <i class="fa-solid ${m.i} text-3xl" style="color:var(--brand-emerald)"></i>
                     </div>
-                    <span class="text-[8px] font-black uppercase text-slate-400 text-center">${m.n}</span>
+                    <span class="text-[10px] font-black uppercase text-slate-400 text-center">${m.n}</span>
                 </div>`).join('');
             document.getElementById('sub-menu-sheet').classList.add('active');
         };
@@ -500,22 +514,20 @@
                 const grid = document.getElementById('market-grid');
                 const items = snap.docs.map(d => ({id: d.id, ...d.data()}));
                 const filtered = items.filter(i => !marketFilter || i.category === marketFilter);
-                grid.innerHTML = filtered.length ? filtered.map(p => `
-                    <div class="card-pro p-6 flex justify-between items-center">
-                        <div class="flex items-center gap-4">
-                            <div class="h-20 w-20 bg-slate-50 rounded-3xl flex items-center justify-center text-slate-200">
-                                <i class="fa-solid fa-box-archive text-3xl"></i>
-                            </div>
+                grid.innerHTML = filtered.map(p => `
+                    <div class="card-pro p-8 flex justify-between items-center bg-white border-2 border-slate-50">
+                        <div class="flex items-center gap-6">
+                            <div class="h-20 w-20 bg-emerald-50 rounded-[2rem] flex items-center justify-center text-emerald-500 text-2xl"><i class="fa-solid fa-box"></i></div>
                             <div>
-                                <h4 class="font-black text-xl tracking-tighter">${p.name}</h4>
-                                <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">${p.shopName}</p>
-                                <p class="text-blue-600 font-black mt-1 text-lg">₹${p.price}</p>
+                                <h4 class="font-black text-2xl tracking-tighter leading-tight">${p.name}</h4>
+                                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">${p.shopName}</p>
+                                <p class="text-blue-600 font-black mt-2 text-xl">₹${p.price}</p>
                             </div>
                         </div>
-                        <button onclick="notify('Captured!')" class="h-12 w-12 bg-slate-900 text-white rounded-2xl active:scale-90 transition-all shadow-xl">
-                            <i class="fa-solid fa-plus"></i>
+                        <button onclick="notify('Service Triggered!')" class="h-14 w-14 bg-slate-900 text-white rounded-2xl active:scale-90 transition-all shadow-2xl">
+                            <i class="fa-solid fa-plus text-xl"></i>
                         </button>
-                    </div>`).join('') : '<p class="py-20 text-center text-slate-300 font-black uppercase text-[10px]">Marketplace Nodes Empty...</p>';
+                    </div>`).join('');
             });
 
             onSnapshot(getBase('ads'), (snap) => {
@@ -530,13 +542,42 @@
 
         window.filterMarket = (cat) => {
             marketFilter = cat;
-            document.getElementById('filter-pill').classList.remove('hidden');
-            document.getElementById('active-cat-name').innerText = cat;
+            document.getElementById('active-filter').classList.remove('hidden');
+            document.getElementById('cat-label').innerText = cat;
             closeSubMenu(); syncMarket();
-            notify(`${cat} Feed Live`);
+            notify(`${cat} Hub Locked`);
         };
 
-        window.clearFilter = () => { marketFilter = null; document.getElementById('filter-pill').classList.add('hidden'); syncMarket(); };
+        window.clearFilter = () => { marketFilter = null; document.getElementById('active-filter').classList.add('hidden'); syncMarket(); };
+
+        // --- PARTNER CONSOLE ---
+        function syncPartnerUI() {
+            const s = user.status || 'Inactive';
+            const badge = document.getElementById('p-status');
+            badge.innerText = s;
+            badge.className = `badge-live ${s === 'Verified' ? 'bg-emerald-100 text-emerald-600' : 'bg-orange-100 text-orange-600'}`;
+            
+            document.getElementById('p-compliance').classList.toggle('hidden', s === 'Verified');
+            document.getElementById('p-ops').classList.toggle('hidden', s !== 'Verified');
+            
+            const reqs = { Food: 'FSSAI Certificate', Grocery: 'Trade License', Rider: 'RC & DL', Service: 'ID Proof' };
+            document.getElementById('p-doc-instruction').innerText = `Category: ${user.businessType}. Required Action: Upload ${reqs[user.businessType] || 'Verification Docs'}`;
+        }
+
+        window.uploadPartnerDocs = async () => {
+            const url = document.getElementById('p-doc-url').value;
+            if(!url) return notify("URL Needed");
+            await updateDoc(doc(db, 'artifacts', pid, 'public', 'data', 'users', user.phone), { verificationDoc: url, status: 'Pending Verification' });
+            user.status = 'Pending Verification'; syncPartnerUI(); notify("Sent for Approval.");
+        };
+
+        window.addSku = async () => {
+            const n = document.getElementById('p-itm-na').value;
+            const p = Number(document.getElementById('p-itm-pr').value);
+            if(!n || !p) return;
+            await addDoc(getBase('products'), { name: n, price: p, category: user.businessType, shopName: user.name, created: new Date().toISOString() });
+            notify("Item Live!");
+        };
 
         // --- RECOVERY ---
         window.recovery = async (s) => {
@@ -551,11 +592,11 @@
                 else l.innerText = "VILLAGE NAME ERROR";
             } else if(s === 'reset') {
                 await updateDoc(doc(db, 'artifacts', pid, 'public', 'data', 'users', recUser.phone), { pin: document.getElementById('fg-pa').value });
-                notify("PIN Overridden!"); setAuthV('login');
+                notify("PIN Changed!"); setAuthV('login');
             }
         };
 
-        // --- APP ENGINE ---
+        // --- NAVIGATION ---
         window.navTo = (v) => {
             const views = ['home', 'orders', 'partner', 'admin'];
             views.forEach(view => document.getElementById(`view-${view}`).classList.toggle('hidden', view !== v));
@@ -570,26 +611,26 @@
                     const list = document.getElementById('admin-verify-stack');
                     const pending = snap.docs.filter(d => d.data().status === 'Pending Verification');
                     list.innerHTML = pending.length ? pending.map(p => `
-                        <div class="card-pro p-6 flex justify-between items-center bg-blue-50 border-blue-100">
-                            <div><p class="font-black">${p.data().name}</p><p class="text-[9px] text-slate-400 font-black uppercase">${p.data().businessType} • <a href="${p.data().verificationDoc}" target="_blank" class="text-blue-600 underline">View Docs</a></p></div>
-                            <button onclick="adminApprove('${p.id}')" class="h-10 px-6 bg-blue-600 text-white rounded-xl text-[9px] font-black uppercase shadow-lg">Verify</button>
+                        <div class="card-pro p-8 flex justify-between items-center bg-blue-50 border-blue-100">
+                            <div><p class="font-black text-lg">${p.data().name}</p><p class="text-[9px] font-black uppercase text-slate-400 mt-1">${p.data().businessType} • <a href="${p.data().verificationDoc}" target="_blank" class="text-blue-600 underline">View Docs</a></p></div>
+                            <button onclick="adminApprove('${p.id}')" class="h-12 px-6 bg-blue-600 text-white rounded-2xl text-[10px] font-black uppercase shadow-xl">Approve</button>
                         </div>`).join('') : '<p class="py-10 text-center opacity-30 font-black text-[10px]">Queue Clear</p>';
                 });
             }
         }
 
-        window.adminApprove = async (id) => { await updateDoc(doc(db, 'artifacts', pid, 'public', 'data', 'users', id), { status: 'Verified' }); notify("Partner Live!"); };
+        window.adminApprove = async (id) => { await updateDoc(doc(db, 'artifacts', pid, 'public', 'data', 'users', id), { status: 'Verified' }); notify("Merchant Live!"); };
         window.adminBroadcast = async () => {
             const t = document.getElementById('ad-inp-text').value;
             const c = document.getElementById('ad-inp-color').value;
             await addDoc(getBase('ads'), { text: t, color: c, created: serverTimestamp() });
-            notify("Campaign Broadcasted!");
+            notify("Broadcasting Campaign!");
         };
 
         window.setAdminTab = (t) => {
             ['verify', 'ads'].forEach(tab => {
                 document.getElementById(`admin-subview-${tab}`).classList.toggle('hidden', tab !== t);
-                document.getElementById(`ab-${tab}`).className = tab === t ? "flex-1 py-3 rounded-xl bg-white shadow-sm text-blue-600 text-[10px] font-black uppercase" : "flex-1 py-3 rounded-xl text-slate-400 text-[10px] font-black uppercase";
+                document.getElementById(`ab-${tab}`).className = tab === t ? "flex-1 py-4 rounded-2xl bg-white shadow-sm text-blue-600 text-[10px] font-black uppercase tracking-widest" : "flex-1 py-4 rounded-2xl text-slate-400 text-[10px] font-black uppercase tracking-widest";
             });
         };
 
