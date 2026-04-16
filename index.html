@@ -148,7 +148,7 @@
 
     <!-- Scrolling Marquee Tagline (Perfectly Aligned) -->
     <div class="fixed top-[56px] sm:top-[80px] w-full bg-gray-900 border-b border-gray-800 z-30 overflow-hidden h-7 sm:h-8 flex items-center shadow-md">
-        <div id="dynamic-marquee" class="animate-marquee inline-block whitespace-nowrap text-[10px] sm:text-[11px] font-black text-emerald-400 uppercase tracking-widest">
+        <div id="dynamic-marquee" class="animate-marquee inline-block whitespace-nowrap text-[10px] sm:text-[11px] font-black text-white uppercase tracking-widest">
             🟢 LIVE IN SANTURI BLOCK VILLAGES AND NEARBY AREAS OF SAKAMBARI PLANT 🟢 &nbsp;&nbsp;|&nbsp;&nbsp; 🟢 LIVE IN SANTURI BLOCK VILLAGES AND NEARBY AREAS OF SAKAMBARI PLANT 🟢 &nbsp;&nbsp;|&nbsp;&nbsp; 🟢 LIVE IN SANTURI BLOCK VILLAGES AND NEARBY AREAS OF SAKAMBARI PLANT 🟢
         </div>
     </div>
@@ -679,6 +679,7 @@
         let currentAuthRole = 'User'; 
         
         const getCol = (name) => collection(db, 'artifacts', appId, 'public', 'data', name);
+        const dbTimeout = (ms = 10000) => new Promise((_, reject) => setTimeout(() => reject(new Error("Network timeout. Please check your connection.")), ms));
 
         // --- Multi-Language Dictionary ---
         const translations = {
@@ -919,14 +920,14 @@
             try {
                 if (!auth.currentUser) {
                     if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(auth, __initial_auth_token);
+                        await Promise.race([signInWithCustomToken(auth, __initial_auth_token), dbTimeout()]);
                     } else {
-                        await signInAnonymously(auth); 
+                        await Promise.race([signInAnonymously(auth), dbTimeout()]); 
                     }
                 }
             } catch(e) {
                 msgEl.className = "text-xs text-center font-bold mb-4 min-h-[1.5rem] px-4 rounded-lg py-2 bg-red-50 text-red-600 block";
-                msgEl.innerText = "Connection failed. Please check network.";
+                msgEl.innerText = e.message || "Connection failed. Please check network.";
                 btn.innerText = originalText; btn.disabled = false;
                 return;
             }
@@ -960,13 +961,9 @@
 
                     const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', phone);
                     
-                    try {
-                        const snap = await getDoc(userRef);
-                        if (snap && snap.exists()) {
-                            throw new Error("Number already registered. Please login.");
-                        }
-                    } catch(e) {
-                        if(e.message.includes("registered")) throw e;
+                    const snap = await Promise.race([getDoc(userRef), dbTimeout()]);
+                    if (snap && snap.exists()) {
+                        throw new Error("Number already registered. Please login.");
                     }
 
                     const userData = { 
@@ -979,7 +976,7 @@
                         ...(currentAuthRole === 'Partner' && { category: partnerCategory, skill: skillStr, shopName: null, doc1: null, doc2: null })
                     };
                     
-                    await setDoc(userRef, userData, { merge: true });
+                    await Promise.race([setDoc(userRef, userData, { merge: true }), dbTimeout()]);
                     
                     currentUser = { ...userData, docId: phone };
                     finalizeLoginSequence();
@@ -999,12 +996,7 @@
                     }
 
                     const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', phone);
-                    let snap;
-                    try {
-                        snap = await getDoc(userRef);
-                    } catch (e) {
-                        throw new Error("Failed to reach database. Are you online?");
-                    }
+                    const snap = await Promise.race([getDoc(userRef), dbTimeout()]);
                     
                     if (!snap || !snap.exists()) {
                         throw new Error("Account not found. Please register.");
