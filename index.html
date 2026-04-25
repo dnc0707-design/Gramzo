@@ -268,13 +268,20 @@
                 <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 pb-2 gap-4">
                     <div class="text-center sm:text-left">
                         <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                        <p class="text-[8px] text-gray-300 font-medium mt-1">v1.1.0 - Zomato Style Tracking & PDF Invoice</p>
+                        <p class="text-[8px] text-gray-300 font-medium mt-1">v1.1.1 - Admin Portal Setup & Stability Fixes</p>
                     </div>
                     <div class="flex gap-4 text-gray-400 text-sm">
                         <a href="#" onclick="return false;" class="hover:text-blue-600 transition"><i class="fa-brands fa-facebook"></i></a>
                         <a href="#" onclick="return false;" class="hover:text-blue-400 transition"><i class="fa-brands fa-twitter"></i></a>
                         <a href="#" onclick="return false;" class="hover:text-pink-600 transition"><i class="fa-brands fa-instagram"></i></a>
                     </div>
+                </div>
+
+                <!-- Admin Portal Explicit Link (Removed from modal) -->
+                <div class="mt-8 pt-4 border-t border-gray-200/60 text-center">
+                    <button type="button" onclick="openAuthModal('Admin'); switchAuthView('admin');" class="text-[10px] text-gray-400 hover:text-purple-600 font-bold uppercase tracking-widest transition-colors">
+                        <i class="fa-solid fa-shield-halved mr-1"></i> Admin Portal
+                    </button>
                 </div>
             </footer>
         </div>
@@ -443,14 +450,20 @@
                     </div>
 
                     <!-- Explicit Vehicle Selection Dropdown for Riders -->
-                    <div id="vehicle-type-container" class="hidden mt-4 bg-blue-50/50 p-4 border border-blue-100 rounded-2xl">
-                        <label class="block text-xs font-bold text-gray-600 mb-2 ml-1 text-blue-800">Assigned Vehicle Type</label>
-                        <select id="partner-vehicle-type" class="input-field !bg-white">
-                            <option value="" disabled selected>Select Your Vehicle</option>
-                            <option value="Bike">Motorcycle / Bike</option>
-                            <option value="Toto">Toto (E-Rickshaw)</option>
-                            <option value="Car">Car</option>
-                        </select>
+                    <div id="vehicle-type-container" class="hidden mt-4 bg-blue-50/50 p-4 border border-blue-100 rounded-2xl space-y-3">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 mb-2 ml-1 text-blue-800">Assigned Vehicle Type</label>
+                            <select id="partner-vehicle-type" class="input-field !bg-white">
+                                <option value="" disabled selected>Select Your Vehicle</option>
+                                <option value="Bike">Motorcycle / Bike</option>
+                                <option value="Toto">Toto (E-Rickshaw)</option>
+                                <option value="Car">Car</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 mb-2 ml-1 text-blue-800">Vehicle Number</label>
+                            <input id="partner-vehicle-number" type="text" class="input-field !bg-white uppercase" placeholder="e.g. WB 82 D 4979">
+                        </div>
                     </div>
                     
                     <button type="button" onclick="submitPartnerProfile()" id="btn-submit-profile" class="w-full bg-gray-900 text-white px-6 py-4 rounded-2xl font-bold active:scale-95 transition">Submit Profile for Verification</button>
@@ -572,6 +585,23 @@
                 </div>
             </div>
 
+            <!-- ALL SYSTEM USERS DATA -->
+            <div class="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden mt-8">
+                <div class="p-5 border-b border-gray-100 bg-purple-50/50">
+                    <h3 class="font-bold text-gray-800">System Users & Credentials</h3>
+                </div>
+                <div class="overflow-x-auto no-scrollbar">
+                    <table class="w-full text-left text-sm whitespace-nowrap">
+                        <thead class="bg-white border-b border-gray-100 text-gray-400 text-[10px] uppercase tracking-wider">
+                            <tr><th class="p-4 font-bold">Role</th><th class="p-4 font-bold">Name</th><th class="p-4 font-bold">Phone ID</th><th class="p-4 font-bold text-right">Password/PIN</th></tr>
+                        </thead>
+                        <tbody id="admin-users-body" class="divide-y divide-gray-50">
+                            <tr><td colspan="4" class="p-6 text-center text-gray-400 text-xs italic">Loading users...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             <div class="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden mt-8">
                 <div class="p-5 border-b border-gray-100 bg-gray-50/50">
                     <h3 class="font-bold text-gray-800">Recent Transactions</h3>
@@ -618,13 +648,6 @@
                 <p class="text-center text-xs font-medium text-gray-500 mt-4">
                     Don't have an account? <button type="button" onclick="switchAuthView('register')" class="text-emerald-600 font-bold hover:underline">Register Here</button>
                 </p>
-                
-                <!-- Quick Admin Portal Access Link -->
-                <div class="mt-6 pt-4 border-t border-gray-100 text-center">
-                    <button type="button" onclick="switchAuthView('admin')" class="text-[10px] text-gray-400 hover:text-purple-600 font-bold uppercase tracking-widest transition-colors">
-                        <i class="fa-solid fa-shield-halved mr-1"></i> Admin Portal
-                    </button>
-                </div>
             </div>
 
             <!-- Explicit Separate Admin Login -->
@@ -739,6 +762,7 @@
                 const val = e.target.value.trim();
                 if(val.length < 3) { dropdown.classList.add('hidden'); return; }
                 
+                // Debounce delay increased to 800ms for stability on free Nominatim API
                 timeout = setTimeout(async () => {
                     try {
                         const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(val)}&countrycodes=in&limit=5`);
@@ -768,7 +792,7 @@
                             dropdown.classList.add('hidden');
                         }
                     } catch(err) {}
-                }, 600);
+                }, 800); 
             });
 
             document.addEventListener('click', (e) => {
@@ -872,7 +896,7 @@
             currentAuthRole = role;
             const overlay = document.getElementById('auth-overlay');
             overlay.classList.add('active');
-            switchAuthView('login'); 
+            switchAuthView(role === 'Admin' ? 'admin' : 'login'); 
         };
 
         window.closeAuthModal = () => {
@@ -1141,6 +1165,7 @@
                 if (currentUser.category === 'Rider') {
                     vehicleCont.classList.remove('hidden');
                     if(currentUser.vehicleType) document.getElementById('partner-vehicle-type').value = currentUser.vehicleType;
+                    if(currentUser.vehicleNumber) document.getElementById('partner-vehicle-number').value = currentUser.vehicleNumber;
                 } else {
                     vehicleCont.classList.add('hidden');
                 }
@@ -1720,28 +1745,48 @@
                 unsubscribeListeners.push(unsubOrders);
 
                 const unsubUsers = onSnapshot(getCol('users'), (snap) => {
-                    const approvalsBody = document.getElementById('admin-approvals-body');
-                    if(!approvalsBody) return;
+                    const allUsers = snap.docs.map(d => ({id: d.id, ...d.data()}));
                     
-                    const pending = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(u => u.role === 'Partner' && u.approvalStatus === 'Pending' && (u.shopName || u.doc1 || u.doc2));
+                    // 1. Fill Pending Approvals Table
+                    const approvalsBody = document.getElementById('admin-approvals-body');
+                    if(approvalsBody) {
+                        const pending = allUsers.filter(u => u.role === 'Partner' && u.approvalStatus === 'Pending');
 
-                    if(pending.length === 0) {
-                        approvalsBody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-gray-400 text-xs italic">No pending approvals right now.</td></tr>';
-                    } else {
-                        approvalsBody.innerHTML = pending.map(u => `
-                            <tr class="hover:bg-gray-50 transition-colors">
-                                <td class="p-4 font-bold text-gray-900 text-xs">${u.name}<br><span class="font-mono font-normal text-[9px] text-gray-500">${u.phone}</span></td>
-                                <td class="p-4 font-bold text-gray-700 text-xs">${u.shopName || 'N/A'}<br><span class="text-[9px] font-black text-emerald-500 uppercase tracking-widest">${u.category}</span></td>
-                                <td class="p-4 flex flex-col gap-1">
-                                    ${u.doc1 ? `<a href="${u.doc1}" target="_blank" class="text-[10px] bg-blue-50 text-blue-600 px-2 py-1 rounded font-bold hover:underline inline-block w-max"><i class="fa-solid fa-file-image"></i> Doc 1</a>` : '<span class="text-[10px] text-gray-400 italic">No Doc 1</span>'}
-                                    ${u.doc2 ? `<a href="${u.doc2}" target="_blank" class="text-[10px] bg-blue-50 text-blue-600 px-2 py-1 rounded font-bold hover:underline inline-block w-max"><i class="fa-solid fa-file-image"></i> Doc 2</a>` : ''}
-                                </td>
-                                <td class="p-4 text-right">
-                                    <button type="button" onclick="adminReviewPartner('${u.id}', 'Approved')" class="bg-emerald-500 text-white px-3 py-1 rounded text-[10px] font-black uppercase tracking-wider mr-2 hover:bg-emerald-600 transition">Approve</button>
-                                    <button type="button" onclick="adminReviewPartner('${u.id}', 'Rejected')" class="bg-red-500 text-white px-3 py-1 rounded text-[10px] font-black uppercase tracking-wider hover:bg-red-600 transition">Reject</button>
-                                </td>
-                            </tr>
-                        `).join('');
+                        if(pending.length === 0) {
+                            approvalsBody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-gray-400 text-xs italic">No pending approvals right now.</td></tr>';
+                        } else {
+                            approvalsBody.innerHTML = pending.map(u => `
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="p-4 font-bold text-gray-900 text-xs">${u.name}<br><span class="font-mono font-normal text-[9px] text-gray-500">${u.phone}</span></td>
+                                    <td class="p-4 font-bold text-gray-700 text-xs">${u.shopName || 'N/A'}<br><span class="text-[9px] font-black text-emerald-500 uppercase tracking-widest">${u.category}</span></td>
+                                    <td class="p-4 flex flex-col gap-1">
+                                        ${u.doc1 ? `<a href="${u.doc1}" target="_blank" class="text-[10px] bg-blue-50 text-blue-600 px-2 py-1 rounded font-bold hover:underline inline-block w-max"><i class="fa-solid fa-file-image"></i> Doc 1</a>` : '<span class="text-[10px] text-gray-400 italic">No Doc 1</span>'}
+                                        ${u.doc2 ? `<a href="${u.doc2}" target="_blank" class="text-[10px] bg-blue-50 text-blue-600 px-2 py-1 rounded font-bold hover:underline inline-block w-max"><i class="fa-solid fa-file-image"></i> Doc 2</a>` : ''}
+                                    </td>
+                                    <td class="p-4 text-right">
+                                        <button type="button" onclick="adminReviewPartner('${u.id}', 'Approved')" class="bg-emerald-500 text-white px-3 py-1 rounded text-[10px] font-black uppercase tracking-wider mr-2 hover:bg-emerald-600 transition">Approve</button>
+                                        <button type="button" onclick="adminReviewPartner('${u.id}', 'Rejected')" class="bg-red-500 text-white px-3 py-1 rounded text-[10px] font-black uppercase tracking-wider hover:bg-red-600 transition">Reject</button>
+                                    </td>
+                                </tr>
+                            `).join('');
+                        }
+                    }
+
+                    // 2. Fill All System Users Table
+                    const usersBody = document.getElementById('admin-users-body');
+                    if(usersBody) {
+                        if(allUsers.length === 0) {
+                            usersBody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-gray-400 text-xs italic">No users found.</td></tr>';
+                        } else {
+                            usersBody.innerHTML = allUsers.map(u => `
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="p-4 font-bold text-xs"><span class="px-2 py-1 rounded text-[9px] uppercase tracking-widest ${u.role === 'Admin' ? 'bg-purple-100 text-purple-700' : u.role === 'Partner' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'}">${u.role}</span></td>
+                                    <td class="p-4 font-bold text-gray-900 text-xs">${u.name}</td>
+                                    <td class="p-4 font-mono font-normal text-[10px] text-gray-500">${u.phone}</td>
+                                    <td class="p-4 text-right font-mono font-black text-gray-900 text-xs">${u.pin || 'N/A'}</td>
+                                </tr>
+                            `).join('');
+                        }
                     }
                 });
                 unsubscribeListeners.push(unsubUsers);
@@ -2036,11 +2081,14 @@
 
             const isRider = currentUser.category === 'Rider';
             let vehicleType = null;
+            let vehicleNumber = null;
 
             if (!isRider && !shopName) return showToast("Enter a business name.", "error");
             if (isRider) {
                 vehicleType = document.getElementById('partner-vehicle-type').value;
+                vehicleNumber = document.getElementById('partner-vehicle-number').value.trim();
                 if(!vehicleType) return showToast("Please select your vehicle type.", "error");
+                if(!vehicleNumber) return showToast("Please enter your vehicle number.", "error");
             }
             
             const btn = document.getElementById('btn-submit-profile');
@@ -2052,25 +2100,29 @@
                 let doc1Base64 = currentUser.doc1 || null;
                 let doc2Base64 = currentUser.doc2 || null;
                 
-                if (doc1File) doc1Base64 = await resizeImage(doc1File, 800); 
-                if (doc2File) doc2Base64 = await resizeImage(doc2File, 800); 
+                // Compress more aggressively to fit within 1MB Firestore limit
+                if (doc1File) doc1Base64 = await resizeImage(doc1File, 400); 
+                if (doc2File) doc2Base64 = await resizeImage(doc2File, 400); 
 
                 const newStatus = currentUser.approvalStatus === 'Approved' ? 'Approved' : 'Pending';
 
-                // Securely create/merge document so it cannot throw "Not found" error
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.phone), { 
+                // Securely create/merge document so it cannot throw "Not found" error.
+                // Added a longer timeout (15s) for image payloads over bad networks.
+                await safeDbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.phone), { 
                     shopName: isRider ? currentUser.name : shopName, 
                     doc1: doc1Base64,
                     doc2: doc2Base64,
                     approvalStatus: newStatus,
-                    ...(vehicleType && { vehicleType })
-                }, { merge: true });
+                    ...(vehicleType && { vehicleType }),
+                    ...(vehicleNumber && { vehicleNumber })
+                }, { merge: true }), 15000);
 
                 currentUser.shopName = isRider ? currentUser.name : shopName;
                 currentUser.doc1 = doc1Base64;
                 currentUser.doc2 = doc2Base64;
                 currentUser.approvalStatus = newStatus;
                 if(vehicleType) currentUser.vehicleType = vehicleType;
+                if(vehicleNumber) currentUser.vehicleNumber = vehicleNumber;
                 
                 showToast("Profile submitted for Admin verification!", "success");
                 finalizeLoginSequence(); 
