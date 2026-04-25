@@ -10,6 +10,9 @@
     <!-- Interactive Free Map (Leaflet API & OpenStreetMap) -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <!-- jsPDF for Invoice Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Righteous&display=swap');
@@ -265,7 +268,7 @@
                 <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 pb-2 gap-4">
                     <div class="text-center sm:text-left">
                         <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                        <p class="text-[8px] text-gray-300 font-medium mt-1">v1.0.9 - Free Open-Source Map Integration</p>
+                        <p class="text-[8px] text-gray-300 font-medium mt-1">v1.1.0 - Zomato Style Tracking & PDF Invoice</p>
                     </div>
                     <div class="flex gap-4 text-gray-400 text-sm">
                         <a href="#" onclick="return false;" class="hover:text-blue-600 transition"><i class="fa-brands fa-facebook"></i></a>
@@ -372,6 +375,17 @@
                         CONFIRM ORDER
                     </button>
                 </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- VIEW: ORDERS (User Order Tracking)         -->
+        <!-- ========================================== -->
+        <div id="view-Orders" class="view-section space-y-6">
+            <h2 class="text-2xl font-black text-gray-900">My Orders</h2>
+            
+            <div id="user-orders-list" class="space-y-4">
+                <p class="text-gray-400 font-medium text-sm text-center py-10 bg-white rounded-3xl shadow-sm border border-gray-100">Loading your orders...</p>
             </div>
         </div>
 
@@ -980,7 +994,6 @@
                     const phone = document.getElementById('reg-phone').value.trim();
                     const pass = document.getElementById('reg-pass').value.trim();
 
-                    // RELAXED VALIDATION FOR EASIER TESTING
                     if (!name || phone.length < 4 || pass.length < 3) {
                         throw new Error("Please enter a valid Name, Phone, and Password.");
                     }
@@ -1019,7 +1032,6 @@
                     try {
                         await safeDbCall(setDoc(userRef, userData, { merge: true }));
                         if(auth.currentUser) {
-                            // Map session ID to phone number for persistence
                             await safeDbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: phone }, { merge: true }));
                         }
                     } catch(e) {
@@ -1053,7 +1065,6 @@
                         currentUser = { ...data, docId: phone };
                         
                         if(auth.currentUser) {
-                            // Map session ID to phone number for persistent login across refreshes
                             await safeDbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: phone }, { merge: true }));
                         }
                         
@@ -1063,7 +1074,7 @@
                             throw e; 
                         }
                         
-                        // FALLBACK: Aggressively log user in using test profile if connection completely fails
+                        // FALLBACK
                         showToast("Offline Mode: Synced with local test profile.", "info");
                         currentUser = { 
                             name: 'Test User', phone: phone, role: currentAuthRole, 
@@ -1186,7 +1197,6 @@
 
         window.logout = async () => {
             if(auth.currentUser) {
-                // Remove session mapping on logout so refresh doesn't auto-login
                 try {
                     await safeDbCall(deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid)));
                 } catch(e) {}
@@ -1210,7 +1220,6 @@
             renderCartUI();
             showToast("Successfully signed out.");
 
-            // Clear Firebase Auth state to force a new anonymous UID next time
             try { await auth.signOut(); } catch(e) {}
         };
 
@@ -1230,6 +1239,7 @@
             if (role === 'User') {
                 container.innerHTML += createNavItem('User', 'fa-solid fa-shop', 'Shop', 'User');
                 container.innerHTML += createNavItem('Cart', 'fa-solid fa-basket-shopping', 'Cart', 'Cart');
+                container.innerHTML += createNavItem('Orders', 'fa-solid fa-receipt', 'Orders', 'Orders'); // Added User Orders Nav
             } else if (role === 'Partner') {
                 container.innerHTML += createNavItem('Partner', 'fa-solid fa-motorcycle', 'Deliveries', 'Partner');
                 container.innerHTML += createNavItem('Partner-Profile', 'fa-solid fa-store', 'My Hub', 'Partner-Profile');
@@ -1413,7 +1423,7 @@
             }, 800);
         };
 
-        window.bookRide = (type, fare, pickup, drop) => {
+        window.bookRide = async (type, fare, pickup, drop) => {
             if(!currentUser) { 
                 showToast("Please login to confirm your ride.", "info"); 
                 openAuthModal('User'); 
@@ -1421,51 +1431,55 @@
             }
             const rideItem = { name: `${type} Ride`, price: fare, pickup, drop };
             
-            addDoc(getCol('orders'), { 
-                customer: currentUser.name, 
-                phone: currentUser.phone, 
-                items: [rideItem], 
-                total: fare, 
-                address: pickup, 
-                drop_location: drop,
-                status: 'Placed', 
-                partnerId: null,
-                partnerName: null,
-                time: serverTimestamp() 
-            }).then(() => {
+            try {
+                await safeDbCall(addDoc(getCol('orders'), { 
+                    customer: currentUser.name, 
+                    phone: currentUser.phone, 
+                    items: [rideItem], 
+                    total: fare, 
+                    address: pickup, 
+                    drop_location: drop,
+                    status: 'Placed', 
+                    partnerId: null, // Specific for ride assignment
+                    restaurantId: null, // Explicitly null for rides
+                    restaurantName: null,
+                    time: serverTimestamp() 
+                }));
                 showToast(`${type} Confirmed! Searching for a driver...`, "success");
-                switchMainView('User');
-            }).catch(e => {
+                switchMainView('Orders');
+            } catch(e) {
                 showToast("Network delayed. Booking in background.", "info");
-                switchMainView('User');
-            });
+                switchMainView('Orders');
+            }
         };
 
-        window.bookAmbulance = () => {
+        window.bookAmbulance = async () => {
             if(!currentUser) { showToast("Please login to request an Ambulance.", "info"); openAuthModal('User'); return; }
             
             const pickup = document.getElementById('ride-pickup').value.trim() || "Emergency Location (Check GPS)";
             const rideItem = { name: "Ambulance SOS", price: 0, pickup, drop: "Nearest Hospital" };
             
-            addDoc(getCol('orders'), { 
-                customer: currentUser.name, 
-                phone: currentUser.phone, 
-                items: [rideItem], 
-                total: 0, 
-                address: pickup, 
-                drop_location: "Nearest Hospital",
-                status: 'Placed', 
-                isEmergency: true,
-                partnerId: null,
-                partnerName: null,
-                time: serverTimestamp() 
-            }).then(() => {
+            try {
+                await safeDbCall(addDoc(getCol('orders'), { 
+                    customer: currentUser.name, 
+                    phone: currentUser.phone, 
+                    items: [rideItem], 
+                    total: 0, 
+                    address: pickup, 
+                    drop_location: "Nearest Hospital",
+                    status: 'Placed', 
+                    isEmergency: true,
+                    partnerId: null,
+                    restaurantId: null,
+                    restaurantName: null,
+                    time: serverTimestamp() 
+                }));
                 showToast("SOS Alert Broadcasted! Help is on the way.", "success");
-                switchMainView('User');
-            }).catch(e => {
+                switchMainView('Orders');
+            } catch(e) {
                 showToast("Network delayed. Broadcasting in background.", "info");
-                switchMainView('User');
-            });
+                switchMainView('Orders');
+            }
         };
 
         window.updatePriceDisplay = (selectEl, priceId) => {
@@ -1473,16 +1487,16 @@
             document.getElementById(priceId).innerText = `₹${price}`;
         };
 
-        window.addVariantToCart = (prodId, baseName, fallbackPrice = null, fallbackQty = '') => {
+        window.addVariantToCart = (prodId, baseName, fallbackPrice = null, fallbackQty = '', partnerId = '', shopName = '') => {
             const selectEl = document.getElementById(`sel-${prodId}`);
             if (selectEl) {
                 const opt = selectEl.options[selectEl.selectedIndex];
                 const price = parseInt(opt.dataset.price);
                 const qty = opt.text;
-                addToCart(`${baseName} (${qty})`, price);
+                addToCart(`${baseName} (${qty})`, price, partnerId, shopName);
             } else {
                 const finalName = fallbackQty ? `${baseName} (${fallbackQty})` : baseName;
-                addToCart(finalName, fallbackPrice);
+                addToCart(finalName, fallbackPrice, partnerId, shopName);
             }
         };
 
@@ -1500,9 +1514,9 @@
             });
 
             const dummyProducts = [
-                { id: "dummy3", name: "Chicken Biryani", variants: [{qty: "Half", price: 90}, {qty: "Full Plate", price: 150}], category: "Food", image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&q=80", shopName: "Local Kitchen", inStock: true, shopStatus: 'Open' },
-                { id: "dummy4", name: "Paneer Butter Masala", price: 120, category: "Food", image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80", shopName: "Desi Dhaba", inStock: true, shopStatus: 'Open' },
-                { id: "dummy5", name: "Veg Chowmein", price: 60, category: "Food", image: "https://images.unsplash.com/photo-1585032226651-759b368d7246?w=400&q=80", shopName: "Fast Food Corner", inStock: true, shopStatus: 'Open' }
+                { id: "dummy3", name: "Chicken Biryani", variants: [{qty: "Half", price: 90}, {qty: "Full Plate", price: 150}], category: "Food", image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&q=80", shopName: "Local Kitchen", partnerId: "1111111111", inStock: true, shopStatus: 'Open' },
+                { id: "dummy4", name: "Paneer Butter Masala", price: 120, category: "Food", image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80", shopName: "Desi Dhaba", partnerId: "2222222222", inStock: true, shopStatus: 'Open' },
+                { id: "dummy5", name: "Veg Chowmein", price: 60, category: "Food", image: "https://images.unsplash.com/photo-1585032226651-759b368d7246?w=400&q=80", shopName: "Fast Food Corner", partnerId: "3333333333", inStock: true, shopStatus: 'Open' }
             ];
 
             const unsub = onSnapshot(getCol('products'), (snap) => {
@@ -1548,9 +1562,10 @@
                     } else if (isOutOfStock) {
                         actionHtml = `<span class="text-[10px] font-black text-orange-500 uppercase tracking-widest bg-orange-50 px-2 py-1 rounded">Out of Stock</span>`;
                     } else {
+                        // Include partnerId and shopName in cart item
                         actionHtml = `
                             <span id="price-${p.id}" class="text-lg font-black text-emerald-600 tracking-tight">₹${displayPrice}</span>
-                            <button type="button" onclick="addVariantToCart('${p.id}', '${p.name.replace(/'/g, "\\'")}', ${!hasVariants ? p.price : 'null'}, '${(!hasVariants && p.qty) ? p.qty : ''}')" class="w-8 h-8 rounded-full bg-gray-900 text-white flex items-center justify-center hover:bg-emerald-500 transition-colors active:scale-90 shrink-0">
+                            <button type="button" onclick="addVariantToCart('${p.id}', '${p.name.replace(/'/g, "\\'")}', ${!hasVariants ? p.price : 'null'}, '${(!hasVariants && p.qty) ? p.qty : ''}', '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')" class="w-8 h-8 rounded-full bg-gray-900 text-white flex items-center justify-center hover:bg-emerald-500 transition-colors active:scale-90 shrink-0">
                                 <i class="fa-solid fa-plus text-xs"></i>
                             </button>
                         `;
@@ -1591,6 +1606,73 @@
             loadMarketplaceData();
         };
 
+        // --- ZOMATO-STYLE ORDER PDF GENERATOR ---
+        window.downloadInvoice = (orderId) => {
+            const order = window.userOrderHistory?.find(o => o.id === orderId);
+            if(!order) return showToast("Unable to find order details.", "error");
+            
+            // Check if jsPDF is loaded
+            if(typeof window.jspdf === 'undefined') {
+                return showToast("PDF Library loading... Try again in a moment.", "info");
+            }
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.setFontSize(22);
+            doc.setTextColor(16, 185, 129); // Emerald 500
+            doc.text("GRAMZO SUPER APP", 20, 20);
+            
+            doc.setFontSize(14);
+            doc.setTextColor(0, 0, 0);
+            doc.text("Order Invoice", 20, 30);
+            
+            doc.setFontSize(10);
+            doc.text(`Order ID: #${order.id.slice(-5).toUpperCase()}`, 20, 45);
+            
+            // Format Date Safely
+            let dateStr = "N/A";
+            if(order.time && order.time.toMillis) {
+                dateStr = new Date(order.time.toMillis()).toLocaleString();
+            } else {
+                dateStr = new Date().toLocaleString();
+            }
+            doc.text(`Date: ${dateStr}`, 20, 50);
+            doc.text(`Status: ${order.status}`, 20, 55);
+            doc.text(`Restaurant/Service: ${order.restaurantName || order.partnerName || 'Gramzo Services'}`, 20, 60);
+            
+            doc.text(`Customer: ${order.customer}`, 20, 75);
+            doc.text(`Phone: ${order.phone}`, 20, 80);
+            doc.text(`Delivery Address: ${order.address}`, 20, 85);
+            
+            doc.line(20, 95, 190, 95);
+            
+            let y = 105;
+            doc.setFontSize(12);
+            doc.text("Items:", 20, y);
+            y += 10;
+            
+            doc.setFontSize(10);
+            order.items.forEach((item, idx) => {
+                doc.text(`${idx + 1}. ${item.name}`, 20, y);
+                doc.text(`Rs. ${item.price}`, 170, y);
+                y += 8;
+            });
+            
+            doc.line(20, y+5, 190, y+5);
+            
+            doc.setFontSize(12);
+            doc.text("Total Paid:", 140, y+15);
+            doc.text(`Rs. ${order.total}`, 170, y+15);
+            
+            doc.setFontSize(10);
+            doc.setTextColor(150, 150, 150);
+            doc.text("Thank you for using Gramzo!", 20, y+40);
+            
+            doc.save(`Gramzo_Invoice_${order.id.slice(-5).toUpperCase()}.pdf`);
+            showToast("Downloading Invoice...", "success");
+        };
+
         // 2. Role Specific Listeners
         function initRoleListeners() {
             if (!currentUser) return;
@@ -1614,7 +1696,7 @@
                     orders.forEach(o => {
                         rev += o.total; count++;
                         if(adminLog) {
-                            let statusColor = o.status === 'Placed' ? 'text-amber-500' : o.status === 'Accepted' ? 'text-blue-500' : 'text-emerald-500';
+                            let statusColor = o.status === 'Placed' ? 'text-amber-500' : o.status === 'Accepted' || o.status === 'Preparing' || o.status === 'Out for Delivery' ? 'text-blue-500' : 'text-emerald-500';
                             let rowBg = '';
                             if(o.isEmergency) {
                                 statusColor = 'text-red-600';
@@ -1625,7 +1707,7 @@
                                 <tr class="hover:bg-gray-50 transition-colors ${rowBg}">
                                     <td class="p-4 font-mono font-bold text-[10px] text-gray-500">#${o.id.slice(-5).toUpperCase()}</td>
                                     <td class="p-4 font-bold text-gray-900 text-xs">${o.customer}</td>
-                                    <td class="p-4 font-medium text-gray-500 text-xs">${o.partnerName || '-'}</td>
+                                    <td class="p-4 font-medium text-gray-500 text-xs">${o.restaurantName || o.partnerName || '-'}</td>
                                     <td class="p-4 font-black text-gray-900 text-xs">₹${o.total}</td>
                                     <td class="p-4 text-right uppercase text-[9px] font-black ${statusColor} tracking-wider">${o.isEmergency ? 'SOS Alert' : o.status}</td>
                                 </tr>
@@ -1664,13 +1746,87 @@
                 });
                 unsubscribeListeners.push(unsubUsers);
             } 
+            else if (currentUser.role === 'User') {
+                // ADDED USER ORDER TRACKING (ZOMATO STYLE)
+                const unsubUserOrders = onSnapshot(getCol('orders'), (snap) => {
+                    const listEl = document.getElementById('user-orders-list');
+                    if(!listEl) return;
+                    
+                    const myOrders = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(o => o.phone === currentUser.phone);
+                    myOrders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0));
+
+                    // Store globally for PDF Generation
+                    window.userOrderHistory = myOrders;
+
+                    if(myOrders.length === 0) {
+                        listEl.innerHTML = '<p class="text-gray-400 font-medium text-sm text-center py-10 bg-white rounded-3xl shadow-sm border border-gray-100">No orders placed yet.</p>';
+                        return;
+                    }
+
+                    listEl.innerHTML = myOrders.map(o => {
+                        let statusColor = 'text-orange-500';
+                        let progressWidth = '25%';
+                        let statusText = 'Processing...';
+                        
+                        if(o.status === 'Preparing' || o.status === 'Accepted') { statusColor = 'text-blue-500'; progressWidth = '50%'; statusText = 'Restaurant is Preparing'; }
+                        if(o.status === 'Out for Delivery') { statusColor = 'text-yellow-500'; progressWidth = '75%'; statusText = 'Rider Assigned - On the way'; }
+                        if(o.status === 'Delivered') { statusColor = 'text-emerald-500'; progressWidth = '100%'; statusText = 'Delivered Successfully'; }
+
+                        const itemsList = o.items.map(i => i.name).join(', ');
+
+                        return `
+                            <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 relative overflow-hidden">
+                                ${o.isEmergency ? '<div class="absolute top-0 left-0 w-full h-1 bg-red-500"></div>' : ''}
+                                <div class="flex justify-between items-start mb-3">
+                                    <div>
+                                        <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Order #${o.id.slice(-5).toUpperCase()}</span>
+                                        <h4 class="font-bold text-gray-900 text-sm">${o.restaurantName || o.partnerName || 'Gramzo Partner'}</h4>
+                                    </div>
+                                    <span class="text-lg font-black text-emerald-600">₹${o.total}</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mb-4 line-clamp-2"><i class="fa-solid fa-box mr-1 text-gray-300"></i> ${itemsList}</p>
+                                
+                                <div class="mb-4">
+                                    <div class="flex justify-between text-[10px] font-bold mb-1 ${statusColor} transition-colors">
+                                        <span>${statusText}</span>
+                                        <span>${progressWidth}</span>
+                                    </div>
+                                    <div class="w-full bg-gray-100 rounded-full h-1.5">
+                                        <div class="bg-current h-1.5 rounded-full transition-all duration-1000 ${statusColor.replace('text-', 'bg-')}" style="width: ${progressWidth}"></div>
+                                    </div>
+                                </div>
+                                
+                                <button onclick="downloadInvoice('${o.id}')" class="w-full bg-emerald-50 text-emerald-600 py-2.5 rounded-xl font-bold text-xs hover:bg-emerald-100 transition-colors border border-emerald-100"><i class="fa-solid fa-file-pdf mr-1"></i> Download Invoice</button>
+                            </div>
+                        `;
+                    }).join('');
+                });
+                unsubscribeListeners.push(unsubUserOrders);
+            }
             else if (currentUser.role === 'Partner') {
                 const orderUnsub = onSnapshot(getCol('orders'), (snap) => {
                     const listEl = document.getElementById('partner-orders-list');
                     let html = '';
                     
                     const orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                    const relevantOrders = orders.filter(o => o.status === 'Placed' || (o.partnerId === currentUser.phone && o.status !== 'Delivered'));
+                    
+                    // SEGREGATED PARTNER VIEWS: Restaurant vs Rider
+                    let relevantOrders = [];
+                    
+                    if (currentUser.category === 'Food Owner') {
+                        // Restaurants see orders assigned to their ID that are Placed or Preparing
+                        relevantOrders = orders.filter(o => 
+                            o.restaurantId === currentUser.phone && 
+                            (o.status === 'Placed' || o.status === 'Preparing')
+                        );
+                    } else if (currentUser.category === 'Rider') {
+                        // Riders see food orders that are Preparing, or general rides
+                        const genericRides = orders.filter(o => o.status === 'Placed' && !o.restaurantId);
+                        const readyFoodOrders = orders.filter(o => o.status === 'Preparing' && !o.riderId);
+                        const myActiveDeliveries = orders.filter(o => o.riderId === currentUser.phone && o.status === 'Out for Delivery');
+                        
+                        relevantOrders = [...genericRides, ...readyFoodOrders, ...myActiveDeliveries];
+                    }
 
                     if (relevantOrders.length === 0) {
                         listEl.innerHTML = '<p class="text-gray-400 font-medium text-sm text-center py-10 bg-white rounded-3xl shadow-sm border border-gray-100">No active requests right now.</p>';
@@ -1678,7 +1834,7 @@
                     }
 
                     relevantOrders.forEach(o => {
-                        const isMine = o.partnerId === currentUser.phone;
+                        const isMine = o.riderId === currentUser.phone || o.restaurantId === currentUser.phone;
                         const itemsStr = o.items.map(i => `${i.name}`).join(', ');
                         
                         let cardStyle = isMine ? 'border-emerald-500 shadow-emerald-100' : 'border-gray-100';
@@ -1687,6 +1843,23 @@
                         if(o.isEmergency) {
                             cardStyle = 'border-red-500 shadow-red-100 bg-red-50/50';
                             iconHeader = `<span class="text-[10px] font-black text-red-600 uppercase tracking-widest bg-red-100 px-2 py-1 rounded flex items-center w-fit mb-2"><i class="fa-solid fa-truck-medical mr-1"></i> EMERGENCY SOS</span>`;
+                        }
+
+                        // Determine actions based on Zomato Flow
+                        let actionButtons = '';
+                        if (currentUser.category === 'Food Owner' && o.status === 'Placed') {
+                            actionButtons = `<button type="button" onclick="acceptFoodOrder('${o.id}')" class="w-full bg-gray-900 text-white py-3 rounded-xl font-bold text-sm hover:bg-emerald-500 transition-colors active:scale-95"><i class="fa-solid fa-fire-burner mr-1"></i> Accept & Prepare</button>`;
+                        } else if (currentUser.category === 'Food Owner' && o.status === 'Preparing') {
+                            actionButtons = `<div class="w-full bg-blue-50 text-blue-600 py-3 rounded-xl font-bold text-sm text-center"><i class="fa-solid fa-clock mr-1"></i> Waiting for Rider...</div>`;
+                        } else if (currentUser.category === 'Rider' && (o.status === 'Preparing' || o.status === 'Placed') && !o.riderId) {
+                            actionButtons = `<button type="button" onclick="acceptDelivery('${o.id}')" class="w-full bg-gray-900 text-white py-3 rounded-xl font-bold text-sm hover:bg-emerald-500 transition-colors active:scale-95"><i class="fa-solid fa-motorcycle mr-1"></i> Accept Delivery Task</button>`;
+                        } else if (currentUser.category === 'Rider' && o.riderId === currentUser.phone && o.status === 'Out for Delivery') {
+                            actionButtons = `
+                                <div class="flex gap-2">
+                                    <a href="tel:${o.phone}" class="flex-1 bg-blue-50 text-blue-600 py-3 rounded-xl font-bold text-sm text-center active:scale-95 transition-transform"><i class="fa-solid fa-phone mr-1"></i> Call Customer</a>
+                                    <button type="button" onclick="markDelivered('${o.id}')" class="flex-1 bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm active:scale-95 transition-transform"><i class="fa-solid fa-check mr-1"></i> Delivered</button>
+                                </div>
+                            `;
                         }
 
                         html += `
@@ -1701,14 +1874,7 @@
                                 </div>
                                 <p class="text-xs text-gray-500 mb-4 line-clamp-2"><i class="fa-solid fa-box mr-1 text-gray-300"></i> ${itemsStr}</p>
                                 
-                                ${o.status === 'Placed' ? `
-                                    <button type="button" onclick="acceptOrder('${o.id}')" class="w-full bg-gray-900 text-white py-3 rounded-xl font-bold text-sm hover:bg-emerald-500 transition-colors active:scale-95">Accept Request</button>
-                                ` : `
-                                    <div class="flex gap-2">
-                                        <a href="tel:${o.phone}" class="flex-1 bg-blue-50 text-blue-600 py-3 rounded-xl font-bold text-sm text-center active:scale-95 transition-transform"><i class="fa-solid fa-phone mr-1"></i> Call</a>
-                                        <button type="button" onclick="markDelivered('${o.id}')" class="flex-1 bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm active:scale-95 transition-transform"><i class="fa-solid fa-check mr-1"></i> Delivered</button>
-                                    </div>
-                                `}
+                                ${actionButtons}
                             </div>
                         `;
                     });
@@ -1760,26 +1926,41 @@
         }
 
         // --- Partner Order Handling Actions ---
-        window.acceptOrder = async (orderId) => {
-            if(!currentUser || currentUser.role !== 'Partner') return;
+        
+        // Zomato Flow: Restaurant Accepts
+        window.acceptFoodOrder = async (orderId) => {
+            if(!currentUser || currentUser.category !== 'Food Owner') return;
             try {
-                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), {
-                    status: 'Accepted',
-                    partnerId: currentUser.phone,
-                    partnerName: currentUser.shopName || currentUser.name || 'Gramzo Partner'
-                });
-                showToast("Request Accepted Successfully!", "success");
+                await safeDbCall(updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), {
+                    status: 'Preparing'
+                }));
+                showToast("Order Accepted. Start Preparing!", "success");
             } catch(e) {
                 showToast("Failed to accept request.", "error");
+            }
+        };
+
+        // Zomato Flow: Rider Accepts
+        window.acceptDelivery = async (orderId) => {
+            if(!currentUser || currentUser.category !== 'Rider') return;
+            try {
+                await safeDbCall(updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), {
+                    status: 'Out for Delivery',
+                    riderId: currentUser.phone,
+                    riderName: currentUser.name
+                }));
+                showToast("Delivery Accepted. Drive Safe!", "success");
+            } catch(e) {
+                showToast("Failed to accept delivery.", "error");
             }
         };
 
         window.markDelivered = async (orderId) => {
             if(!currentUser || currentUser.role !== 'Partner') return;
             try {
-                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), {
+                await safeDbCall(updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), {
                     status: 'Delivered'
-                });
+                }));
                 showToast("Order Marked as Delivered!", "success");
             } catch(e) {
                 showToast("Failed to update order status.", "error");
@@ -2020,11 +2201,17 @@
 
         // --- Cart & Order Logic --- //
 
-        window.addToCart = (name, price) => {
+        window.addToCart = (name, price, partnerId = '', shopName = '') => {
             if(!currentUser) { openAuthModal('User'); return; }
             if(currentUser.role !== 'User') { showToast("Switch to User account to buy.", "error"); return; }
             
-            cart.push({name, price});
+            // Enforce single restaurant per order
+            if (cart.length > 0 && cart[0].partnerId !== partnerId && partnerId !== '') {
+                showToast("You can only order from one restaurant at a time. Please clear your cart first.", "error");
+                return;
+            }
+
+            cart.push({name, price, partnerId, shopName});
             renderCartUI();
             showToast(`${name} added to cart!`, "success");
             
@@ -2076,7 +2263,7 @@
             renderCartUI(); 
         };
 
-        window.placeOrder = () => {
+        window.placeOrder = async () => {
             if(cart.length === 0) return;
             const addr = document.getElementById('cart-address').value.trim();
             if(!addr) {
@@ -2088,36 +2275,44 @@
             const sub = cart.reduce((s,i) => s + i.price, 0);
             const handlingFee = cart.length > 0 ? (10 + (cart.length * 2 > 20 ? 20 : cart.length * 2)) : 0;
             const total = sub + handlingFee;
+            
+            // Extract restaurant details from first item in cart
+            const restaurantId = cart[0].partnerId || null;
+            const restaurantName = cart[0].shopName || null;
 
             const btn = document.getElementById('btn-place-order');
             const originalText = btn.innerText;
             btn.innerText = "PROCESSING...";
             btn.disabled = true;
 
-            addDoc(getCol('orders'), { 
-                customer: currentUser.name, 
-                phone: currentUser.phone, 
-                items: cart, 
-                total, 
-                address: addr, 
-                status: 'Placed', 
-                partnerId: null,
-                partnerName: null,
-                time: serverTimestamp() 
-            }).then(() => {
+            try {
+                await safeDbCall(addDoc(getCol('orders'), { 
+                    customer: currentUser.name, 
+                    phone: currentUser.phone, 
+                    items: cart, 
+                    total, 
+                    address: addr, 
+                    status: 'Placed', 
+                    restaurantId: restaurantId,
+                    restaurantName: restaurantName,
+                    riderId: null,
+                    riderName: null,
+                    time: serverTimestamp() 
+                }));
+                
                 cart = []; 
                 renderCartUI(); 
-                showToast("Order Placed Successfully! Partner will be assigned soon.", "success");
-                switchMainView('User');
-            }).catch(e => {
+                showToast("Order Placed Successfully!", "success");
+                switchMainView('Orders'); // Take user directly to Tracking!
+            } catch(e) {
                 showToast("Network delayed. Syncing in background.", "info");
                 cart = []; 
                 renderCartUI();
-                switchMainView('User');
-            }).finally(() => {
+                switchMainView('Orders');
+            } finally {
                 btn.innerText = originalText;
                 btn.disabled = false;
-            });
+            }
         };
 
         // Init
