@@ -78,7 +78,7 @@
         .modal-overlay.active .modal-content { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 
         .timeline-line {
-            position: absolute; left: 1.25rem; top: 2.5rem; bottom: 2.5rem; width: 2px; background-color: #e5e7eb; z-index: 0;
+            position: absolute; left: 1.15rem; top: 2.5rem; bottom: 2.5rem; width: 2px; background-color: #e5e7eb; z-index: 0;
         }
 
         /* Google Maps Specific Overrides */
@@ -293,7 +293,7 @@
                 <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 pb-2 gap-4">
                     <div class="text-center sm:text-left">
                         <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                        <p class="text-[10px] text-emerald-700 font-bold mt-2 bg-emerald-50 border border-emerald-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v1.2.11 - Maps API Fix</p>
+                        <p class="text-[10px] text-emerald-700 font-bold mt-2 bg-emerald-50 border border-emerald-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v1.3.0 - Professional Ride UI</p>
                     </div>
                     <div class="flex gap-4 text-gray-400 text-sm">
                         <a href="#" onclick="return false;" class="hover:text-blue-600 transition"><i class="fa-brands fa-facebook"></i></a>
@@ -326,46 +326,46 @@
                 
                 <!-- Fixed Center Pin HTML Overlay -->
                 <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-full z-[400] pointer-events-none flex flex-col items-center justify-end pb-1">
-                    <div id="map-pin-tooltip" class="bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded-md mb-1 shadow-md whitespace-nowrap transition-colors">Set Pickup</div>
-                    <i class="fa-solid fa-location-dot text-4xl drop-shadow-md transition-colors duration-300 text-blue-500" id="map-center-pin"></i>
+                    <div id="map-pin-tooltip" class="bg-black text-white text-[10px] font-bold px-2 py-1 rounded-md mb-1 shadow-md whitespace-nowrap transition-colors">Set Location</div>
+                    <i class="fa-solid fa-location-dot text-4xl drop-shadow-md transition-colors duration-300 text-black" id="map-center-pin"></i>
                     <div class="w-2 h-1 bg-black/30 rounded-full mt-0.5 blur-[1px]"></div>
                 </div>
 
                 <!-- Recenter GPS Button -->
-                <button type="button" onclick="centerMapToGPS()" class="absolute bottom-6 right-4 z-[400] bg-white w-10 h-10 rounded-full shadow-lg flex items-center justify-center text-gray-700 hover:text-blue-600 border border-gray-100 transition-transform active:scale-90">
+                <button type="button" onclick="centerMapToGPS()" class="absolute bottom-6 right-4 z-[400] bg-white w-10 h-10 rounded-full shadow-lg flex items-center justify-center text-gray-700 hover:text-black border border-gray-100 transition-transform active:scale-90">
                     <i class="fa-solid fa-location-crosshairs text-lg"></i>
                 </button>
             </div>
             
             <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100 relative mt-[-2rem] z-20">
-                <div class="timeline-line" style="top: 2rem; bottom: 2rem;"></div>
+                <div class="timeline-line" style="top: 2.5rem; bottom: 2.5rem; border-left: 2px dashed #d1d5db; background: transparent;"></div>
                 <div class="relative z-10 space-y-4">
                     <div class="flex items-center gap-3 relative">
-                        <div class="w-3 h-3 rounded-full bg-blue-500 shadow-[0_0_0_4px_rgba(59,130,246,0.2)] shrink-0"></div>
+                        <div class="w-3 h-3 rounded-full bg-black shrink-0 z-10"></div>
                         <div class="relative w-full">
-                            <input id="ride-pickup" onfocus="setActiveMapInput('ride-pickup')" class="input-field !pl-4 !pr-10 !border-blue-400 !ring-blue-500/20 bg-blue-50/30" placeholder="Search Pickup Location...">
+                            <input id="ride-pickup" onfocus="setActiveMapInput('ride-pickup')" class="input-field !pl-4 !pr-10 !border-gray-200 focus:!border-black focus:!ring-black/20" placeholder="Current Location">
                         </div>
                     </div>
                     <div class="flex items-center gap-3 relative">
-                        <div class="w-3 h-3 rounded-none bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.2)] shrink-0"></div>
+                        <div class="w-3 h-3 rounded-none bg-black shrink-0 z-10"></div>
                         <div class="relative w-full">
-                            <input id="ride-drop" onfocus="setActiveMapInput('ride-drop')" class="input-field !pl-4" placeholder="Search Drop Destination...">
+                            <input id="ride-drop" onfocus="setActiveMapInput('ride-drop')" class="input-field !pl-4 focus:!border-black focus:!ring-black/20" placeholder="Where to?">
                         </div>
                     </div>
                 </div>
                 
-                <button type="button" onclick="calculateRideFares()" id="btn-find-rides" class="w-full bg-gray-900 text-white py-4 rounded-2xl font-bold mt-6 hover:bg-gray-800 transition-colors active:scale-95 shadow-xl shadow-gray-900/20" data-i18n="find_rides">Find Rides</button>
+                <button type="button" onclick="calculateRideFares()" id="btn-find-rides" class="w-full bg-black text-white py-4 rounded-2xl font-bold mt-6 hover:bg-gray-800 transition-colors active:scale-95 shadow-xl shadow-gray-900/20" data-i18n="find_rides">Search</button>
                 
                 <!-- SMALL AMBULANCE SOS BUTTON -->
-                <div class="text-right mt-3">
-                    <button type="button" onclick="bookAmbulance()" class="text-xs text-red-600 bg-red-50 px-3 py-2 rounded-lg font-bold hover:bg-red-100 transition-colors active:scale-95 inline-flex items-center gap-1.5 border border-red-100 shadow-sm">
-                        <i class="fa-solid fa-truck-medical animate-pulse"></i> Ambulance (SOS)
+                <div class="text-center mt-4">
+                    <button type="button" onclick="bookAmbulance()" class="text-[10px] text-red-600 bg-white px-3 py-1.5 rounded-full font-bold hover:bg-red-50 transition-colors active:scale-95 inline-flex items-center gap-1.5 border border-red-100 shadow-sm">
+                        <i class="fa-solid fa-truck-medical animate-pulse"></i> Book Ambulance (SOS)
                     </button>
                 </div>
             </div>
 
             <div id="ride-options-container" class="hidden space-y-4 animate-fadeIn">
-                <h3 class="font-bold text-gray-500 uppercase tracking-wider text-xs ml-2">Available Options <span id="ride-distance-display" class="lowercase normal-case text-gray-400 font-medium ml-2"></span></h3>
+                <h3 class="font-bold text-gray-900 text-lg ml-2">Choose a ride <span id="ride-distance-display" class="lowercase normal-case text-gray-400 text-xs font-medium ml-2"></span></h3>
                 <div id="ride-options-list" class="space-y-3"></div>
             </div>
         </div>
@@ -684,7 +684,7 @@
                     </div>
                 </div>
 
-                <button type="button" id="submit-register" onclick="handleAuth('register')" class="w-full bg-emerald-500 text-white p-4 rounded-2xl font-bold text-sm shadow-xl shadow-emerald-500/20 active:scale-95 transition mt-4">Sign Up Now</button>
+                <button type="button" id="submit-register" onclick="handleAuth('register')" class="w-full bg-emerald-50 text-white p-4 rounded-2xl font-bold text-sm shadow-xl shadow-emerald-500/20 active:scale-95 transition mt-4">Sign Up Now</button>
                 <p class="text-center text-xs font-medium text-gray-500 mt-4">
                     Already have an account? <button type="button" onclick="switchAuthView('login')" class="text-gray-900 font-bold hover:underline">Login</button>
                 </p>
@@ -976,20 +976,41 @@
         }
         
         window.handleAdminLogin = async () => {
-            const id = document.getElementById('admin-id-input').value.trim();
-            const pass = document.getElementById('admin-pass-input').value.trim();
+            const btn = document.querySelector('#admin-auth-overlay button');
+            const orig = btn.innerText;
+            btn.innerText = "Verifying...";
+            btn.disabled = true;
 
-            if (id === 'Gramzo_admin' && pass === '1234') {
-                currentUser = { name: 'Super Admin', role: 'Admin', phone: 'Admin', docId: 'admin_session', uid: auth.currentUser?.uid };
-                
-                if(auth.currentUser) {
-                    await safeDbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: 'admin_session' }, { merge: true }));
+            try {
+                const id = document.getElementById('admin-id-input').value.trim();
+                const pass = document.getElementById('admin-pass-input').value.trim();
+
+                if (id === 'Gramzo_admin' && pass === '1234') {
+                    currentUser = { name: 'Super Admin', role: 'Admin', phone: 'Admin', docId: 'admin_session', uid: auth.currentUser?.uid || 'admin' };
+                    
+                    if(auth.currentUser) {
+                        try {
+                            await safeDbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: 'admin_session' }, { merge: true }), 3000);
+                        } catch(err) {
+                            console.warn("Admin session sync delayed, continuing login.");
+                        }
+                    }
+                    
+                    closeAdminModal();
+                    document.getElementById('admin-id-input').value = '';
+                    document.getElementById('admin-pass-input').value = '';
+                    finalizeLoginSequence();
+                } else {
+                    showToast("Invalid Admin Credentials.", "error");
                 }
-                
-                closeAdminModal();
-                return finalizeLoginSequence();
-            } else {
-                showToast("Invalid Admin Credentials.", "error");
+            } catch (e) {
+                console.error(e);
+                showToast("System error during admin login.", "error");
+            } finally {
+                if (btn) {
+                    btn.innerText = orig;
+                    btn.disabled = false;
+                }
             }
         };
 
@@ -1058,22 +1079,28 @@
                         btn.innerText = "Compressing Documents...";
                         try {
                             const resizeImageForUpload = (file, maxSize) => {
-                                return new Promise((resolve) => {
+                                return new Promise((resolve, reject) => {
                                     const reader = new FileReader();
                                     reader.onload = (e) => {
                                         const img = new Image();
                                         img.onload = () => {
-                                            const canvas = document.createElement('canvas');
-                                            let width = img.width;
-                                            let height = img.height;
-                                            if (width > maxSize) { height *= maxSize / width; width = maxSize; }
-                                            canvas.width = width; canvas.height = height;
-                                            const ctx = canvas.getContext('2d');
-                                            ctx.drawImage(img, 0, 0, width, height);
-                                            resolve(canvas.toDataURL('image/jpeg', 0.5)); 
+                                            try {
+                                                const canvas = document.createElement('canvas');
+                                                let width = img.width;
+                                                let height = img.height;
+                                                if (width > maxSize) { height *= maxSize / width; width = maxSize; }
+                                                canvas.width = width; canvas.height = height;
+                                                const ctx = canvas.getContext('2d');
+                                                ctx.drawImage(img, 0, 0, width, height);
+                                                resolve(canvas.toDataURL('image/jpeg', 0.6)); 
+                                            } catch(err) {
+                                                reject(err);
+                                            }
                                         };
+                                        img.onerror = () => reject(new Error("Image processing failed."));
                                         img.src = e.target.result;
                                     };
+                                    reader.onerror = () => reject(new Error("File read failed."));
                                     reader.readAsDataURL(file);
                                 });
                             };
@@ -1081,7 +1108,7 @@
                             if (file1) doc1Base64 = await resizeImageForUpload(file1, 500); 
                             if (file2) doc2Base64 = await resizeImageForUpload(file2, 500); 
                         } catch(err) {
-                            console.warn("Failed to process image file. Skipping image attach.");
+                            throw new Error("Could not process images. Try smaller files.");
                         }
                     }
 
@@ -1090,7 +1117,7 @@
                     const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', phone);
                     
                     try {
-                        const snap = await safeDbCall(getDoc(userRef));
+                        const snap = await safeDbCall(getDoc(userRef), 10000);
                         if (snap && typeof snap.exists === 'function' && snap.exists()) {
                             throw new Error("Number already registered. Please login.");
                         }
@@ -1106,24 +1133,26 @@
                         uid: auth?.currentUser?.uid || 'offline_uid_' + Date.now(),
                         created: new Date().toISOString(),
                         ...(currentAuthRole === 'Partner' && { 
-                            category: partnerCategory, 
+                            category: partnerCategory || null, 
                             shopName: shopName || name, 
-                            vehicleType,
-                            vehicleNumber,
-                            doc1: doc1Base64, 
-                            doc1Type,
-                            doc2: doc2Base64,
-                            doc2Type
+                            vehicleType: vehicleType || null,
+                            vehicleNumber: vehicleNumber || null,
+                            doc1: doc1Base64 || null, 
+                            doc1Type: doc1Type || null,
+                            doc2: doc2Base64 || null,
+                            doc2Type: doc2Type || null
                         })
                     };
                     
                     try {
                         await safeDbCall(setDoc(userRef, userData, { merge: true }), 20000);
                         if(auth.currentUser) {
-                            await safeDbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: phone }, { merge: true }));
+                            try {
+                                await safeDbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: phone }, { merge: true }), 3000);
+                            } catch(se) { console.warn("Session sync delayed."); }
                         }
                     } catch(e) {
-                        throw new Error("Network timeout while uploading data. Please try again with a smaller image.");
+                        throw new Error("Network timeout while uploading data. Please try again.");
                     }
                     
                     currentUser = { ...userData, docId: phone };
@@ -1153,7 +1182,9 @@
                         currentUser = { ...data, docId: phone };
                         
                         if(auth.currentUser) {
-                            await safeDbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: phone }, { merge: true }));
+                            try {
+                                await safeDbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: phone }, { merge: true }), 3000);
+                            } catch(se) { console.warn("Session sync delayed."); }
                         }
                         
                         finalizeLoginSequence();
@@ -1322,19 +1353,19 @@
             const pin = document.getElementById('map-center-pin');
             const tooltip = document.getElementById('map-pin-tooltip');
             
-            document.getElementById('ride-pickup').classList.remove('!border-blue-400', '!ring-blue-500/20', 'bg-blue-50/30');
-            document.getElementById('ride-drop').classList.remove('!border-emerald-400', '!ring-emerald-500/20', 'bg-emerald-50/30');
+            document.getElementById('ride-pickup').classList.remove('!border-black', 'focus:!border-black', 'focus:!ring-black/20');
+            document.getElementById('ride-drop').classList.remove('!border-black', 'focus:!border-black', 'focus:!ring-black/20');
             
             if (id === 'ride-pickup') {
-                pin.className = "fa-solid fa-location-dot text-4xl drop-shadow-md transition-colors duration-300 text-blue-500";
+                pin.className = "fa-solid fa-location-dot text-4xl drop-shadow-md transition-colors duration-300 text-black";
                 tooltip.innerText = "Set Pickup";
-                tooltip.className = "bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded-md mb-1 shadow-md whitespace-nowrap transition-colors";
-                document.getElementById('ride-pickup').classList.add('!border-blue-400', '!ring-blue-500/20', 'bg-blue-50/30');
+                tooltip.className = "bg-black text-white text-[10px] font-bold px-2 py-1 rounded-md mb-1 shadow-md whitespace-nowrap transition-colors";
+                document.getElementById('ride-pickup').classList.add('focus:!border-black', 'focus:!ring-black/20');
             } else {
-                pin.className = "fa-solid fa-location-dot text-4xl drop-shadow-md transition-colors duration-300 text-emerald-500";
-                tooltip.innerText = "Set Drop";
-                tooltip.className = "bg-emerald-600 text-white text-[10px] font-bold px-2 py-1 rounded-md mb-1 shadow-md whitespace-nowrap transition-colors";
-                document.getElementById('ride-drop').classList.add('!border-emerald-400', '!ring-emerald-500/20', 'bg-emerald-50/30');
+                pin.className = "fa-solid fa-location-dot text-4xl drop-shadow-md transition-colors duration-300 text-black";
+                tooltip.innerText = "Set Destination";
+                tooltip.className = "bg-black text-white text-[10px] font-bold px-2 py-1 rounded-md mb-1 shadow-md whitespace-nowrap transition-colors";
+                document.getElementById('ride-drop').classList.add('focus:!border-black', 'focus:!ring-black/20');
             }
         };
 
@@ -1348,7 +1379,7 @@
                     mapObj.setZoom(16);
                 }, () => {
                     showToast("Location access denied or failed.", "error");
-                    document.getElementById('map-pin-tooltip').innerText = activeMapInput === 'ride-pickup' ? "Set Pickup" : "Set Drop";
+                    document.getElementById('map-pin-tooltip').innerText = activeMapInput === 'ride-pickup' ? "Set Pickup" : "Set Destination";
                 });
             }
         };
@@ -1429,7 +1460,7 @@
                             if (status === "OK" && results[0]) {
                                 const addr = results[0].formatted_address.split(',').slice(0, 3).join(', ');
                                 input.value = addr;
-                                document.getElementById('map-pin-tooltip').innerText = activeMapInput === 'ride-pickup' ? "Pickup Set" : "Drop Set";
+                                document.getElementById('map-pin-tooltip').innerText = activeMapInput === 'ride-pickup' ? "Pickup Set" : "Destination Set";
                             } else {
                                 console.error("Geocoder failed due to: " + status);
                                 input.value = `${userLat.toFixed(4)}, ${userLon.toFixed(4)}`;
@@ -1462,7 +1493,7 @@
             }
 
             const btn = document.getElementById('btn-find-rides');
-            btn.innerText = "Finding nearest rides...";
+            btn.innerText = "Searching...";
             btn.disabled = true;
 
             setTimeout(() => {
@@ -1489,9 +1520,9 @@
                             {lat: destLat, lng: destLon}
                         ],
                         geodesic: true,
-                        strokeColor: '#10b981',
+                        strokeColor: '#000000',
                         strokeOpacity: 1.0,
-                        strokeWeight: 4
+                        strokeWeight: 3
                     });
                     mapRouteLine.setMap(mapObj);
                     
@@ -1500,8 +1531,8 @@
                         map: mapObj,
                         icon: {
                             path: google.maps.SymbolPath.CIRCLE,
-                            scale: 8,
-                            fillColor: '#10b981',
+                            scale: 6,
+                            fillColor: '#000000',
                             fillOpacity: 1,
                             strokeColor: '#ffffff',
                             strokeWeight: 2
@@ -1509,41 +1540,60 @@
                     });
                 }
 
-                // Fare calculations
+                // Fare calculations & Mock ETA
                 const distanceKm = Math.floor(Math.random() * 15) + 2; 
 
                 const bikeFare = distanceKm <= 3 ? 25 : 25 + ((distanceKm - 3) * 3);
                 const totoFare = distanceKm <= 3 ? 50 : 50 + ((distanceKm - 3) * 10);
                 const carFare = distanceKm * 15;
+                
+                const etaBike = Math.floor(Math.random() * 5) + 2;
+                const etaToto = Math.floor(Math.random() * 8) + 4;
+                const etaCar = Math.floor(Math.random() * 10) + 5;
+
+                const now = new Date();
+                const getArrivalTime = (mins) => {
+                    const arrival = new Date(now.getTime() + mins * 60000);
+                    return arrival.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                };
 
                 document.getElementById('ride-distance-display').innerText = `(~${distanceKm} km route)`;
                 document.getElementById('ride-options-container').classList.remove('hidden');
                 
                 const html = `
-                    <div class="bg-gray-50 border border-gray-200 rounded-2xl p-4 flex items-center justify-between cursor-pointer hover:border-emerald-500 transition-colors" onclick="bookRide('Bike Taxi', ${bikeFare}, '${pickup}', '${drop}')">
+                    <div class="bg-white border border-gray-200 rounded-2xl p-4 flex items-center justify-between cursor-pointer hover:ring-2 hover:ring-black transition-all shadow-sm" onclick="bookRide('Bike Taxi', ${bikeFare}, '${pickup}', '${drop}')">
                         <div class="flex items-center gap-4">
-                            <i class="fa-solid fa-motorcycle text-2xl text-gray-700"></i>
-                            <div><p class="font-bold text-gray-900">Gramzo Bike</p><p class="text-[10px] text-gray-500">Fast & affordable</p></div>
+                            <i class="fa-solid fa-motorcycle text-3xl text-gray-800 w-10 text-center"></i>
+                            <div>
+                                <p class="font-black text-gray-900 text-lg leading-none">Gramzo Bike <i class="fa-solid fa-user text-[10px] text-gray-400 ml-1"></i><span class="text-xs text-gray-500 ml-0.5">1</span></p>
+                                <p class="text-xs text-emerald-600 font-bold mt-1">${etaBike} min away <span class="text-gray-400 font-medium ml-1">• ${getArrivalTime(etaBike)}</span></p>
+                            </div>
                         </div>
-                        <span class="font-black text-emerald-600 text-lg">₹${bikeFare}</span>
+                        <span class="font-black text-gray-900 text-xl">₹${bikeFare}</span>
                     </div>
-                    <div class="bg-gray-50 border border-gray-200 rounded-2xl p-4 flex items-center justify-between cursor-pointer hover:border-emerald-500 transition-colors" onclick="bookRide('Gramzo Toto', ${totoFare}, '${pickup}', '${drop}')">
+                    <div class="bg-white border border-gray-200 rounded-2xl p-4 flex items-center justify-between cursor-pointer hover:ring-2 hover:ring-black transition-all shadow-sm" onclick="bookRide('Gramzo Toto', ${totoFare}, '${pickup}', '${drop}')">
                         <div class="flex items-center gap-4">
-                            <i class="fa-solid fa-caravan text-2xl text-gray-700"></i>
-                            <div><p class="font-bold text-gray-900">Gramzo Toto</p><p class="text-[10px] text-gray-500">Eco-friendly local</p></div>
+                            <i class="fa-solid fa-caravan text-3xl text-gray-800 w-10 text-center"></i>
+                            <div>
+                                <p class="font-black text-gray-900 text-lg leading-none">Gramzo Toto <i class="fa-solid fa-user text-[10px] text-gray-400 ml-1"></i><span class="text-xs text-gray-500 ml-0.5">3</span></p>
+                                <p class="text-xs text-emerald-600 font-bold mt-1">${etaToto} min away <span class="text-gray-400 font-medium ml-1">• ${getArrivalTime(etaToto)}</span></p>
+                            </div>
                         </div>
-                        <span class="font-black text-emerald-600 text-lg">₹${totoFare}</span>
+                        <span class="font-black text-gray-900 text-xl">₹${totoFare}</span>
                     </div>
-                    <div class="bg-gray-50 border border-gray-200 rounded-2xl p-4 flex items-center justify-between cursor-pointer hover:border-emerald-500 transition-colors" onclick="bookRide('Gramzo Car', ${carFare}, '${pickup}', '${drop}')">
+                    <div class="bg-white border border-gray-200 rounded-2xl p-4 flex items-center justify-between cursor-pointer hover:ring-2 hover:ring-black transition-all shadow-sm" onclick="bookRide('Gramzo Car', ${carFare}, '${pickup}', '${drop}')">
                         <div class="flex items-center gap-4">
-                            <i class="fa-solid fa-car text-2xl text-gray-700"></i>
-                            <div><p class="font-bold text-gray-900">Gramzo Car</p><p class="text-[10px] text-gray-500">Comfortable trip</p></div>
+                            <i class="fa-solid fa-car text-3xl text-gray-800 w-10 text-center"></i>
+                            <div>
+                                <p class="font-black text-gray-900 text-lg leading-none">Gramzo Car <i class="fa-solid fa-user text-[10px] text-gray-400 ml-1"></i><span class="text-xs text-gray-500 ml-0.5">4</span></p>
+                                <p class="text-xs text-emerald-600 font-bold mt-1">${etaCar} min away <span class="text-gray-400 font-medium ml-1">• ${getArrivalTime(etaCar)}</span></p>
+                            </div>
                         </div>
-                        <span class="font-black text-emerald-600 text-lg">₹${carFare}</span>
+                        <span class="font-black text-gray-900 text-xl">₹${carFare}</span>
                     </div>
                 `;
                 document.getElementById('ride-options-list').innerHTML = html;
-                btn.innerText = "Refresh Pricing";
+                btn.innerText = "Search";
                 btn.disabled = false;
             }, 800);
         };
