@@ -293,7 +293,7 @@
                 <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 pb-2 gap-4">
                     <div class="text-center sm:text-left">
                         <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                        <p class="text-[10px] text-emerald-700 font-bold mt-2 bg-emerald-50 border border-emerald-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v1.3.2 - Image Compression & Auth Fix</p>
+                        <p class="text-[10px] text-emerald-700 font-bold mt-2 bg-emerald-50 border border-emerald-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v1.3.3 - Fast Partner Reg</p>
                     </div>
                     <div class="flex gap-4 text-gray-400 text-sm">
                         <a href="#" onclick="return false;" class="hover:text-blue-600 transition"><i class="fa-brands fa-facebook"></i></a>
@@ -456,23 +456,34 @@
                     <span id="partner-approval-status" class="text-[10px] font-black text-gray-500 bg-gray-100 px-2 py-1 rounded uppercase tracking-widest">Setup Needed</span>
                 </div>
                 
-                <!-- Shop Status Toggle (Only visible if approved) -->
-                <div id="shop-status-container" class="mt-2 flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100 hidden">
-                    <div>
-                        <p class="font-bold text-sm text-gray-900">Accepting Orders</p>
-                        <p class="text-[10px] text-gray-500" id="shop-status-text">Currently Open</p>
+                <div class="space-y-4">
+                    <!-- Display Only Details -->
+                    <div id="hub-display-details" class="bg-gray-50 p-4 rounded-xl border border-gray-100 space-y-2 text-sm text-gray-700">
+                        <p><strong>Name:</strong> <span id="hub-name-val"></span></p>
+                        <p><strong>Type:</strong> <span id="hub-cat-val"></span></p>
+                        <p id="hub-fssai-row" class="hidden"><strong>FSSAI:</strong> <span id="hub-fssai-val"></span></p>
+                        <p id="hub-veh-row" class="hidden"><strong>Vehicle:</strong> <span id="hub-veh-val"></span></p>
+                        <p id="hub-dl-row" class="hidden"><strong>DL:</strong> <span id="hub-dl-val"></span></p>
                     </div>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" id="partner-status-toggle" class="sr-only peer" onchange="toggleShopStatus()">
-                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
-                    </label>
+
+                    <!-- Shop Status Toggle (Only visible if approved) -->
+                    <div id="shop-status-container" class="mt-2 flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100 hidden">
+                        <div>
+                            <p class="font-bold text-sm text-gray-900">Accepting Orders</p>
+                            <p class="text-[10px] text-gray-500" id="shop-status-text">Currently Open</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="partner-status-toggle" class="sr-only peer" onchange="toggleShopStatus()">
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                        </label>
+                    </div>
                 </div>
             </div>
 
             <!-- Approval Warning -->
             <div id="approval-warning" class="bg-orange-50 border border-orange-200 rounded-[2rem] p-6 text-center hidden">
                 <i class="fa-solid fa-clock-rotate-left text-3xl text-orange-400 mb-2"></i>
-                <p class="text-sm text-orange-800 font-bold mt-2" id="approval-warning-text">Your documents are under review by the Admin. You can manage products once approved.</p>
+                <p class="text-sm text-orange-800 font-bold mt-2" id="approval-warning-text">Your profile is under review by the Admin. You can manage products once approved.</p>
             </div>
 
             <!-- Add Product -->
@@ -563,7 +574,7 @@
                 <div class="overflow-x-auto no-scrollbar">
                     <table class="w-full text-left text-sm whitespace-nowrap">
                         <thead class="bg-white border-b border-gray-100 text-gray-400 text-[10px] uppercase tracking-wider">
-                            <tr><th class="p-4 font-bold">Partner</th><th class="p-4 font-bold">Business</th><th class="p-4 font-bold">Documents</th><th class="p-4 font-bold text-right">Action</th></tr>
+                            <tr><th class="p-4 font-bold">Partner</th><th class="p-4 font-bold">Business</th><th class="p-4 font-bold">Details</th><th class="p-4 font-bold text-right">Action</th></tr>
                         </thead>
                         <tbody id="admin-approvals-body" class="divide-y divide-gray-50">
                             <tr><td colspan="4" class="p-6 text-center text-gray-400 text-xs italic">Loading...</td></tr>
@@ -651,6 +662,7 @@
                     </select>
 
                     <input id="reg-shop-name" type="text" class="input-field !bg-white hidden" placeholder="Shop / Business Name">
+                    <input id="reg-fssai-number" type="text" class="input-field !bg-white hidden uppercase" placeholder="FSSAI License Number (Optional)">
 
                     <div id="reg-vehicle-container" class="hidden space-y-3">
                         <select id="reg-vehicle-type" class="input-field !bg-white">
@@ -660,31 +672,11 @@
                             <option value="Car">Car</option>
                         </select>
                         <input id="reg-vehicle-number" type="text" class="input-field !bg-white uppercase" placeholder="Vehicle No (e.g. WB 82 D 4979)">
-                    </div>
-
-                    <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mt-4">Verification Documents</label>
-                    <div class="space-y-2">
-                        <select id="reg-doc-type-1" class="input-field !bg-white !py-2 !text-xs">
-                            <option value="" disabled selected>Select Doc 1 Type</option>
-                            <option value="FSSAI">FSSAI License</option>
-                            <option value="DRIVING LICENCE">Driving Licence</option>
-                            <option value="RC">Vehicle RC</option>
-                        </select>
-                        <input type="file" id="reg-doc-file-1" accept="image/*" class="w-full text-xs text-gray-500 file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:bg-emerald-50 file:text-emerald-700">
-                    </div>
-
-                    <div class="space-y-2">
-                        <select id="reg-doc-type-2" class="input-field !bg-white !py-2 !text-xs">
-                            <option value="" disabled selected>Select Doc 2 Type (Optional)</option>
-                            <option value="FSSAI">FSSAI License</option>
-                            <option value="DRIVING LICENCE">Driving Licence</option>
-                            <option value="RC">Vehicle RC</option>
-                        </select>
-                        <input type="file" id="reg-doc-file-2" accept="image/*" class="w-full text-xs text-gray-500 file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:bg-emerald-50 file:text-emerald-700">
+                        <input id="reg-dl-number" type="text" class="input-field !bg-white uppercase" placeholder="Driving Licence Number">
                     </div>
                 </div>
 
-                <button type="button" id="submit-register" onclick="handleAuth('register')" class="w-full bg-emerald-50 text-white p-4 rounded-2xl font-bold text-sm shadow-xl shadow-emerald-500/20 active:scale-95 transition mt-4">Sign Up Now</button>
+                <button type="button" id="submit-register" onclick="handleAuth('register')" class="w-full bg-emerald-500 text-white p-4 rounded-2xl font-bold text-sm shadow-xl shadow-emerald-500/20 active:scale-95 transition mt-4">Sign Up Now</button>
                 <p class="text-center text-xs font-medium text-gray-500 mt-4">
                     Already have an account? <button type="button" onclick="switchAuthView('login')" class="text-gray-900 font-bold hover:underline">Login</button>
                 </p>
@@ -831,7 +823,6 @@
                     loadMarketplaceData();
                 }
             } else {
-                // If somehow completely logged out of Firebase, reconnect anonymously
                 startApp(); 
             }
         });
@@ -888,16 +879,20 @@
         window.togglePartnerRegFields = () => {
             const cat = document.getElementById('reg-partner-category').value;
             const shopName = document.getElementById('reg-shop-name');
+            const fssaiNum = document.getElementById('reg-fssai-number');
             const vehCont = document.getElementById('reg-vehicle-container');
 
             if(cat === 'Food Owner') {
                 shopName.classList.remove('hidden');
+                fssaiNum.classList.remove('hidden');
                 vehCont.classList.add('hidden');
             } else if (cat === 'Rider') {
                 shopName.classList.add('hidden');
+                fssaiNum.classList.add('hidden');
                 vehCont.classList.remove('hidden');
             } else {
                 shopName.classList.add('hidden');
+                fssaiNum.classList.add('hidden');
                 vehCont.classList.add('hidden');
             }
         };
@@ -1026,7 +1021,6 @@
             btn.innerText = "Processing...";
             btn.disabled = true;
 
-            // Wait for Anonymous Auth to guarantee we have a UID for session persistence.
             if (!auth.currentUser) {
                 try {
                     await safeDbCall(signInAnonymously(auth), 10000);
@@ -1049,10 +1043,8 @@
                     let shopName = null;
                     let vehicleType = null;
                     let vehicleNumber = null;
-                    let doc1Base64 = null;
-                    let doc2Base64 = null;
-                    let doc1Type = null;
-                    let doc2Type = null;
+                    let fssaiNumber = null;
+                    let dlNumber = null;
 
                     if (currentAuthRole === 'Partner') {
                         partnerCategory = document.getElementById('reg-partner-category').value;
@@ -1060,55 +1052,13 @@
 
                         if (partnerCategory === 'Food Owner') {
                             shopName = document.getElementById('reg-shop-name').value.trim();
+                            fssaiNumber = document.getElementById('reg-fssai-number').value.trim();
                             if(!shopName) throw new Error("Please enter your Business Name.");
                         } else if (partnerCategory === 'Rider') {
                             vehicleType = document.getElementById('reg-vehicle-type').value;
                             vehicleNumber = document.getElementById('reg-vehicle-number').value.trim();
+                            dlNumber = document.getElementById('reg-dl-number').value.trim();
                             if(!vehicleType || !vehicleNumber) throw new Error("Please enter your Vehicle Type and Number.");
-                        }
-
-                        // Process Uploaded Documents
-                        const file1 = document.getElementById('reg-doc-file-1').files[0];
-                        const file2 = document.getElementById('reg-doc-file-2').files[0];
-                        doc1Type = document.getElementById('reg-doc-type-1').value;
-                        doc2Type = document.getElementById('reg-doc-type-2').value;
-
-                        if (!file1) throw new Error("Please upload at least the first verification document.");
-                        if (!doc1Type) throw new Error("Please select the type for Document 1.");
-
-                        btn.innerText = "Compressing Documents...";
-                        try {
-                            const resizeImageForUpload = (file, maxSize) => {
-                                return new Promise((resolve, reject) => {
-                                    const reader = new FileReader();
-                                    reader.onload = (e) => {
-                                        const img = new Image();
-                                        img.onload = () => {
-                                            try {
-                                                const canvas = document.createElement('canvas');
-                                                let width = img.width;
-                                                let height = img.height;
-                                                if (width > maxSize) { height *= maxSize / width; width = maxSize; }
-                                                canvas.width = width; canvas.height = height;
-                                                const ctx = canvas.getContext('2d');
-                                                ctx.drawImage(img, 0, 0, width, height);
-                                                resolve(canvas.toDataURL('image/jpeg', 0.6)); 
-                                            } catch(err) {
-                                                reject(err);
-                                            }
-                                        };
-                                        img.onerror = () => reject(new Error("Image processing failed."));
-                                        img.src = e.target.result;
-                                    };
-                                    reader.onerror = () => reject(new Error("File read failed."));
-                                    reader.readAsDataURL(file);
-                                });
-                            };
-
-                            if (file1) doc1Base64 = await resizeImageForUpload(file1, 500); 
-                            if (file2) doc2Base64 = await resizeImageForUpload(file2, 500); 
-                        } catch(err) {
-                            throw new Error("Could not process images. Try smaller files.");
                         }
                     }
 
@@ -1137,10 +1087,8 @@
                             shopName: shopName || name, 
                             vehicleType: vehicleType || null,
                             vehicleNumber: vehicleNumber || null,
-                            doc1: doc1Base64 || null, 
-                            doc1Type: doc1Type || null,
-                            doc2: doc2Base64 || null,
-                            doc2Type: doc2Type || null
+                            dlNumber: dlNumber || null,
+                            fssaiNumber: fssaiNumber || null
                         })
                     };
                     
@@ -1192,7 +1140,7 @@
                         if (e.message.includes("Account not found") || e.message.includes("Incorrect password")) {
                             throw e; 
                         }
-                        throw e; // Do not fallback to Test User
+                        throw e; 
                     }
                 }
             } catch (e) {
@@ -1248,6 +1196,31 @@
                 const statusLabel = document.getElementById('partner-approval-status');
                 const approvalWarning = document.getElementById('approval-warning');
                 const canAddProducts = (currentUser.category === 'Food Owner');
+                
+                // Show Hub Details
+                document.getElementById('hub-name-val').innerText = currentUser.shopName || currentUser.name;
+                document.getElementById('hub-cat-val').innerText = currentUser.category;
+                
+                const hubFssaiRow = document.getElementById('hub-fssai-row');
+                const hubVehRow = document.getElementById('hub-veh-row');
+                const hubDlRow = document.getElementById('hub-dl-row');
+
+                if (currentUser.category === 'Rider') {
+                    hubFssaiRow.classList.add('hidden');
+                    hubVehRow.classList.remove('hidden');
+                    hubDlRow.classList.remove('hidden');
+                    document.getElementById('hub-veh-val').innerText = currentUser.vehicleNumber || 'N/A';
+                    document.getElementById('hub-dl-val').innerText = currentUser.dlNumber || 'N/A';
+                } else {
+                    hubVehRow.classList.add('hidden');
+                    hubDlRow.classList.add('hidden');
+                    if (currentUser.fssaiNumber) {
+                        hubFssaiRow.classList.remove('hidden');
+                        document.getElementById('hub-fssai-val').innerText = currentUser.fssaiNumber;
+                    } else {
+                        hubFssaiRow.classList.add('hidden');
+                    }
+                }
 
                 if (currentUser.approvalStatus === 'Approved') {
                     statusLabel.innerText = "Verified";
@@ -1276,7 +1249,7 @@
                     catListCont.classList.add('hidden');
                     statusCont.classList.add('hidden');
                     approvalWarning.classList.remove('hidden');
-                    document.getElementById('approval-warning-text').innerText = "Your documents have been submitted and are under review by the Admin.";
+                    document.getElementById('approval-warning-text').innerText = "Your details have been submitted and are under review by the Admin.";
                 } else {
                     statusLabel.innerText = "Error";
                     approvalWarning.classList.add('hidden');
@@ -1916,8 +1889,10 @@
                                     <td class="p-4 font-bold text-gray-900 text-xs">${u.name || 'Unknown'}<br><span class="font-mono font-normal text-[9px] text-gray-500">${u.phone || 'N/A'}</span></td>
                                     <td class="p-4 font-bold text-gray-700 text-xs">${u.shopName || u.vehicleType || 'N/A'}<br><span class="text-[9px] font-black text-emerald-500 uppercase tracking-widest">${u.category || 'Partner'}</span></td>
                                     <td class="p-4 flex flex-col gap-1">
-                                        ${u.doc1 ? `<a href="${u.doc1}" target="_blank" class="text-[10px] bg-blue-50 text-blue-600 px-2 py-1 rounded font-bold hover:underline inline-block w-max"><i class="fa-solid fa-file-image"></i> ${u.doc1Type || 'Doc 1'}</a>` : '<span class="text-[10px] text-gray-400 italic">No Doc 1</span>'}
-                                        ${u.doc2 ? `<a href="${u.doc2}" target="_blank" class="text-[10px] bg-blue-50 text-blue-600 px-2 py-1 rounded font-bold hover:underline inline-block w-max"><i class="fa-solid fa-file-image"></i> ${u.doc2Type || 'Doc 2'}</a>` : ''}
+                                        ${u.fssaiNumber ? `<span class="text-[10px] text-gray-600 font-mono">FSSAI: ${u.fssaiNumber}</span>` : ''}
+                                        ${u.vehicleNumber ? `<span class="text-[10px] text-gray-600 font-mono">Veh: ${u.vehicleNumber}</span>` : ''}
+                                        ${u.dlNumber ? `<span class="text-[10px] text-gray-600 font-mono">DL: ${u.dlNumber}</span>` : ''}
+                                        ${(!u.fssaiNumber && !u.vehicleNumber && !u.dlNumber) ? '<span class="text-[10px] text-gray-400 italic">No Docs</span>' : ''}
                                     </td>
                                     <td class="p-4 text-right">
                                         <button type="button" onclick="adminReviewPartner('${u.id}', 'Approved')" class="bg-emerald-500 text-white px-3 py-1 rounded text-[10px] font-black uppercase tracking-wider mr-2 hover:bg-emerald-600 transition">Approve</button>
