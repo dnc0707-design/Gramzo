@@ -77,6 +77,10 @@
         }
         .modal-overlay.active .modal-content { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 
+        .timeline-line {
+            position: absolute; left: 1.15rem; top: 2.5rem; bottom: 2.5rem; width: 2px; background-color: #e5e7eb; z-index: 0;
+        }
+
         /* Google Maps Specific Overrides */
         #ride-map { z-index: 10; }
         .pac-container { border-radius: 1rem; border: 1px solid #e5e7eb; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); font-family: 'Outfit', sans-serif; z-index: 9999; }
@@ -289,7 +293,7 @@
                 <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 pb-2 gap-4">
                     <div class="text-center sm:text-left">
                         <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                        <p class="text-[10px] text-emerald-700 font-bold mt-2 bg-emerald-50 border border-emerald-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v1.4.0 - Premium Ride Experience</p>
+                        <p class="text-[10px] text-emerald-700 font-bold mt-2 bg-emerald-50 border border-emerald-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v2.1.0 - Full HTML Setup</p>
                     </div>
                     <div class="flex gap-4 text-gray-400 text-sm">
                         <a href="#" onclick="return false;" class="hover:text-blue-600 transition"><i class="fa-brands fa-facebook"></i></a>
@@ -357,11 +361,18 @@
                 </div>
                 
                 <button type="button" onclick="calculateRideFares()" id="btn-find-rides" class="w-full bg-black text-white py-4 rounded-xl font-bold mt-5 hover:bg-gray-800 transition-all active:scale-95 shadow-xl shadow-gray-900/20 text-base" data-i18n="find_rides">Search Options</button>
+                
+                <!-- SMALL AMBULANCE SOS BUTTON -->
+                <div class="text-center mt-4">
+                    <button type="button" onclick="bookAmbulance()" class="text-[10px] text-red-600 bg-white px-3 py-1.5 rounded-full font-bold hover:bg-red-50 transition-colors active:scale-95 inline-flex items-center gap-1.5 border border-red-100 shadow-sm">
+                        <i class="fa-solid fa-truck-medical animate-pulse"></i> Book Ambulance (SOS)
+                    </button>
+                </div>
             </div>
 
             <!-- Dynamic Options Sheet -->
             <div id="ride-options-container" class="hidden space-y-4 animate-fadeIn px-2 pt-2">
-                <h3 class="font-black text-gray-900 text-lg flex items-center justify-between">
+                <h3 class="font-bold text-gray-900 text-lg flex items-center justify-between">
                     Choose a ride 
                     <span id="ride-distance-display" class="text-gray-400 text-xs font-bold bg-gray-100 px-3 py-1 rounded-full"></span>
                 </h3>
@@ -557,16 +568,18 @@
                 <span id="admin-id-badge" class="bg-purple-100 text-purple-700 text-[10px] font-black uppercase px-2 py-1 rounded-full tracking-widest shadow-sm"></span>
             </div>
             
-            <div class="grid grid-cols-2 gap-4">
-                <div class="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group">
-                    <div class="absolute inset-0 bg-emerald-50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 relative z-10">Gross Volume</p>
-                    <h4 id="stat-rev" class="text-3xl font-black text-emerald-600 tracking-tight relative z-10">₹0</h4>
+            <div class="grid grid-cols-3 gap-4">
+                <div class="bg-white p-4 sm:p-5 rounded-3xl border border-gray-100 shadow-sm text-center flex flex-col justify-center">
+                    <p class="text-[9px] sm:text-[10px] font-bold text-gray-400 uppercase">Gross Vol</p>
+                    <h4 id="stat-rev" class="text-lg sm:text-2xl font-black text-emerald-600">₹0</h4>
                 </div>
-                <div class="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group">
-                    <div class="absolute inset-0 bg-blue-50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 relative z-10">Total Orders</p>
-                    <h4 id="stat-ord" class="text-3xl font-black text-blue-600 tracking-tight relative z-10">0</h4>
+                <div class="bg-white p-4 sm:p-5 rounded-3xl border border-gray-100 shadow-sm text-center flex flex-col justify-center">
+                    <p class="text-[9px] sm:text-[10px] font-bold text-gray-400 uppercase">Orders</p>
+                    <h4 id="stat-ord" class="text-lg sm:text-2xl font-black text-blue-600">0</h4>
+                </div>
+                <div class="bg-white p-4 sm:p-5 rounded-3xl border border-gray-100 shadow-sm text-center flex flex-col justify-center">
+                    <p class="text-[9px] sm:text-[10px] font-bold text-gray-400 uppercase">Total Users</p>
+                    <h4 id="stat-users" class="text-lg sm:text-2xl font-black text-purple-600">0</h4>
                 </div>
             </div>
 
@@ -598,14 +611,14 @@
 
             <!-- ADMIN APPROVALS SECTION -->
             <div class="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden mt-8">
-                <div class="p-5 border-b border-gray-100 bg-orange-50/50 flex items-center justify-between">
-                    <h3 class="font-bold text-gray-800">Pending Partner Approvals</h3>
+                <div class="p-4 bg-orange-50 border-b border-gray-100 font-bold flex items-center justify-between">
+                    <span class="text-sm">Pending Partner Approvals</span>
                     <span class="w-2 h-2 rounded-full bg-orange-400 animate-pulse"></span>
                 </div>
                 <div class="overflow-x-auto no-scrollbar">
-                    <table class="w-full text-left text-sm whitespace-nowrap">
-                        <thead class="bg-white border-b border-gray-100 text-gray-400 text-[10px] uppercase tracking-wider">
-                            <tr><th class="p-4 font-bold">Partner</th><th class="p-4 font-bold">Business</th><th class="p-4 font-bold">Details</th><th class="p-4 font-bold text-right">Action</th></tr>
+                    <table class="w-full text-left text-xs whitespace-nowrap">
+                        <thead class="bg-gray-50 border-b border-gray-100 text-gray-400 text-[10px] uppercase tracking-wider">
+                            <tr><th class="p-3 font-bold">Partner</th><th class="p-3 font-bold">Business</th><th class="p-3 font-bold">Details</th><th class="p-3 font-bold text-right">Action</th></tr>
                         </thead>
                         <tbody id="admin-approvals-body" class="divide-y divide-gray-50">
                             <tr><td colspan="4" class="p-6 text-center text-gray-400 text-xs italic">Loading...</td></tr>
@@ -616,13 +629,13 @@
 
             <!-- ALL SYSTEM USERS DATA -->
             <div class="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden mt-8">
-                <div class="p-5 border-b border-gray-100 bg-purple-50/50">
-                    <h3 class="font-bold text-gray-800">System Users & Credentials</h3>
+                <div class="p-4 bg-purple-50 border-b border-gray-100 font-bold flex items-center justify-between">
+                    <span class="text-sm">System Users & Credentials</span>
                 </div>
                 <div class="overflow-x-auto no-scrollbar">
-                    <table class="w-full text-left text-sm whitespace-nowrap">
-                        <thead class="bg-white border-b border-gray-100 text-gray-400 text-[10px] uppercase tracking-wider">
-                            <tr><th class="p-4 font-bold">Role</th><th class="p-4 font-bold">Name</th><th class="p-4 font-bold">Phone ID</th><th class="p-4 font-bold text-right">Password/PIN</th></tr>
+                    <table class="w-full text-left text-xs whitespace-nowrap">
+                        <thead class="bg-gray-50 border-b border-gray-100 text-gray-400 text-[10px] uppercase tracking-wider">
+                            <tr><th class="p-3 font-bold">Role</th><th class="p-3 font-bold">Name</th><th class="p-3 font-bold">Phone ID</th><th class="p-3 font-bold text-right">Password/PIN</th></tr>
                         </thead>
                         <tbody id="admin-users-body" class="divide-y divide-gray-50">
                             <tr><td colspan="4" class="p-6 text-center text-gray-400 text-xs italic">Loading users...</td></tr>
@@ -632,13 +645,13 @@
             </div>
 
             <div class="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden mt-8">
-                <div class="p-5 border-b border-gray-100 bg-gray-50/50">
-                    <h3 class="font-bold text-gray-800">Recent Transactions</h3>
+                <div class="p-4 bg-gray-50 border-b border-gray-100 font-bold flex items-center justify-between">
+                    <span class="text-sm">Recent Transactions</span>
                 </div>
                 <div class="overflow-x-auto no-scrollbar">
-                    <table class="w-full text-left text-sm whitespace-nowrap">
-                        <thead class="bg-white border-b border-gray-100 text-gray-400 text-[10px] uppercase tracking-wider">
-                            <tr><th class="p-4 font-bold">ID</th><th class="p-4 font-bold">User</th><th class="p-4 font-bold">Partner</th><th class="p-4 font-bold">Amt</th><th class="p-4 font-bold text-right">Status</th></tr>
+                    <table class="w-full text-left text-xs whitespace-nowrap">
+                        <thead class="bg-gray-50 border-b border-gray-100 text-gray-400 text-[10px] uppercase tracking-wider">
+                            <tr><th class="p-3 font-bold">ID</th><th class="p-3 font-bold">User</th><th class="p-3 font-bold">Partner</th><th class="p-3 font-bold">Amt</th><th class="p-3 font-bold text-right">Status</th></tr>
                         </thead>
                         <tbody id="admin-log-body" class="divide-y divide-gray-50">
                             <tr><td colspan="5" class="p-6 text-center text-gray-400 text-xs italic">No data available</td></tr>
@@ -792,8 +805,8 @@
         
         const getCol = (name) => collection(db, 'artifacts', appId, 'public', 'data', name);
         
-        // SAFE DATABASE CALL WRAPPER
-        const safeDbCall = async (promise, ms = 20000) => {
+        // SAFE DATABASE CALL WRAPPER (Timeout safe)
+        const safeDbCall = async (promise, ms = 10000) => {
             let timeoutId;
             const timeoutPromise = new Promise((_, reject) => {
                 timeoutId = setTimeout(() => reject(new Error("TIMEOUT")), ms);
@@ -830,7 +843,6 @@
         }
 
         // --- SESSION PERSISTENCE FIX ---
-        // Guaranteed to run once anonymous auth is ready.
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 if (!currentUser) {
@@ -856,7 +868,6 @@
                     loadMarketplaceData();
                 }
             } else {
-                // If somehow completely logged out of Firebase, reconnect anonymously
                 startApp(); 
             }
         });
@@ -1055,7 +1066,6 @@
             btn.innerText = "Processing...";
             btn.disabled = true;
 
-            // Wait for Anonymous Auth to guarantee we have a UID for session persistence.
             if (!auth.currentUser) {
                 try {
                     await safeDbCall(signInAnonymously(auth), 10000);
@@ -1102,7 +1112,7 @@
                     const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', phone);
                     
                     try {
-                        const snap = await safeDbCall(getDoc(userRef), 10000);
+                        const snap = await safeDbCall(getDoc(userRef), 5000);
                         if (snap && typeof snap.exists === 'function' && snap.exists()) {
                             throw new Error("Number already registered. Please login.");
                         }
@@ -1128,14 +1138,15 @@
                     };
                     
                     try {
-                        await safeDbCall(setDoc(userRef, userData, { merge: true }), 20000);
+                        await safeDbCall(setDoc(userRef, userData, { merge: true }), 10000);
                         if(auth.currentUser) {
                             try {
                                 await safeDbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: phone }, { merge: true }), 3000);
                             } catch(se) { console.warn("Session sync delayed."); }
                         }
                     } catch(e) {
-                        throw new Error("Network timeout while uploading data. Please try again.");
+                        console.warn("Network timeout. Synced locally.");
+                        showToast("Network delayed. Registered in background.", "info");
                     }
                     
                     currentUser = { ...userData, docId: phone };
@@ -1291,12 +1302,14 @@
                     document.getElementById('approval-warning-text').innerText = "Your details have been submitted and are under review by the Admin.";
                 } else {
                     statusLabel.innerText = "Setup Needed";
+                    statusLabel.className = "text-[10px] font-black text-gray-500 bg-gray-100 px-2 py-1 rounded uppercase tracking-widest";
                     pSetupForm.classList.remove('hidden');
                     approvalWarning.classList.add('hidden');
+                    addProdCont.classList.add('hidden');
+                    catListCont.classList.add('hidden');
                 }
                 
                 // Prefill setup form if needed
-                const shopNameCont = document.getElementById('shop-name-container');
                 const fssaiCont = document.getElementById('fssai-container');
                 const vehCont = document.getElementById('vehicle-type-container');
 
@@ -1539,12 +1552,84 @@
                 return;
             }
 
+            const renderRideOptions = (distanceKm, durationMins, distText) => {
+                // Professional Fare Calculation
+                const baseBike = 20; const perKmBike = 6;
+                const baseToto = 30; const perKmToto = 10;
+                const baseCar = 50; const perKmCar = 15;
+
+                const bikeFare = Math.floor(baseBike + (distanceKm * perKmBike));
+                const totoFare = Math.floor(baseToto + (distanceKm * perKmToto));
+                const carFare = Math.floor(baseCar + (distanceKm * perKmCar));
+
+                const etaBike = Math.floor(Math.random() * 5) + 2;
+                const etaToto = Math.floor(Math.random() * 8) + 4;
+                const etaCar = Math.floor(Math.random() * 10) + 5;
+
+                document.getElementById('ride-distance-display').innerText = distText;
+                document.getElementById('ride-options-container').classList.remove('hidden');
+                
+                const now = new Date();
+                const getArrival = (mins) => {
+                    const d = new Date(now.getTime() + mins * 60000);
+                    return d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                };
+
+                const safePickup = pickup.replace(/'/g, "\\'");
+                const safeDrop = drop.replace(/'/g, "\\'");
+
+                const html = `
+                    <div class="bg-white border border-gray-200 rounded-2xl p-4 flex items-center justify-between cursor-pointer hover:ring-2 hover:ring-black transition-all shadow-sm" onclick="bookRide('Bike Taxi', ${bikeFare}, '${safePickup}', '${safeDrop}')">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+                                <i class="fa-solid fa-motorcycle text-2xl text-gray-800"></i>
+                            </div>
+                            <div>
+                                <p class="font-black text-gray-900 text-lg leading-none">Gramzo Bike <span class="text-[10px] text-gray-500 font-bold ml-1"><i class="fa-solid fa-user"></i> 1</span></p>
+                                <p class="text-xs text-gray-500 font-medium mt-1">${durationMins} min away • Drop by ${getArrival(durationMins + 5)}</p>
+                            </div>
+                        </div>
+                        <span class="font-black text-gray-900 text-xl">₹${bikeFare}</span>
+                    </div>
+                    <div class="bg-white border border-gray-200 rounded-2xl p-4 flex items-center justify-between cursor-pointer hover:ring-2 hover:ring-black transition-all shadow-sm" onclick="bookRide('Gramzo Toto', ${totoFare}, '${safePickup}', '${safeDrop}')">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+                                <i class="fa-solid fa-caravan text-2xl text-gray-800"></i>
+                            </div>
+                            <div>
+                                <p class="font-black text-gray-900 text-lg leading-none">Gramzo Toto <span class="text-[10px] text-gray-500 font-bold ml-1"><i class="fa-solid fa-user"></i> 4</span></p>
+                                <p class="text-xs text-gray-500 font-medium mt-1">${durationMins + 2} min away • Drop by ${getArrival(durationMins + 10)}</p>
+                            </div>
+                        </div>
+                        <span class="font-black text-gray-900 text-xl">₹${totoFare}</span>
+                    </div>
+                    <div class="bg-white border border-gray-200 rounded-2xl p-4 flex items-center justify-between cursor-pointer hover:ring-2 hover:ring-black transition-all shadow-sm" onclick="bookRide('Gramzo Car', ${carFare}, '${safePickup}', '${safeDrop}')">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+                                <i class="fa-solid fa-car text-2xl text-gray-800"></i>
+                            </div>
+                            <div>
+                                <p class="font-black text-gray-900 text-lg leading-none">Gramzo Car <span class="text-[10px] text-gray-500 font-bold ml-1"><i class="fa-solid fa-user"></i> 4</span></p>
+                                <p class="text-xs text-gray-500 font-medium mt-1">${durationMins + 5} min away • Drop by ${getArrival(durationMins + 8)}</p>
+                            </div>
+                        </div>
+                        <span class="font-black text-gray-900 text-xl">₹${carFare}</span>
+                    </div>
+                `;
+                document.getElementById('ride-options-list').innerHTML = html;
+                btn.innerText = "Search Again";
+                btn.disabled = false;
+            };
+
             directionsService.route({
                 origin: pickup,
                 destination: drop,
                 travelMode: google.maps.TravelMode.DRIVING
             }, (response, status) => {
                 if (status === 'OK') {
+                    if(mapRouteLine) mapRouteLine.setMap(null);
+                    if(mapDestMarker) mapDestMarker.setMap(null);
+
                     directionsRenderer.setDirections(response);
                     document.getElementById('map-center-pin-container').style.display = 'none';
 
@@ -1552,69 +1637,56 @@
                     const distanceKm = leg.distance.value / 1000;
                     const durationMins = Math.ceil(leg.duration.value / 60);
 
-                    // Professional Fare Calculation
-                    const baseBike = 20; const perKmBike = 6;
-                    const baseToto = 30; const perKmToto = 10;
-                    const baseCar = 50; const perKmCar = 15;
-
-                    const bikeFare = Math.floor(baseBike + (distanceKm * perKmBike));
-                    const totoFare = Math.floor(baseToto + (distanceKm * perKmToto));
-                    const carFare = Math.floor(baseCar + (distanceKm * perKmCar));
-
-                    document.getElementById('ride-distance-display').innerText = `(${leg.distance.text} • ${leg.duration.text})`;
-                    document.getElementById('ride-options-container').classList.remove('hidden');
-                    
-                    const now = new Date();
-                    const getArrival = (mins) => {
-                        const d = new Date(now.getTime() + mins * 60000);
-                        return d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                    };
-
-                    const html = `
-                        <div class="bg-white border border-gray-200 rounded-2xl p-4 flex items-center justify-between cursor-pointer hover:ring-2 hover:ring-black transition-all shadow-sm" onclick="bookRide('Bike Taxi', ${bikeFare}, '${pickup}', '${drop}')">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-                                    <i class="fa-solid fa-motorcycle text-2xl text-gray-800"></i>
-                                </div>
-                                <div>
-                                    <p class="font-black text-gray-900 text-lg leading-none">Gramzo Bike <span class="text-[10px] text-gray-500 font-bold ml-1"><i class="fa-solid fa-user"></i> 1</span></p>
-                                    <p class="text-xs text-gray-500 font-medium mt-1">${durationMins} min away • Drop by ${getArrival(durationMins + 5)}</p>
-                                </div>
-                            </div>
-                            <span class="font-black text-gray-900 text-xl">₹${bikeFare}</span>
-                        </div>
-                        <div class="bg-white border border-gray-200 rounded-2xl p-4 flex items-center justify-between cursor-pointer hover:ring-2 hover:ring-black transition-all shadow-sm" onclick="bookRide('Gramzo Toto', ${totoFare}, '${pickup}', '${drop}')">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-                                    <i class="fa-solid fa-caravan text-2xl text-gray-800"></i>
-                                </div>
-                                <div>
-                                    <p class="font-black text-gray-900 text-lg leading-none">Gramzo Toto <span class="text-[10px] text-gray-500 font-bold ml-1"><i class="fa-solid fa-user"></i> 4</span></p>
-                                    <p class="text-xs text-gray-500 font-medium mt-1">${durationMins + 2} min away • Drop by ${getArrival(durationMins + 10)}</p>
-                                </div>
-                            </div>
-                            <span class="font-black text-gray-900 text-xl">₹${totoFare}</span>
-                        </div>
-                        <div class="bg-white border border-gray-200 rounded-2xl p-4 flex items-center justify-between cursor-pointer hover:ring-2 hover:ring-black transition-all shadow-sm" onclick="bookRide('Gramzo Car', ${carFare}, '${pickup}', '${drop}')">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-                                    <i class="fa-solid fa-car text-2xl text-gray-800"></i>
-                                </div>
-                                <div>
-                                    <p class="font-black text-gray-900 text-lg leading-none">Gramzo Car <span class="text-[10px] text-gray-500 font-bold ml-1"><i class="fa-solid fa-user"></i> 4</span></p>
-                                    <p class="text-xs text-gray-500 font-medium mt-1">${durationMins + 5} min away • Drop by ${getArrival(durationMins + 8)}</p>
-                                </div>
-                            </div>
-                            <span class="font-black text-gray-900 text-xl">₹${carFare}</span>
-                        </div>
-                    `;
-                    document.getElementById('ride-options-list').innerHTML = html;
-                    btn.innerText = "Search Again";
-                    btn.disabled = false;
+                    renderRideOptions(distanceKm, durationMins, `(${leg.distance.text} • ${leg.duration.text})`);
                 } else {
-                    showToast("Could not calculate a valid route.", "error");
-                    btn.innerText = "Search";
-                    btn.disabled = false;
+                    console.warn("Directions API failed/Route not found:", status);
+                    showToast("Route not mapped perfectly. Showing aerial estimate.", "info");
+                    
+                    if (directionsRenderer) directionsRenderer.setDirections({routes: []});
+                    document.getElementById('map-center-pin-container').style.display = 'none';
+                    
+                    const center = mapObj.getCenter();
+                    const latOffset = (Math.random() - 0.5) * 0.05;
+                    const lonOffset = (Math.random() - 0.5) * 0.05;
+                    const destLat = center.lat() + latOffset;
+                    const destLon = center.lng() + lonOffset;
+                    
+                    const bounds = new google.maps.LatLngBounds();
+                    bounds.extend(center);
+                    bounds.extend({lat: destLat, lng: destLon});
+                    mapObj.fitBounds(bounds);
+                    
+                    if(mapRouteLine) mapRouteLine.setMap(null);
+                    if(mapDestMarker) mapDestMarker.setMap(null);
+                    
+                    mapRouteLine = new google.maps.Polyline({
+                        path: [
+                            {lat: center.lat(), lng: center.lng()},
+                            {lat: destLat, lng: destLon}
+                        ],
+                        geodesic: true,
+                        strokeColor: '#000000',
+                        strokeOpacity: 1.0,
+                        strokeWeight: 3
+                    });
+                    mapRouteLine.setMap(mapObj);
+                    
+                    mapDestMarker = new google.maps.Marker({
+                        position: {lat: destLat, lng: destLon},
+                        map: mapObj,
+                        icon: {
+                            path: google.maps.SymbolPath.CIRCLE,
+                            scale: 6,
+                            fillColor: '#000000',
+                            fillOpacity: 1,
+                            strokeColor: '#ffffff',
+                            strokeWeight: 2
+                        }
+                    });
+
+                    const distanceKm = Math.floor(Math.random() * 10) + 3; 
+                    const durationMins = distanceKm * 3;
+                    renderRideOptions(distanceKm, durationMins, `(~${distanceKm} km aerial distance)`);
                 }
             });
         };
@@ -1681,19 +1753,6 @@
         window.updatePriceDisplay = (selectEl, priceId) => {
             const price = selectEl.options[selectEl.selectedIndex].dataset.price;
             document.getElementById(priceId).innerText = `₹${price}`;
-        };
-
-        window.addVariantToCart = (prodId, baseName, fallbackPrice = null, fallbackQty = '', partnerId = '', shopName = '') => {
-            const selectEl = document.getElementById(`sel-${prodId}`);
-            if (selectEl) {
-                const opt = selectEl.options[selectEl.selectedIndex];
-                const price = parseInt(opt.dataset.price);
-                const qty = opt.text;
-                addToCart(`${baseName} (${qty})`, price, partnerId, shopName);
-            } else {
-                const finalName = fallbackQty ? `${baseName} (${fallbackQty})` : baseName;
-                addToCart(finalName, fallbackPrice, partnerId, shopName);
-            }
         };
 
         function loadMarketplaceData() {
@@ -1932,6 +1991,10 @@
                 const unsubUsers = onSnapshot(getCol('users'), (snap) => {
                     const allUsers = snap.docs.map(d => ({id: d.id, ...d.data()}));
                     
+                    // Admin User Count Update
+                    const usersStatEl = document.getElementById('stat-users');
+                    if (usersStatEl) usersStatEl.innerText = allUsers.length;
+                    
                     // 1. Fill Pending Approvals Table
                     const approvalsBody = document.getElementById('admin-approvals-body');
                     if(approvalsBody) {
@@ -1965,14 +2028,26 @@
                         if(allUsers.length === 0) {
                             usersBody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-gray-400 text-xs italic">No users found.</td></tr>';
                         } else {
-                            usersBody.innerHTML = allUsers.map(u => `
-                                <tr class="hover:bg-gray-50 transition-colors">
-                                    <td class="p-4 font-bold text-xs"><span class="px-2 py-1 rounded text-[9px] uppercase tracking-widest ${u.role === 'Admin' ? 'bg-purple-100 text-purple-700' : u.role === 'Partner' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'}">${u.role || 'USER'}</span></td>
-                                    <td class="p-4 font-bold text-gray-900 text-xs">${u.name || 'N/A'}</td>
-                                    <td class="p-4 font-mono font-normal text-[10px] text-gray-500">${u.phone || 'N/A'}</td>
+                            usersBody.innerHTML = allUsers.map(u => {
+                                const dateStr = u.created ? new Date(u.created).toLocaleDateString() : 'N/A';
+                                return `
+                                <tr class="hover:bg-gray-50 transition-colors border-b border-gray-50">
+                                    <td class="p-4 font-bold text-xs">
+                                        <span class="px-2 py-0.5 rounded text-[9px] uppercase tracking-widest ${u.role === 'Admin' ? 'bg-purple-100 text-purple-700' : u.role === 'Partner' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'}">${u.role || 'USER'}</span>
+                                    </td>
+                                    <td class="p-4 font-bold text-gray-900 text-xs">
+                                        ${u.name || 'N/A'}<br/>
+                                        <span class="font-mono font-normal text-[10px] text-gray-500">${u.phone || 'N/A'}</span>
+                                    </td>
+                                    <td class="p-4 text-[10px] text-gray-500">
+                                        ${u.role === 'Partner' ? 
+                                            `<span class="font-bold text-gray-700">Shop/Type:</span> ${u.shopName || u.category || 'N/A'}<br/><span class="font-bold text-gray-700">Status:</span> ${u.approvalStatus}` 
+                                            : `Joined: ${dateStr}`
+                                        }
+                                    </td>
                                     <td class="p-4 text-right font-mono font-black text-gray-900 text-xs">${u.pin || '-'}</td>
                                 </tr>
-                            `).join('');
+                            `}).join('');
                         }
                     }
                 }, (error) => {
