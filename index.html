@@ -77,10 +77,6 @@
         }
         .modal-overlay.active .modal-content { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 
-        .timeline-line {
-            position: absolute; left: 1.15rem; top: 2.5rem; bottom: 2.5rem; width: 2px; background-color: #e5e7eb; z-index: 0;
-        }
-
         /* Google Maps Specific Overrides */
         #ride-map { z-index: 10; }
         .pac-container { border-radius: 1rem; border: 1px solid #e5e7eb; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); font-family: 'Outfit', sans-serif; z-index: 9999; }
@@ -293,7 +289,7 @@
                 <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 pb-2 gap-4">
                     <div class="text-center sm:text-left">
                         <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                        <p class="text-[10px] text-emerald-700 font-bold mt-2 bg-emerald-50 border border-emerald-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v1.3.5 - Network Timeout Fix</p>
+                        <p class="text-[10px] text-emerald-700 font-bold mt-2 bg-emerald-50 border border-emerald-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v1.4.0 - Premium Ride Experience</p>
                     </div>
                     <div class="flex gap-4 text-gray-400 text-sm">
                         <a href="#" onclick="return false;" class="hover:text-blue-600 transition"><i class="fa-brands fa-facebook"></i></a>
@@ -314,59 +310,62 @@
         <!-- ========================================== -->
         <!-- VIEW: RIDE BOOKING                         -->
         <!-- ========================================== -->
-        <div id="view-RideBooking" class="view-section space-y-6">
-            <div class="flex items-center gap-3 mb-2">
-                <button type="button" onclick="switchMainView('User')" class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-arrow-left"></i></button>
-                <h2 class="text-2xl font-black text-gray-900" data-i18n="book_ride">Book a Ride</h2>
+        <div id="view-RideBooking" class="view-section space-y-4">
+            <!-- Rapido/Uber Style Header -->
+            <div class="flex items-center gap-4 mb-2 bg-white p-4 rounded-3xl shadow-sm border border-gray-100">
+                <button type="button" onclick="switchMainView('User')" class="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center text-gray-800 hover:bg-gray-100 transition-colors"><i class="fa-solid fa-arrow-left"></i></button>
+                <h2 class="text-xl font-black text-gray-900 tracking-tight flex-1">Where are you going?</h2>
             </div>
 
-            <!-- Uber/Rapido Style Free Map Container -->
-            <div class="relative h-64 sm:h-80 w-full rounded-3xl mb-4 bg-gray-100 z-10 border border-gray-200 shadow-inner overflow-hidden">
+            <!-- Professional Map Area -->
+            <div class="relative h-[45vh] w-full rounded-[2rem] bg-gray-100 z-10 border border-gray-200 shadow-inner overflow-hidden">
                 <div id="ride-map" class="w-full h-full z-10"></div>
                 
                 <!-- Fixed Center Pin HTML Overlay -->
-                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-full z-[400] pointer-events-none flex flex-col items-center justify-end pb-1">
-                    <div id="map-pin-tooltip" class="bg-black text-white text-[10px] font-bold px-2 py-1 rounded-md mb-1 shadow-md whitespace-nowrap transition-colors">Set Location</div>
+                <div id="map-center-pin-container" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-full z-[400] pointer-events-none flex flex-col items-center justify-end pb-1">
+                    <div id="map-pin-tooltip" class="bg-black text-white text-[10px] font-bold px-3 py-1.5 rounded-lg mb-1 shadow-xl whitespace-nowrap transition-colors relative">
+                        Set Location
+                        <div class="absolute bottom-[-4px] left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-black"></div>
+                    </div>
                     <i class="fa-solid fa-location-dot text-4xl drop-shadow-md transition-colors duration-300 text-black" id="map-center-pin"></i>
-                    <div class="w-2 h-1 bg-black/30 rounded-full mt-0.5 blur-[1px]"></div>
+                    <div class="w-3 h-1 bg-black/20 rounded-full mt-0.5 blur-[2px]"></div>
                 </div>
 
                 <!-- Recenter GPS Button -->
-                <button type="button" onclick="centerMapToGPS()" class="absolute bottom-6 right-4 z-[400] bg-white w-10 h-10 rounded-full shadow-lg flex items-center justify-center text-gray-700 hover:text-black border border-gray-100 transition-transform active:scale-90">
-                    <i class="fa-solid fa-location-crosshairs text-lg"></i>
+                <button type="button" onclick="centerMapToGPS()" class="absolute bottom-4 right-4 z-[400] bg-white w-12 h-12 rounded-full shadow-lg flex items-center justify-center text-gray-800 hover:text-black border border-gray-100 transition-transform active:scale-90">
+                    <i class="fa-solid fa-location-crosshairs text-xl"></i>
                 </button>
             </div>
             
-            <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100 relative mt-[-2rem] z-20">
-                <div class="timeline-line" style="top: 2.5rem; bottom: 2.5rem; border-left: 2px dashed #d1d5db; background: transparent;"></div>
-                <div class="relative z-10 space-y-4">
-                    <div class="flex items-center gap-3 relative">
-                        <div class="w-3 h-3 rounded-full bg-black shrink-0 z-10"></div>
+            <!-- Floating Inputs Sheet -->
+            <div class="bg-white rounded-[2rem] p-5 shadow-2xl border border-gray-100 relative z-20 mx-2 -mt-12">
+                <div class="absolute left-7 top-10 bottom-10 w-0.5 z-0 border-l-[2.5px] border-dashed border-gray-300 bg-transparent"></div>
+                
+                <div class="relative z-10 space-y-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-3 h-3 rounded-full bg-blue-600 shrink-0 z-10 shadow-[0_0_0_4px_rgba(37,99,235,0.2)]"></div>
                         <div class="relative w-full">
-                            <input id="ride-pickup" onfocus="setActiveMapInput('ride-pickup')" class="input-field !pl-4 !pr-10 !border-gray-200 focus:!border-black focus:!ring-black/20" placeholder="Current Location">
+                            <input id="ride-pickup" onfocus="setActiveMapInput('ride-pickup')" class="w-full px-4 py-3.5 bg-gray-50 rounded-xl outline-none focus:bg-white focus:ring-2 ring-blue-500/30 transition-all text-sm font-bold text-gray-900 border border-transparent focus:border-blue-400" placeholder="Current Location">
                         </div>
                     </div>
-                    <div class="flex items-center gap-3 relative">
-                        <div class="w-3 h-3 rounded-none bg-black shrink-0 z-10"></div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-3 h-3 rounded-sm bg-black shrink-0 z-10 shadow-[0_0_0_4px_rgba(0,0,0,0.1)]"></div>
                         <div class="relative w-full">
-                            <input id="ride-drop" onfocus="setActiveMapInput('ride-drop')" class="input-field !pl-4 focus:!border-black focus:!ring-black/20" placeholder="Where to?">
+                            <input id="ride-drop" onfocus="setActiveMapInput('ride-drop')" class="w-full px-4 py-3.5 bg-gray-100 rounded-xl outline-none focus:bg-white focus:ring-2 ring-black/20 transition-all text-sm font-bold text-gray-900 border border-transparent focus:border-gray-400" placeholder="Search destination">
                         </div>
                     </div>
                 </div>
                 
-                <button type="button" onclick="calculateRideFares()" id="btn-find-rides" class="w-full bg-black text-white py-4 rounded-2xl font-bold mt-6 hover:bg-gray-800 transition-colors active:scale-95 shadow-xl shadow-gray-900/20" data-i18n="find_rides">Search</button>
-                
-                <!-- SMALL AMBULANCE SOS BUTTON -->
-                <div class="text-center mt-4">
-                    <button type="button" onclick="bookAmbulance()" class="text-[10px] text-red-600 bg-white px-3 py-1.5 rounded-full font-bold hover:bg-red-50 transition-colors active:scale-95 inline-flex items-center gap-1.5 border border-red-100 shadow-sm">
-                        <i class="fa-solid fa-truck-medical animate-pulse"></i> Book Ambulance (SOS)
-                    </button>
-                </div>
+                <button type="button" onclick="calculateRideFares()" id="btn-find-rides" class="w-full bg-black text-white py-4 rounded-xl font-bold mt-5 hover:bg-gray-800 transition-all active:scale-95 shadow-xl shadow-gray-900/20 text-base" data-i18n="find_rides">Search Options</button>
             </div>
 
-            <div id="ride-options-container" class="hidden space-y-4 animate-fadeIn">
-                <h3 class="font-bold text-gray-900 text-lg ml-2">Choose a ride <span id="ride-distance-display" class="lowercase normal-case text-gray-400 text-xs font-medium ml-2"></span></h3>
-                <div id="ride-options-list" class="space-y-3"></div>
+            <!-- Dynamic Options Sheet -->
+            <div id="ride-options-container" class="hidden space-y-4 animate-fadeIn px-2 pt-2">
+                <h3 class="font-black text-gray-900 text-lg flex items-center justify-between">
+                    Choose a ride 
+                    <span id="ride-distance-display" class="text-gray-400 text-xs font-bold bg-gray-100 px-3 py-1 rounded-full"></span>
+                </h3>
+                <div id="ride-options-list" class="space-y-3 pb-8"></div>
             </div>
         </div>
 
@@ -788,6 +787,8 @@
         let mapDestMarker = null;
         let pickupAutocomplete = null;
         let dropAutocomplete = null;
+        let directionsService = null;
+        let directionsRenderer = null;
         
         const getCol = (name) => collection(db, 'artifacts', appId, 'public', 'data', name);
         
@@ -1101,13 +1102,12 @@
                     const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', phone);
                     
                     try {
-                        const snap = await safeDbCall(getDoc(userRef), 5000);
+                        const snap = await safeDbCall(getDoc(userRef), 10000);
                         if (snap && typeof snap.exists === 'function' && snap.exists()) {
                             throw new Error("Number already registered. Please login.");
                         }
                     } catch(e) {
                         if (e.message && e.message.includes("registered")) throw e;
-                        console.warn("Could not check duplicate number due to network timeout.");
                     }
 
                     const userData = { 
@@ -1128,15 +1128,14 @@
                     };
                     
                     try {
-                        await safeDbCall(setDoc(userRef, userData, { merge: true }), 8000);
+                        await safeDbCall(setDoc(userRef, userData, { merge: true }), 20000);
                         if(auth.currentUser) {
                             try {
                                 await safeDbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: phone }, { merge: true }), 3000);
                             } catch(se) { console.warn("Session sync delayed."); }
                         }
                     } catch(e) {
-                        console.warn("Network timeout. Synced locally.");
-                        showToast("Network delayed. Signed up in offline mode.", "info");
+                        throw new Error("Network timeout while uploading data. Please try again.");
                     }
                     
                     currentUser = { ...userData, docId: phone };
@@ -1380,6 +1379,9 @@
             document.getElementById('ride-pickup').classList.remove('!border-black', 'focus:!border-black', 'focus:!ring-black/20');
             document.getElementById('ride-drop').classList.remove('!border-black', 'focus:!border-black', 'focus:!ring-black/20');
             
+            if (directionsRenderer) directionsRenderer.setDirections({routes: []});
+            document.getElementById('map-center-pin-container').style.display = 'flex';
+
             if (id === 'ride-pickup') {
                 pin.className = "fa-solid fa-location-dot text-4xl drop-shadow-md transition-colors duration-300 text-black";
                 tooltip.innerText = "Set Pickup";
@@ -1442,6 +1444,13 @@
                         gestureHandling: "greedy" 
                     });
 
+                    directionsService = new google.maps.DirectionsService();
+                    directionsRenderer = new google.maps.DirectionsRenderer({
+                        map: mapObj,
+                        suppressMarkers: false, 
+                        polylineOptions: { strokeColor: '#111827', strokeWeight: 4 }
+                    });
+
                     const pickupInput = document.getElementById('ride-pickup');
                     const dropInput = document.getElementById('ride-drop');
                     
@@ -1497,6 +1506,9 @@
                     });
                 }
                 
+                if (directionsRenderer) directionsRenderer.setDirections({routes: []});
+                document.getElementById('map-center-pin-container').style.display = 'flex';
+
                 google.maps.event.trigger(mapObj, 'resize');
                 mapObj.setCenter({ lat: userLat, lng: userLon });
                 
@@ -1517,109 +1529,94 @@
             }
 
             const btn = document.getElementById('btn-find-rides');
-            btn.innerText = "Searching...";
+            btn.innerText = "Finding route...";
             btn.disabled = true;
 
-            setTimeout(() => {
-                if(mapObj && typeof google !== 'undefined') {
-                    if(mapRouteLine) mapRouteLine.setMap(null);
-                    if(mapDestMarker) mapDestMarker.setMap(null);
-                    
-                    const center = mapObj.getCenter();
-                    const latOffset = (Math.random() - 0.5) * 0.05;
-                    const lonOffset = (Math.random() - 0.5) * 0.05;
-                    const destLat = center.lat() + latOffset;
-                    const destLon = center.lng() + lonOffset;
-                    
-                    const bounds = new google.maps.LatLngBounds();
-                    bounds.extend(center);
-                    bounds.extend({lat: destLat, lng: destLon});
-                    mapObj.fitBounds(bounds);
-                    
-                    mapRouteLine = new google.maps.Polyline({
-                        path: [
-                            {lat: center.lat(), lng: center.lng()},
-                            {lat: center.lat() + latOffset/2, lng: center.lng()},
-                            {lat: center.lat() + latOffset/2, lng: destLon},
-                            {lat: destLat, lng: destLon}
-                        ],
-                        geodesic: true,
-                        strokeColor: '#000000',
-                        strokeOpacity: 1.0,
-                        strokeWeight: 3
-                    });
-                    mapRouteLine.setMap(mapObj);
-                    
-                    mapDestMarker = new google.maps.Marker({
-                        position: {lat: destLat, lng: destLon},
-                        map: mapObj,
-                        icon: {
-                            path: google.maps.SymbolPath.CIRCLE,
-                            scale: 6,
-                            fillColor: '#000000',
-                            fillOpacity: 1,
-                            strokeColor: '#ffffff',
-                            strokeWeight: 2
-                        }
-                    });
-                }
-
-                // Fare calculations & Mock ETA
-                const distanceKm = Math.floor(Math.random() * 15) + 2; 
-
-                const bikeFare = distanceKm <= 3 ? 25 : 25 + ((distanceKm - 3) * 3);
-                const totoFare = distanceKm <= 3 ? 50 : 50 + ((distanceKm - 3) * 10);
-                const carFare = distanceKm * 15;
-                
-                const etaBike = Math.floor(Math.random() * 5) + 2;
-                const etaToto = Math.floor(Math.random() * 8) + 4;
-                const etaCar = Math.floor(Math.random() * 10) + 5;
-
-                const now = new Date();
-                const getArrivalTime = (mins) => {
-                    const arrival = new Date(now.getTime() + mins * 60000);
-                    return arrival.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                };
-
-                document.getElementById('ride-distance-display').innerText = `(~${distanceKm} km route)`;
-                document.getElementById('ride-options-container').classList.remove('hidden');
-                
-                const html = `
-                    <div class="bg-white border border-gray-200 rounded-2xl p-4 flex items-center justify-between cursor-pointer hover:ring-2 hover:ring-black transition-all shadow-sm" onclick="bookRide('Bike Taxi', ${bikeFare}, '${pickup}', '${drop}')">
-                        <div class="flex items-center gap-4">
-                            <i class="fa-solid fa-motorcycle text-3xl text-gray-800 w-10 text-center"></i>
-                            <div>
-                                <p class="font-black text-gray-900 text-lg leading-none">Gramzo Bike <i class="fa-solid fa-user text-[10px] text-gray-400 ml-1"></i><span class="text-xs text-gray-500 ml-0.5">1</span></p>
-                                <p class="text-xs text-emerald-600 font-bold mt-1">${etaBike} min away <span class="text-gray-400 font-medium ml-1">• ${getArrivalTime(etaBike)}</span></p>
-                            </div>
-                        </div>
-                        <span class="font-black text-gray-900 text-xl">₹${bikeFare}</span>
-                    </div>
-                    <div class="bg-white border border-gray-200 rounded-2xl p-4 flex items-center justify-between cursor-pointer hover:ring-2 hover:ring-black transition-all shadow-sm" onclick="bookRide('Gramzo Toto', ${totoFare}, '${pickup}', '${drop}')">
-                        <div class="flex items-center gap-4">
-                            <i class="fa-solid fa-caravan text-3xl text-gray-800 w-10 text-center"></i>
-                            <div>
-                                <p class="font-black text-gray-900 text-lg leading-none">Gramzo Toto <i class="fa-solid fa-user text-[10px] text-gray-400 ml-1"></i><span class="text-xs text-gray-500 ml-0.5">3</span></p>
-                                <p class="text-xs text-emerald-600 font-bold mt-1">${etaToto} min away <span class="text-gray-400 font-medium ml-1">• ${getArrivalTime(etaToto)}</span></p>
-                            </div>
-                        </div>
-                        <span class="font-black text-gray-900 text-xl">₹${totoFare}</span>
-                    </div>
-                    <div class="bg-white border border-gray-200 rounded-2xl p-4 flex items-center justify-between cursor-pointer hover:ring-2 hover:ring-black transition-all shadow-sm" onclick="bookRide('Gramzo Car', ${carFare}, '${pickup}', '${drop}')">
-                        <div class="flex items-center gap-4">
-                            <i class="fa-solid fa-car text-3xl text-gray-800 w-10 text-center"></i>
-                            <div>
-                                <p class="font-black text-gray-900 text-lg leading-none">Gramzo Car <i class="fa-solid fa-user text-[10px] text-gray-400 ml-1"></i><span class="text-xs text-gray-500 ml-0.5">4</span></p>
-                                <p class="text-xs text-emerald-600 font-bold mt-1">${etaCar} min away <span class="text-gray-400 font-medium ml-1">• ${getArrivalTime(etaCar)}</span></p>
-                            </div>
-                        </div>
-                        <span class="font-black text-gray-900 text-xl">₹${carFare}</span>
-                    </div>
-                `;
-                document.getElementById('ride-options-list').innerHTML = html;
+            if (typeof google === 'undefined' || !directionsService) {
+                showToast("Google Maps is not loaded properly.", "error");
                 btn.innerText = "Search";
                 btn.disabled = false;
-            }, 800);
+                return;
+            }
+
+            directionsService.route({
+                origin: pickup,
+                destination: drop,
+                travelMode: google.maps.TravelMode.DRIVING
+            }, (response, status) => {
+                if (status === 'OK') {
+                    directionsRenderer.setDirections(response);
+                    document.getElementById('map-center-pin-container').style.display = 'none';
+
+                    const leg = response.routes[0].legs[0];
+                    const distanceKm = leg.distance.value / 1000;
+                    const durationMins = Math.ceil(leg.duration.value / 60);
+
+                    // Professional Fare Calculation
+                    const baseBike = 20; const perKmBike = 6;
+                    const baseToto = 30; const perKmToto = 10;
+                    const baseCar = 50; const perKmCar = 15;
+
+                    const bikeFare = Math.floor(baseBike + (distanceKm * perKmBike));
+                    const totoFare = Math.floor(baseToto + (distanceKm * perKmToto));
+                    const carFare = Math.floor(baseCar + (distanceKm * perKmCar));
+
+                    document.getElementById('ride-distance-display').innerText = `(${leg.distance.text} • ${leg.duration.text})`;
+                    document.getElementById('ride-options-container').classList.remove('hidden');
+                    
+                    const now = new Date();
+                    const getArrival = (mins) => {
+                        const d = new Date(now.getTime() + mins * 60000);
+                        return d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    };
+
+                    const html = `
+                        <div class="bg-white border border-gray-200 rounded-2xl p-4 flex items-center justify-between cursor-pointer hover:ring-2 hover:ring-black transition-all shadow-sm" onclick="bookRide('Bike Taxi', ${bikeFare}, '${pickup}', '${drop}')">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+                                    <i class="fa-solid fa-motorcycle text-2xl text-gray-800"></i>
+                                </div>
+                                <div>
+                                    <p class="font-black text-gray-900 text-lg leading-none">Gramzo Bike <span class="text-[10px] text-gray-500 font-bold ml-1"><i class="fa-solid fa-user"></i> 1</span></p>
+                                    <p class="text-xs text-gray-500 font-medium mt-1">${durationMins} min away • Drop by ${getArrival(durationMins + 5)}</p>
+                                </div>
+                            </div>
+                            <span class="font-black text-gray-900 text-xl">₹${bikeFare}</span>
+                        </div>
+                        <div class="bg-white border border-gray-200 rounded-2xl p-4 flex items-center justify-between cursor-pointer hover:ring-2 hover:ring-black transition-all shadow-sm" onclick="bookRide('Gramzo Toto', ${totoFare}, '${pickup}', '${drop}')">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+                                    <i class="fa-solid fa-caravan text-2xl text-gray-800"></i>
+                                </div>
+                                <div>
+                                    <p class="font-black text-gray-900 text-lg leading-none">Gramzo Toto <span class="text-[10px] text-gray-500 font-bold ml-1"><i class="fa-solid fa-user"></i> 4</span></p>
+                                    <p class="text-xs text-gray-500 font-medium mt-1">${durationMins + 2} min away • Drop by ${getArrival(durationMins + 10)}</p>
+                                </div>
+                            </div>
+                            <span class="font-black text-gray-900 text-xl">₹${totoFare}</span>
+                        </div>
+                        <div class="bg-white border border-gray-200 rounded-2xl p-4 flex items-center justify-between cursor-pointer hover:ring-2 hover:ring-black transition-all shadow-sm" onclick="bookRide('Gramzo Car', ${carFare}, '${pickup}', '${drop}')">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+                                    <i class="fa-solid fa-car text-2xl text-gray-800"></i>
+                                </div>
+                                <div>
+                                    <p class="font-black text-gray-900 text-lg leading-none">Gramzo Car <span class="text-[10px] text-gray-500 font-bold ml-1"><i class="fa-solid fa-user"></i> 4</span></p>
+                                    <p class="text-xs text-gray-500 font-medium mt-1">${durationMins + 5} min away • Drop by ${getArrival(durationMins + 8)}</p>
+                                </div>
+                            </div>
+                            <span class="font-black text-gray-900 text-xl">₹${carFare}</span>
+                        </div>
+                    `;
+                    document.getElementById('ride-options-list').innerHTML = html;
+                    btn.innerText = "Search Again";
+                    btn.disabled = false;
+                } else {
+                    showToast("Could not calculate a valid route.", "error");
+                    btn.innerText = "Search";
+                    btn.disabled = false;
+                }
+            });
         };
 
         window.bookRide = async (type, fare, pickup, drop) => {
