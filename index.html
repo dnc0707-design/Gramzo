@@ -293,7 +293,7 @@
                 <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 pb-2 gap-4">
                     <div class="text-center sm:text-left">
                         <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                        <p class="text-[10px] text-emerald-700 font-bold mt-2 bg-emerald-50 border border-emerald-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v1.3.3 - Fast Partner Reg</p>
+                        <p class="text-[10px] text-emerald-700 font-bold mt-2 bg-emerald-50 border border-emerald-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v1.3.4 - Fast Reg (No Images)</p>
                     </div>
                     <div class="flex gap-4 text-gray-400 text-sm">
                         <a href="#" onclick="return false;" class="hover:text-blue-600 transition"><i class="fa-brands fa-facebook"></i></a>
@@ -1100,7 +1100,7 @@
                             } catch(se) { console.warn("Session sync delayed."); }
                         }
                     } catch(e) {
-                        throw new Error("Network timeout while uploading data. Please try again.");
+                        throw new Error("Network timeout. Please check your internet connection.");
                     }
                     
                     currentUser = { ...userData, docId: phone };
@@ -1892,7 +1892,7 @@
                                         ${u.fssaiNumber ? `<span class="text-[10px] text-gray-600 font-mono">FSSAI: ${u.fssaiNumber}</span>` : ''}
                                         ${u.vehicleNumber ? `<span class="text-[10px] text-gray-600 font-mono">Veh: ${u.vehicleNumber}</span>` : ''}
                                         ${u.dlNumber ? `<span class="text-[10px] text-gray-600 font-mono">DL: ${u.dlNumber}</span>` : ''}
-                                        ${(!u.fssaiNumber && !u.vehicleNumber && !u.dlNumber) ? '<span class="text-[10px] text-gray-400 italic">No Docs</span>' : ''}
+                                        ${(!u.fssaiNumber && !u.vehicleNumber && !u.dlNumber) ? '<span class="text-[10px] text-gray-400 italic">No Docs provided</span>' : ''}
                                     </td>
                                     <td class="p-4 text-right">
                                         <button type="button" onclick="adminReviewPartner('${u.id}', 'Approved')" class="bg-emerald-500 text-white px-3 py-1 rounded text-[10px] font-black uppercase tracking-wider mr-2 hover:bg-emerald-600 transition">Approve</button>
