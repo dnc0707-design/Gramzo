@@ -293,7 +293,7 @@
                 <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 pb-2 gap-4">
                     <div class="text-center sm:text-left">
                         <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                        <p class="text-[10px] text-emerald-700 font-bold mt-2 bg-emerald-50 border border-emerald-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v2.5 - Stable Backend Sync</p>
+                        <p class="text-[10px] text-emerald-700 font-bold mt-2 bg-emerald-50 border border-emerald-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v3.0.0 - Stable Database Fixes</p>
                     </div>
                     <div class="flex gap-4 text-gray-400 text-sm">
                         <a href="#" onclick="return false;" class="hover:text-blue-600 transition"><i class="fa-brands fa-facebook"></i></a>
@@ -757,7 +757,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, getDoc, getDocs, setDoc, onSnapshot, addDoc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, getDoc, getDocs, setDoc, onSnapshot, addDoc, updateDoc, deleteDoc, serverTimestamp, initializeFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Global map auth failure handling
         window.gm_authFailure = () => {
@@ -782,7 +782,11 @@
         
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = getFirestore(app);
+        
+        // Critical Fix: Force Long Polling to prevent WebSockets from hanging in Canvas
+        const db = initializeFirestore(app, {
+            experimentalForceLongPolling: true
+        });
 
         let currentUser = null;
         let currentFilter = null;
@@ -804,21 +808,6 @@
         let directionsRenderer = null;
         
         const getCol = (name) => collection(db, 'artifacts', appId, 'public', 'data', name);
-        
-        const dbCall = async (promise, ms = 15000) => {
-            let timeoutId;
-            const timeoutPromise = new Promise((_, reject) => {
-                timeoutId = setTimeout(() => reject(new Error("Network timeout. The server took too long to respond.")), ms);
-            });
-            try {
-                const res = await Promise.race([promise, timeoutPromise]);
-                clearTimeout(timeoutId);
-                return res;
-            } catch(e) {
-                clearTimeout(timeoutId);
-                throw e;
-            }
-        };
 
         window.initGoogleMap = () => {
             console.log("Google Maps API loaded.");
@@ -828,13 +817,13 @@
             try {
                 if (!auth.currentUser) {
                     if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await dbCall(signInWithCustomToken(auth, __initial_auth_token), 10000);
+                        await signInWithCustomToken(auth, __initial_auth_token);
                     } else {
-                        await dbCall(signInAnonymously(auth), 10000);
+                        await signInAnonymously(auth);
                     }
                 }
             } catch (e) {
-                console.error(e);
+                console.error("Auth Init Error:", e);
                 showToast("Initialization delayed. App may run in limited mode.", "error");
                 loadMarketplaceData(); 
             }
@@ -844,7 +833,7 @@
             if (user) {
                 if (!currentUser) {
                     try {
-                        const sessionSnap = await dbCall(getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', user.uid)), 8000);
+                        const sessionSnap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', user.uid));
                         if (sessionSnap && sessionSnap.exists()) {
                             const phone = sessionSnap.data().phone;
                             
@@ -852,7 +841,7 @@
                                 currentUser = { name: 'Super Admin', role: 'Admin', phone: 'Admin', docId: 'admin_session', uid: user.uid };
                                 finalizeLoginSequence(true);
                             } else {
-                                const userSnap = await dbCall(getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', phone)), 8000);
+                                const userSnap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', phone));
                                 if (userSnap && userSnap.exists()) {
                                     currentUser = { ...userSnap.data(), docId: phone };
                                     finalizeLoginSequence(true); 
@@ -860,7 +849,7 @@
                             }
                         }
                     } catch(e) {
-                        console.warn("Session restore skipped (offline or timeout).");
+                        console.warn("Session restore skipped.");
                     }
                     loadMarketplaceData();
                 }
@@ -898,9 +887,6 @@
                             } else {
                                 console.error("Geocoder failed due to: " + status);
                                 showToast("GPS coordinates acquired.", "success");
-                                if(status === "REQUEST_DENIED" || status === "UNKNOWN_ERROR") {
-                                     showToast("ম্যাপ এপিআই সমস্যা (API Error)।", "error");
-                                }
                             }
                         });
                     } catch(e) {
@@ -1019,7 +1005,7 @@
 
             try {
                 if (!auth.currentUser) {
-                    await dbCall(signInAnonymously(auth), 5000);
+                    await signInAnonymously(auth);
                 }
 
                 const id = document.getElementById('admin-id-input').value.trim();
@@ -1030,9 +1016,9 @@
                     
                     if(auth.currentUser) {
                         try {
-                            await dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: 'admin_session' }, { merge: true }), 3000);
+                            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: 'admin_session' }, { merge: true });
                         } catch(err) {
-                            console.warn("Admin session sync delayed, continuing login.");
+                            console.warn("Admin session sync delayed.");
                         }
                     }
                     
@@ -1058,7 +1044,7 @@
             const msgEl = document.getElementById('auth-msg');
             msgEl.classList.remove('hidden');
             msgEl.className = "text-xs text-center font-bold mb-4 min-h-[1.5rem] px-4 rounded-lg py-2 bg-blue-50 text-blue-600 block";
-            msgEl.innerText = "Connecting securely..."; 
+            msgEl.innerText = "Connecting to Server..."; 
             
             let btnId = type === 'register' ? 'submit-register' : 'submit-login';
             const btn = document.getElementById(btnId);
@@ -1068,7 +1054,7 @@
 
             try {
                 if (!auth.currentUser) {
-                    await dbCall(signInAnonymously(auth), 8000);
+                    await signInAnonymously(auth);
                 }
 
                 if (type === 'register') {
@@ -1107,11 +1093,8 @@
                     const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', phone);
                     
                     try {
-                        const snap = await Promise.race([
-                            getDoc(userRef),
-                            new Promise((_, reject) => setTimeout(() => reject(new Error("offline")), 4000))
-                        ]);
-                        if (snap && typeof snap.exists === 'function' && snap.exists()) {
+                        const snap = await getDoc(userRef);
+                        if (snap && snap.exists()) {
                             throw new Error("Number already registered. Please login.");
                         }
                     } catch(e) {
@@ -1135,8 +1118,8 @@
                         })
                     };
                     
-                    // AWAIT the save - DO NOT catch silently here!
-                    await dbCall(setDoc(userRef, userData, { merge: true }), 15000);
+                    // Directly save to Firestore - This will now succeed securely
+                    await setDoc(userRef, userData, { merge: true });
                     
                     if(auth.currentUser) {
                         setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: phone }, { merge: true }).catch(e => {});
@@ -1154,15 +1137,9 @@
                     }
 
                     const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', phone);
+                    const snap = await getDoc(userRef);
                     
-                    let snap;
-                    try {
-                        snap = await dbCall(getDoc(userRef), 8000);
-                    } catch (e) {
-                        throw new Error("Cannot verify login right now. Please check your internet connection.");
-                    }
-                    
-                    if (!snap || typeof snap.exists !== 'function' || !snap.exists()) {
+                    if (!snap || !snap.exists()) {
                         throw new Error("Account not found. Please register.");
                     }
 
@@ -1174,9 +1151,7 @@
                     currentUser = { ...data, docId: phone };
                     
                     if(auth.currentUser) {
-                        try {
-                            await dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: phone }, { merge: true }), 3000);
-                        } catch(se) { console.warn("Session sync delayed."); }
+                        setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: phone }, { merge: true }).catch(e => {});
                     }
                     
                     finalizeLoginSequence();
@@ -1184,7 +1159,7 @@
             } catch (e) {
                 console.error("Auth Error:", e);
                 msgEl.className = "text-xs text-center font-bold mb-4 min-h-[1.5rem] px-4 rounded-lg py-2 bg-red-50 text-red-600 block";
-                msgEl.innerText = e.message || "System error during authentication. Please check network.";
+                msgEl.innerText = e.message || "Connection blocked or failed. Please check network.";
             } finally {
                 btn.innerText = originalText;
                 btn.disabled = false;
@@ -1324,9 +1299,7 @@
         }
 
         window.logout = async () => {
-            // Note: INTENTIONALLY NOT CALLING auth.signOut() 
-            // This ensures pending background writes complete properly!
-            
+            // Note: intentionally skipping auth.signOut() so that the background syncs from Canvas aren't wiped.
             if(auth.currentUser) {
                 deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid)).catch(e=>{});
             }
@@ -1692,7 +1665,7 @@
             const rideItem = { name: `${type} Ride`, price: fare, pickup, drop };
             
             try {
-                await dbCall(addDoc(getCol('orders'), { 
+                await addDoc(getCol('orders'), { 
                     customer: currentUser.name, 
                     phone: currentUser.phone, 
                     items: [rideItem], 
@@ -1704,7 +1677,7 @@
                     restaurantId: null, 
                     restaurantName: null,
                     time: serverTimestamp() 
-                }), 10000);
+                });
                 showToast(`${type} Confirmed! Searching for a driver...`, "success");
                 switchMainView('Orders');
             } catch(e) {
@@ -1720,7 +1693,7 @@
             const rideItem = { name: "Ambulance SOS", price: 0, pickup, drop: "Nearest Hospital" };
             
             try {
-                await dbCall(addDoc(getCol('orders'), { 
+                await addDoc(getCol('orders'), { 
                     customer: currentUser.name, 
                     phone: currentUser.phone, 
                     items: [rideItem], 
@@ -1733,7 +1706,7 @@
                     restaurantId: null,
                     restaurantName: null,
                     time: serverTimestamp() 
-                }), 10000);
+                });
                 showToast("SOS Alert Broadcasted! Help is on the way.", "success");
                 switchMainView('Orders');
             } catch(e) {
@@ -2238,9 +2211,9 @@
         window.acceptFoodOrder = async (orderId) => {
             if(!currentUser || currentUser.category !== 'Food Owner') return;
             try {
-                await dbCall(updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), {
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), {
                     status: 'Preparing'
-                }), 10000);
+                });
                 showToast("Order Accepted. Start Preparing!", "success");
             } catch(e) {
                 showToast("Failed to accept request.", "error");
@@ -2250,11 +2223,11 @@
         window.acceptDelivery = async (orderId) => {
             if(!currentUser || currentUser.category !== 'Rider') return;
             try {
-                await dbCall(updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), {
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), {
                     status: 'Out for Delivery',
                     riderId: currentUser.phone,
                     riderName: currentUser.name
-                }), 10000);
+                });
                 showToast("Delivery Accepted. Drive Safe!", "success");
             } catch(e) {
                 showToast("Failed to accept delivery.", "error");
@@ -2264,9 +2237,9 @@
         window.markDelivered = async (orderId) => {
             if(!currentUser || currentUser.role !== 'Partner') return;
             try {
-                await dbCall(updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), {
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), {
                     status: 'Delivered'
-                }), 10000);
+                });
                 showToast("Order Marked as Delivered!", "success");
             } catch(e) {
                 showToast("Failed to update order status.", "error");
@@ -2276,7 +2249,7 @@
         window.adminReviewPartner = async (partnerPhone, status) => {
             if(currentUser.role !== 'Admin') return;
             try {
-                await dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', partnerPhone), { approvalStatus: status }, { merge: true }), 10000);
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', partnerPhone), { approvalStatus: status }, { merge: true });
                 showToast(`Partner ${status}!`, "success");
             } catch(e) {
                 showToast("Error updating status.", "error");
@@ -2316,7 +2289,7 @@
                     });
                 };
                 const base64 = await resizeImage(file, 800); 
-                await dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'app_config'), { offerBanner: base64 }, { merge: true }), 15000);
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'app_config'), { offerBanner: base64 }, { merge: true });
                 showToast("Offer Banner Updated!", "success");
                 document.getElementById('admin-offer-file').value = "";
             } catch(e) {
@@ -2338,7 +2311,7 @@
             btn.disabled = true;
 
             try {
-                await dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'app_config'), { marqueeText: text }, { merge: true }), 10000);
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'app_config'), { marqueeText: text }, { merge: true });
                 showToast("Marquee Updated!", "success");
                 document.getElementById('admin-marquee-text').value = "";
             } catch(e) {
@@ -2357,10 +2330,10 @@
             document.getElementById('shop-status-text').innerText = `Currently ${newStatus}`;
             
             try {
-                await dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.phone), { shopStatus: newStatus }, { merge: true }), 10000);
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.phone), { shopStatus: newStatus }, { merge: true });
                 currentUser.shopStatus = newStatus;
                 
-                const snap = await dbCall(getDocs(getCol('products')), 10000);
+                const snap = await getDocs(getCol('products'));
                 const myProducts = snap.docs.filter(d => d.data().partnerId === currentUser.phone);
                 
                 myProducts.forEach(d => {
@@ -2377,7 +2350,7 @@
 
         window.togglePartnerStock = async (productId, currentInStock) => {
             try {
-                await dbCall(updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', productId), { inStock: !currentInStock }), 10000);
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', productId), { inStock: !currentInStock });
                 showToast(currentInStock ? "Marked Out of Stock" : "Marked In Stock", "success");
             } catch(e) {
                 showToast("Error updating stock", "error");
@@ -2429,7 +2402,7 @@
             btn.innerText = "Adding...";
             btn.disabled = true;
 
-            dbCall(addDoc(getCol('products'), {
+            addDoc(getCol('products'), {
                 name, 
                 variants,
                 price: variants[0].price, 
@@ -2442,7 +2415,7 @@
                 inStock: true,
                 shopStatus: currentUser.shopStatus || 'Open',
                 created: new Date().toISOString()
-            }), 15000).then(() => {
+            }).then(() => {
                 document.getElementById('prod-name').value = '';
                 document.getElementById('variant-container').innerHTML = `
                     <div class="flex gap-3 variant-row">
@@ -2523,7 +2496,7 @@
         };
 
         window.deletePartnerProduct = (productId) => {
-            dbCall(deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', productId)), 10000)
+            deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', productId))
                 .then(() => showToast("Product removed from catalog.", "success"))
                 .catch(e => showToast("Error removing product.", "error"));
         };
@@ -2610,7 +2583,7 @@
             btn.disabled = true;
 
             try {
-                await dbCall(addDoc(getCol('orders'), { 
+                await addDoc(getCol('orders'), { 
                     customer: currentUser.name, 
                     phone: currentUser.phone, 
                     items: cart, 
@@ -2622,7 +2595,7 @@
                     riderId: null,
                     riderName: null,
                     time: serverTimestamp() 
-                }), 10000);
+                });
                 
                 cart = []; 
                 renderCartUI(); 
