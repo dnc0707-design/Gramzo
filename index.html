@@ -293,7 +293,7 @@
                 <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 pb-2 gap-4">
                     <div class="text-center sm:text-left">
                         <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                        <p class="text-[10px] text-emerald-700 font-bold mt-2 bg-emerald-50 border border-emerald-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v2.1.0 - Full HTML Setup</p>
+                        <p class="text-[10px] text-emerald-700 font-bold mt-2 bg-emerald-50 border border-emerald-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v2.1.2 - Admin Fetch Fix</p>
                     </div>
                     <div class="flex gap-4 text-gray-400 text-sm">
                         <a href="#" onclick="return false;" class="hover:text-blue-600 transition"><i class="fa-brands fa-facebook"></i></a>
@@ -805,8 +805,8 @@
         
         const getCol = (name) => collection(db, 'artifacts', appId, 'public', 'data', name);
         
-        // SAFE DATABASE CALL WRAPPER (Timeout safe)
-        const safeDbCall = async (promise, ms = 10000) => {
+        // SAFE DATABASE CALL WRAPPER
+        const safeDbCall = async (promise, ms = 20000) => {
             let timeoutId;
             const timeoutPromise = new Promise((_, reject) => {
                 timeoutId = setTimeout(() => reject(new Error("TIMEOUT")), ms);
@@ -1022,6 +1022,11 @@
             btn.disabled = true;
 
             try {
+                // Ensure auth is initialized before fetching snapshots
+                if (!auth.currentUser) {
+                    try { await safeDbCall(signInAnonymously(auth), 5000); } catch(e) { console.warn("Admin offline login"); }
+                }
+
                 const id = document.getElementById('admin-id-input').value.trim();
                 const pass = document.getElementById('admin-pass-input').value.trim();
 
@@ -1145,8 +1150,7 @@
                             } catch(se) { console.warn("Session sync delayed."); }
                         }
                     } catch(e) {
-                        console.warn("Network timeout. Synced locally.");
-                        showToast("Network delayed. Registered in background.", "info");
+                        throw new Error("Network timeout while saving to database. Please check your connection and try again.");
                     }
                     
                     currentUser = { ...userData, docId: phone };
@@ -1756,6 +1760,10 @@
         };
 
         function loadMarketplaceData() {
+            if (!auth.currentUser) {
+                setTimeout(loadMarketplaceData, 500);
+                return;
+            }
             const defaultBanner = "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80";
             
             onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'app_config'), (snap) => {
@@ -1943,6 +1951,10 @@
         // 2. Role Specific Listeners
         function initRoleListeners() {
             if (!currentUser) return;
+            if (!auth.currentUser) {
+                setTimeout(initRoleListeners, 500);
+                return;
+            }
 
             unsubscribeListeners.forEach(u => u());
             unsubscribeListeners = [];
@@ -1998,7 +2010,8 @@
                     // 1. Fill Pending Approvals Table
                     const approvalsBody = document.getElementById('admin-approvals-body');
                     if(approvalsBody) {
-                        const pending = allUsers.filter(u => u.role === 'Partner' && u.approvalStatus === 'Pending');
+                        // Broader filter: Include ANY partner who is NOT approved
+                        const pending = allUsers.filter(u => u.role === 'Partner' && u.approvalStatus !== 'Approved');
 
                         if(pending.length === 0) {
                             approvalsBody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-gray-400 text-xs italic">No pending approvals right now.</td></tr>';
@@ -2041,7 +2054,7 @@
                                     </td>
                                     <td class="p-4 text-[10px] text-gray-500">
                                         ${u.role === 'Partner' ? 
-                                            `<span class="font-bold text-gray-700">Shop/Type:</span> ${u.shopName || u.category || 'N/A'}<br/><span class="font-bold text-gray-700">Status:</span> ${u.approvalStatus}` 
+                                            `<span class="font-bold text-gray-700">Shop/Type:</span> ${u.shopName || u.category || 'N/A'}<br/><span class="font-bold text-gray-700">Status:</span> <span class="${u.approvalStatus === 'Approved' ? 'text-emerald-500' : 'text-orange-500'} font-bold">${u.approvalStatus}</span>` 
                                             : `Joined: ${dateStr}`
                                         }
                                     </td>
@@ -2052,9 +2065,12 @@
                     }
                 }, (error) => {
                     console.error("Users Fetch Error:", error);
+                    const approvalsBody = document.getElementById('admin-approvals-body');
+                    if (approvalsBody) approvalsBody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-red-500 text-xs font-bold">Database Error: ${error.message}</td></tr>`;
+                    
                     const usersBody = document.getElementById('admin-users-body');
                     if (usersBody) {
-                        usersBody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-red-400 text-xs italic">Error loading users.</td></tr>';
+                        usersBody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-red-500 text-xs font-bold">Database Error: ${error.message}</td></tr>`;
                     }
                 });
                 unsubscribeListeners.push(unsubUsers);
