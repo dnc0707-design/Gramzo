@@ -293,7 +293,7 @@
                 <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 pb-2 gap-4">
                     <div class="text-center sm:text-left">
                         <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                        <p class="text-[10px] text-emerald-700 font-bold mt-2 bg-emerald-50 border border-emerald-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v2.1.2 - Admin Fetch Fix</p>
+                        <p class="text-[10px] text-emerald-700 font-bold mt-2 bg-emerald-50 border border-emerald-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v2.1.3 - Fixed Admin Sync</p>
                     </div>
                     <div class="flex gap-4 text-gray-400 text-sm">
                         <a href="#" onclick="return false;" class="hover:text-blue-600 transition"><i class="fa-brands fa-facebook"></i></a>
@@ -805,7 +805,6 @@
         
         const getCol = (name) => collection(db, 'artifacts', appId, 'public', 'data', name);
         
-        // STRICT DATABASE CALL WRAPPER - Throws Error on Timeout
         const dbCall = async (promise, ms = 15000) => {
             let timeoutId;
             const timeoutPromise = new Promise((_, reject) => {
@@ -825,7 +824,6 @@
             console.log("Google Maps API loaded.");
         };
 
-        // --- Core Application Init Logic ---
         async function startApp() {
             try {
                 if (!auth.currentUser) {
@@ -842,7 +840,6 @@
             }
         }
 
-        // --- SESSION PERSISTENCE FIX ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 if (!currentUser) {
@@ -920,7 +917,6 @@
             }
         };
 
-        // --- Auth UI Toggles ---
         window.togglePartnerRegFields = () => {
             const cat = document.getElementById('reg-partner-category').value;
             const shopName = document.getElementById('reg-shop-name');
@@ -1036,7 +1032,7 @@
                         try {
                             await dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: 'admin_session' }, { merge: true }), 3000);
                         } catch(err) {
-                            console.warn("Admin session sync delayed.");
+                            console.warn("Admin session sync delayed, continuing login.");
                         }
                     }
                     
@@ -1120,7 +1116,6 @@
                         }
                     } catch(e) {
                         if (e.message && e.message.includes("registered")) throw e;
-                        console.warn("Offline check skipped, proceeding.", e);
                     }
 
                     const userData = { 
@@ -1141,7 +1136,7 @@
                     };
                     
                     // Optimistic Registration: Save to local state and push to Firebase in the background
-                    setDoc(userRef, userData, { merge: true }).catch(err => console.warn("Background sync delay", err));
+                    setDoc(userRef, userData, { merge: true }).catch(err => console.warn("Background sync delay"));
                     
                     if(auth.currentUser) {
                         setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: phone }, { merge: true }).catch(e => {});
@@ -1331,7 +1326,7 @@
         window.logout = async () => {
             if(auth.currentUser) {
                 try {
-                    await dbCall(deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid)), 5000);
+                    deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid)).catch(e=>{});
                 } catch(e) {}
             }
             
@@ -1351,9 +1346,10 @@
             
             switchMainView('User');
             renderCartUI();
-            showToast("Successfully signed out.");
-
-            try { await auth.signOut(); } catch(e) {}
+            showToast("Successfully signed out.", "success");
+            
+            // Note: INTENTIONALLY NOT CALLING auth.signOut() 
+            // This ensures pending background writes complete properly!
         };
 
         function setupBottomNav(role) {
@@ -1754,6 +1750,10 @@
         };
 
         function loadMarketplaceData() {
+            if (!auth.currentUser) {
+                setTimeout(loadMarketplaceData, 500);
+                return;
+            }
             const defaultBanner = "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80";
             
             onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'app_config'), (snap) => {
