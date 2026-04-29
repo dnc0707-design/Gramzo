@@ -805,11 +805,11 @@
         
         const getCol = (name) => collection(db, 'artifacts', appId, 'public', 'data', name);
         
-        // SAFE DATABASE CALL WRAPPER
-        const safeDbCall = async (promise, ms = 20000) => {
+        // STRICT DATABASE CALL WRAPPER - Throws Error on Timeout
+        const dbCall = async (promise, ms = 15000) => {
             let timeoutId;
             const timeoutPromise = new Promise((_, reject) => {
-                timeoutId = setTimeout(() => reject(new Error("TIMEOUT")), ms);
+                timeoutId = setTimeout(() => reject(new Error("Network timeout. The server took too long to respond.")), ms);
             });
             try {
                 const res = await Promise.race([promise, timeoutPromise]);
@@ -830,14 +830,14 @@
             try {
                 if (!auth.currentUser) {
                     if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await safeDbCall(signInWithCustomToken(auth, __initial_auth_token), 10000);
+                        await dbCall(signInWithCustomToken(auth, __initial_auth_token), 10000);
                     } else {
-                        await safeDbCall(signInAnonymously(auth), 10000);
+                        await dbCall(signInAnonymously(auth), 10000);
                     }
                 }
             } catch (e) {
                 console.error(e);
-                showToast("Initialization issue. App may run offline.", "error");
+                showToast("Initialization delayed. App may run in limited mode.", "error");
                 loadMarketplaceData(); 
             }
         }
@@ -847,7 +847,7 @@
             if (user) {
                 if (!currentUser) {
                     try {
-                        const sessionSnap = await safeDbCall(getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', user.uid)), 8000);
+                        const sessionSnap = await dbCall(getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', user.uid)), 8000);
                         if (sessionSnap && sessionSnap.exists()) {
                             const phone = sessionSnap.data().phone;
                             
@@ -855,7 +855,7 @@
                                 currentUser = { name: 'Super Admin', role: 'Admin', phone: 'Admin', docId: 'admin_session', uid: user.uid };
                                 finalizeLoginSequence(true);
                             } else {
-                                const userSnap = await safeDbCall(getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', phone)), 8000);
+                                const userSnap = await dbCall(getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', phone)), 8000);
                                 if (userSnap && userSnap.exists()) {
                                     currentUser = { ...userSnap.data(), docId: phone };
                                     finalizeLoginSequence(true); 
@@ -1022,9 +1022,8 @@
             btn.disabled = true;
 
             try {
-                // Ensure auth is initialized before fetching snapshots
                 if (!auth.currentUser) {
-                    try { await safeDbCall(signInAnonymously(auth), 5000); } catch(e) { console.warn("Admin offline login"); }
+                    await dbCall(signInAnonymously(auth), 5000);
                 }
 
                 const id = document.getElementById('admin-id-input').value.trim();
@@ -1035,9 +1034,9 @@
                     
                     if(auth.currentUser) {
                         try {
-                            await safeDbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: 'admin_session' }, { merge: true }), 3000);
+                            await dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: 'admin_session' }, { merge: true }), 3000);
                         } catch(err) {
-                            console.warn("Admin session sync delayed, continuing login.");
+                            console.warn("Admin session sync delayed.");
                         }
                     }
                     
@@ -1071,15 +1070,11 @@
             btn.innerText = "Processing...";
             btn.disabled = true;
 
-            if (!auth.currentUser) {
-                try {
-                    await safeDbCall(signInAnonymously(auth), 10000);
-                } catch(e) {
-                    console.warn("Auth initialization delayed/offline. Proceeding locally.", e);
-                }
-            }
-
             try {
+                if (!auth.currentUser) {
+                    await dbCall(signInAnonymously(auth), 8000);
+                }
+
                 if (type === 'register') {
                     const name = document.getElementById('reg-name').value.trim();
                     const phone = document.getElementById('reg-phone').value.trim();
@@ -1113,16 +1108,11 @@
                     }
 
                     btn.innerText = "Saving Profile...";
-
                     const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', phone);
                     
-                    try {
-                        const snap = await safeDbCall(getDoc(userRef), 5000);
-                        if (snap && typeof snap.exists === 'function' && snap.exists()) {
-                            throw new Error("Number already registered. Please login.");
-                        }
-                    } catch(e) {
-                        if (e.message && e.message.includes("registered")) throw e;
+                    const snap = await dbCall(getDoc(userRef), 8000);
+                    if (snap && typeof snap.exists === 'function' && snap.exists()) {
+                        throw new Error("Number already registered. Please login.");
                     }
 
                     const userData = { 
@@ -1130,7 +1120,7 @@
                         role: currentAuthRole, 
                         shopStatus: 'Open',
                         approvalStatus: currentAuthRole === 'Partner' ? 'Pending' : 'Approved', 
-                        uid: auth?.currentUser?.uid || 'offline_uid_' + Date.now(),
+                        uid: auth?.currentUser?.uid || 'unknown',
                         created: new Date().toISOString(),
                         ...(currentAuthRole === 'Partner' && { 
                             category: partnerCategory || null, 
@@ -1142,15 +1132,13 @@
                         })
                     };
                     
-                    try {
-                        await safeDbCall(setDoc(userRef, userData, { merge: true }), 10000);
-                        if(auth.currentUser) {
-                            try {
-                                await safeDbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: phone }, { merge: true }), 3000);
-                            } catch(se) { console.warn("Session sync delayed."); }
-                        }
-                    } catch(e) {
-                        throw new Error("Network timeout while saving to database. Please check your connection and try again.");
+                    // STRICT DB CALL - Throws if fails, preventing fake local success
+                    await dbCall(setDoc(userRef, userData, { merge: true }), 10000);
+                    
+                    if(auth.currentUser) {
+                        try {
+                            await dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: phone }, { merge: true }), 3000);
+                        } catch(se) { console.warn("Session sync delayed."); }
                     }
                     
                     currentUser = { ...userData, docId: phone };
@@ -1165,37 +1153,31 @@
                     }
 
                     const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', phone);
-                    let snap;
-                    try {
-                        snap = await safeDbCall(getDoc(userRef));
-                        if (!snap || typeof snap.exists !== 'function' || !snap.exists()) {
-                            throw new Error("Account not found. Please register.");
-                        }
-
-                        const data = snap.data();
-                        if (data.pin !== pass) {
-                            throw new Error("Incorrect password.");
-                        }
-
-                        currentUser = { ...data, docId: phone };
-                        
-                        if(auth.currentUser) {
-                            try {
-                                await safeDbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: phone }, { merge: true }), 3000);
-                            } catch(se) { console.warn("Session sync delayed."); }
-                        }
-                        
-                        finalizeLoginSequence();
-                    } catch (e) {
-                        if (e.message && (e.message.includes("Account not found") || e.message.includes("Incorrect password"))) {
-                            throw e; 
-                        }
-                        throw e; 
+                    
+                    const snap = await dbCall(getDoc(userRef), 8000);
+                    if (!snap || typeof snap.exists !== 'function' || !snap.exists()) {
+                        throw new Error("Account not found. Please register.");
                     }
+
+                    const data = snap.data();
+                    if (data.pin !== pass) {
+                        throw new Error("Incorrect password.");
+                    }
+
+                    currentUser = { ...data, docId: phone };
+                    
+                    if(auth.currentUser) {
+                        try {
+                            await dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: phone }, { merge: true }), 3000);
+                        } catch(se) { console.warn("Session sync delayed."); }
+                    }
+                    
+                    finalizeLoginSequence();
                 }
             } catch (e) {
+                console.error("Auth Error:", e);
                 msgEl.className = "text-xs text-center font-bold mb-4 min-h-[1.5rem] px-4 rounded-lg py-2 bg-red-50 text-red-600 block";
-                msgEl.innerText = e.message || "System error during authentication. Please try again.";
+                msgEl.innerText = e.message || "System error during authentication. Please check network.";
             } finally {
                 btn.innerText = originalText;
                 btn.disabled = false;
@@ -1337,7 +1319,7 @@
         window.logout = async () => {
             if(auth.currentUser) {
                 try {
-                    await safeDbCall(deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid)));
+                    await dbCall(deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid)), 5000);
                 } catch(e) {}
             }
             
@@ -1704,7 +1686,7 @@
             const rideItem = { name: `${type} Ride`, price: fare, pickup, drop };
             
             try {
-                await safeDbCall(addDoc(getCol('orders'), { 
+                await dbCall(addDoc(getCol('orders'), { 
                     customer: currentUser.name, 
                     phone: currentUser.phone, 
                     items: [rideItem], 
@@ -1716,7 +1698,7 @@
                     restaurantId: null, 
                     restaurantName: null,
                     time: serverTimestamp() 
-                }));
+                }), 10000);
                 showToast(`${type} Confirmed! Searching for a driver...`, "success");
                 switchMainView('Orders');
             } catch(e) {
@@ -1732,7 +1714,7 @@
             const rideItem = { name: "Ambulance SOS", price: 0, pickup, drop: "Nearest Hospital" };
             
             try {
-                await safeDbCall(addDoc(getCol('orders'), { 
+                await dbCall(addDoc(getCol('orders'), { 
                     customer: currentUser.name, 
                     phone: currentUser.phone, 
                     items: [rideItem], 
@@ -1745,7 +1727,7 @@
                     restaurantId: null,
                     restaurantName: null,
                     time: serverTimestamp() 
-                }));
+                }), 10000);
                 showToast("SOS Alert Broadcasted! Help is on the way.", "success");
                 switchMainView('Orders');
             } catch(e) {
@@ -1760,10 +1742,6 @@
         };
 
         function loadMarketplaceData() {
-            if (!auth.currentUser) {
-                setTimeout(loadMarketplaceData, 500);
-                return;
-            }
             const defaultBanner = "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80";
             
             onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'app_config'), (snap) => {
@@ -1951,7 +1929,7 @@
         // 2. Role Specific Listeners
         function initRoleListeners() {
             if (!currentUser) return;
-            if (!auth.currentUser) {
+            if (!auth.currentUser && currentUser.role !== 'Admin') {
                 setTimeout(initRoleListeners, 500);
                 return;
             }
@@ -2010,7 +1988,6 @@
                     // 1. Fill Pending Approvals Table
                     const approvalsBody = document.getElementById('admin-approvals-body');
                     if(approvalsBody) {
-                        // Broader filter: Include ANY partner who is NOT approved
                         const pending = allUsers.filter(u => u.role === 'Partner' && u.approvalStatus !== 'Approved');
 
                         if(pending.length === 0) {
@@ -2251,9 +2228,9 @@
         window.acceptFoodOrder = async (orderId) => {
             if(!currentUser || currentUser.category !== 'Food Owner') return;
             try {
-                await safeDbCall(updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), {
+                await dbCall(updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), {
                     status: 'Preparing'
-                }));
+                }), 10000);
                 showToast("Order Accepted. Start Preparing!", "success");
             } catch(e) {
                 showToast("Failed to accept request.", "error");
@@ -2263,11 +2240,11 @@
         window.acceptDelivery = async (orderId) => {
             if(!currentUser || currentUser.category !== 'Rider') return;
             try {
-                await safeDbCall(updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), {
+                await dbCall(updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), {
                     status: 'Out for Delivery',
                     riderId: currentUser.phone,
                     riderName: currentUser.name
-                }));
+                }), 10000);
                 showToast("Delivery Accepted. Drive Safe!", "success");
             } catch(e) {
                 showToast("Failed to accept delivery.", "error");
@@ -2277,9 +2254,9 @@
         window.markDelivered = async (orderId) => {
             if(!currentUser || currentUser.role !== 'Partner') return;
             try {
-                await safeDbCall(updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), {
+                await dbCall(updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), {
                     status: 'Delivered'
-                }));
+                }), 10000);
                 showToast("Order Marked as Delivered!", "success");
             } catch(e) {
                 showToast("Failed to update order status.", "error");
@@ -2289,7 +2266,7 @@
         window.adminReviewPartner = async (partnerPhone, status) => {
             if(currentUser.role !== 'Admin') return;
             try {
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', partnerPhone), { approvalStatus: status }, { merge: true });
+                await dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', partnerPhone), { approvalStatus: status }, { merge: true }), 10000);
                 showToast(`Partner ${status}!`, "success");
             } catch(e) {
                 showToast("Error updating status.", "error");
@@ -2308,7 +2285,7 @@
 
             try {
                 const resizeImage = (file, maxSize) => {
-                    return new Promise((resolve) => {
+                    return new Promise((resolve, reject) => {
                         const reader = new FileReader();
                         reader.onload = (e) => {
                             const img = new Image();
@@ -2321,13 +2298,15 @@
                                 ctx.drawImage(img, 0, 0, width, height);
                                 resolve(canvas.toDataURL('image/jpeg', 0.6)); 
                             };
+                            img.onerror = reject;
                             img.src = e.target.result;
                         };
+                        reader.onerror = reject;
                         reader.readAsDataURL(file);
                     });
                 };
                 const base64 = await resizeImage(file, 800); 
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'app_config'), { offerBanner: base64 }, { merge: true });
+                await dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'app_config'), { offerBanner: base64 }, { merge: true }), 15000);
                 showToast("Offer Banner Updated!", "success");
                 document.getElementById('admin-offer-file').value = "";
             } catch(e) {
@@ -2349,7 +2328,7 @@
             btn.disabled = true;
 
             try {
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'app_config'), { marqueeText: text }, { merge: true });
+                await dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'app_config'), { marqueeText: text }, { merge: true }), 10000);
                 showToast("Marquee Updated!", "success");
                 document.getElementById('admin-marquee-text').value = "";
             } catch(e) {
@@ -2368,10 +2347,10 @@
             document.getElementById('shop-status-text').innerText = `Currently ${newStatus}`;
             
             try {
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.phone), { shopStatus: newStatus }, { merge: true });
+                await dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.phone), { shopStatus: newStatus }, { merge: true }), 10000);
                 currentUser.shopStatus = newStatus;
                 
-                const snap = await getDocs(getCol('products'));
+                const snap = await dbCall(getDocs(getCol('products')), 10000);
                 const myProducts = snap.docs.filter(d => d.data().partnerId === currentUser.phone);
                 
                 myProducts.forEach(d => {
@@ -2388,7 +2367,7 @@
 
         window.togglePartnerStock = async (productId, currentInStock) => {
             try {
-                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', productId), { inStock: !currentInStock });
+                await dbCall(updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', productId), { inStock: !currentInStock }), 10000);
                 showToast(currentInStock ? "Marked Out of Stock" : "Marked In Stock", "success");
             } catch(e) {
                 showToast("Error updating stock", "error");
@@ -2440,7 +2419,7 @@
             btn.innerText = "Adding...";
             btn.disabled = true;
 
-            addDoc(getCol('products'), {
+            dbCall(addDoc(getCol('products'), {
                 name, 
                 variants,
                 price: variants[0].price, 
@@ -2453,7 +2432,7 @@
                 inStock: true,
                 shopStatus: currentUser.shopStatus || 'Open',
                 created: new Date().toISOString()
-            }).then(() => {
+            }), 15000).then(() => {
                 document.getElementById('prod-name').value = '';
                 document.getElementById('variant-container').innerHTML = `
                     <div class="flex gap-3 variant-row">
@@ -2512,7 +2491,7 @@
                 };
 
                 try {
-                    await safeDbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.phone), updateData, { merge: true }), 8000);
+                    await dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.phone), updateData, { merge: true }), 10000);
                 } catch(dbErr) {
                     console.warn("DB Write timeout/failed. Reverting to local state.", dbErr);
                 }
@@ -2536,7 +2515,7 @@
         };
 
         window.deletePartnerProduct = (productId) => {
-            deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', productId))
+            dbCall(deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', productId)), 10000)
                 .then(() => showToast("Product removed from catalog.", "success"))
                 .catch(e => showToast("Error removing product.", "error"));
         };
@@ -2623,7 +2602,7 @@
             btn.disabled = true;
 
             try {
-                await safeDbCall(addDoc(getCol('orders'), { 
+                await dbCall(addDoc(getCol('orders'), { 
                     customer: currentUser.name, 
                     phone: currentUser.phone, 
                     items: cart, 
@@ -2635,7 +2614,7 @@
                     riderId: null,
                     riderName: null,
                     time: serverTimestamp() 
-                }));
+                }), 10000);
                 
                 cart = []; 
                 renderCartUI(); 
