@@ -1110,9 +1110,17 @@
                     btn.innerText = "Saving Profile...";
                     const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', phone);
                     
-                    const snap = await dbCall(getDoc(userRef), 8000);
-                    if (snap && typeof snap.exists === 'function' && snap.exists()) {
-                        throw new Error("Number already registered. Please login.");
+                    try {
+                        const snap = await Promise.race([
+                            getDoc(userRef),
+                            new Promise((_, reject) => setTimeout(() => reject(new Error("offline")), 4000))
+                        ]);
+                        if (snap && typeof snap.exists === 'function' && snap.exists()) {
+                            throw new Error("Number already registered. Please login.");
+                        }
+                    } catch(e) {
+                        if (e.message && e.message.includes("registered")) throw e;
+                        console.warn("Offline check skipped, proceeding.", e);
                     }
 
                     const userData = { 
@@ -1132,13 +1140,11 @@
                         })
                     };
                     
-                    // STRICT DB CALL - Throws if fails, preventing fake local success
-                    await dbCall(setDoc(userRef, userData, { merge: true }), 10000);
+                    // Optimistic Registration: Save to local state and push to Firebase in the background
+                    setDoc(userRef, userData, { merge: true }).catch(err => console.warn("Background sync delay", err));
                     
                     if(auth.currentUser) {
-                        try {
-                            await dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: phone }, { merge: true }), 3000);
-                        } catch(se) { console.warn("Session sync delayed."); }
+                        setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: phone }, { merge: true }).catch(e => {});
                     }
                     
                     currentUser = { ...userData, docId: phone };
@@ -1154,7 +1160,13 @@
 
                     const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', phone);
                     
-                    const snap = await dbCall(getDoc(userRef), 8000);
+                    let snap;
+                    try {
+                        snap = await dbCall(getDoc(userRef), 8000);
+                    } catch (e) {
+                        throw new Error("Cannot verify login right now. Please check your internet connection.");
+                    }
+                    
                     if (!snap || typeof snap.exists !== 'function' || !snap.exists()) {
                         throw new Error("Account not found. Please register.");
                     }
@@ -2490,11 +2502,9 @@
                     ...(fssaiNumber && { fssaiNumber })
                 };
 
-                try {
-                    await dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.phone), updateData, { merge: true }), 10000);
-                } catch(dbErr) {
-                    console.warn("DB Write timeout/failed. Reverting to local state.", dbErr);
-                }
+                // Optimistic Background sync
+                setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.phone), updateData, { merge: true })
+                    .catch(dbErr => console.warn("DB Write delayed.", dbErr));
 
                 currentUser.shopName = isRider ? currentUser.name : shopName;
                 currentUser.approvalStatus = newStatus;
@@ -2507,7 +2517,7 @@
                 finalizeLoginSequence(); 
             } catch(e) {
                 console.error(e);
-                showToast("Network error. Try again.", "error");
+                showToast("System error. Try again.", "error");
             } finally { 
                 btn.innerText = orig; 
                 btn.disabled = false; 
