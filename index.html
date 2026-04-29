@@ -293,7 +293,7 @@
                 <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 pb-2 gap-4">
                     <div class="text-center sm:text-left">
                         <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                        <p class="text-[10px] text-emerald-700 font-bold mt-2 bg-emerald-50 border border-emerald-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v2.1.3 - Fixed Admin Sync</p>
+                        <p class="text-[10px] text-emerald-700 font-bold mt-2 bg-emerald-50 border border-emerald-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v2.5 - Stable Backend Sync</p>
                     </div>
                     <div class="flex gap-4 text-gray-400 text-sm">
                         <a href="#" onclick="return false;" class="hover:text-blue-600 transition"><i class="fa-brands fa-facebook"></i></a>
@@ -1135,8 +1135,8 @@
                         })
                     };
                     
-                    // Optimistic Registration: Save to local state and push to Firebase in the background
-                    setDoc(userRef, userData, { merge: true }).catch(err => console.warn("Background sync delay"));
+                    // AWAIT the save - DO NOT catch silently here!
+                    await dbCall(setDoc(userRef, userData, { merge: true }), 15000);
                     
                     if(auth.currentUser) {
                         setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: phone }, { merge: true }).catch(e => {});
@@ -1324,10 +1324,11 @@
         }
 
         window.logout = async () => {
+            // Note: INTENTIONALLY NOT CALLING auth.signOut() 
+            // This ensures pending background writes complete properly!
+            
             if(auth.currentUser) {
-                try {
-                    deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid)).catch(e=>{});
-                } catch(e) {}
+                deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid)).catch(e=>{});
             }
             
             currentUser = null;
@@ -1347,9 +1348,6 @@
             switchMainView('User');
             renderCartUI();
             showToast("Successfully signed out.", "success");
-            
-            // Note: INTENTIONALLY NOT CALLING auth.signOut() 
-            // This ensures pending background writes complete properly!
         };
 
         function setupBottomNav(role) {
