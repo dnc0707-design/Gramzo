@@ -273,7 +273,7 @@
                 <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                     <div class="text-center sm:text-left">
                         <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                        <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v6.4.0 - Master Functions Fix</p>
+                        <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v6.5.1 - Final Scope Patch</p>
                     </div>
                     <!-- EXPLICIT ADMIN BUTTON IN FOOTER -->
                     <div class="mt-4 sm:mt-0 text-center sm:text-right">
@@ -501,6 +501,28 @@
                 <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm text-center flex flex-col justify-center">
                     <p class="text-[9px] font-bold text-gray-400 uppercase">Users</p>
                     <h4 id="stat-users" class="text-lg font-black text-purple-600">0</h4>
+                </div>
+            </div>
+
+            <!-- ADMIN OFFER ZONE MANAGEMENT -->
+            <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden mt-6 p-5 relative">
+                <div class="relative z-10">
+                    <h3 class="font-bold text-gray-900 mb-2 border-b border-gray-100 pb-2">Manage Promo Banner</h3>
+                    <div class="space-y-3 mt-3">
+                        <input type="file" id="admin-offer-file" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-1.5 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-red-50 file:text-red-600 hover:file:bg-red-100 transition-all border border-gray-200 rounded-xl p-1.5 bg-gray-50">
+                        <button type="button" onclick="window.adminUpdateOffer()" id="btn-update-offer" class="w-full bg-red-600 text-white py-3 rounded-xl font-bold shadow-md hover:bg-red-700 active:scale-95 transition text-sm">Publish Offer Image</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADMIN MARQUEE MANAGEMENT -->
+            <div class="bg-gray-900 rounded-3xl border border-gray-800 shadow-sm overflow-hidden mt-6 p-5 relative">
+                <div class="relative z-10">
+                    <h3 class="font-bold text-white mb-2 border-b border-gray-700 pb-2">Manage Scrolling Marquee</h3>
+                    <div class="space-y-3 mt-3">
+                        <input type="text" id="admin-marquee-text" class="input-field !bg-gray-800 !text-white !border-gray-700 !py-3" placeholder="Enter new scrolling announcement...">
+                        <button type="button" onclick="window.adminUpdateMarquee()" id="btn-update-marquee" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold shadow-md hover:bg-emerald-600 active:scale-95 transition text-sm">Publish Marquee Text</button>
+                    </div>
                 </div>
             </div>
 
@@ -795,6 +817,27 @@
             }
         };
 
+        window.togglePartnerRegFields = () => {
+            const cat = document.getElementById('reg-partner-category').value;
+            const shopName = document.getElementById('reg-shop-name');
+            const fssaiNum = document.getElementById('reg-fssai-number');
+            const vehCont = document.getElementById('reg-vehicle-container');
+
+            if(cat === 'Food Owner') {
+                shopName.classList.remove('hidden');
+                fssaiNum.classList.remove('hidden');
+                if (vehCont) vehCont.classList.add('hidden');
+            } else if (cat === 'Rider') {
+                shopName.classList.add('hidden');
+                fssaiNum.classList.add('hidden');
+                if (vehCont) vehCont.classList.remove('hidden');
+            } else {
+                shopName.classList.add('hidden');
+                fssaiNum.classList.add('hidden');
+                if (vehCont) vehCont.classList.add('hidden');
+            }
+        };
+
         window.openAuthModal = (role = 'User') => {
             currentAuthRole = role;
             const overlay = document.getElementById('auth-overlay');
@@ -1027,7 +1070,7 @@
             roleSpan.className = `text-[9px] font-bold uppercase ${currentUser.role === 'Admin' ? 'text-purple-500' : currentUser.role === 'Partner' ? 'text-orange-500' : 'text-blue-500'}`;
 
             document.getElementById('menu-name').innerText = currentUser.name || 'Unknown';
-            let displayPhone = currentUser.phone;
+            let displayPhone = currentUser.phone ? String(currentUser.phone) : '';
             if(displayPhone && displayPhone.includes('@')) {
                 displayPhone = displayPhone.split('@')[0] + '@...';
             } else if (currentUser.role !== 'Admin') {
@@ -1080,7 +1123,7 @@
                     statusLabel.className = "text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-1 rounded uppercase tracking-widest border border-emerald-100";
                     approvalWarning.classList.add('hidden');
                     statusCont.classList.remove('hidden');
-                    pSetupForm.classList.remove('hidden');
+                    pSetupForm.classList.remove('hidden'); // allow updating QR/COD even after approval
                     document.getElementById('btn-submit-profile').innerText = "Update Settings";
                     if (canAddProducts) {
                         addProdCont.classList.remove('hidden');
@@ -1166,6 +1209,8 @@
 
             const unsub = onSnapshot(getCol('products'), (snap) => {
                 const listEl = document.getElementById('market-list');
+                if (!listEl) return;
+                
                 let items = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
                 
                 if(items.length === 0) items = dummyProducts;
@@ -1408,58 +1453,71 @@
                 unsubscribeListeners.push(unsubOrders);
 
                 const unsubUsers = onSnapshot(getCol('users'), (snap) => {
-                    const allUsers = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                    
-                    const usersStatEl = document.getElementById('stat-users');
-                    if (usersStatEl) usersStatEl.innerText = allUsers.length;
-                    
-                    const approvalsBody = document.getElementById('admin-approvals-body');
-                    if(approvalsBody) {
-                        const pending = allUsers.filter(u => u.role === 'Partner' && u.approvalStatus !== 'Approved');
+                    try {
+                        const allUsers = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                        
+                        const usersStatEl = document.getElementById('stat-users');
+                        if (usersStatEl) usersStatEl.innerText = allUsers.length;
+                        
+                        const approvalsBody = document.getElementById('admin-approvals-body');
+                        if(approvalsBody) {
+                            const pending = allUsers.filter(u => u.role === 'Partner' && u.approvalStatus !== 'Approved');
 
-                        if(pending.length === 0) {
-                            approvalsBody.innerHTML = '<tr><td colspan="3" class="p-6 text-center text-gray-400 text-xs italic">No pending approvals right now.</td></tr>';
-                        } else {
-                            approvalsBody.innerHTML = pending.map(u => {
-                                let displayPhone = u.phone || '';
-                                return `
-                                <tr class="hover:bg-gray-50 transition-colors border-b border-gray-100">
-                                    <td class="p-4 font-bold text-gray-900 text-xs">${u.name || 'Unknown'}<br><span class="font-mono font-normal text-[9px] text-gray-500">${displayPhone || 'N/A'}</span></td>
-                                    <td class="p-4 font-bold text-gray-700 text-xs">${u.shopName || 'N/A'}</td>
-                                    <td class="p-4 text-right flex gap-2 justify-end">
-                                        <button type="button" onclick="window.adminReviewPartner('${u.id}', 'Approved')" class="bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider hover:bg-emerald-200 transition">Approve</button>
-                                        <button type="button" onclick="window.adminReviewPartner('${u.id}', 'Rejected')" class="bg-red-100 text-red-700 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider hover:bg-red-200 transition">Reject</button>
-                                    </td>
-                                </tr>
-                            `}).join('');
+                            if(pending.length === 0) {
+                                approvalsBody.innerHTML = '<tr><td colspan="3" class="p-6 text-center text-gray-400 text-xs italic">No pending approvals right now.</td></tr>';
+                            } else {
+                                approvalsBody.innerHTML = pending.map(u => {
+                                    let displayPhone = u.phone ? String(u.phone) : '';
+                                    if(displayPhone.includes('@')) displayPhone = displayPhone.split('@')[0] + '@...';
+                                    return `
+                                    <tr class="hover:bg-gray-50 transition-colors border-b border-gray-100">
+                                        <td class="p-4 font-bold text-gray-900 text-xs">${u.name || 'Unknown'}<br><span class="font-mono font-normal text-[9px] text-gray-500">${displayPhone || 'N/A'}</span></td>
+                                        <td class="p-4 font-bold text-gray-700 text-xs">${u.shopName || 'N/A'}</td>
+                                        <td class="p-4 text-right flex gap-2 justify-end">
+                                            <button type="button" onclick="window.adminReviewPartner('${u.id}', 'Approved')" class="bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider hover:bg-emerald-200 transition">Approve</button>
+                                            <button type="button" onclick="window.adminReviewPartner('${u.id}', 'Rejected')" class="bg-red-100 text-red-700 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider hover:bg-red-200 transition">Reject</button>
+                                        </td>
+                                    </tr>
+                                `}).join('');
+                            }
                         }
-                    }
 
+                        const usersBody = document.getElementById('admin-users-body');
+                        if(usersBody) {
+                            if(allUsers.length === 0) {
+                                usersBody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-gray-400 text-xs italic">No users found.</td></tr>';
+                            } else {
+                                usersBody.innerHTML = allUsers.map(u => {
+                                    let displayPhone = u.phone ? String(u.phone) : '';
+                                    if(displayPhone.includes('@')) displayPhone = displayPhone.split('@')[0] + '@...';
+
+                                    return `
+                                    <tr class="hover:bg-gray-50 transition-colors border-b border-gray-50">
+                                        <td class="p-4 font-bold text-xs">
+                                            <span class="px-2 py-0.5 rounded text-[9px] uppercase tracking-widest ${u.role === 'Admin' ? 'bg-purple-100 text-purple-700' : u.role === 'Partner' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'}">${u.role || 'USER'}</span>
+                                        </td>
+                                        <td class="p-4 font-bold text-gray-900 text-xs">
+                                            ${u.name || 'N/A'}<br/>
+                                            <span class="font-mono font-normal text-[10px] text-gray-500">${displayPhone || 'N/A'}</span>
+                                        </td>
+                                        <td class="p-4 text-[10px] text-gray-500">
+                                            ${u.role === 'Partner' ? `<span class="font-bold text-gray-700">Shop:</span> ${u.shopName || 'N/A'}<br/><span class="font-bold text-gray-700">Status:</span> <span class="${u.approvalStatus === 'Approved' ? 'text-emerald-500' : 'text-orange-500'} font-bold">${u.approvalStatus}</span>` : `Verified`}
+                                        </td>
+                                        <td class="p-4 text-right font-mono font-black text-gray-900 text-xs">${u.pin || '-'}</td>
+                                    </tr>
+                                `}).join('');
+                            }
+                        }
+                    } catch(err) {
+                        console.error("Error rendering users:", err);
+                        const usersBody = document.getElementById('admin-users-body');
+                        if (usersBody) usersBody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-red-500 text-xs font-bold">UI Render Error: Data corrupted</td></tr>`;
+                    }
+                }, (error) => {
+                    console.error("Users Fetch Error:", error);
                     const usersBody = document.getElementById('admin-users-body');
-                    if(usersBody) {
-                        if(allUsers.length === 0) {
-                            usersBody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-gray-400 text-xs italic">No users found.</td></tr>';
-                        } else {
-                            usersBody.innerHTML = allUsers.map(u => {
-                                let displayPhone = u.phone || '';
-                                return `
-                                <tr class="hover:bg-gray-50 transition-colors border-b border-gray-50">
-                                    <td class="p-4 font-bold text-xs">
-                                        <span class="px-2 py-0.5 rounded text-[9px] uppercase tracking-widest ${u.role === 'Admin' ? 'bg-purple-100 text-purple-700' : u.role === 'Partner' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'}">${u.role || 'USER'}</span>
-                                    </td>
-                                    <td class="p-4 font-bold text-gray-900 text-xs">
-                                        ${u.name || 'N/A'}<br/>
-                                        <span class="font-mono font-normal text-[10px] text-gray-500">${displayPhone || 'N/A'}</span>
-                                    </td>
-                                    <td class="p-4 text-[10px] text-gray-500">
-                                        ${u.role === 'Partner' ? `<span class="font-bold text-gray-700">Shop:</span> ${u.shopName || 'N/A'}<br/><span class="font-bold text-gray-700">Status:</span> <span class="${u.approvalStatus === 'Approved' ? 'text-emerald-500' : 'text-orange-500'} font-bold">${u.approvalStatus}</span>` : `Verified`}
-                                    </td>
-                                    <td class="p-4 text-right font-mono font-black text-gray-900 text-xs">${u.pin || '-'}</td>
-                                </tr>
-                            `}).join('');
-                        }
-                    }
-                }, (error) => {});
+                    if (usersBody) usersBody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-red-500 text-xs font-bold">Database Fetch Error</td></tr>`;
+                });
                 unsubscribeListeners.push(unsubUsers);
             } 
             else if (currentUser.role === 'User') {
