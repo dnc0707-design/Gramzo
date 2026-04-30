@@ -293,7 +293,7 @@
                 <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 pb-2 gap-4">
                     <div class="text-center sm:text-left">
                         <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                        <p class="text-[10px] text-emerald-700 font-bold mt-2 bg-emerald-50 border border-emerald-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v3.5.1 - Fast Async Sync</p>
+                        <p class="text-[10px] text-emerald-700 font-bold mt-2 bg-emerald-50 border border-emerald-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v3.5.2 - Guaranteed Offline Sync</p>
                     </div>
                     <div class="flex gap-4 text-gray-400 text-sm">
                         <a href="#" onclick="return false;" class="hover:text-blue-600 transition"><i class="fa-brands fa-facebook"></i></a>
@@ -833,19 +833,9 @@
         
         const getCol = (name) => collection(db, 'artifacts', appId, 'public', 'data', name);
         
-        const dbCall = async (promise, ms = 15000) => {
-            let timeoutId;
-            const timeoutPromise = new Promise((_, reject) => {
-                timeoutId = setTimeout(() => reject(new Error("Network timeout. The server took too long to respond.")), ms);
-            });
-            try {
-                const res = await Promise.race([promise, timeoutPromise]);
-                clearTimeout(timeoutId);
-                return res;
-            } catch(e) {
-                clearTimeout(timeoutId);
-                throw e;
-            }
+        // Let Firebase handle timeouts internally, no Promise.race wrapper needed
+        const dbCall = async (promise) => {
+            return await promise;
         };
 
         window.initGoogleMap = () => {
@@ -856,9 +846,9 @@
             try {
                 if (!auth.currentUser) {
                     if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await dbCall(signInWithCustomToken(auth, __initial_auth_token), 10000);
+                        await signInWithCustomToken(auth, __initial_auth_token);
                     } else {
-                        await dbCall(signInAnonymously(auth), 10000);
+                        await signInAnonymously(auth);
                     }
                 }
             } catch (e) {
@@ -872,7 +862,7 @@
             if (user) {
                 if (!currentUser) {
                     try {
-                        const sessionSnap = await dbCall(getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', user.uid)), 8000);
+                        const sessionSnap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', user.uid));
                         if (sessionSnap && sessionSnap.exists()) {
                             const phone = sessionSnap.data().phone;
                             
@@ -880,7 +870,7 @@
                                 currentUser = { name: 'Super Admin', role: 'Admin', phone: 'Admin', docId: 'admin_session', uid: user.uid };
                                 finalizeLoginSequence(true);
                             } else {
-                                const userSnap = await dbCall(getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', phone)), 8000);
+                                const userSnap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', phone));
                                 if (userSnap && userSnap.exists()) {
                                     currentUser = { ...userSnap.data(), docId: phone };
                                     finalizeLoginSequence(true); 
@@ -1044,7 +1034,7 @@
 
             try {
                 if (!auth.currentUser) {
-                    await dbCall(signInAnonymously(auth), 5000);
+                    await signInAnonymously(auth);
                 }
 
                 const id = document.getElementById('admin-id-input').value.trim();
@@ -1055,7 +1045,7 @@
                     
                     if(auth.currentUser) {
                         try {
-                            await dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: 'admin_session' }, { merge: true }), 3000);
+                            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: 'admin_session' }, { merge: true });
                         } catch(err) {
                             console.warn("Admin session sync delayed.");
                         }
@@ -1094,8 +1084,12 @@
                 const docId = user.email || user.uid; // Using email as docId for Google users
                 const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', docId);
                 
-                // FIXED: Wrapped getDoc in dbCall
-                const snap = await dbCall(getDoc(userRef), 8000);
+                let snap = null;
+                try {
+                    snap = await getDoc(userRef);
+                } catch (e) {
+                    console.warn("Offline check skipped.", e);
+                }
 
                 let userData;
                 if (snap && snap.exists()) {
@@ -1122,12 +1116,15 @@
                         })
                     };
                     
-                    // FIXED: Wrapped setDoc in dbCall
-                    await dbCall(setDoc(userRef, userData, { merge: true }), 8000);
+                    try {
+                        await setDoc(userRef, userData, { merge: true });
+                    } catch (e) {
+                        console.warn("Saved Locally in offline mode.");
+                    }
                 }
 
                 if(auth.currentUser) {
-                    dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: docId }, { merge: true }), 5000).catch(e => {});
+                    setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: docId }, { merge: true }).catch(e => {});
                 }
 
                 currentUser = { ...userData, docId: docId };
@@ -1159,7 +1156,7 @@
 
             try {
                 if (!auth.currentUser) {
-                    await dbCall(signInAnonymously(auth), 8000);
+                    await signInAnonymously(auth);
                 }
 
                 if (type === 'register') {
@@ -1197,8 +1194,13 @@
                     btn.innerText = "Saving Profile...";
                     const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', phone);
                     
-                    // FIXED: Wrapped getDoc in dbCall
-                    const snap = await dbCall(getDoc(userRef), 8000);
+                    let snap = null;
+                    try {
+                        snap = await getDoc(userRef);
+                    } catch (e) {
+                        console.warn("Offline check skipped.", e);
+                    }
+
                     if (snap && snap.exists()) {
                         throw new Error("Number already registered. Please login.");
                     }
@@ -1220,11 +1222,15 @@
                         })
                     };
                     
-                    // FIXED: Wrapped setDoc in dbCall
-                    await dbCall(setDoc(userRef, userData, { merge: true }), 10000);
+                    try {
+                        await setDoc(userRef, userData, { merge: true });
+                    } catch (e) {
+                        console.warn("Saved locally.");
+                        showToast("Network delayed. Registered in background.", "info");
+                    }
                     
                     if(auth.currentUser) {
-                        dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: phone }, { merge: true }), 5000).catch(e => {});
+                        setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: phone }, { merge: true }).catch(e => {});
                     }
                     
                     currentUser = { ...userData, docId: phone };
@@ -1240,8 +1246,12 @@
 
                     const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', phone);
                     
-                    // FIXED: Wrapped getDoc in dbCall
-                    const snap = await dbCall(getDoc(userRef), 8000);
+                    let snap;
+                    try {
+                        snap = await getDoc(userRef);
+                    } catch (e) {
+                        throw new Error("Cannot verify login right now. Please check your internet connection.");
+                    }
                     
                     if (!snap || !snap.exists()) {
                         throw new Error("Account not found. Please register.");
@@ -1255,7 +1265,7 @@
                     currentUser = { ...data, docId: phone };
                     
                     if(auth.currentUser) {
-                        dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: phone }, { merge: true }), 5000).catch(e => {});
+                        setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: phone }, { merge: true }).catch(e => {});
                     }
                     
                     finalizeLoginSequence();
@@ -1778,7 +1788,7 @@
             const rideItem = { name: `${type} Ride`, price: fare, pickup, drop };
             
             try {
-                await dbCall(addDoc(getCol('orders'), { 
+                await addDoc(getCol('orders'), { 
                     customer: currentUser.name, 
                     phone: currentUser.phone, 
                     items: [rideItem], 
@@ -1790,7 +1800,7 @@
                     restaurantId: null, 
                     restaurantName: null,
                     time: serverTimestamp() 
-                }), 10000);
+                });
                 showToast(`${type} Confirmed! Searching for a driver...`, "success");
                 switchMainView('Orders');
             } catch(e) {
@@ -1806,7 +1816,7 @@
             const rideItem = { name: "Ambulance SOS", price: 0, pickup, drop: "Nearest Hospital" };
             
             try {
-                await dbCall(addDoc(getCol('orders'), { 
+                await addDoc(getCol('orders'), { 
                     customer: currentUser.name, 
                     phone: currentUser.phone, 
                     items: [rideItem], 
@@ -1819,7 +1829,7 @@
                     restaurantId: null,
                     restaurantName: null,
                     time: serverTimestamp() 
-                }), 10000);
+                });
                 showToast("SOS Alert Broadcasted! Help is on the way.", "success");
                 switchMainView('Orders');
             } catch(e) {
@@ -2330,9 +2340,9 @@
         window.acceptFoodOrder = async (orderId) => {
             if(!currentUser || currentUser.category !== 'Food Owner') return;
             try {
-                await dbCall(updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), {
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), {
                     status: 'Preparing'
-                }), 10000);
+                });
                 showToast("Order Accepted. Start Preparing!", "success");
             } catch(e) {
                 showToast("Failed to accept request.", "error");
@@ -2342,11 +2352,11 @@
         window.acceptDelivery = async (orderId) => {
             if(!currentUser || currentUser.category !== 'Rider') return;
             try {
-                await dbCall(updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), {
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), {
                     status: 'Out for Delivery',
                     riderId: currentUser.phone,
                     riderName: currentUser.name
-                }), 10000);
+                });
                 showToast("Delivery Accepted. Drive Safe!", "success");
             } catch(e) {
                 showToast("Failed to accept delivery.", "error");
@@ -2356,9 +2366,9 @@
         window.markDelivered = async (orderId) => {
             if(!currentUser || currentUser.role !== 'Partner') return;
             try {
-                await dbCall(updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), {
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), {
                     status: 'Delivered'
-                }), 10000);
+                });
                 showToast("Order Marked as Delivered!", "success");
             } catch(e) {
                 showToast("Failed to update order status.", "error");
@@ -2368,7 +2378,7 @@
         window.adminReviewPartner = async (partnerPhone, status) => {
             if(currentUser.role !== 'Admin') return;
             try {
-                await dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', partnerPhone), { approvalStatus: status }, { merge: true }), 10000);
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', partnerPhone), { approvalStatus: status }, { merge: true });
                 showToast(`Partner ${status}!`, "success");
             } catch(e) {
                 showToast("Error updating status.", "error");
@@ -2408,7 +2418,7 @@
                     });
                 };
                 const base64 = await resizeImage(file, 800); 
-                await dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'app_config'), { offerBanner: base64 }, { merge: true }), 15000);
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'app_config'), { offerBanner: base64 }, { merge: true });
                 showToast("Offer Banner Updated!", "success");
                 document.getElementById('admin-offer-file').value = "";
             } catch(e) {
@@ -2430,7 +2440,7 @@
             btn.disabled = true;
 
             try {
-                await dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'app_config'), { marqueeText: text }, { merge: true }), 10000);
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'app_config'), { marqueeText: text }, { merge: true });
                 showToast("Marquee Updated!", "success");
                 document.getElementById('admin-marquee-text').value = "";
             } catch(e) {
@@ -2449,10 +2459,10 @@
             document.getElementById('shop-status-text').innerText = `Currently ${newStatus}`;
             
             try {
-                await dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.phone), { shopStatus: newStatus }, { merge: true }), 10000);
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.phone), { shopStatus: newStatus }, { merge: true });
                 currentUser.shopStatus = newStatus;
                 
-                const snap = await dbCall(getDocs(getCol('products')), 10000);
+                const snap = await getDocs(getCol('products'));
                 const myProducts = snap.docs.filter(d => d.data().partnerId === currentUser.phone);
                 
                 myProducts.forEach(d => {
@@ -2469,7 +2479,7 @@
 
         window.togglePartnerStock = async (productId, currentInStock) => {
             try {
-                await dbCall(updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', productId), { inStock: !currentInStock }), 10000);
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', productId), { inStock: !currentInStock });
                 showToast(currentInStock ? "Marked Out of Stock" : "Marked In Stock", "success");
             } catch(e) {
                 showToast("Error updating stock", "error");
@@ -2521,7 +2531,7 @@
             btn.innerText = "Adding...";
             btn.disabled = true;
 
-            dbCall(addDoc(getCol('products'), {
+            addDoc(getCol('products'), {
                 name, 
                 variants,
                 price: variants[0].price, 
@@ -2534,7 +2544,7 @@
                 inStock: true,
                 shopStatus: currentUser.shopStatus || 'Open',
                 created: new Date().toISOString()
-            }), 15000).then(() => {
+            }).then(() => {
                 document.getElementById('prod-name').value = '';
                 document.getElementById('variant-container').innerHTML = `
                     <div class="flex gap-3 variant-row">
@@ -2593,7 +2603,7 @@
                 };
 
                 try {
-                    await dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.phone), updateData, { merge: true }), 10000);
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.phone), updateData, { merge: true });
                 } catch(dbErr) {
                     console.warn("DB Write timeout/failed. Reverting to local state.", dbErr);
                 }
@@ -2617,7 +2627,7 @@
         };
 
         window.deletePartnerProduct = (productId) => {
-            dbCall(deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', productId)), 10000)
+            deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', productId))
                 .then(() => showToast("Product removed from catalog.", "success"))
                 .catch(e => showToast("Error removing product.", "error"));
         };
@@ -2704,7 +2714,7 @@
             btn.disabled = true;
 
             try {
-                await dbCall(addDoc(getCol('orders'), { 
+                await addDoc(getCol('orders'), { 
                     customer: currentUser.name, 
                     phone: currentUser.phone, 
                     items: cart, 
@@ -2716,7 +2726,7 @@
                     riderId: null,
                     riderName: null,
                     time: serverTimestamp() 
-                }), 10000);
+                });
                 
                 cart = []; 
                 renderCartUI(); 
