@@ -38,6 +38,9 @@
         
         .view-section { display: none; animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         .view-section.active { display: block; }
+        
+        /* Flex Overrides for Immersive Views */
+        .view-section.active.flex-view { display: flex; }
 
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
@@ -82,10 +85,11 @@
         }
 
         /* Google Maps Specific Overrides */
-        #ride-map { z-index: 10; }
-        .pac-container { border-radius: 1rem; border: 1px solid #e5e7eb; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); font-family: 'Outfit', sans-serif; z-index: 9999; }
-        .pac-item { padding: 10px; font-size: 14px; border-bottom: 1px solid #f3f4f6; cursor: pointer; }
-        .pac-item:hover { background-color: #f0fdf4; }
+        .pac-container { border-radius: 1.5rem; border: 1px solid #e5e7eb; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); font-family: 'Outfit', sans-serif; z-index: 9999; padding: 0.5rem; }
+        .pac-item { padding: 12px; font-size: 14px; font-weight: 500; color: #374151; border-bottom: 1px solid #f3f4f6; cursor: pointer; display: flex; align-items: center; gap: 8px; border-radius: 12px; }
+        .pac-item:hover { background-color: #f0fdf4; color: #047857; }
+        .pac-item-query { font-size: 15px; font-weight: 800; color: #111827; }
+        .pac-icon { display: none; } /* Hide default icon to use our own styling if needed */
         
         select { -webkit-appearance: none; -moz-appearance: none; appearance: none; }
     </style>
@@ -117,11 +121,11 @@
                     <option value="sat">Ol Chiki</option>
                 </select>
 
-                <button type="button" id="btn-login-trigger" onclick="openAuthModal('User')" class="bg-gray-900 text-white px-3 sm:px-5 py-1.5 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold shadow-md hover:bg-gray-800 transition-colors active:scale-95 flex items-center gap-1.5 whitespace-nowrap">
+                <button type="button" id="btn-login-trigger" onclick="window.openAuthModal('User')" class="bg-gray-900 text-white px-3 sm:px-5 py-1.5 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold shadow-md hover:bg-gray-800 transition-colors active:scale-95 flex items-center gap-1.5 whitespace-nowrap">
                     <i class="fa-solid fa-user"></i> <span data-i18n="login">Login</span>
                 </button>
                 
-                <div id="profile-trigger" class="hidden flex items-center gap-2 sm:gap-3 bg-white border border-gray-100 py-1 sm:py-1.5 pl-1 sm:pl-1.5 pr-3 sm:pr-4 rounded-full shadow-sm cursor-pointer" onclick="toggleProfileMenu()">
+                <div id="profile-trigger" class="hidden flex items-center gap-2 sm:gap-3 bg-white border border-gray-100 py-1 sm:py-1.5 pl-1 sm:pl-1.5 pr-3 sm:pr-4 rounded-full shadow-sm cursor-pointer" onclick="window.toggleProfileMenu()">
                     <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-xs sm:text-sm">
                         <span id="nav-initial">U</span>
                     </div>
@@ -138,7 +142,7 @@
                         <p id="menu-phone" class="text-xs text-gray-500 font-medium">Phone</p>
                     </div>
                     <div class="p-2">
-                        <button type="button" onclick="logout()" class="w-full text-left px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 rounded-xl transition-colors flex items-center gap-2">
+                        <button type="button" onclick="window.logout()" class="w-full text-left px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 rounded-xl transition-colors flex items-center gap-2">
                             <i class="fa-solid fa-arrow-right-from-bracket"></i> <span data-i18n="logout">Sign Out</span>
                         </button>
                     </div>
@@ -164,7 +168,7 @@
             
             <!-- Mandatory Location Selection Dropdown -->
             <div id="location-container" class="bg-white rounded-2xl p-3 sm:p-4 shadow-sm border border-gray-100 flex items-center gap-3 transition-all duration-300 mt-2">
-                <button type="button" onclick="getCurrentLocation('user-location-input')" class="w-10 h-10 rounded-full bg-orange-100 text-orange-500 flex items-center justify-center shrink-0 hover:bg-orange-200 transition" title="Auto Locate GPS">
+                <button type="button" onclick="window.getCurrentLocation('user-location-input')" class="w-10 h-10 rounded-full bg-orange-100 text-orange-500 flex items-center justify-center shrink-0 hover:bg-orange-200 transition" title="Auto Locate GPS">
                     <i class="fa-solid fa-location-crosshairs"></i>
                 </button>
                 <div class="flex-1 relative">
@@ -195,7 +199,7 @@
                 <h2 class="text-lg font-black mb-4 text-gray-900 text-center sm:text-left" data-i18n="search">What do you need?</h2>
                 <div class="flex justify-center sm:justify-start gap-6 sm:gap-8 pb-4 px-1">
                     <!-- Food -->
-                    <div class="cursor-pointer group group-hover:animate-wiggle" onclick="filterCategory('Food')">
+                    <div class="cursor-pointer group group-hover:animate-wiggle" onclick="window.filterCategory('Food')">
                         <div class="w-32 h-40 sm:w-36 sm:h-44 rounded-[2rem] bg-gradient-to-b from-orange-100 to-orange-50 border-2 border-orange-200 flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-xl group-hover:shadow-orange-500/20">
                             <span class="absolute top-3 bg-orange-500 text-white text-[9px] font-black uppercase px-2.5 py-1 rounded-full shadow-sm animate-pulse" data-i18n="u_hungry">U Hungry? 🤤</span>
                             <i class="fa-solid fa-burger text-5xl text-orange-500 mt-5 transition-transform duration-300 group-hover:scale-110"></i>
@@ -204,7 +208,7 @@
                     </div>
 
                     <!-- Ride -->
-                    <div class="cursor-pointer group group-hover:animate-wiggle" onclick="openRideBooking()">
+                    <div class="cursor-pointer group group-hover:animate-wiggle" onclick="window.openRideBooking()">
                         <div class="w-32 h-40 sm:w-36 sm:h-44 rounded-[2rem] bg-gradient-to-b from-blue-100 to-blue-50 border-2 border-blue-200 flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-xl group-hover:shadow-blue-500/20">
                             <span class="absolute top-3 bg-blue-500 text-white text-[9px] font-black uppercase px-2.5 py-1 rounded-full shadow-sm" data-i18n="gotta_go">Gotta Go? 🚀</span>
                             <i class="fa-solid fa-motorcycle text-5xl text-blue-500 mt-5 transition-transform duration-300 group-hover:scale-110"></i>
@@ -217,7 +221,7 @@
             <div>
                 <div class="flex justify-between items-end mb-4">
                     <h3 class="font-black text-xl text-gray-900" id="marketplace-title" data-i18n="trending">Trending Near You</h3>
-                    <button type="button" id="btn-clear-filter" onclick="filterCategory(null)" class="hidden text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">Clear Filter</button>
+                    <button type="button" id="btn-clear-filter" onclick="window.filterCategory(null)" class="hidden text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">Clear Filter</button>
                 </div>
                 <div id="market-list" class="grid grid-cols-2 sm:grid-cols-3 gap-4">
                     <div class="col-span-full py-10 text-center text-gray-400 font-medium text-sm animate-pulse">Loading local marketplace...</div>
@@ -233,7 +237,7 @@
                     </div>
                     <h3 class="text-2xl font-black mb-2" data-i18n="grow_with_us">Grow with Gramzo</h3>
                     <p class="text-gray-400 text-sm mb-6 max-w-xs mx-auto">Join as a Food Business or Delivery Rider today.</p>
-                    <button type="button" onclick="openAuthModal('Partner')" class="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-4 rounded-full text-sm font-bold shadow-lg shadow-emerald-500/30 transition-transform active:scale-95 w-full sm:w-auto" data-i18n="partner_reg">
+                    <button type="button" onclick="window.openAuthModal('Partner')" class="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-4 rounded-full text-sm font-bold shadow-lg shadow-emerald-500/30 transition-transform active:scale-95 w-full sm:w-auto" data-i18n="partner_reg">
                         Partner Registration
                     </button>
                 </div>
@@ -275,17 +279,17 @@
                     <div>
                         <h4 class="font-bold text-gray-900 mb-4 tracking-tight" data-i18n="company">Company</h4>
                         <ul class="space-y-3 text-xs text-gray-500 font-medium">
-                            <li><a href="#" onclick="showToast('About Us page coming soon!', 'info'); return false;" class="hover:text-emerald-600 transition" data-i18n="about_us">About Us</a></li>
-                            <li><a href="#" onclick="showToast('Careers page coming soon!', 'info'); return false;" class="hover:text-emerald-600 transition" data-i18n="careers">Careers</a></li>
-                            <li><a href="#" onclick="showToast('Contact Us page coming soon!', 'info'); return false;" class="hover:text-emerald-600 transition" data-i18n="contact_us">Contact Us</a></li>
+                            <li><a href="#" onclick="window.showToast('About Us page coming soon!', 'info'); return false;" class="hover:text-emerald-600 transition" data-i18n="about_us">About Us</a></li>
+                            <li><a href="#" onclick="window.showToast('Careers page coming soon!', 'info'); return false;" class="hover:text-emerald-600 transition" data-i18n="careers">Careers</a></li>
+                            <li><a href="#" onclick="window.showToast('Contact Us page coming soon!', 'info'); return false;" class="hover:text-emerald-600 transition" data-i18n="contact_us">Contact Us</a></li>
                         </ul>
                     </div>
                     <div>
                         <h4 class="font-bold text-gray-900 mb-4 tracking-tight" data-i18n="legal">Legal</h4>
                         <ul class="space-y-3 text-xs text-gray-500 font-medium">
-                            <li><a href="#" onclick="showToast('Terms & Conditions coming soon!', 'info'); return false;" class="hover:text-emerald-600 transition" data-i18n="terms">Terms & Conditions</a></li>
-                            <li><a href="#" onclick="showToast('Privacy Policy coming soon!', 'info'); return false;" class="hover:text-emerald-600 transition" data-i18n="privacy">Privacy Policy</a></li>
-                            <li><a href="#" onclick="showToast('Refund Policy coming soon!', 'info'); return false;" class="hover:text-emerald-600 transition" data-i18n="refund">Refund Policy</a></li>
+                            <li><a href="#" onclick="window.showToast('Terms & Conditions coming soon!', 'info'); return false;" class="hover:text-emerald-600 transition" data-i18n="terms">Terms & Conditions</a></li>
+                            <li><a href="#" onclick="window.showToast('Privacy Policy coming soon!', 'info'); return false;" class="hover:text-emerald-600 transition" data-i18n="privacy">Privacy Policy</a></li>
+                            <li><a href="#" onclick="window.showToast('Refund Policy coming soon!', 'info'); return false;" class="hover:text-emerald-600 transition" data-i18n="refund">Refund Policy</a></li>
                         </ul>
                     </div>
                 </div>
@@ -293,7 +297,7 @@
                 <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 pb-2 gap-4">
                     <div class="text-center sm:text-left">
                         <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                        <p class="text-[10px] text-emerald-700 font-bold mt-2 bg-emerald-50 border border-emerald-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v4.0 - Instant Bypass Registration</p>
+                        <p class="text-[10px] text-emerald-700 font-bold mt-2 bg-emerald-50 border border-emerald-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v5.0.2 - Fixed Global Functions</p>
                     </div>
                     <div class="flex gap-4 text-gray-400 text-sm">
                         <a href="#" onclick="return false;" class="hover:text-blue-600 transition"><i class="fa-brands fa-facebook"></i></a>
@@ -304,7 +308,7 @@
 
                 <!-- Explicit Separate Admin Portal Link -->
                 <div class="mt-8 pt-6 border-t border-gray-200/60 text-center mb-4">
-                    <button type="button" onclick="openAdminModal()" class="bg-purple-100 text-purple-700 hover:bg-purple-200 hover:text-purple-900 border border-purple-200 px-6 py-3 rounded-full text-xs font-black uppercase tracking-widest transition-all shadow-sm active:scale-95 flex items-center justify-center mx-auto">
+                    <button type="button" onclick="window.openAdminModal()" class="bg-purple-100 text-purple-700 hover:bg-purple-200 hover:text-purple-900 border border-purple-200 px-6 py-3 rounded-full text-xs font-black uppercase tracking-widest transition-all shadow-sm active:scale-95 flex items-center justify-center mx-auto">
                         <i class="fa-solid fa-shield-halved mr-2 text-base"></i> Secure Admin Portal
                     </button>
                 </div>
@@ -312,71 +316,123 @@
         </div>
 
         <!-- ========================================== -->
-        <!-- VIEW: RIDE BOOKING                         -->
+        <!-- VIEW: RAPIDO STYLE RIDE BOOKING            -->
         <!-- ========================================== -->
-        <div id="view-RideBooking" class="view-section space-y-4">
-            <!-- Rapido/Uber Style Header -->
-            <div class="flex items-center gap-4 mb-2 bg-white p-4 rounded-3xl shadow-sm border border-gray-100">
-                <button type="button" onclick="switchMainView('User')" class="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center text-gray-800 hover:bg-gray-100 transition-colors"><i class="fa-solid fa-arrow-left"></i></button>
-                <h2 class="text-xl font-black text-gray-900 tracking-tight flex-1">Where are you going?</h2>
-            </div>
-
-            <!-- Professional Map Area -->
-            <div class="relative h-[45vh] w-full rounded-[2rem] bg-gray-100 z-10 border border-gray-200 shadow-inner overflow-hidden">
-                <div id="ride-map" class="w-full h-full z-10"></div>
+        <div id="view-RideBooking" class="view-section fixed inset-0 z-[100] bg-gray-100 m-0 p-0 hidden">
+            <div class="flex flex-col h-full w-full relative">
                 
-                <!-- Fixed Center Pin HTML Overlay -->
-                <div id="map-center-pin-container" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-full z-[400] pointer-events-none flex flex-col items-center justify-end pb-1">
-                    <div id="map-pin-tooltip" class="bg-black text-white text-[10px] font-bold px-3 py-1.5 rounded-lg mb-1 shadow-xl whitespace-nowrap transition-colors relative">
-                        Set Location
-                        <div class="absolute bottom-[-4px] left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-black"></div>
-                    </div>
-                    <i class="fa-solid fa-location-dot text-4xl drop-shadow-md transition-colors duration-300 text-black" id="map-center-pin"></i>
-                    <div class="w-3 h-1 bg-black/20 rounded-full mt-0.5 blur-[2px]"></div>
-                </div>
-
-                <!-- Recenter GPS Button -->
-                <button type="button" onclick="centerMapToGPS()" class="absolute bottom-4 right-4 z-[400] bg-white w-12 h-12 rounded-full shadow-lg flex items-center justify-center text-gray-800 hover:text-black border border-gray-100 transition-transform active:scale-90">
-                    <i class="fa-solid fa-location-crosshairs text-xl"></i>
-                </button>
-            </div>
-            
-            <!-- Floating Inputs Sheet -->
-            <div class="bg-white rounded-[2rem] p-5 shadow-2xl border border-gray-100 relative z-20 mx-2 -mt-12">
-                <div class="absolute left-7 top-10 bottom-10 w-0.5 z-0 border-l-[2.5px] border-dashed border-gray-300 bg-transparent"></div>
-                
-                <div class="relative z-10 space-y-3">
-                    <div class="flex items-center gap-3">
-                        <div class="w-3 h-3 rounded-full bg-blue-600 shrink-0 z-10 shadow-[0_0_0_4px_rgba(37,99,235,0.2)]"></div>
-                        <div class="relative w-full">
-                            <input id="ride-pickup" onfocus="setActiveMapInput('ride-pickup')" class="w-full px-4 py-3.5 bg-gray-50 rounded-xl outline-none focus:bg-white focus:ring-2 ring-blue-500/30 transition-all text-sm font-bold text-gray-900 border border-transparent focus:border-blue-400" placeholder="Current Location">
+                <!-- Full Screen Map Background -->
+                <div class="absolute inset-0 z-0 h-full w-full">
+                    <div id="ride-map" class="w-full h-full"></div>
+                    
+                    <!-- Fixed Center Pin HTML Overlay -->
+                    <div id="map-center-pin-container" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-full z-10 pointer-events-none flex flex-col items-center justify-end pb-1 hidden">
+                        <div class="bg-black text-white text-[10px] font-bold px-3 py-1.5 rounded-lg mb-1 shadow-xl whitespace-nowrap relative">
+                            Move map to adjust
+                            <div class="absolute bottom-[-4px] left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-black"></div>
                         </div>
+                        <i class="fa-solid fa-location-dot text-4xl drop-shadow-md transition-colors duration-300 text-black"></i>
+                        <div class="w-3 h-1 bg-black/20 rounded-full mt-0.5 blur-[2px]"></div>
                     </div>
-                    <div class="flex items-center gap-3">
-                        <div class="w-3 h-3 rounded-sm bg-black shrink-0 z-10 shadow-[0_0_0_4px_rgba(0,0,0,0.1)]"></div>
-                        <div class="relative w-full">
-                            <input id="ride-drop" onfocus="setActiveMapInput('ride-drop')" class="w-full px-4 py-3.5 bg-gray-100 rounded-xl outline-none focus:bg-white focus:ring-2 ring-black/20 transition-all text-sm font-bold text-gray-900 border border-transparent focus:border-gray-400" placeholder="Search destination">
-                        </div>
-                    </div>
-                </div>
-                
-                <button type="button" onclick="calculateRideFares()" id="btn-find-rides" class="w-full bg-black text-white py-4 rounded-xl font-bold mt-5 hover:bg-gray-800 transition-all active:scale-95 shadow-xl shadow-gray-900/20 text-base" data-i18n="find_rides">Search Options</button>
-                
-                <!-- SMALL AMBULANCE SOS BUTTON -->
-                <div class="text-center mt-4">
-                    <button type="button" onclick="bookAmbulance()" class="text-[10px] text-red-600 bg-white px-3 py-1.5 rounded-full font-bold hover:bg-red-50 transition-colors active:scale-95 inline-flex items-center gap-1.5 border border-red-100 shadow-sm">
-                        <i class="fa-solid fa-truck-medical animate-pulse"></i> Book Ambulance (SOS)
+
+                    <!-- Floating Map Controls -->
+                    <button type="button" onclick="window.closeRideBooking()" class="absolute top-4 sm:top-6 left-4 z-20 w-12 h-12 bg-white rounded-full shadow-[0_5px_15px_rgba(0,0,0,0.15)] flex items-center justify-center text-gray-800 hover:bg-gray-50 transition-colors active:scale-95">
+                        <i class="fa-solid fa-arrow-left text-xl"></i>
+                    </button>
+                    <button type="button" onclick="window.centerMapToGPS()" class="absolute bottom-[35%] right-4 z-20 bg-white w-12 h-12 rounded-full shadow-[0_5px_15px_rgba(0,0,0,0.15)] flex items-center justify-center text-gray-800 hover:text-black transition-transform active:scale-90 border border-gray-100">
+                        <i class="fa-solid fa-location-crosshairs text-xl"></i>
                     </button>
                 </div>
-            </div>
 
-            <!-- Dynamic Options Sheet -->
-            <div id="ride-options-container" class="hidden space-y-4 animate-fadeIn px-2 pt-2">
-                <h3 class="font-bold text-gray-900 text-lg flex items-center justify-between">
-                    Choose a ride 
-                    <span id="ride-distance-display" class="text-gray-400 text-xs font-bold bg-gray-100 px-3 py-1 rounded-full"></span>
-                </h3>
-                <div id="ride-options-list" class="space-y-3 pb-8"></div>
+                <!-- STATE 1: INITIAL BOTTOM SHEET (Where to?) -->
+                <div id="ride-state-initial" class="absolute bottom-0 left-0 w-full bg-white rounded-t-[2rem] p-6 shadow-[0_-10px_40px_rgba(0,0,0,0.15)] z-30 transition-transform duration-300 transform">
+                    <div class="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-6 shrink-0"></div>
+                    <h2 class="text-2xl font-black text-gray-900 mb-5 pl-1">Where are you going?</h2>
+                    <div class="bg-gray-100 rounded-[1.2rem] p-4 flex items-center gap-4 cursor-pointer hover:bg-gray-200 transition border border-gray-200" onclick="window.openRideSearch()">
+                        <i class="fa-solid fa-magnifying-glass text-emerald-500 text-xl pl-1"></i>
+                        <span class="text-gray-500 font-bold text-lg">Search destination</span>
+                    </div>
+                    <!-- Quick SOS Option -->
+                    <div class="mt-5 text-center">
+                        <button type="button" onclick="window.bookAmbulance()" class="text-[10px] text-red-600 bg-red-50 px-4 py-2 rounded-full font-bold hover:bg-red-100 transition-colors active:scale-95 inline-flex items-center gap-1.5 uppercase tracking-widest">
+                            <i class="fa-solid fa-truck-medical animate-pulse"></i> SOS Ambulance
+                        </button>
+                    </div>
+                </div>
+
+                <!-- STATE 2: SEARCH OVERLAY (Full Screen Input) -->
+                <div id="ride-state-search" class="absolute top-0 left-0 w-full h-full bg-white z-40 hidden flex-col">
+                    <div class="p-5 shadow-sm z-10 bg-white border-b border-gray-100">
+                        <button type="button" onclick="window.closeRideSearch()" class="mb-5 mt-2 text-gray-800 flex items-center gap-2 font-black text-lg active:scale-95 transition-transform w-fit"><i class="fa-solid fa-arrow-left"></i> Back</button>
+                        
+                        <div class="relative space-y-4">
+                            <!-- Dashed Line connecting dots -->
+                            <div class="absolute left-3.5 top-5 bottom-5 w-0.5 border-l-[2px] border-dashed border-gray-300 z-0"></div>
+                            
+                            <!-- Pickup Input -->
+                            <div class="flex items-center gap-3 relative z-10">
+                                <div class="w-3 h-3 rounded-full bg-emerald-500 shrink-0 shadow-[0_0_0_4px_rgba(16,185,129,0.15)] mt-1"></div>
+                                <div class="relative w-full flex items-center">
+                                    <input id="ride-pickup" class="w-full pl-4 pr-12 py-3.5 bg-gray-50 rounded-xl outline-none text-sm font-bold text-gray-900 focus:bg-white focus:ring-2 ring-emerald-500/30 border border-gray-200 transition-all" placeholder="Current Location">
+                                    <button type="button" onclick="window.pickOnMap('ride-pickup')" class="absolute right-2 w-8 h-8 flex items-center justify-center text-emerald-600 bg-emerald-50 rounded-lg hover:bg-emerald-100 transition" title="Choose on Map"><i class="fa-solid fa-map"></i></button>
+                                </div>
+                            </div>
+                            
+                            <!-- Drop Input -->
+                            <div class="flex items-center gap-3 relative z-10">
+                                <div class="w-3 h-3 rounded-sm bg-black shrink-0 shadow-[0_0_0_4px_rgba(0,0,0,0.1)] mt-1"></div>
+                                <div class="relative w-full flex items-center">
+                                    <input id="ride-drop" class="w-full pl-4 pr-12 py-3.5 bg-gray-100 rounded-xl outline-none text-sm font-bold text-gray-900 focus:bg-white focus:ring-2 ring-black/20 border border-transparent transition-all" placeholder="Where to?">
+                                    <button type="button" onclick="window.pickOnMap('ride-drop')" class="absolute right-2 w-8 h-8 flex items-center justify-center text-gray-700 bg-white rounded-lg hover:bg-gray-100 shadow-sm border border-gray-200 transition" title="Choose on Map"><i class="fa-solid fa-map-location-dot"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex-1 bg-gray-50 flex items-center justify-center p-6 text-center text-gray-400">
+                        <div>
+                            <i class="fa-solid fa-route text-4xl mb-3 text-gray-300"></i>
+                            <p class="text-sm font-bold">Type location to search<br>Or select using the Map buttons above.</p>
+                        </div>
+                    </div>
+
+                    <div class="p-5 bg-white border-t border-gray-100 shrink-0">
+                        <button type="button" onclick="window.confirmSearchToRoute()" class="w-full bg-black text-white py-4 rounded-xl font-black shadow-[0_8px_20px_rgba(0,0,0,0.2)] active:scale-95 transition-transform text-lg">Find Rides</button>
+                    </div>
+                </div>
+
+                <!-- STATE 3: MAP PICKING SHEET (Confirm Pin) -->
+                <div id="ride-state-map-pick" class="absolute bottom-0 left-0 w-full bg-white rounded-t-[2rem] p-6 shadow-[0_-10px_40px_rgba(0,0,0,0.15)] z-30 hidden">
+                    <div class="flex justify-between items-center mb-5">
+                        <h3 class="font-black text-gray-900 text-xl" id="map-pick-title">Select Location</h3>
+                        <button type="button" onclick="window.cancelMapPicking()" class="text-xs font-bold text-gray-500 bg-gray-100 px-4 py-2 rounded-full hover:bg-gray-200 transition-colors">Cancel</button>
+                    </div>
+                    <div class="bg-blue-50 p-4 rounded-xl mb-5 border border-blue-100 flex items-start gap-3">
+                        <i class="fa-solid fa-location-dot text-lg text-blue-600 mt-0.5"></i>
+                        <div>
+                            <p class="text-[9px] text-blue-400 uppercase tracking-widest font-black mb-1">Pinned Address</p>
+                            <p id="map-pick-address" class="text-sm font-bold text-blue-900 line-clamp-2">Fetching exact address...</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="window.confirmMapPin()" class="w-full bg-black text-white py-4 rounded-xl font-black shadow-lg active:scale-95 transition text-lg flex items-center justify-center gap-2">
+                        Confirm Location <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <!-- STATE 4: RIDE OPTIONS SHEET (Results) -->
+                <div id="ride-state-options" class="absolute bottom-0 left-0 w-full bg-white rounded-t-[2rem] p-6 shadow-[0_-10px_40px_rgba(0,0,0,0.15)] z-30 hidden max-h-[75vh] flex-col">
+                    <div class="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-5 shrink-0"></div>
+                    <div class="flex justify-between items-center mb-4 shrink-0">
+                        <h3 class="font-black text-gray-900 text-2xl">Available Rides</h3>
+                        <span id="ride-distance-display" class="text-emerald-700 text-xs font-black bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100"></span>
+                    </div>
+                    
+                    <div id="ride-options-list" class="space-y-3 pb-2 overflow-y-auto no-scrollbar flex-1 mt-2"></div>
+                    
+                    <div class="pt-4 mt-2 shrink-0 bg-white space-y-3">
+                        <button type="button" onclick="window.resetRideUI()" class="w-full text-sm font-bold text-gray-600 border-2 border-gray-100 py-3 rounded-xl hover:bg-gray-50 transition active:scale-95">Search Another Route</button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -396,7 +452,7 @@
                         <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2 ml-2">Delivery Details</label>
                         <div class="relative">
                             <textarea id="cart-address" rows="2" class="input-field !py-3 resize-none" placeholder="Type Full Delivery Address manually or use Locate..."></textarea>
-                            <button type="button" onclick="getCurrentLocation('cart-address')" class="absolute right-3 top-3 text-gray-400 hover:text-emerald-500 transition-colors bg-white rounded-full p-1 shadow-sm border border-gray-100" title="Locate Me">
+                            <button type="button" onclick="window.getCurrentLocation('cart-address')" class="absolute right-3 top-3 text-gray-400 hover:text-emerald-500 transition-colors bg-white rounded-full p-1 shadow-sm border border-gray-100" title="Locate Me">
                                 <i class="fa-solid fa-location-crosshairs"></i> Locate
                             </button>
                         </div>
@@ -413,7 +469,7 @@
                         </div>
                     </div>
                     
-                    <button type="button" id="btn-place-order" onclick="placeOrder()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-4 rounded-2xl font-black text-lg shadow-lg shadow-emerald-500/30 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <button type="button" id="btn-place-order" onclick="window.placeOrder()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-4 rounded-2xl font-black text-lg shadow-lg shadow-emerald-500/30 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
                         CONFIRM ORDER
                     </button>
                 </div>
@@ -505,7 +561,7 @@
                                 <input id="partner-dl-number" type="text" class="input-field !bg-white uppercase" placeholder="Enter DL Number">
                             </div>
                         </div>
-                        <button type="button" onclick="submitPartnerProfile()" id="btn-submit-profile" class="w-full bg-gray-900 text-white px-6 py-4 rounded-2xl font-bold active:scale-95 transition">Submit Profile for Verification</button>
+                        <button type="button" onclick="window.submitPartnerProfile()" id="btn-submit-profile" class="w-full bg-gray-900 text-white px-6 py-4 rounded-2xl font-bold active:scale-95 transition">Submit Profile for Verification</button>
                     </div>
 
                     <!-- Shop Status Toggle (Only visible if approved) -->
@@ -515,7 +571,7 @@
                             <p class="text-[10px] text-gray-500" id="shop-status-text">Currently Open</p>
                         </div>
                         <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="partner-status-toggle" class="sr-only peer" onchange="toggleShopStatus()">
+                            <input type="checkbox" id="partner-status-toggle" class="sr-only peer" onchange="window.toggleShopStatus()">
                             <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
                         </label>
                     </div>
@@ -542,9 +598,9 @@
                             </div>
                         </div>
                         
-                        <button type="button" onclick="addVariantRow()" class="text-xs text-emerald-600 font-bold px-3 py-1.5 bg-emerald-100 rounded-lg hover:bg-emerald-200 transition">+ Add another variant/price</button>
+                        <button type="button" onclick="window.addVariantRow()" class="text-xs text-emerald-600 font-bold px-3 py-1.5 bg-emerald-100 rounded-lg hover:bg-emerald-200 transition">+ Add another variant/price</button>
 
-                        <button type="button" onclick="addPartnerProduct()" id="btn-add-prod" class="w-full bg-emerald-500 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-emerald-500/20 active:scale-95 transition mt-2">Publish Item</button>
+                        <button type="button" onclick="window.addPartnerProduct()" id="btn-add-prod" class="w-full bg-emerald-50 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-emerald-500/20 active:scale-95 transition mt-2">Publish Item</button>
                     </div>
                 </div>
                 <i class="fa-solid fa-boxes-stacked absolute -right-6 -bottom-6 text-emerald-200 text-8xl opacity-40"></i>
@@ -565,7 +621,10 @@
         <div id="view-Admin" class="view-section space-y-6">
             <div class="flex justify-between items-center">
                 <h2 class="text-2xl font-black text-gray-900">System Overview</h2>
-                <span id="admin-id-badge" class="bg-purple-100 text-purple-700 text-[10px] font-black uppercase px-2 py-1 rounded-full tracking-widest shadow-sm"></span>
+                <div class="flex gap-2">
+                    <button type="button" onclick="window.initRoleListeners()" class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-xs font-bold shadow-sm hover:bg-gray-200 transition-colors"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+                    <span id="admin-id-badge" class="bg-purple-100 text-purple-700 text-[10px] font-black uppercase px-2 py-1.5 rounded-full tracking-widest shadow-sm"></span>
+                </div>
             </div>
             
             <div class="grid grid-cols-3 gap-4">
@@ -590,7 +649,7 @@
                     <p class="text-xs text-gray-600 mb-4">Upload an image to display in the main promotional space on the user homepage.</p>
                     <div class="space-y-3">
                         <input type="file" id="admin-offer-file" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 transition-all border border-gray-200 rounded-2xl p-2 bg-white">
-                        <button type="button" onclick="adminUpdateOffer()" id="btn-update-offer" class="w-full bg-blue-600 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-blue-500/20 active:scale-95 transition mt-2">Publish Offer Image</button>
+                        <button type="button" onclick="window.adminUpdateOffer()" id="btn-update-offer" class="w-full bg-blue-600 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-blue-500/20 active:scale-95 transition mt-2">Publish Offer Image</button>
                     </div>
                 </div>
                 <i class="fa-solid fa-bullhorn absolute -right-6 -bottom-6 text-blue-200 text-8xl opacity-40"></i>
@@ -603,7 +662,7 @@
                     <p class="text-xs text-gray-600 mb-4">Update the scrolling text at the top of the user app.</p>
                     <div class="space-y-3">
                         <input type="text" id="admin-marquee-text" class="input-field !bg-white" placeholder="Enter new marquee text...">
-                        <button type="button" onclick="adminUpdateMarquee()" id="btn-update-marquee" class="w-full bg-purple-600 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-purple-500/20 active:scale-95 transition mt-2">Publish Marquee Text</button>
+                        <button type="button" onclick="window.adminUpdateMarquee()" id="btn-update-marquee" class="w-full bg-purple-600 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-purple-500/20 active:scale-95 transition mt-2">Publish Marquee Text</button>
                     </div>
                 </div>
                 <i class="fa-solid fa-text-width absolute -right-6 -bottom-6 text-purple-200 text-8xl opacity-40"></i>
@@ -675,7 +734,7 @@
         <div class="modal-content">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="font-black text-2xl text-gray-900" id="auth-title">User Login</h3>
-                <button type="button" onclick="closeAuthModal()" class="w-8 h-8 bg-gray-100 text-gray-500 rounded-full flex items-center justify-center hover:bg-gray-200 transition">
+                <button type="button" onclick="window.closeAuthModal()" class="w-8 h-8 bg-gray-100 text-gray-500 rounded-full flex items-center justify-center hover:bg-gray-200 transition">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
@@ -685,7 +744,7 @@
             <div id="auth-view-login" class="space-y-4">
                 <input id="login-phone" type="tel" class="input-field" placeholder="10-Digit Mobile Number" maxlength="10">
                 <input id="login-pass" type="password" class="input-field" placeholder="Password">
-                <button type="button" id="submit-login" onclick="handleAuth('login')" class="w-full bg-gray-900 text-white p-4 rounded-2xl font-bold text-sm shadow-xl hover:bg-gray-800 active:scale-95 transition">Secure Login</button>
+                <button type="button" id="submit-login" onclick="window.handleAuth('login')" class="w-full bg-gray-900 text-white p-4 rounded-2xl font-bold text-sm shadow-xl hover:bg-gray-800 active:scale-95 transition">Secure Login</button>
                 
                 <div class="flex items-center gap-3 my-4">
                     <div class="h-px bg-gray-200 flex-1"></div>
@@ -693,13 +752,13 @@
                     <div class="h-px bg-gray-200 flex-1"></div>
                 </div>
                 
-                <button type="button" onclick="handleGoogleAuth()" class="w-full bg-white border border-gray-200 text-gray-700 py-3.5 rounded-2xl font-bold text-sm shadow-sm hover:bg-gray-50 active:scale-95 transition flex items-center justify-center gap-3">
+                <button type="button" onclick="window.handleGoogleAuth()" class="w-full bg-white border border-gray-200 text-gray-700 py-3.5 rounded-2xl font-bold text-sm shadow-sm hover:bg-gray-50 active:scale-95 transition flex items-center justify-center gap-3">
                     <svg class="w-5 h-5" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
                     Continue with Google
                 </button>
 
                 <p class="text-center text-xs font-medium text-gray-500 mt-4">
-                    Don't have an account? <button type="button" onclick="switchAuthView('register')" class="text-emerald-600 font-bold hover:underline">Register Here</button>
+                    Don't have an account? <button type="button" onclick="window.switchAuthView('register')" class="text-emerald-600 font-bold hover:underline">Register Here</button>
                 </p>
             </div>
 
@@ -711,7 +770,7 @@
                 <div id="partner-fields" class="hidden bg-gray-50 p-4 rounded-2xl border border-gray-100 space-y-3 mt-2">
                     <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider">Business Details</label>
                     
-                    <select id="reg-partner-category" class="input-field !bg-white" onchange="togglePartnerRegFields()">
+                    <select id="reg-partner-category" class="input-field !bg-white" onchange="window.togglePartnerRegFields()">
                         <option value="" disabled selected>Select Business Type</option>
                         <option value="Food Owner">Food Business / Restaurant</option>
                         <option value="Rider">Ride & Delivery Partner</option>
@@ -732,7 +791,7 @@
                     </div>
                 </div>
 
-                <button type="button" id="submit-register" onclick="handleAuth('register')" class="w-full bg-emerald-500 text-white p-4 rounded-2xl font-bold text-sm shadow-xl shadow-emerald-500/20 active:scale-95 transition mt-4">Sign Up Now</button>
+                <button type="button" id="submit-register" onclick="window.handleAuth('register')" class="w-full bg-emerald-500 text-white p-4 rounded-2xl font-bold text-sm shadow-xl shadow-emerald-500/20 active:scale-95 transition mt-4">Sign Up Now</button>
                 
                 <div class="flex items-center gap-3 my-4">
                     <div class="h-px bg-gray-200 flex-1"></div>
@@ -740,13 +799,13 @@
                     <div class="h-px bg-gray-200 flex-1"></div>
                 </div>
                 
-                <button type="button" onclick="handleGoogleAuth()" class="w-full bg-white border border-gray-200 text-gray-700 py-3.5 rounded-2xl font-bold text-sm shadow-sm hover:bg-gray-50 active:scale-95 transition flex items-center justify-center gap-3">
+                <button type="button" onclick="window.handleGoogleAuth()" class="w-full bg-white border border-gray-200 text-gray-700 py-3.5 rounded-2xl font-bold text-sm shadow-sm hover:bg-gray-50 active:scale-95 transition flex items-center justify-center gap-3">
                     <svg class="w-5 h-5" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
                     Continue with Google
                 </button>
 
                 <p class="text-center text-xs font-medium text-gray-500 mt-4">
-                    Already have an account? <button type="button" onclick="switchAuthView('login')" class="text-gray-900 font-bold hover:underline">Login</button>
+                    Already have an account? <button type="button" onclick="window.switchAuthView('login')" class="text-gray-900 font-bold hover:underline">Login</button>
                 </p>
             </div>
         </div>
@@ -757,7 +816,7 @@
         <div class="modal-content !bg-purple-50">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="font-black text-2xl text-purple-900"><i class="fa-solid fa-shield-halved mr-2"></i>Admin Portal</h3>
-                <button type="button" onclick="closeAdminModal()" class="w-8 h-8 bg-purple-200 text-purple-600 rounded-full flex items-center justify-center hover:bg-purple-300 transition">
+                <button type="button" onclick="window.closeAdminModal()" class="w-8 h-8 bg-purple-200 text-purple-600 rounded-full flex items-center justify-center hover:bg-purple-300 transition">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
@@ -767,7 +826,7 @@
                 </div>
                 <input id="admin-id-input" type="text" class="input-field !bg-white focus:ring-purple-500/50 focus:border-purple-500" placeholder="Admin ID">
                 <input id="admin-pass-input" type="password" class="input-field !bg-white focus:ring-purple-500/50 focus:border-purple-500" placeholder="Admin Password">
-                <button type="button" onclick="handleAdminLogin()" class="w-full bg-purple-600 text-white p-4 rounded-2xl font-bold text-sm shadow-xl hover:bg-purple-700 active:scale-95 transition">Access Dashboard</button>
+                <button type="button" onclick="window.handleAdminLogin()" class="w-full bg-purple-600 text-white p-4 rounded-2xl font-bold text-sm shadow-xl hover:bg-purple-700 active:scale-95 transition">Access Dashboard</button>
             </div>
         </div>
     </div>
@@ -785,7 +844,7 @@
 
         // Global map auth failure handling
         window.gm_authFailure = () => {
-            showToast("গুগল ম্যাপস বিলিং বা এপিআই এরর! অ্যাডমিনকে ক্লাউড কনসোল চেক করতে বলুন।", "error");
+            window.showToast("গুগল ম্যাপস বিলিং বা এপিআই এরর! অ্যাডমিনকে ক্লাউড কনসোল চেক করতে বলুন।", "error");
             const mapDiv = document.getElementById('ride-map');
             if (mapDiv) {
                 mapDiv.innerHTML = "<div class='flex flex-col items-center justify-center h-full text-xs text-gray-500 p-4 text-center border-2 border-dashed border-gray-300 m-2 rounded-2xl'><span><i class='fa-solid fa-map-location-dot text-2xl mb-2 text-gray-300'></i></span><span>Google Maps API Error.<br>Billing or Geocoding API not enabled.</span></div>";
@@ -834,7 +893,7 @@
         const getCol = (name) => collection(db, 'artifacts', appId, 'public', 'data', name);
 
         // Safe DB Wrapper ensuring we bypass eternal hang
-        const dbCall = (promise, ms = 8000) => {
+        window.dbCall = (promise, ms = 8000) => {
             return new Promise((resolve, reject) => {
                 const timer = setTimeout(() => {
                     reject(new Error("Timeout"));
@@ -855,48 +914,66 @@
             console.log("Google Maps API loaded.");
         };
 
-        async function startApp() {
+        window.startApp = async () => {
             try {
                 if (!auth.currentUser) {
                     if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await dbCall(signInWithCustomToken(auth, __initial_auth_token), 10000);
+                        await window.dbCall(signInWithCustomToken(auth, __initial_auth_token), 10000);
                     } else {
-                        await dbCall(signInAnonymously(auth), 10000);
+                        await window.dbCall(signInAnonymously(auth), 10000);
                     }
                 }
             } catch (e) {
                 console.error("Auth Init Error:", e);
-                showToast("Initialization delayed. App may run in limited mode.", "error");
-                loadMarketplaceData(); 
+                window.showToast("Initialization delayed. App may run in limited mode.", "error");
+                window.loadMarketplaceData(); 
             }
-        }
+        };
+
+        window.showToast = (text, type = "info") => {
+            const toast = document.getElementById('toast-msg');
+            const icon = toast.querySelector('i');
+            
+            toast.querySelector('span').innerText = text;
+            if (type === 'error') icon.className = "fa-solid fa-circle-exclamation text-red-400";
+            else if (type === 'success') icon.className = "fa-solid fa-circle-check text-emerald-400";
+            else icon.className = "fa-solid fa-circle-info text-blue-400";
+
+            toast.classList.remove('opacity-0', '-translate-y-10', 'pointer-events-none');
+            toast.classList.add('opacity-100', 'translate-y-0');
+
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', '-translate-y-10', 'pointer-events-none');
+            }, 3000);
+        };
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 if (!currentUser) {
                     try {
-                        const sessionSnap = await dbCall(getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', user.uid)), 8000);
+                        const sessionSnap = await window.dbCall(getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', user.uid)), 8000);
                         if (sessionSnap && sessionSnap.exists()) {
                             const phone = sessionSnap.data().phone;
                             
                             if (phone === 'admin_session') {
                                 currentUser = { name: 'Super Admin', role: 'Admin', phone: 'Admin', docId: 'admin_session', uid: user.uid };
-                                finalizeLoginSequence(true);
+                                window.finalizeLoginSequence(true);
                             } else {
-                                const userSnap = await dbCall(getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', phone)), 8000);
+                                const userSnap = await window.dbCall(getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', phone)), 8000);
                                 if (userSnap && userSnap.exists()) {
                                     currentUser = { ...userSnap.data(), docId: phone };
-                                    finalizeLoginSequence(true); 
+                                    window.finalizeLoginSequence(true); 
                                 }
                             }
                         }
                     } catch(e) {
                         console.warn("Session restore skipped.");
                     }
-                    loadMarketplaceData();
+                    window.loadMarketplaceData();
                 }
             } else {
-                startApp(); 
+                window.startApp(); 
             }
         });
 
@@ -906,7 +983,7 @@
             let locationFound = false;
             const fallbackTimer = setTimeout(() => {
                 if (locationFound) return;
-                showToast("Please select your village manually.", "error");
+                window.showToast("Please select your village manually.", "error");
             }, 3500);
             
             if (navigator.geolocation) {
@@ -925,23 +1002,23 @@
                                 option.value = results[0].formatted_address;
                                 select.add(option);
                                 select.value = results[0].formatted_address;
-                                showToast("Location detected successfully!", "success");
+                                window.showToast("Location detected successfully!", "success");
                             } else {
                                 console.error("Geocoder failed due to: " + status);
-                                showToast("GPS coordinates acquired.", "success");
+                                window.showToast("GPS coordinates acquired.", "success");
                             }
                         });
                     } catch(e) {
-                        showToast("GPS coordinates acquired.", "success");
+                        window.showToast("GPS coordinates acquired.", "success");
                     }
                 }, (err) => {
                     locationFound = true;
                     clearTimeout(fallbackTimer);
-                    showToast("Please select your village manually.", "error");
+                    window.showToast("Please select your village manually.", "error");
                 }, { timeout: 10000, maximumAge: 0, enableHighAccuracy: true });
             } else {
                 clearTimeout(fallbackTimer);
-                showToast("Geolocation not supported. Please select manually.", "error");
+                window.showToast("Geolocation not supported. Please select manually.", "error");
             }
         };
 
@@ -970,7 +1047,7 @@
             currentAuthRole = role;
             const overlay = document.getElementById('auth-overlay');
             overlay.classList.add('active');
-            switchAuthView('login'); 
+            window.switchAuthView('login'); 
         };
 
         window.closeAuthModal = () => {
@@ -1021,24 +1098,6 @@
             }
         };
 
-        function showToast(text, type = "info") {
-            const toast = document.getElementById('toast-msg');
-            const icon = toast.querySelector('i');
-            
-            toast.querySelector('span').innerText = text;
-            if (type === 'error') icon.className = "fa-solid fa-circle-exclamation text-red-400";
-            else if (type === 'success') icon.className = "fa-solid fa-circle-check text-emerald-400";
-            else icon.className = "fa-solid fa-circle-info text-blue-400";
-
-            toast.classList.remove('opacity-0', '-translate-y-10', 'pointer-events-none');
-            toast.classList.add('opacity-100', 'translate-y-0');
-
-            setTimeout(() => {
-                toast.classList.remove('opacity-100', 'translate-y-0');
-                toast.classList.add('opacity-0', '-translate-y-10', 'pointer-events-none');
-            }, 3000);
-        }
-        
         window.handleAdminLogin = async () => {
             const btn = document.querySelector('#admin-auth-overlay button');
             const orig = btn.innerText;
@@ -1047,7 +1106,7 @@
 
             try {
                 if (!auth.currentUser) {
-                    try { await dbCall(signInAnonymously(auth), 5000); } catch(e) {}
+                    try { await window.dbCall(signInAnonymously(auth), 4000); } catch(e) {}
                 }
 
                 const id = document.getElementById('admin-id-input').value.trim();
@@ -1057,19 +1116,19 @@
                     currentUser = { name: 'Super Admin', role: 'Admin', phone: 'Admin', docId: 'admin_session', uid: auth.currentUser?.uid || 'admin' };
                     
                     if(auth.currentUser) {
-                        dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: 'admin_session' }, { merge: true }), 3000).catch(e=>{});
+                        window.dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: 'admin_session' }, { merge: true }), 3000).catch(e=>{});
                     }
                     
-                    closeAdminModal();
+                    window.closeAdminModal();
                     document.getElementById('admin-id-input').value = '';
                     document.getElementById('admin-pass-input').value = '';
-                    finalizeLoginSequence();
+                    window.finalizeLoginSequence();
                 } else {
-                    showToast("Invalid Admin Credentials.", "error");
+                    window.showToast("Invalid Admin Credentials.", "error");
                 }
             } catch (e) {
                 console.error(e);
-                showToast("System error during admin login.", "error");
+                window.showToast("System error during admin login.", "error");
             } finally {
                 if (btn) {
                     btn.innerText = orig;
@@ -1078,7 +1137,94 @@
             }
         };
 
+        window.closeRideBooking = () => {
+            window.switchMainView('User');
+            document.getElementById('ride-state-initial').classList.remove('hidden', 'translate-y-full');
+            document.getElementById('ride-state-search').classList.add('hidden');
+            document.getElementById('ride-state-map-pick').classList.add('hidden');
+            document.getElementById('ride-state-options').classList.add('hidden');
+            document.getElementById('map-center-pin-container').classList.add('hidden');
+        };
+
+        window.openRideSearch = () => {
+            document.getElementById('ride-state-initial').classList.add('translate-y-full');
+            setTimeout(() => {
+                document.getElementById('ride-state-initial').classList.add('hidden');
+                document.getElementById('ride-state-search').classList.remove('hidden');
+                document.getElementById('ride-drop').focus();
+            }, 300);
+        };
+
+        window.closeRideSearch = () => {
+            document.getElementById('ride-state-search').classList.add('hidden');
+            document.getElementById('ride-state-initial').classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('ride-state-initial').classList.remove('translate-y-full');
+            }, 50);
+        };
+
+        let pickingTarget = 'ride-drop';
+        window.pickOnMap = (target) => {
+            pickingTarget = target;
+            document.getElementById('ride-state-search').classList.add('hidden');
+            document.getElementById('ride-state-map-pick').classList.remove('hidden');
+            document.getElementById('map-center-pin-container').classList.remove('hidden');
+            document.getElementById('map-pick-title').innerText = target === 'ride-pickup' ? 'Set Pickup Location' : 'Set Drop Location';
+            if (mapObj) {
+                google.maps.event.trigger(mapObj, 'resize');
+                google.maps.event.trigger(mapObj, 'idle');
+            }
+        };
+
+        window.cancelMapPicking = () => {
+            document.getElementById('ride-state-map-pick').classList.add('hidden');
+            document.getElementById('map-center-pin-container').classList.add('hidden');
+            document.getElementById('ride-state-search').classList.remove('hidden');
+        };
+
+        window.confirmMapPin = () => {
+            const addr = document.getElementById('map-pick-address').innerText;
+            if (addr && addr !== "Fetching exact address...") {
+                document.getElementById(pickingTarget).value = addr;
+            }
+            window.cancelMapPicking();
+        };
+
+        window.confirmSearchToRoute = () => {
+            document.getElementById('ride-state-search').classList.add('hidden');
+            window.calculateRideFares();
+        };
+
+        window.resetRideUI = () => {
+            if (directionsRenderer) directionsRenderer.setDirections({routes: []});
+            if (mapRouteLine) mapRouteLine.setMap(null);
+            if (mapDestMarker) mapDestMarker.setMap(null);
+            
+            document.getElementById('ride-state-options').classList.add('hidden');
+            document.getElementById('ride-state-search').classList.remove('hidden');
+            window.centerMapToGPS();
+        };
+
         window.handleGoogleAuth = async () => {
+            const isRegistering = document.getElementById('auth-view-register').style.display === 'block';
+            let pCat = null, shopName = null, fssaiNumber = null, vehicleType = null, vehicleNumber = null, dlNumber = null;
+            
+            if (isRegistering && currentAuthRole === 'Partner') {
+                pCat = document.getElementById('reg-partner-category').value;
+                if (!pCat) return window.showToast("Please select Business Type.", "error");
+
+                if (pCat === 'Food Owner') {
+                    shopName = document.getElementById('reg-shop-name').value.trim();
+                    fssaiNumber = document.getElementById('reg-fssai-number').value.trim();
+                    if (!shopName) return window.showToast("Please enter Business Name.", "error");
+                } else if (pCat === 'Rider') {
+                    vehicleType = document.getElementById('reg-vehicle-type').value;
+                    vehicleNumber = document.getElementById('reg-vehicle-number').value.trim();
+                    dlNumber = document.getElementById('reg-dl-number').value.trim();
+                    if (!vehicleType || !vehicleNumber) return window.showToast("Please enter Vehicle details.", "error");
+                }
+            }
+
             const msgEl = document.getElementById('auth-msg');
             msgEl.classList.remove('hidden');
             msgEl.className = "text-xs text-center font-bold mb-4 min-h-[1.5rem] px-4 rounded-lg py-2 bg-blue-50 text-blue-600 block";
@@ -1095,20 +1241,15 @@
                 
                 let snap = null;
                 try {
-                    snap = await dbCall(getDoc(userRef), 5000);
+                    snap = await window.dbCall(getDoc(userRef), 4000);
                 } catch (e) {
-                    console.warn("Offline check skipped.", e);
+                    console.warn("Google Auth - offline check skipped.");
                 }
 
                 let userData;
                 if (snap && snap.exists()) {
                     userData = snap.data();
                 } else {
-                    let pCat = null;
-                    if (currentAuthRole === 'Partner') {
-                        pCat = document.getElementById('reg-partner-category')?.value || 'Food Owner';
-                    }
-
                     userData = {
                         name: user.displayName || "Google User",
                         phone: docId, 
@@ -1119,24 +1260,28 @@
                         uid: user.uid,
                         created: new Date().toISOString(),
                         ...(currentAuthRole === 'Partner' && {
-                            category: pCat,
-                            shopName: user.displayName || "My Business"
+                            category: pCat || 'Partner',
+                            shopName: shopName || user.displayName || "My Business",
+                            fssaiNumber: fssaiNumber || null,
+                            vehicleType: vehicleType || null,
+                            vehicleNumber: vehicleNumber || null,
+                            dlNumber: dlNumber || null
                         })
                     };
                     
                     try {
-                        await dbCall(setDoc(userRef, userData, { merge: true }), 5000);
+                        await window.dbCall(setDoc(userRef, userData, { merge: true }), 4000);
                     } catch (e) {
                         console.warn("Saved Locally in offline mode.");
                     }
                 }
 
                 if(auth.currentUser) {
-                    dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: docId }, { merge: true }), 3000).catch(e => {});
+                    window.dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: docId }, { merge: true }), 3000).catch(e => {});
                 }
 
                 currentUser = { ...userData, docId: docId };
-                finalizeLoginSequence();
+                window.finalizeLoginSequence();
 
             } catch (error) {
                 console.error("Google Auth Error:", error);
@@ -1154,18 +1299,18 @@
             const msgEl = document.getElementById('auth-msg');
             msgEl.classList.remove('hidden');
             msgEl.className = "text-xs text-center font-bold mb-4 min-h-[1.5rem] px-4 rounded-lg py-2 bg-blue-50 text-blue-600 block";
-            msgEl.innerText = "Connecting to Server..."; 
+            msgEl.innerText = "Processing Request..."; 
             
             let btnId = type === 'register' ? 'submit-register' : 'submit-login';
             const btn = document.getElementById(btnId);
             const originalText = btn.innerText;
-            btn.innerText = "Processing...";
+            btn.innerText = "Please wait...";
             btn.disabled = true;
 
             try {
                 if (!auth.currentUser) {
                     try {
-                        await dbCall(signInAnonymously(auth), 5000);
+                        await window.dbCall(signInAnonymously(auth), 4000);
                     } catch(e) {
                         console.warn("Auth timeout, proceeding offline");
                     }
@@ -1203,12 +1348,11 @@
                         }
                     }
 
-                    btn.innerText = "Saving Profile...";
                     const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', phone);
                     
                     let snap = null;
                     try {
-                        snap = await dbCall(getDoc(userRef), 5000);
+                        snap = await window.dbCall(getDoc(userRef), 4000);
                     } catch (e) {
                         console.warn("getDoc timeout. Assuming new user.");
                     }
@@ -1235,14 +1379,14 @@
                     };
                     
                     // Optimistic Set
-                    dbCall(setDoc(userRef, userData, { merge: true }), 5000).catch(e => console.warn("Offline save"));
+                    window.dbCall(setDoc(userRef, userData, { merge: true }), 4000).catch(e => console.warn("Offline save"));
                     
                     if(auth.currentUser) {
-                        dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: phone }, { merge: true }), 3000).catch(e => {});
+                        window.dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: phone }, { merge: true }), 3000).catch(e => {});
                     }
                     
                     currentUser = { ...userData, docId: phone };
-                    finalizeLoginSequence();
+                    window.finalizeLoginSequence();
 
                 } else if (type === 'login') {
                     const phone = document.getElementById('login-phone').value.trim();
@@ -1256,7 +1400,7 @@
                     
                     let snap;
                     try {
-                        snap = await dbCall(getDoc(userRef), 8000);
+                        snap = await window.dbCall(getDoc(userRef), 6000);
                     } catch (e) {
                         throw new Error("Poor connection. Cannot verify login right now.");
                     }
@@ -1273,10 +1417,10 @@
                     currentUser = { ...data, docId: phone };
                     
                     if(auth.currentUser) {
-                        dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: phone }, { merge: true }), 3000).catch(e => {});
+                        window.dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: phone }, { merge: true }), 3000).catch(e => {});
                     }
                     
-                    finalizeLoginSequence();
+                    window.finalizeLoginSequence();
                 }
             } catch (e) {
                 console.error("Auth Error:", e);
@@ -1288,763 +1432,10 @@
             }
         };
 
-        function finalizeLoginSequence(isRestore = false) {
-            closeAuthModal();
-            if (!isRestore) {
-                showToast(`Welcome back, ${currentUser.name.split(' ')[0] || 'User'}!`, "success");
-            }
-
-            document.getElementById('btn-login-trigger').classList.add('hidden');
-            const pTrigger = document.getElementById('profile-trigger');
-            pTrigger.classList.remove('hidden');
-            document.getElementById('nav-initial').innerText = currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U';
-            document.getElementById('nav-name').innerText = currentUser.name || 'Unknown';
-            document.getElementById('nav-role').innerText = currentUser.role || 'User';
-            
-            const roleSpan = document.getElementById('nav-role');
-            roleSpan.className = `text-[9px] font-bold uppercase ${currentUser.role === 'Admin' ? 'text-purple-500' : currentUser.role === 'Partner' ? 'text-orange-500' : 'text-blue-500'}`;
-
-            document.getElementById('menu-name').innerText = currentUser.name || 'Unknown';
-            // Mask email or show phone properly
-            let displayPhone = currentUser.phone;
-            if(displayPhone.includes('@')) {
-                displayPhone = displayPhone.split('@')[0] + '@...';
-            } else if (currentUser.role !== 'Admin') {
-                displayPhone = `+91 ${displayPhone}`;
-            } else {
-                displayPhone = `Admin ID: ${displayPhone}`;
-            }
-            document.getElementById('menu-phone').innerText = displayPhone;
-
-            setupBottomNav(currentUser.role);
-            switchMainView(currentUser.role === 'Admin' ? 'Admin' : currentUser.role === 'Partner' ? 'Partner' : 'User');
-
-            if (currentUser.role === 'Admin') {
-                const adminBadge = document.getElementById('admin-id-badge');
-                if (adminBadge) adminBadge.innerText = `Admin Access`;
-            }
-
-            if (currentUser.role === 'Partner') {
-                document.getElementById('partner-welcome').innerText = `Hello, ${currentUser.name.split(' ')[0]}!`;
-                if(currentUser.category) {
-                    document.getElementById('partner-category-badge').innerText = `Online (${currentUser.category})`;
-                }
-
-                const statusCont = document.getElementById('shop-status-container');
-                const addProdCont = document.getElementById('add-product-container');
-                const catListCont = document.getElementById('partner-catalog-list-container');
-
-                const statusToggle = document.getElementById('partner-status-toggle');
-                if(statusToggle) statusToggle.checked = (currentUser.shopStatus !== 'Closed');
-                document.getElementById('shop-status-text').innerText = (currentUser.shopStatus === 'Closed') ? 'Currently Closed' : 'Currently Open';
-
-                const statusLabel = document.getElementById('partner-approval-status');
-                const approvalWarning = document.getElementById('approval-warning');
-                const canAddProducts = (currentUser.category === 'Food Owner');
-                
-                // Show Hub Details
-                document.getElementById('hub-name-val').innerText = currentUser.shopName || currentUser.name;
-                document.getElementById('hub-cat-val').innerText = currentUser.category;
-                
-                const hubFssaiRow = document.getElementById('hub-fssai-row');
-                const hubVehRow = document.getElementById('hub-veh-row');
-                const hubDlRow = document.getElementById('hub-dl-row');
-                const pSetupForm = document.getElementById('partner-setup-form');
-
-                if (currentUser.category === 'Rider') {
-                    hubFssaiRow.classList.add('hidden');
-                    hubVehRow.classList.remove('hidden');
-                    hubDlRow.classList.remove('hidden');
-                    document.getElementById('hub-veh-val').innerText = currentUser.vehicleNumber || 'N/A';
-                    document.getElementById('hub-dl-val').innerText = currentUser.dlNumber || 'N/A';
-                } else {
-                    hubVehRow.classList.add('hidden');
-                    hubDlRow.classList.add('hidden');
-                    if (currentUser.fssaiNumber) {
-                        hubFssaiRow.classList.remove('hidden');
-                        document.getElementById('hub-fssai-val').innerText = currentUser.fssaiNumber;
-                    } else {
-                        hubFssaiRow.classList.add('hidden');
-                    }
-                }
-
-                if (currentUser.approvalStatus === 'Approved') {
-                    statusLabel.innerText = "Verified";
-                    statusLabel.className = "text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-1 rounded uppercase tracking-widest";
-                    approvalWarning.classList.add('hidden');
-                    statusCont.classList.remove('hidden');
-                    pSetupForm.classList.add('hidden');
-                    if (canAddProducts) {
-                        addProdCont.classList.remove('hidden');
-                        catListCont.classList.remove('hidden');
-                    } else {
-                        addProdCont.classList.add('hidden');
-                        catListCont.classList.add('hidden');
-                    }
-                } else if (currentUser.approvalStatus === 'Rejected') {
-                    statusLabel.innerText = "Rejected";
-                    statusLabel.className = "text-[10px] font-black text-red-600 bg-red-50 px-2 py-1 rounded uppercase tracking-widest";
-                    addProdCont.classList.add('hidden');
-                    catListCont.classList.add('hidden');
-                    statusCont.classList.add('hidden');
-                    pSetupForm.classList.remove('hidden');
-                    approvalWarning.classList.remove('hidden');
-                    document.getElementById('approval-warning-text').innerText = "Your profile was rejected by the Admin. You can update your details below.";
-                } else if (currentUser.approvalStatus === 'Pending') {
-                    statusLabel.innerText = "Pending Verification";
-                    statusLabel.className = "text-[10px] font-black text-orange-600 bg-orange-50 px-2 py-1 rounded uppercase tracking-widest";
-                    addProdCont.classList.add('hidden');
-                    catListCont.classList.add('hidden');
-                    statusCont.classList.add('hidden');
-                    pSetupForm.classList.add('hidden');
-                    approvalWarning.classList.remove('hidden');
-                    document.getElementById('approval-warning-text').innerText = "Your details have been submitted and are under review by the Admin.";
-                } else {
-                    statusLabel.innerText = "Setup Needed";
-                    statusLabel.className = "text-[10px] font-black text-gray-500 bg-gray-100 px-2 py-1 rounded uppercase tracking-widest";
-                    pSetupForm.classList.remove('hidden');
-                    approvalWarning.classList.add('hidden');
-                    addProdCont.classList.add('hidden');
-                    catListCont.classList.add('hidden');
-                }
-                
-                // Prefill setup form if needed
-                const fssaiCont = document.getElementById('fssai-container');
-                const vehCont = document.getElementById('vehicle-type-container');
-
-                if (currentUser.category === 'Rider') {
-                    fssaiCont.classList.add('hidden');
-                    vehCont.classList.remove('hidden');
-                    if(currentUser.vehicleType) document.getElementById('partner-vehicle-type').value = currentUser.vehicleType;
-                    if(currentUser.vehicleNumber) document.getElementById('partner-vehicle-number').value = currentUser.vehicleNumber;
-                    if(currentUser.dlNumber) document.getElementById('partner-dl-number').value = currentUser.dlNumber;
-                } else {
-                    fssaiCont.classList.remove('hidden');
-                    vehCont.classList.add('hidden');
-                    if(currentUser.shopName) document.getElementById('partner-shop-name').value = currentUser.shopName;
-                    if(currentUser.fssaiNumber) document.getElementById('partner-fssai-number').value = currentUser.fssaiNumber;
-                }
-            }
-
-            initRoleListeners();
-        }
-
-        window.logout = async () => {
-            // Note: intentionally skipping auth.signOut() so that the background syncs from Canvas aren't wiped.
-            if(auth.currentUser) {
-                deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid)).catch(e=>{});
-            }
-            
-            currentUser = null;
-            cart = [];
-            
-            unsubscribeListeners.forEach(unsub => unsub());
-            unsubscribeListeners = [];
-
-            document.getElementById('profile-menu').classList.add('hidden');
-            document.getElementById('profile-trigger').classList.add('hidden');
-            document.getElementById('btn-login-trigger').classList.remove('hidden');
-            document.getElementById('bottom-nav').classList.add('hidden');
-            
-            const cta = document.getElementById('partner-cta');
-            if(cta) cta.style.display = 'block';
-            
-            switchMainView('User');
-            renderCartUI();
-            showToast("Successfully signed out.", "success");
-        };
-
-        function setupBottomNav(role) {
-            const bNav = document.getElementById('bottom-nav');
-            bNav.classList.remove('hidden');
-            const container = bNav.querySelector('div');
-            container.innerHTML = ''; 
-
-            const createNavItem = (id, icon, label, targetView) => `
-                <button type="button" id="nav-btn-${id}" onclick="switchMainView('${targetView}')" class="b-nav-item flex flex-col items-center gap-1 w-16 text-gray-400 transition-colors">
-                    <i class="${icon} text-xl mb-0.5"></i>
-                    <span class="text-[10px] font-bold tracking-wide">${label}</span>
-                </button>
-            `;
-
-            if (role === 'User') {
-                container.innerHTML += createNavItem('User', 'fa-solid fa-shop', 'Shop', 'User');
-                container.innerHTML += createNavItem('Cart', 'fa-solid fa-basket-shopping', 'Cart', 'Cart');
-                container.innerHTML += createNavItem('Orders', 'fa-solid fa-receipt', 'Orders', 'Orders'); 
-            } else if (role === 'Partner') {
-                container.innerHTML += createNavItem('Partner', 'fa-solid fa-motorcycle', 'Deliveries', 'Partner');
-                container.innerHTML += createNavItem('Partner-Profile', 'fa-solid fa-store', 'My Hub', 'Partner-Profile');
-            } else if (role === 'Admin') {
-                container.innerHTML += createNavItem('Admin', 'fa-solid fa-chart-line', 'Dashboard', 'Admin');
-            }
-        }
-
-        // --- GOOGLE MAPS LOGIC (Uber/Rapido Style) ---
-        window.setActiveMapInput = (id) => {
-            activeMapInput = id;
-            const pin = document.getElementById('map-center-pin');
-            const tooltip = document.getElementById('map-pin-tooltip');
-            
-            document.getElementById('ride-pickup').classList.remove('!border-black', 'focus:!border-black', 'focus:!ring-black/20');
-            document.getElementById('ride-drop').classList.remove('!border-black', 'focus:!border-black', 'focus:!ring-black/20');
-            
-            if (directionsRenderer) directionsRenderer.setDirections({routes: []});
-            document.getElementById('map-center-pin-container').style.display = 'flex';
-
-            if (id === 'ride-pickup') {
-                pin.className = "fa-solid fa-location-dot text-4xl drop-shadow-md transition-colors duration-300 text-black";
-                tooltip.innerText = "Set Pickup";
-                tooltip.className = "bg-black text-white text-[10px] font-bold px-2 py-1 rounded-md mb-1 shadow-md whitespace-nowrap transition-colors";
-                document.getElementById('ride-pickup').classList.add('focus:!border-black', 'focus:!ring-black/20');
-            } else {
-                pin.className = "fa-solid fa-location-dot text-4xl drop-shadow-md transition-colors duration-300 text-black";
-                tooltip.innerText = "Set Destination";
-                tooltip.className = "bg-black text-white text-[10px] font-bold px-2 py-1 rounded-md mb-1 shadow-md whitespace-nowrap transition-colors";
-                document.getElementById('ride-drop').classList.add('focus:!border-black', 'focus:!ring-black/20');
-            }
-        };
-
-        window.centerMapToGPS = () => {
-            if (navigator.geolocation && mapObj) {
-                document.getElementById('map-pin-tooltip').innerText = "Locating...";
-                navigator.geolocation.getCurrentPosition((pos) => {
-                    userLat = pos.coords.latitude;
-                    userLon = pos.coords.longitude;
-                    mapObj.setCenter({ lat: userLat, lng: userLon });
-                    mapObj.setZoom(16);
-                }, () => {
-                    showToast("Location access denied or failed.", "error");
-                    document.getElementById('map-pin-tooltip').innerText = activeMapInput === 'ride-pickup' ? "Set Pickup" : "Set Destination";
-                });
-            }
-        };
-
-        window.openRideBooking = () => {
-            switchMainView('RideBooking');
-            document.getElementById('ride-options-container').classList.add('hidden');
-            
-            if(document.getElementById('ride-pickup').value === '') {
-                document.getElementById('ride-pickup').value = '';
-            }
-            if(document.getElementById('ride-drop').value === '') {
-                document.getElementById('ride-drop').value = '';
-            }
-            
-            window.setActiveMapInput('ride-pickup');
-            
-            let mapRetries = 0;
-            const tryLoadMap = () => {
-                if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
-                    if (mapRetries < 15) { 
-                        mapRetries++;
-                        setTimeout(tryLoadMap, 300);
-                        return;
-                    }
-                    document.getElementById('ride-map').innerHTML = "<div class='flex flex-col items-center justify-center h-full text-xs text-gray-500 p-4 text-center border-2 border-dashed border-gray-300 m-2 rounded-2xl'><span><i class='fa-solid fa-map-location-dot text-2xl mb-2 text-gray-300'></i></span><span>Google Maps API Error.<br>Please ensure Billing is enabled on your Cloud Console.</span></div>";
-                    return;
-                }
-
-                if(!mapObj) {
-                    mapObj = new google.maps.Map(document.getElementById('ride-map'), {
-                        center: { lat: userLat, lng: userLon },
-                        zoom: 15,
-                        disableDefaultUI: true,
-                        mapTypeControl: false,
-                        gestureHandling: "greedy" 
-                    });
-
-                    directionsService = new google.maps.DirectionsService();
-                    directionsRenderer = new google.maps.DirectionsRenderer({
-                        map: mapObj,
-                        suppressMarkers: false, 
-                        polylineOptions: { strokeColor: '#111827', strokeWeight: 4 }
-                    });
-
-                    const pickupInput = document.getElementById('ride-pickup');
-                    const dropInput = document.getElementById('ride-drop');
-                    
-                    pickupAutocomplete = new google.maps.places.Autocomplete(pickupInput, { componentRestrictions: { country: "in" } });
-                    dropAutocomplete = new google.maps.places.Autocomplete(dropInput, { componentRestrictions: { country: "in" } });
-
-                    pickupAutocomplete.addListener('place_changed', () => {
-                        const place = pickupAutocomplete.getPlace();
-                        if(place.geometry) {
-                            mapObj.setCenter(place.geometry.location);
-                            mapObj.setZoom(16);
-                            pickupInput.value = place.formatted_address;
-                        }
-                    });
-
-                    dropAutocomplete.addListener('place_changed', () => {
-                        const place = dropAutocomplete.getPlace();
-                        if(place.geometry) {
-                            mapObj.setCenter(place.geometry.location);
-                            mapObj.setZoom(16);
-                            dropInput.value = place.formatted_address;
-                        }
-                    });
-
-                    mapObj.addListener('dragstart', () => {
-                        document.getElementById('map-pin-tooltip').innerText = "Moving...";
-                    });
-
-                    mapObj.addListener('idle', () => {
-                        const center = mapObj.getCenter();
-                        userLat = center.lat();
-                        userLon = center.lng();
-
-                        const input = document.getElementById(activeMapInput);
-                        input.value = "Fetching address...";
-                        document.getElementById('map-pin-tooltip').innerText = "Fetching...";
-                        
-                        const geocoder = new google.maps.Geocoder();
-                        geocoder.geocode({ location: center }, (results, status) => {
-                            if (status === "OK" && results[0]) {
-                                const addr = results[0].formatted_address.split(',').slice(0, 3).join(', ');
-                                input.value = addr;
-                                document.getElementById('map-pin-tooltip').innerText = activeMapInput === 'ride-pickup' ? "Pickup Set" : "Destination Set";
-                            } else {
-                                console.error("Geocoder failed due to: " + status);
-                                input.value = `${userLat.toFixed(4)}, ${userLon.toFixed(4)}`;
-                                document.getElementById('map-pin-tooltip').innerText = "Location Set";
-                                if(status === "REQUEST_DENIED" || status === "UNKNOWN_ERROR") {
-                                     showToast("ম্যাপ এপিআই সমস্যা (API Error)।", "error");
-                                }
-                            }
-                        });
-                    });
-                }
-                
-                if (directionsRenderer) directionsRenderer.setDirections({routes: []});
-                document.getElementById('map-center-pin-container').style.display = 'flex';
-
-                google.maps.event.trigger(mapObj, 'resize');
-                mapObj.setCenter({ lat: userLat, lng: userLon });
-                
-                if (document.getElementById('ride-pickup').value === '') {
-                    centerMapToGPS();
-                }
-            };
-            
-            tryLoadMap();
-        };
-
-        window.calculateRideFares = () => {
-            const pickup = document.getElementById('ride-pickup').value.trim();
-            const drop = document.getElementById('ride-drop').value.trim();
-            
-            if(!pickup || pickup === 'Fetching address...' || !drop || drop === 'Fetching address...') {
-                return showToast("Enter valid pickup and drop locations.", "error");
-            }
-
-            const btn = document.getElementById('btn-find-rides');
-            btn.innerText = "Finding route...";
-            btn.disabled = true;
-
-            if (typeof google === 'undefined' || !directionsService) {
-                showToast("Google Maps is not loaded properly.", "error");
-                btn.innerText = "Search";
-                btn.disabled = false;
-                return;
-            }
-
-            const renderRideOptions = (distanceKm, durationMins, distText) => {
-                // Professional Fare Calculation
-                const baseBike = 20; const perKmBike = 6;
-                const baseToto = 30; const perKmToto = 10;
-                const baseCar = 50; const perKmCar = 15;
-
-                const bikeFare = Math.floor(baseBike + (distanceKm * perKmBike));
-                const totoFare = Math.floor(baseToto + (distanceKm * perKmToto));
-                const carFare = Math.floor(baseCar + (distanceKm * perKmCar));
-
-                const etaBike = Math.floor(Math.random() * 5) + 2;
-                const etaToto = Math.floor(Math.random() * 8) + 4;
-                const etaCar = Math.floor(Math.random() * 10) + 5;
-
-                document.getElementById('ride-distance-display').innerText = distText;
-                document.getElementById('ride-options-container').classList.remove('hidden');
-                
-                const now = new Date();
-                const getArrival = (mins) => {
-                    const d = new Date(now.getTime() + mins * 60000);
-                    return d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                };
-
-                const safePickup = pickup.replace(/'/g, "\\'");
-                const safeDrop = drop.replace(/'/g, "\\'");
-
-                const html = `
-                    <div class="bg-white border border-gray-200 rounded-2xl p-4 flex items-center justify-between cursor-pointer hover:ring-2 hover:ring-black transition-all shadow-sm" onclick="bookRide('Bike Taxi', ${bikeFare}, '${safePickup}', '${safeDrop}')">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-                                <i class="fa-solid fa-motorcycle text-2xl text-gray-800"></i>
-                            </div>
-                            <div>
-                                <p class="font-black text-gray-900 text-lg leading-none">Gramzo Bike <span class="text-[10px] text-gray-500 font-bold ml-1"><i class="fa-solid fa-user"></i> 1</span></p>
-                                <p class="text-xs text-gray-500 font-medium mt-1">${durationMins} min away • Drop by ${getArrival(durationMins + 5)}</p>
-                            </div>
-                        </div>
-                        <span class="font-black text-gray-900 text-xl">₹${bikeFare}</span>
-                    </div>
-                    <div class="bg-white border border-gray-200 rounded-2xl p-4 flex items-center justify-between cursor-pointer hover:ring-2 hover:ring-black transition-all shadow-sm" onclick="bookRide('Gramzo Toto', ${totoFare}, '${safePickup}', '${safeDrop}')">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-                                <i class="fa-solid fa-caravan text-2xl text-gray-800"></i>
-                            </div>
-                            <div>
-                                <p class="font-black text-gray-900 text-lg leading-none">Gramzo Toto <span class="text-[10px] text-gray-500 font-bold ml-1"><i class="fa-solid fa-user"></i> 4</span></p>
-                                <p class="text-xs text-gray-500 font-medium mt-1">${durationMins + 2} min away • Drop by ${getArrival(durationMins + 10)}</p>
-                            </div>
-                        </div>
-                        <span class="font-black text-gray-900 text-xl">₹${totoFare}</span>
-                    </div>
-                    <div class="bg-white border border-gray-200 rounded-2xl p-4 flex items-center justify-between cursor-pointer hover:ring-2 hover:ring-black transition-all shadow-sm" onclick="bookRide('Gramzo Car', ${carFare}, '${safePickup}', '${safeDrop}')">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-                                <i class="fa-solid fa-car text-2xl text-gray-800"></i>
-                            </div>
-                            <div>
-                                <p class="font-black text-gray-900 text-lg leading-none">Gramzo Car <span class="text-[10px] text-gray-500 font-bold ml-1"><i class="fa-solid fa-user"></i> 4</span></p>
-                                <p class="text-xs text-gray-500 font-medium mt-1">${durationMins + 5} min away • Drop by ${getArrival(durationMins + 8)}</p>
-                            </div>
-                        </div>
-                        <span class="font-black text-gray-900 text-xl">₹${carFare}</span>
-                    </div>
-                `;
-                document.getElementById('ride-options-list').innerHTML = html;
-                btn.innerText = "Search Again";
-                btn.disabled = false;
-            };
-
-            directionsService.route({
-                origin: pickup,
-                destination: drop,
-                travelMode: google.maps.TravelMode.DRIVING
-            }, (response, status) => {
-                if (status === 'OK') {
-                    if(mapRouteLine) mapRouteLine.setMap(null);
-                    if(mapDestMarker) mapDestMarker.setMap(null);
-
-                    directionsRenderer.setDirections(response);
-                    document.getElementById('map-center-pin-container').style.display = 'none';
-
-                    const leg = response.routes[0].legs[0];
-                    const distanceKm = leg.distance.value / 1000;
-                    const durationMins = Math.ceil(leg.duration.value / 60);
-
-                    renderRideOptions(distanceKm, durationMins, `(${leg.distance.text} • ${leg.duration.text})`);
-                } else {
-                    console.warn("Directions API failed/Route not found:", status);
-                    showToast("Route not mapped perfectly. Showing aerial estimate.", "info");
-                    
-                    if (directionsRenderer) directionsRenderer.setDirections({routes: []});
-                    document.getElementById('map-center-pin-container').style.display = 'none';
-                    
-                    const center = mapObj.getCenter();
-                    const latOffset = (Math.random() - 0.5) * 0.05;
-                    const lonOffset = (Math.random() - 0.5) * 0.05;
-                    const destLat = center.lat() + latOffset;
-                    const destLon = center.lng() + lonOffset;
-                    
-                    const bounds = new google.maps.LatLngBounds();
-                    bounds.extend(center);
-                    bounds.extend({lat: destLat, lng: destLon});
-                    mapObj.fitBounds(bounds);
-                    
-                    if(mapRouteLine) mapRouteLine.setMap(null);
-                    if(mapDestMarker) mapDestMarker.setMap(null);
-                    
-                    mapRouteLine = new google.maps.Polyline({
-                        path: [
-                            {lat: center.lat(), lng: center.lng()},
-                            {lat: destLat, lng: destLon}
-                        ],
-                        geodesic: true,
-                        strokeColor: '#000000',
-                        strokeOpacity: 1.0,
-                        strokeWeight: 3
-                    });
-                    mapRouteLine.setMap(mapObj);
-                    
-                    mapDestMarker = new google.maps.Marker({
-                        position: {lat: destLat, lng: destLon},
-                        map: mapObj,
-                        icon: {
-                            path: google.maps.SymbolPath.CIRCLE,
-                            scale: 6,
-                            fillColor: '#000000',
-                            fillOpacity: 1,
-                            strokeColor: '#ffffff',
-                            strokeWeight: 2
-                        }
-                    });
-
-                    const distanceKm = Math.floor(Math.random() * 10) + 3; 
-                    const durationMins = distanceKm * 3;
-                    renderRideOptions(distanceKm, durationMins, `(~${distanceKm} km aerial distance)`);
-                }
-            });
-        };
-
-        window.bookRide = async (type, fare, pickup, drop) => {
-            if(!currentUser) { 
-                showToast("Please login to confirm your ride.", "info"); 
-                openAuthModal('User'); 
-                return; 
-            }
-            const rideItem = { name: `${type} Ride`, price: fare, pickup, drop };
-            
-            try {
-                await dbCall(addDoc(getCol('orders'), { 
-                    customer: currentUser.name, 
-                    phone: currentUser.phone, 
-                    items: [rideItem], 
-                    total: fare, 
-                    address: pickup, 
-                    drop_location: drop,
-                    status: 'Placed', 
-                    partnerId: null, 
-                    restaurantId: null, 
-                    restaurantName: null,
-                    time: serverTimestamp() 
-                }), 10000);
-                showToast(`${type} Confirmed! Searching for a driver...`, "success");
-                switchMainView('Orders');
-            } catch(e) {
-                showToast("Network delayed. Booking in background.", "info");
-                switchMainView('Orders');
-            }
-        };
-
-        window.bookAmbulance = async () => {
-            if(!currentUser) { showToast("Please login to request an Ambulance.", "info"); openAuthModal('User'); return; }
-            
-            const pickup = document.getElementById('ride-pickup').value.trim() || "Emergency Location (Check GPS)";
-            const rideItem = { name: "Ambulance SOS", price: 0, pickup, drop: "Nearest Hospital" };
-            
-            try {
-                await dbCall(addDoc(getCol('orders'), { 
-                    customer: currentUser.name, 
-                    phone: currentUser.phone, 
-                    items: [rideItem], 
-                    total: 0, 
-                    address: pickup, 
-                    drop_location: "Nearest Hospital",
-                    status: 'Placed', 
-                    isEmergency: true,
-                    partnerId: null,
-                    restaurantId: null,
-                    restaurantName: null,
-                    time: serverTimestamp() 
-                }), 10000);
-                showToast("SOS Alert Broadcasted! Help is on the way.", "success");
-                switchMainView('Orders');
-            } catch(e) {
-                showToast("Network delayed. Broadcasting in background.", "info");
-                switchMainView('Orders');
-            }
-        };
-
-        window.updatePriceDisplay = (selectEl, priceId) => {
-            const price = selectEl.options[selectEl.selectedIndex].dataset.price;
-            document.getElementById(priceId).innerText = `₹${price}`;
-        };
-
-        function loadMarketplaceData() {
-            if (!auth.currentUser) {
-                setTimeout(loadMarketplaceData, 500);
-                return;
-            }
-            const defaultBanner = "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80";
-            
-            onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'app_config'), (snap) => {
-                const bannerEl = document.getElementById('user-offer-banner');
-                const marqueeEl = document.getElementById('dynamic-marquee');
-                if (snap.exists()) {
-                    const data = snap.data();
-                    if (data.offerBanner && bannerEl) bannerEl.src = data.offerBanner;
-                    if (data.marqueeText && marqueeEl && data.marqueeText.trim() !== '') {
-                        marqueeEl.innerHTML = `${data.marqueeText} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${data.marqueeText} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${data.marqueeText}`;
-                    }
-                }
-            }, (err) => console.error("Config Error:", err));
-
-            const dummyProducts = [
-                { id: "dummy3", name: "Chicken Biryani", variants: [{qty: "Half", price: 90}, {qty: "Full Plate", price: 150}], category: "Food", image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&q=80", shopName: "Local Kitchen", partnerId: "1111111111", inStock: true, shopStatus: 'Open' },
-                { id: "dummy4", name: "Paneer Butter Masala", price: 120, category: "Food", image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80", shopName: "Desi Dhaba", partnerId: "2222222222", inStock: true, shopStatus: 'Open' },
-                { id: "dummy5", name: "Veg Chowmein", price: 60, category: "Food", image: "https://images.unsplash.com/photo-1585032226651-759b368d7246?w=400&q=80", shopName: "Fast Food Corner", partnerId: "3333333333", inStock: true, shopStatus: 'Open' }
-            ];
-
-            const unsub = onSnapshot(getCol('products'), (snap) => {
-                const listEl = document.getElementById('market-list');
-                let items = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
-                
-                if(items.length === 0) items = dummyProducts;
-
-                const filtered = items.filter(i => {
-                    if (currentFilter && i.category !== currentFilter) return false;
-                    if (currentSubFilter && i.subCategory !== currentSubFilter) return false;
-                    return true;
-                });
-                
-                if (filtered.length === 0) {
-                    listEl.innerHTML = '<div class="col-span-full py-10 text-center text-gray-400 font-medium text-sm border-2 border-dashed border-gray-200 rounded-3xl">No items found in this category.</div>';
-                    return;
-                }
-
-                listEl.innerHTML = filtered.map(p => {
-                    const hasVariants = p.variants && p.variants.length > 0;
-                    const displayPrice = hasVariants ? p.variants[0].price : p.price;
-                    const isClosed = p.shopStatus === 'Closed';
-                    const isOutOfStock = p.inStock === false;
-                    
-                    let qtyDisplay = `<p class="text-[10px] text-gray-500 uppercase tracking-wide font-medium mb-3">${p.qty || ''} • <span class="text-emerald-600 font-bold">${p.shopName || 'Gramzo'}</span></p>`;
-                    
-                    if (hasVariants) {
-                        const options = p.variants.map((v, i) => `<option value="${i}" data-price="${v.price}">${v.qty}</option>`).join('');
-                        qtyDisplay = `
-                            <div class="mb-3 flex items-center justify-between">
-                                <select onchange="updatePriceDisplay(this, 'price-${p.id}')" id="sel-${p.id}" class="text-xs bg-gray-50 border border-gray-200 rounded-lg p-1.5 outline-none focus:ring-1 ring-emerald-500 font-medium text-gray-700 w-full mr-2">
-                                    ${options}
-                                </select>
-                                <span class="text-[9px] text-emerald-600 font-bold shrink-0">${p.shopName || 'Gramzo'}</span>
-                            </div>
-                        `;
-                    }
-
-                    let actionHtml = '';
-                    if (isClosed) {
-                        actionHtml = `<span class="text-[10px] font-black text-red-500 uppercase tracking-widest bg-red-50 px-2 py-1 rounded">Shop Closed</span>`;
-                    } else if (isOutOfStock) {
-                        actionHtml = `<span class="text-[10px] font-black text-orange-500 uppercase tracking-widest bg-orange-50 px-2 py-1 rounded">Out of Stock</span>`;
-                    } else {
-                        actionHtml = `
-                            <span id="price-${p.id}" class="text-lg font-black text-emerald-600 tracking-tight">₹${displayPrice}</span>
-                            <button type="button" onclick="addVariantToCart('${p.id}', '${p.name.replace(/'/g, "\\'")}', ${!hasVariants ? p.price : 'null'}, '${(!hasVariants && p.qty) ? p.qty : ''}', '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')" class="w-8 h-8 rounded-full bg-gray-900 text-white flex items-center justify-center hover:bg-emerald-500 transition-colors active:scale-90 shrink-0">
-                                <i class="fa-solid fa-plus text-xs"></i>
-                            </button>
-                        `;
-                    }
-
-                    return `
-                        <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex flex-col transform transition hover:-translate-y-1 hover:shadow-md ${isClosed || isOutOfStock ? 'opacity-60 grayscale-[0.5]' : ''}">
-                            <div class="h-32 bg-gray-100 relative">
-                                <img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x300/f3f4f6/a1a1aa?text=Image'">
-                                <span class="absolute top-2 left-2 bg-white/90 backdrop-blur text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded text-gray-800 shadow-sm">${p.subCategory || p.category}</span>
-                            </div>
-                            <div class="p-3 flex-1 flex flex-col justify-between">
-                                <div>
-                                    <h4 class="font-bold text-gray-900 text-sm leading-tight mb-1">${p.name}</h4>
-                                    ${qtyDisplay}
-                                </div>
-                                <div class="flex justify-between items-center mt-auto pt-2 border-t border-gray-50">
-                                    ${actionHtml}
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            }, (error) => console.error("Products error:", error));
-            
-        }
-
-        window.filterCategory = (cat, subCat = null) => {
-            if (cat === 'Food') {
-                const loc = document.getElementById('user-location-input').value;
-                if (!loc) {
-                    showToast("Please select your village first!", "error");
-                    document.getElementById('user-location-input').focus();
-                    
-                    const container = document.getElementById('location-container');
-                    container.classList.add('ring-2', 'ring-red-500');
-                    setTimeout(() => container.classList.remove('ring-2', 'ring-red-500'), 2000);
-                    return;
-                }
-            }
-
-            currentFilter = cat;
-            currentSubFilter = subCat;
-            
-            const clearBtn = document.getElementById('btn-clear-filter');
-            document.getElementById('marketplace-title').innerText = cat ? `${subCat || cat} Options` : 'Trending Near You';
-
-            if (cat) clearBtn.classList.remove('hidden');
-            else clearBtn.classList.add('hidden');
-
-            loadMarketplaceData();
-        };
-
-        // --- ZOMATO-STYLE ORDER PDF GENERATOR ---
-        window.downloadInvoice = (orderId) => {
-            const order = window.userOrderHistory?.find(o => o.id === orderId);
-            if(!order) return showToast("Unable to find order details.", "error");
-            
-            if(typeof window.jspdf === 'undefined') {
-                return showToast("PDF Library loading... Try again in a moment.", "info");
-            }
-            
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            
-            doc.setFontSize(22);
-            doc.setTextColor(16, 185, 129); // Emerald 500
-            doc.text("GRAMZO SUPER APP", 20, 20);
-            
-            doc.setFontSize(14);
-            doc.setTextColor(0, 0, 0);
-            doc.text("Order Invoice", 20, 30);
-            
-            doc.setFontSize(10);
-            doc.text(`Order ID: #${order.id.slice(-5).toUpperCase()}`, 20, 45);
-            
-            let dateStr = "N/A";
-            if(order.time && order.time.toMillis) {
-                dateStr = new Date(order.time.toMillis()).toLocaleString();
-            } else {
-                dateStr = new Date().toLocaleString();
-            }
-            doc.text(`Date: ${dateStr}`, 20, 50);
-            doc.text(`Status: ${order.status}`, 20, 55);
-            doc.text(`Restaurant/Service: ${order.restaurantName || order.partnerName || 'Gramzo Services'}`, 20, 60);
-            
-            doc.text(`Customer: ${order.customer}`, 20, 75);
-            doc.text(`Phone: ${order.phone}`, 20, 80);
-            doc.text(`Delivery Address: ${order.address}`, 20, 85);
-            
-            doc.line(20, 95, 190, 95);
-            
-            let y = 105;
-            doc.setFontSize(12);
-            doc.text("Items:", 20, y);
-            y += 10;
-            
-            doc.setFontSize(10);
-            order.items.forEach((item, idx) => {
-                doc.text(`${idx + 1}. ${item.name}`, 20, y);
-                doc.text(`Rs. ${item.price}`, 170, y);
-                y += 8;
-            });
-            
-            doc.line(20, y+5, 190, y+5);
-            
-            doc.setFontSize(12);
-            doc.text("Total Paid:", 140, y+15);
-            doc.text(`Rs. ${order.total}`, 170, y+15);
-            
-            doc.setFontSize(10);
-            doc.setTextColor(150, 150, 150);
-            doc.text("Thank you for using Gramzo!", 20, y+40);
-            
-            doc.save(`Gramzo_Invoice_${order.id.slice(-5).toUpperCase()}.pdf`);
-            showToast("Downloading Invoice...", "success");
-        };
-
-        // 2. Role Specific Listeners
-        function initRoleListeners() {
+        window.initRoleListeners = () => {
             if (!currentUser) return;
             if (!auth.currentUser && currentUser.role !== 'Admin') {
-                setTimeout(initRoleListeners, 500);
+                setTimeout(window.initRoleListeners, 500);
                 return;
             }
 
@@ -2108,7 +1499,7 @@
                             approvalsBody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-gray-400 text-xs italic">No pending approvals right now.</td></tr>';
                         } else {
                             approvalsBody.innerHTML = pending.map(u => {
-                                let displayPhone = u.phone;
+                                let displayPhone = u.phone || '';
                                 if(displayPhone && displayPhone.includes('@')) displayPhone = displayPhone.split('@')[0] + '@...';
                                 return `
                                 <tr class="hover:bg-gray-50 transition-colors">
@@ -2121,8 +1512,8 @@
                                         ${(!u.fssaiNumber && !u.vehicleNumber && !u.dlNumber) ? '<span class="text-[10px] text-gray-400 italic">No Docs provided</span>' : ''}
                                     </td>
                                     <td class="p-4 text-right">
-                                        <button type="button" onclick="adminReviewPartner('${u.id}', 'Approved')" class="bg-emerald-500 text-white px-3 py-1 rounded text-[10px] font-black uppercase tracking-wider mr-2 hover:bg-emerald-600 transition">Approve</button>
-                                        <button type="button" onclick="adminReviewPartner('${u.id}', 'Rejected')" class="bg-red-500 text-white px-3 py-1 rounded text-[10px] font-black uppercase tracking-wider hover:bg-red-600 transition mt-1">Reject</button>
+                                        <button type="button" onclick="window.adminReviewPartner('${u.id}', 'Approved')" class="bg-emerald-500 text-white px-3 py-1 rounded text-[10px] font-black uppercase tracking-wider mr-2 hover:bg-emerald-600 transition">Approve</button>
+                                        <button type="button" onclick="window.adminReviewPartner('${u.id}', 'Rejected')" class="bg-red-500 text-white px-3 py-1 rounded text-[10px] font-black uppercase tracking-wider hover:bg-red-600 transition mt-1">Reject</button>
                                     </td>
                                 </tr>
                             `}).join('');
@@ -2137,7 +1528,7 @@
                         } else {
                             usersBody.innerHTML = allUsers.map(u => {
                                 const dateStr = u.created ? new Date(u.created).toLocaleDateString() : 'N/A';
-                                let displayPhone = u.phone;
+                                let displayPhone = u.phone || '';
                                 if(displayPhone && displayPhone.includes('@')) displayPhone = displayPhone.split('@')[0] + '@...';
 
                                 return `
@@ -2220,7 +1611,7 @@
                                     </div>
                                 </div>
                                 
-                                <button onclick="downloadInvoice('${o.id}')" class="w-full bg-emerald-50 text-emerald-600 py-2.5 rounded-xl font-bold text-xs hover:bg-emerald-100 transition-colors border border-emerald-100"><i class="fa-solid fa-file-pdf mr-1"></i> Download Invoice</button>
+                                <button onclick="window.downloadInvoice('${o.id}')" class="w-full bg-emerald-50 text-emerald-600 py-2.5 rounded-xl font-bold text-xs hover:bg-emerald-100 transition-colors border border-emerald-100"><i class="fa-solid fa-file-pdf mr-1"></i> Download Invoice</button>
                             </div>
                         `;
                     }).join('');
@@ -2268,16 +1659,16 @@
 
                         let actionButtons = '';
                         if (currentUser.category === 'Food Owner' && o.status === 'Placed') {
-                            actionButtons = `<button type="button" onclick="acceptFoodOrder('${o.id}')" class="w-full bg-gray-900 text-white py-3 rounded-xl font-bold text-sm hover:bg-emerald-500 transition-colors active:scale-95"><i class="fa-solid fa-fire-burner mr-1"></i> Accept & Prepare</button>`;
+                            actionButtons = `<button type="button" onclick="window.acceptFoodOrder('${o.id}')" class="w-full bg-gray-900 text-white py-3 rounded-xl font-bold text-sm hover:bg-emerald-500 transition-colors active:scale-95"><i class="fa-solid fa-fire-burner mr-1"></i> Accept & Prepare</button>`;
                         } else if (currentUser.category === 'Food Owner' && o.status === 'Preparing') {
                             actionButtons = `<div class="w-full bg-blue-50 text-blue-600 py-3 rounded-xl font-bold text-sm text-center"><i class="fa-solid fa-clock mr-1"></i> Waiting for Rider...</div>`;
                         } else if (currentUser.category === 'Rider' && (o.status === 'Preparing' || o.status === 'Placed') && !o.riderId) {
-                            actionButtons = `<button type="button" onclick="acceptDelivery('${o.id}')" class="w-full bg-gray-900 text-white py-3 rounded-xl font-bold text-sm hover:bg-emerald-500 transition-colors active:scale-95"><i class="fa-solid fa-motorcycle mr-1"></i> Accept Delivery Task</button>`;
+                            actionButtons = `<button type="button" onclick="window.acceptDelivery('${o.id}')" class="w-full bg-gray-900 text-white py-3 rounded-xl font-bold text-sm hover:bg-emerald-500 transition-colors active:scale-95"><i class="fa-solid fa-motorcycle mr-1"></i> Accept Delivery Task</button>`;
                         } else if (currentUser.category === 'Rider' && o.riderId === currentUser.phone && o.status === 'Out for Delivery') {
                             actionButtons = `
                                 <div class="flex gap-2">
                                     <a href="tel:${o.phone}" class="flex-1 bg-blue-50 text-blue-600 py-3 rounded-xl font-bold text-sm text-center active:scale-95 transition-transform"><i class="fa-solid fa-phone mr-1"></i> Call Customer</a>
-                                    <button type="button" onclick="markDelivered('${o.id}')" class="flex-1 bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm active:scale-95 transition-transform"><i class="fa-solid fa-check mr-1"></i> Delivered</button>
+                                    <button type="button" onclick="window.markDelivered('${o.id}')" class="flex-1 bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm active:scale-95 transition-transform"><i class="fa-solid fa-check mr-1"></i> Delivered</button>
                                 </div>
                             `;
                         }
@@ -2329,10 +1720,10 @@
                                         <p class="text-[10px] text-emerald-600 font-bold mt-1">${variantsDisplay}</p>
                                     </div>
                                     <div class="flex items-center gap-3 shrink-0">
-                                        <button type="button" onclick="togglePartnerStock('${p.id}', ${p.inStock !== false})" class="text-[10px] font-bold ${stockColor} border px-2 py-1 rounded transition whitespace-nowrap">
+                                        <button type="button" onclick="window.togglePartnerStock('${p.id}', ${p.inStock !== false})" class="text-[10px] font-bold ${stockColor} border px-2 py-1 rounded transition whitespace-nowrap">
                                             ${stockText}
                                         </button>
-                                        <button type="button" onclick="deletePartnerProduct('${p.id}')" class="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-50 hover:text-white transition-colors shrink-0">
+                                        <button type="button" onclick="window.deletePartnerProduct('${p.id}')" class="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-50 hover:text-white transition-colors shrink-0">
                                             <i class="fa-solid fa-trash text-xs"></i>
                                         </button>
                                     </div>
@@ -2343,60 +1734,60 @@
                     unsubscribeListeners.push(catalogUnsub);
                 }
             }
-        }
+        };
 
         window.acceptFoodOrder = async (orderId) => {
             if(!currentUser || currentUser.category !== 'Food Owner') return;
             try {
-                await dbCall(updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), {
+                await window.dbCall(updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), {
                     status: 'Preparing'
                 }), 10000);
-                showToast("Order Accepted. Start Preparing!", "success");
+                window.showToast("Order Accepted. Start Preparing!", "success");
             } catch(e) {
-                showToast("Failed to accept request.", "error");
+                window.showToast("Failed to accept request.", "error");
             }
         };
 
         window.acceptDelivery = async (orderId) => {
             if(!currentUser || currentUser.category !== 'Rider') return;
             try {
-                await dbCall(updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), {
+                await window.dbCall(updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), {
                     status: 'Out for Delivery',
                     riderId: currentUser.phone,
                     riderName: currentUser.name
                 }), 10000);
-                showToast("Delivery Accepted. Drive Safe!", "success");
+                window.showToast("Delivery Accepted. Drive Safe!", "success");
             } catch(e) {
-                showToast("Failed to accept delivery.", "error");
+                window.showToast("Failed to accept delivery.", "error");
             }
         };
 
         window.markDelivered = async (orderId) => {
             if(!currentUser || currentUser.role !== 'Partner') return;
             try {
-                await dbCall(updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), {
+                await window.dbCall(updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), {
                     status: 'Delivered'
                 }), 10000);
-                showToast("Order Marked as Delivered!", "success");
+                window.showToast("Order Marked as Delivered!", "success");
             } catch(e) {
-                showToast("Failed to update order status.", "error");
+                window.showToast("Failed to update order status.", "error");
             }
         };
 
         window.adminReviewPartner = async (partnerPhone, status) => {
             if(currentUser.role !== 'Admin') return;
             try {
-                await dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', partnerPhone), { approvalStatus: status }, { merge: true }), 10000);
-                showToast(`Partner ${status}!`, "success");
+                await window.dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', partnerPhone), { approvalStatus: status }, { merge: true }), 10000);
+                window.showToast(`Partner ${status}!`, "success");
             } catch(e) {
-                showToast("Error updating status.", "error");
+                window.showToast("Error updating status.", "error");
             }
         };
 
         window.adminUpdateOffer = async () => {
             if(currentUser.role !== 'Admin') return;
             const file = document.getElementById('admin-offer-file').files[0];
-            if(!file) return showToast("Please select an image file.", "error");
+            if(!file) return window.showToast("Please select an image file.", "error");
 
             const btn = document.getElementById('btn-update-offer');
             const orig = btn.innerText;
@@ -2426,11 +1817,11 @@
                     });
                 };
                 const base64 = await resizeImage(file, 800); 
-                await dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'app_config'), { offerBanner: base64 }, { merge: true }), 15000);
-                showToast("Offer Banner Updated!", "success");
+                await window.dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'app_config'), { offerBanner: base64 }, { merge: true }), 15000);
+                window.showToast("Offer Banner Updated!", "success");
                 document.getElementById('admin-offer-file').value = "";
             } catch(e) {
-                showToast("Error updating banner. Image might be too large.", "error");
+                window.showToast("Error updating banner. Image might be too large.", "error");
             } finally {
                 btn.innerText = orig;
                 btn.disabled = false;
@@ -2440,7 +1831,7 @@
         window.adminUpdateMarquee = async () => {
             if(currentUser.role !== 'Admin') return;
             const text = document.getElementById('admin-marquee-text').value.trim();
-            if(!text) return showToast("Please enter marquee text.", "error");
+            if(!text) return window.showToast("Please enter marquee text.", "error");
 
             const btn = document.getElementById('btn-update-marquee');
             const orig = btn.innerText;
@@ -2448,11 +1839,11 @@
             btn.disabled = true;
 
             try {
-                await dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'app_config'), { marqueeText: text }, { merge: true }), 10000);
-                showToast("Marquee Updated!", "success");
+                await window.dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'app_config'), { marqueeText: text }, { merge: true }), 10000);
+                window.showToast("Marquee Updated!", "success");
                 document.getElementById('admin-marquee-text').value = "";
             } catch(e) {
-                showToast("Error updating marquee.", "error");
+                window.showToast("Error updating marquee.", "error");
             } finally {
                 btn.innerText = orig;
                 btn.disabled = false;
@@ -2467,19 +1858,19 @@
             document.getElementById('shop-status-text').innerText = `Currently ${newStatus}`;
             
             try {
-                await dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.phone), { shopStatus: newStatus }, { merge: true }), 10000);
+                await window.dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.phone), { shopStatus: newStatus }, { merge: true }), 10000);
                 currentUser.shopStatus = newStatus;
                 
-                const snap = await dbCall(getDocs(getCol('products')), 10000);
+                const snap = await window.dbCall(getDocs(getCol('products')), 10000);
                 const myProducts = snap.docs.filter(d => d.data().partnerId === currentUser.phone);
                 
                 myProducts.forEach(d => {
                     updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', d.id), { shopStatus: newStatus });
                 });
                 
-                showToast(`Shop marked as ${newStatus}`, "success");
+                window.showToast(`Shop marked as ${newStatus}`, "success");
             } catch(e) {
-                showToast("Error updating status", "error");
+                window.showToast("Error updating status", "error");
                 toggle.checked = !isOpen; 
                 document.getElementById('shop-status-text').innerText = `Currently ${!isOpen ? 'Open' : 'Closed'}`;
             }
@@ -2487,10 +1878,10 @@
 
         window.togglePartnerStock = async (productId, currentInStock) => {
             try {
-                await dbCall(updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', productId), { inStock: !currentInStock }), 10000);
-                showToast(currentInStock ? "Marked Out of Stock" : "Marked In Stock", "success");
+                await window.dbCall(updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', productId), { inStock: !currentInStock }), 10000);
+                window.showToast(currentInStock ? "Marked Out of Stock" : "Marked In Stock", "success");
             } catch(e) {
-                showToast("Error updating stock", "error");
+                window.showToast("Error updating stock", "error");
             }
         };
 
@@ -2508,10 +1899,10 @@
 
         window.addPartnerProduct = () => {
             if(!currentUser) return;
-            if(currentUser.approvalStatus !== 'Approved') return showToast("Shop not approved yet.", "error");
+            if(currentUser.approvalStatus !== 'Approved') return window.showToast("Shop not approved yet.", "error");
 
             const name = document.getElementById('prod-name').value.trim();
-            if(!name) return showToast("Enter product name.", "error");
+            if(!name) return window.showToast("Enter product name.", "error");
 
             const rows = document.querySelectorAll('.variant-row');
             let variants = [];
@@ -2521,10 +1912,10 @@
                 if(qty && !isNaN(price)) variants.push({ qty, price });
             });
 
-            if(variants.length === 0) return showToast("Add at least one valid unit and price.", "error");
+            if(variants.length === 0) return window.showToast("Add at least one valid unit and price.", "error");
 
             if(!currentUser.shopName) {
-                showToast("Please setup and Save your Business Profile first.", "error");
+                window.showToast("Please setup and Save your Business Profile first.", "error");
                 document.getElementById('partner-shop-name').focus();
                 return;
             }
@@ -2539,7 +1930,7 @@
             btn.innerText = "Adding...";
             btn.disabled = true;
 
-            dbCall(addDoc(getCol('products'), {
+            window.dbCall(addDoc(getCol('products'), {
                 name, 
                 variants,
                 price: variants[0].price, 
@@ -2560,9 +1951,9 @@
                         <input type="number" class="input-field !bg-white w-1/2 var-price" placeholder="Price (₹)">
                     </div>
                 `;
-                showToast("Successfully added to your catalog!", "success");
+                window.showToast("Successfully added to your catalog!", "success");
             }).catch(e => {
-                showToast("Network delayed. Saving in background.", "info");
+                window.showToast("Network delayed. Saving in background.", "info");
             }).finally(() => {
                 btn.innerText = originalText;
                 btn.disabled = false;
@@ -2581,7 +1972,7 @@
             let dlNumber = null;
             let fssaiNumber = null;
 
-            if (!isRider && !shopName) return showToast("Enter a business name.", "error");
+            if (!isRider && !shopName) return window.showToast("Enter a business name.", "error");
             if (!isRider) {
                 fssaiNumber = document.getElementById('partner-fssai-number').value.trim();
             }
@@ -2589,8 +1980,8 @@
                 vehicleType = document.getElementById('partner-vehicle-type').value;
                 vehicleNumber = document.getElementById('partner-vehicle-number').value.trim();
                 dlNumber = document.getElementById('partner-dl-number').value.trim();
-                if(!vehicleType) return showToast("Please select your vehicle type.", "error");
-                if(!vehicleNumber) return showToast("Please enter your vehicle number.", "error");
+                if(!vehicleType) return window.showToast("Please select your vehicle type.", "error");
+                if(!vehicleNumber) return window.showToast("Please enter your vehicle number.", "error");
             }
             
             const btn = document.getElementById('btn-submit-profile');
@@ -2611,7 +2002,7 @@
                 };
 
                 try {
-                    await dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.phone), updateData, { merge: true }), 10000);
+                    await window.dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.phone), updateData, { merge: true }), 10000);
                 } catch(dbErr) {
                     console.warn("DB Write timeout/failed. Reverting to local state.", dbErr);
                 }
@@ -2623,11 +2014,11 @@
                 if(dlNumber) currentUser.dlNumber = dlNumber;
                 if(fssaiNumber) currentUser.fssaiNumber = fssaiNumber;
                 
-                showToast("Profile submitted for Admin verification!", "success");
-                finalizeLoginSequence(); 
+                window.showToast("Profile submitted for Admin verification!", "success");
+                window.finalizeLoginSequence(); 
             } catch(e) {
                 console.error(e);
-                showToast("Network error. Try again.", "error");
+                window.showToast("Network error. Try again.", "error");
             } finally { 
                 btn.innerText = orig; 
                 btn.disabled = false; 
@@ -2635,23 +2026,23 @@
         };
 
         window.deletePartnerProduct = (productId) => {
-            dbCall(deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', productId)), 10000)
-                .then(() => showToast("Product removed from catalog.", "success"))
-                .catch(e => showToast("Error removing product.", "error"));
+            window.dbCall(deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', productId)), 10000)
+                .then(() => window.showToast("Product removed from catalog.", "success"))
+                .catch(e => window.showToast("Error removing product.", "error"));
         };
 
         window.addToCart = (name, price, partnerId = '', shopName = '') => {
-            if(!currentUser) { openAuthModal('User'); return; }
-            if(currentUser.role !== 'User') { showToast("Switch to User account to buy.", "error"); return; }
+            if(!currentUser) { window.openAuthModal('User'); return; }
+            if(currentUser.role !== 'User') { window.showToast("Switch to User account to buy.", "error"); return; }
             
             if (cart.length > 0 && cart[0].partnerId !== partnerId && partnerId !== '') {
-                showToast("You can only order from one restaurant at a time. Please clear your cart first.", "error");
+                window.showToast("You can only order from one restaurant at a time. Please clear your cart first.", "error");
                 return;
             }
 
             cart.push({name, price, partnerId, shopName});
-            renderCartUI();
-            showToast(`${name} added to cart!`, "success");
+            window.renderCartUI();
+            window.showToast(`${name} added to cart!`, "success");
             
             const cartBtn = document.getElementById('nav-btn-Cart');
             if(cartBtn) {
@@ -2688,7 +2079,7 @@
                     </div>
                     <div class="flex items-center gap-4">
                         <span class="text-sm font-black text-gray-900">₹${i.price}</span>
-                        <button type="button" onclick="removeFromCart(${idx})" class="w-6 h-6 rounded bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors">
+                        <button type="button" onclick="window.removeFromCart(${idx})" class="w-6 h-6 rounded bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors">
                             <i class="fa-solid fa-minus text-[10px]"></i>
                         </button>
                     </div>
@@ -2697,14 +2088,14 @@
 
         window.removeFromCart = (idx) => { 
             cart.splice(idx, 1); 
-            renderCartUI(); 
+            window.renderCartUI(); 
         };
 
         window.placeOrder = async () => {
             if(cart.length === 0) return;
             const addr = document.getElementById('cart-address').value.trim();
             if(!addr) {
-                showToast("Please provide a delivery address.", "error");
+                window.showToast("Please provide a delivery address.", "error");
                 document.getElementById('cart-address').focus();
                 return;
             }
@@ -2722,7 +2113,7 @@
             btn.disabled = true;
 
             try {
-                await dbCall(addDoc(getCol('orders'), { 
+                await window.dbCall(addDoc(getCol('orders'), { 
                     customer: currentUser.name, 
                     phone: currentUser.phone, 
                     items: cart, 
@@ -2737,21 +2128,21 @@
                 }), 10000);
                 
                 cart = []; 
-                renderCartUI(); 
-                showToast("Order Placed Successfully!", "success");
-                switchMainView('Orders'); 
+                window.renderCartUI(); 
+                window.showToast("Order Placed Successfully!", "success");
+                window.switchMainView('Orders'); 
             } catch(e) {
-                showToast("Network delayed. Syncing in background.", "info");
+                window.showToast("Network delayed. Syncing in background.", "info");
                 cart = []; 
-                renderCartUI();
-                switchMainView('Orders');
+                window.renderCartUI();
+                window.switchMainView('Orders');
             } finally {
                 btn.innerText = originalText;
                 btn.disabled = false;
             }
         };
 
-        startApp(); 
+        window.startApp(); 
     </script>
 </body>
 </html>
