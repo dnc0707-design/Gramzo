@@ -293,7 +293,7 @@
                 <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 pb-2 gap-4">
                     <div class="text-center sm:text-left">
                         <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                        <p class="text-[10px] text-emerald-700 font-bold mt-2 bg-emerald-50 border border-emerald-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v3.0.0 - Stable Database Fixes</p>
+                        <p class="text-[10px] text-emerald-700 font-bold mt-2 bg-emerald-50 border border-emerald-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v3.5 - Google Auth Integrated</p>
                     </div>
                     <div class="flex gap-4 text-gray-400 text-sm">
                         <a href="#" onclick="return false;" class="hover:text-blue-600 transition"><i class="fa-brands fa-facebook"></i></a>
@@ -635,7 +635,7 @@
                 <div class="overflow-x-auto no-scrollbar">
                     <table class="w-full text-left text-xs whitespace-nowrap">
                         <thead class="bg-gray-50 border-b border-gray-100 text-gray-400 text-[10px] uppercase tracking-wider">
-                            <tr><th class="p-3 font-bold">Role</th><th class="p-3 font-bold">Name</th><th class="p-3 font-bold">Phone ID</th><th class="p-3 font-bold text-right">Password/PIN</th></tr>
+                            <tr><th class="p-3 font-bold">Role</th><th class="p-3 font-bold">Name</th><th class="p-3 font-bold">ID / Email</th><th class="p-3 font-bold text-right">Password/PIN</th></tr>
                         </thead>
                         <tbody id="admin-users-body" class="divide-y divide-gray-50">
                             <tr><td colspan="4" class="p-6 text-center text-gray-400 text-xs italic">Loading users...</td></tr>
@@ -686,6 +686,18 @@
                 <input id="login-phone" type="tel" class="input-field" placeholder="10-Digit Mobile Number" maxlength="10">
                 <input id="login-pass" type="password" class="input-field" placeholder="Password">
                 <button type="button" id="submit-login" onclick="handleAuth('login')" class="w-full bg-gray-900 text-white p-4 rounded-2xl font-bold text-sm shadow-xl hover:bg-gray-800 active:scale-95 transition">Secure Login</button>
+                
+                <div class="flex items-center gap-3 my-4">
+                    <div class="h-px bg-gray-200 flex-1"></div>
+                    <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">OR</span>
+                    <div class="h-px bg-gray-200 flex-1"></div>
+                </div>
+                
+                <button type="button" onclick="handleGoogleAuth()" class="w-full bg-white border border-gray-200 text-gray-700 py-3.5 rounded-2xl font-bold text-sm shadow-sm hover:bg-gray-50 active:scale-95 transition flex items-center justify-center gap-3">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                    Continue with Google
+                </button>
+
                 <p class="text-center text-xs font-medium text-gray-500 mt-4">
                     Don't have an account? <button type="button" onclick="switchAuthView('register')" class="text-emerald-600 font-bold hover:underline">Register Here</button>
                 </p>
@@ -721,6 +733,18 @@
                 </div>
 
                 <button type="button" id="submit-register" onclick="handleAuth('register')" class="w-full bg-emerald-500 text-white p-4 rounded-2xl font-bold text-sm shadow-xl shadow-emerald-500/20 active:scale-95 transition mt-4">Sign Up Now</button>
+                
+                <div class="flex items-center gap-3 my-4">
+                    <div class="h-px bg-gray-200 flex-1"></div>
+                    <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">OR</span>
+                    <div class="h-px bg-gray-200 flex-1"></div>
+                </div>
+                
+                <button type="button" onclick="handleGoogleAuth()" class="w-full bg-white border border-gray-200 text-gray-700 py-3.5 rounded-2xl font-bold text-sm shadow-sm hover:bg-gray-50 active:scale-95 transition flex items-center justify-center gap-3">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                    Continue with Google
+                </button>
+
                 <p class="text-center text-xs font-medium text-gray-500 mt-4">
                     Already have an account? <button type="button" onclick="switchAuthView('login')" class="text-gray-900 font-bold hover:underline">Login</button>
                 </p>
@@ -756,7 +780,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, getDoc, getDocs, setDoc, onSnapshot, addDoc, updateDoc, deleteDoc, serverTimestamp, initializeFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Global map auth failure handling
@@ -783,7 +807,7 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         
-        // Critical Fix: Force Long Polling to prevent WebSockets from hanging in Canvas
+        // Force Long Polling to prevent WebSockets from hanging in Canvas
         const db = initializeFirestore(app, {
             experimentalForceLongPolling: true
         });
@@ -1017,9 +1041,7 @@
                     if(auth.currentUser) {
                         try {
                             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: 'admin_session' }, { merge: true });
-                        } catch(err) {
-                            console.warn("Admin session sync delayed.");
-                        }
+                        } catch(err) {}
                     }
                     
                     closeAdminModal();
@@ -1036,6 +1058,69 @@
                 if (btn) {
                     btn.innerText = orig;
                     btn.disabled = false;
+                }
+            }
+        };
+
+        window.handleGoogleAuth = async () => {
+            const msgEl = document.getElementById('auth-msg');
+            msgEl.classList.remove('hidden');
+            msgEl.className = "text-xs text-center font-bold mb-4 min-h-[1.5rem] px-4 rounded-lg py-2 bg-blue-50 text-blue-600 block";
+            msgEl.innerText = "Opening Google Sign-In...";
+
+            try {
+                const provider = new GoogleAuthProvider();
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+
+                msgEl.innerText = "Syncing Profile...";
+                const docId = user.email || user.uid; // Using email as docId for Google users
+                const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', docId);
+                const snap = await getDoc(userRef);
+
+                let userData;
+                if (snap.exists()) {
+                    userData = snap.data();
+                } else {
+                    // New Google User Registration
+                    let pCat = null;
+                    if (currentAuthRole === 'Partner') {
+                        pCat = document.getElementById('reg-partner-category')?.value || 'Food Owner';
+                    }
+
+                    userData = {
+                        name: user.displayName || "Google User",
+                        phone: docId, 
+                        pin: "GOOGLE_AUTH",
+                        role: currentAuthRole,
+                        shopStatus: 'Open',
+                        approvalStatus: currentAuthRole === 'Partner' ? 'Pending' : 'Approved',
+                        uid: user.uid,
+                        created: new Date().toISOString(),
+                        ...(currentAuthRole === 'Partner' && {
+                            category: pCat,
+                            shopName: user.displayName || "My Business"
+                        })
+                    };
+                    
+                    await setDoc(userRef, userData, { merge: true });
+                }
+
+                if(auth.currentUser) {
+                    setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: docId }, { merge: true }).catch(e => {});
+                }
+
+                currentUser = { ...userData, docId: docId };
+                finalizeLoginSequence();
+
+            } catch (error) {
+                console.error("Google Auth Error:", error);
+                msgEl.className = "text-xs text-center font-bold mb-4 min-h-[1.5rem] px-4 rounded-lg py-2 bg-red-50 text-red-600 block";
+                
+                if (error?.code === 'auth/unauthorized-domain' || error?.message?.includes('unauthorized-domain')) {
+                    msgEl.innerHTML = `<b>Domain not authorized!</b><br>Please add this preview link to your Firebase Console:<br><i>Authentication > Settings > Authorized domains</i>`;
+                } else {
+                    msgEl.innerText = error.message || "Google Sign-In failed or was cancelled.";
                 }
             }
         };
@@ -1092,13 +1177,9 @@
                     btn.innerText = "Saving Profile...";
                     const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', phone);
                     
-                    try {
-                        const snap = await getDoc(userRef);
-                        if (snap && snap.exists()) {
-                            throw new Error("Number already registered. Please login.");
-                        }
-                    } catch(e) {
-                        if (e.message && e.message.includes("registered")) throw e;
+                    const snap = await getDoc(userRef);
+                    if (snap && snap.exists()) {
+                        throw new Error("Number already registered. Please login.");
                     }
 
                     const userData = { 
@@ -1118,7 +1199,6 @@
                         })
                     };
                     
-                    // Directly save to Firestore - This will now succeed securely
                     await setDoc(userRef, userData, { merge: true });
                     
                     if(auth.currentUser) {
@@ -1159,7 +1239,7 @@
             } catch (e) {
                 console.error("Auth Error:", e);
                 msgEl.className = "text-xs text-center font-bold mb-4 min-h-[1.5rem] px-4 rounded-lg py-2 bg-red-50 text-red-600 block";
-                msgEl.innerText = e.message || "Connection blocked or failed. Please check network.";
+                msgEl.innerText = e.message || "Connection failed. Please check network.";
             } finally {
                 btn.innerText = originalText;
                 btn.disabled = false;
@@ -1183,14 +1263,23 @@
             roleSpan.className = `text-[9px] font-bold uppercase ${currentUser.role === 'Admin' ? 'text-purple-500' : currentUser.role === 'Partner' ? 'text-orange-500' : 'text-blue-500'}`;
 
             document.getElementById('menu-name').innerText = currentUser.name || 'Unknown';
-            document.getElementById('menu-phone').innerText = currentUser.role === 'Admin' ? `Admin ID: ${currentUser.phone}` : `+91 ${currentUser.phone}`;
+            // Mask email or show phone properly
+            let displayPhone = currentUser.phone;
+            if(displayPhone.includes('@')) {
+                displayPhone = displayPhone.split('@')[0] + '@...';
+            } else if (currentUser.role !== 'Admin') {
+                displayPhone = `+91 ${displayPhone}`;
+            } else {
+                displayPhone = `Admin ID: ${displayPhone}`;
+            }
+            document.getElementById('menu-phone').innerText = displayPhone;
 
             setupBottomNav(currentUser.role);
             switchMainView(currentUser.role === 'Admin' ? 'Admin' : currentUser.role === 'Partner' ? 'Partner' : 'User');
 
             if (currentUser.role === 'Admin') {
                 const adminBadge = document.getElementById('admin-id-badge');
-                if (adminBadge) adminBadge.innerText = `Admin: ${currentUser.phone}`;
+                if (adminBadge) adminBadge.innerText = `Admin Access`;
             }
 
             if (currentUser.role === 'Partner') {
@@ -1976,9 +2065,12 @@
                         if(pending.length === 0) {
                             approvalsBody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-gray-400 text-xs italic">No pending approvals right now.</td></tr>';
                         } else {
-                            approvalsBody.innerHTML = pending.map(u => `
+                            approvalsBody.innerHTML = pending.map(u => {
+                                let displayPhone = u.phone;
+                                if(displayPhone && displayPhone.includes('@')) displayPhone = displayPhone.split('@')[0] + '@...';
+                                return `
                                 <tr class="hover:bg-gray-50 transition-colors">
-                                    <td class="p-4 font-bold text-gray-900 text-xs">${u.name || 'Unknown'}<br><span class="font-mono font-normal text-[9px] text-gray-500">${u.phone || 'N/A'}</span></td>
+                                    <td class="p-4 font-bold text-gray-900 text-xs">${u.name || 'Unknown'}<br><span class="font-mono font-normal text-[9px] text-gray-500">${displayPhone || 'N/A'}</span></td>
                                     <td class="p-4 font-bold text-gray-700 text-xs">${u.shopName || u.vehicleType || 'N/A'}<br><span class="text-[9px] font-black text-emerald-500 uppercase tracking-widest">${u.category || 'Partner'}</span></td>
                                     <td class="p-4 flex flex-col gap-1">
                                         ${u.fssaiNumber ? `<span class="text-[10px] text-gray-600 font-mono">FSSAI: ${u.fssaiNumber}</span>` : ''}
@@ -1991,7 +2083,7 @@
                                         <button type="button" onclick="adminReviewPartner('${u.id}', 'Rejected')" class="bg-red-500 text-white px-3 py-1 rounded text-[10px] font-black uppercase tracking-wider hover:bg-red-600 transition mt-1">Reject</button>
                                     </td>
                                 </tr>
-                            `).join('');
+                            `}).join('');
                         }
                     }
 
@@ -2003,6 +2095,9 @@
                         } else {
                             usersBody.innerHTML = allUsers.map(u => {
                                 const dateStr = u.created ? new Date(u.created).toLocaleDateString() : 'N/A';
+                                let displayPhone = u.phone;
+                                if(displayPhone && displayPhone.includes('@')) displayPhone = displayPhone.split('@')[0] + '@...';
+
                                 return `
                                 <tr class="hover:bg-gray-50 transition-colors border-b border-gray-50">
                                     <td class="p-4 font-bold text-xs">
@@ -2010,7 +2105,7 @@
                                     </td>
                                     <td class="p-4 font-bold text-gray-900 text-xs">
                                         ${u.name || 'N/A'}<br/>
-                                        <span class="font-mono font-normal text-[10px] text-gray-500">${u.phone || 'N/A'}</span>
+                                        <span class="font-mono font-normal text-[10px] text-gray-500">${displayPhone || 'N/A'}</span>
                                     </td>
                                     <td class="p-4 text-[10px] text-gray-500">
                                         ${u.role === 'Partner' ? 
@@ -2473,9 +2568,11 @@
                     ...(fssaiNumber && { fssaiNumber })
                 };
 
-                // Optimistic Background sync
-                setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.phone), updateData, { merge: true })
-                    .catch(dbErr => console.warn("DB Write delayed.", dbErr));
+                try {
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.phone), updateData, { merge: true });
+                } catch(dbErr) {
+                    console.warn("DB Write timeout/failed. Reverting to local state.", dbErr);
+                }
 
                 currentUser.shopName = isRider ? currentUser.name : shopName;
                 currentUser.approvalStatus = newStatus;
@@ -2488,7 +2585,7 @@
                 finalizeLoginSequence(); 
             } catch(e) {
                 console.error(e);
-                showToast("System error. Try again.", "error");
+                showToast("Network error. Try again.", "error");
             } finally { 
                 btn.innerText = orig; 
                 btn.disabled = false; 
