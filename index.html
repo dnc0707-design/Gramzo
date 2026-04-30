@@ -141,14 +141,14 @@
     </nav>
 
     <!-- Upgraded Marquee -->
-    <div class="fixed top-[65px] sm:top-[80px] w-full bg-gray-900 border-b border-gray-800 z-30 overflow-hidden h-8 flex items-center shadow-sm">
+    <div id="marquee-container" class="fixed top-[65px] sm:top-[80px] w-full bg-gray-900 border-b border-gray-800 z-30 overflow-hidden h-8 flex items-center shadow-sm hidden">
         <div id="dynamic-marquee" class="animate-marquee inline-block whitespace-nowrap text-xs font-bold text-gray-200 tracking-widest">
             🚀 Fast Food Delivery available now! Order from your favorite local restaurants instantly. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 🚀 Support local businesses, order directly from Gramzo!
         </div>
     </div>
 
     <!-- Main Content Area -->
-    <main class="pt-[110px] sm:pt-[135px] px-4 pb-24 max-w-md mx-auto sm:max-w-4xl sm:px-6">
+    <main id="main-content" class="pt-[110px] sm:pt-[135px] px-4 pb-24 max-w-md mx-auto sm:max-w-4xl sm:px-6">
         
         <!-- ========================================== -->
         <!-- VIEW: USER (Marketplace & Services)        -->
@@ -276,7 +276,7 @@
                 <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                     <div class="text-center sm:text-left">
                         <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                        <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v7.2.0 - Direct Partner Uploads</p>
+                        <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v8.2.0 - HTML Export Ready</p>
                     </div>
                     <!-- EXPLICIT ADMIN BUTTON IN FOOTER -->
                     <div class="mt-4 sm:mt-0 text-center sm:text-right">
@@ -654,7 +654,13 @@
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, getDoc, getDocs, setDoc, onSnapshot, addDoc, updateDoc, deleteDoc, serverTimestamp, initializeFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const userConfig = {
+        // ==========================================
+        // 🔴 LIVE WEBSITE CONFIGURATION 🔴
+        // ==========================================
+        // Set this to TRUE when hosting on GitHub Pages, Vercel, Netlify etc.
+        const IS_LIVE_WEBSITE = true;
+
+        const liveFirebaseConfig = {
             apiKey: "AIzaSyCA4U4jva7HHeMP-yk1VJy3l_BBct3Gohg",
             authDomain: "gramzo.firebaseapp.com",
             projectId: "gramzo",
@@ -662,9 +668,17 @@
             messagingSenderId: "674262956986",
             appId: "1:674262956986:web:772f68694c77e15bf3fb83"
         };
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : userConfig;
+
+        const canvasFallbackConfig = {
+            apiKey: "AIzaSyCA4U4jva7HHeMP-yk1VJy3l_BBct3Gohg",
+            authDomain: "gramzo.firebaseapp.com",
+            projectId: "gramzo",
+            storageBucket: "gramzo.firebasestorage.app",
+            messagingSenderId: "674262956986",
+            appId: "1:674262956986:web:772f68694c77e15bf3fb83"
+        };
         
-        // Match existing DB
+        const firebaseConfig = IS_LIVE_WEBSITE ? liveFirebaseConfig : (typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : canvasFallbackConfig);
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'gramzo-super-v2'; 
         
         const app = initializeApp(firebaseConfig);
@@ -685,7 +699,9 @@
         window.currentCartPartner = null;
         window.bannerInterval = null;
         
-        const getCol = (name) => collection(db, 'artifacts', appId, 'public', 'data', name);
+        // --- Dynamic Path Helper ---
+        const getCol = (name) => IS_LIVE_WEBSITE ? collection(db, name) : collection(db, 'artifacts', appId, 'public', 'data', name);
+        const getDocRef = (colName, docId) => IS_LIVE_WEBSITE ? doc(db, colName, docId) : doc(db, 'artifacts', appId, 'public', 'data', colName, docId);
 
         // NATIVE FUNCTIONS
         window.gm_authFailure = () => {
@@ -822,6 +838,27 @@
             }
         };
 
+        window.togglePartnerRegFields = () => {
+            const cat = document.getElementById('reg-partner-category').value;
+            const shopName = document.getElementById('reg-shop-name');
+            const fssaiNum = document.getElementById('reg-fssai-number');
+            const vehCont = document.getElementById('reg-vehicle-container');
+
+            if(cat === 'Food Owner') {
+                shopName.classList.remove('hidden');
+                fssaiNum.classList.remove('hidden');
+                if (vehCont) vehCont.classList.add('hidden');
+            } else if (cat === 'Rider') {
+                shopName.classList.add('hidden');
+                fssaiNum.classList.add('hidden');
+                if (vehCont) vehCont.classList.remove('hidden');
+            } else {
+                shopName.classList.add('hidden');
+                fssaiNum.classList.add('hidden');
+                if (vehCont) vehCont.classList.add('hidden');
+            }
+        };
+
         window.openAuthModal = (role = 'User') => {
             currentAuthRole = role;
             const overlay = document.getElementById('auth-overlay');
@@ -899,7 +936,7 @@
                     currentUser = { name: 'Super Admin', role: 'Admin', phone: 'Admin', docId: 'admin_session', uid: auth.currentUser?.uid || 'admin' };
                     
                     if(auth.currentUser) {
-                        window.dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: 'admin_session' }, { merge: true }), 3000).catch(e=>{});
+                        window.dbCall(setDoc(getDocRef('sessions', auth.currentUser.uid), { phone: 'admin_session' }, { merge: true }), 3000).catch(e=>{});
                     }
                     
                     window.closeAdminModal();
@@ -946,7 +983,7 @@
                         throw new Error("Please enter a valid Name, Phone, and Password.");
                     }
 
-                    const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', phone);
+                    const userRef = getDocRef('users', phone);
                     
                     let snap = null;
                     try {
@@ -987,7 +1024,7 @@
                     window.dbCall(setDoc(userRef, userData, { merge: true }), 4000).catch(e => console.warn("Offline save"));
                     
                     if(auth.currentUser) {
-                        window.dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: phone }, { merge: true }), 3000).catch(e => {});
+                        window.dbCall(setDoc(getDocRef('sessions', auth.currentUser.uid), { phone: phone }, { merge: true }), 3000).catch(e => {});
                     }
                     
                     currentUser = { ...userData, docId: phone };
@@ -1001,7 +1038,7 @@
                         throw new Error("Please enter your registered Phone and Password.");
                     }
 
-                    const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', phone);
+                    const userRef = getDocRef('users', phone);
                     
                     let snap;
                     try {
@@ -1022,7 +1059,7 @@
                     currentUser = { ...data, docId: phone };
                     
                     if(auth.currentUser) {
-                        window.dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', auth.currentUser.uid), { phone: phone }, { merge: true }), 3000).catch(e => {});
+                        window.dbCall(setDoc(getDocRef('sessions', auth.currentUser.uid), { phone: phone }, { merge: true }), 3000).catch(e => {});
                     }
                     
                     window.finalizeLoginSequence();
@@ -1087,6 +1124,7 @@
                 document.getElementById('shop-status-text').innerText = (currentUser.shopStatus === 'Closed') ? 'Currently Closed' : 'Currently Open';
 
                 const statusLabel = document.getElementById('partner-approval-status');
+                const approvalWarning = document.getElementById('approval-warning');
                 const canAddProducts = (currentUser.category === 'Food Owner');
                 
                 document.getElementById('hub-name-val').innerText = currentUser.shopName || currentUser.name;
@@ -1104,6 +1142,7 @@
                 if (currentUser.approvalStatus === 'Approved') {
                     statusLabel.innerText = "Verified Restaurant";
                     statusLabel.className = "text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-1 rounded uppercase tracking-widest border border-emerald-100";
+                    if(approvalWarning) approvalWarning.classList.add('hidden');
                     statusCont.classList.remove('hidden');
                     pSetupForm.classList.remove('hidden');
                     document.getElementById('btn-submit-profile').innerText = "Update Settings";
@@ -1114,10 +1153,33 @@
                         addProdCont.classList.add('hidden');
                         catListCont.classList.add('hidden');
                     }
+                } else if (currentUser.approvalStatus === 'Rejected') {
+                    statusLabel.innerText = "Rejected";
+                    statusLabel.className = "text-[10px] font-black text-red-600 bg-red-50 px-2 py-1 rounded uppercase tracking-widest";
+                    addProdCont.classList.add('hidden');
+                    catListCont.classList.add('hidden');
+                    statusCont.classList.add('hidden');
+                    pSetupForm.classList.remove('hidden');
+                    if(approvalWarning) {
+                        approvalWarning.classList.remove('hidden');
+                        document.getElementById('approval-warning-text').innerText = "Your restaurant application was rejected by Admin. Please update details.";
+                    }
+                } else if (currentUser.approvalStatus === 'Pending') {
+                    statusLabel.innerText = "Pending Verification";
+                    statusLabel.className = "text-[10px] font-black text-orange-600 bg-orange-50 px-2 py-1 rounded uppercase tracking-widest";
+                    addProdCont.classList.add('hidden');
+                    catListCont.classList.add('hidden');
+                    statusCont.classList.add('hidden');
+                    pSetupForm.classList.add('hidden');
+                    if(approvalWarning) {
+                        approvalWarning.classList.remove('hidden');
+                        document.getElementById('approval-warning-text').innerText = "Your restaurant details are under review. Menu editing will unlock after approval.";
+                    }
                 } else {
                     statusLabel.innerText = "Setup Needed";
                     statusLabel.className = "text-[10px] font-black text-gray-500 bg-gray-100 px-2 py-1 rounded uppercase tracking-widest";
                     pSetupForm.classList.remove('hidden');
+                    if(approvalWarning) approvalWarning.classList.add('hidden');
                     addProdCont.classList.add('hidden');
                     catListCont.classList.add('hidden');
                 }
@@ -1152,19 +1214,20 @@
             
             const defaultBanner = "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80";
             
-            onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'app_config'), (snap) => {
+            onSnapshot(getDocRef('settings', 'app_config'), (snap) => {
                 const bannerEl = document.getElementById('user-offer-banner');
+                const marqueeContainer = document.getElementById('marquee-container');
                 const marqueeEl = document.getElementById('dynamic-marquee');
                 const dotsContainer = document.getElementById('banner-dots');
+                const mainContent = document.getElementById('main-content');
                 
                 if (snap.exists()) {
                     const data = snap.data();
                     
-                    // Multi-banner support
                     if (data.offerBanners && data.offerBanners.length > 0) {
                         window.offerBanners = data.offerBanners;
                         window.currentBannerIndex = 0;
-                        bannerEl.src = window.offerBanners[0];
+                        if(bannerEl) bannerEl.src = window.offerBanners[0];
                         
                         if(dotsContainer) {
                             dotsContainer.innerHTML = window.offerBanners.map((_, i) => `<div class="w-1.5 h-1.5 rounded-full ${i === 0 ? 'bg-white' : 'bg-white/40'}"></div>`).join('');
@@ -1172,11 +1235,13 @@
                         
                         if (!window.bannerInterval) {
                             window.bannerInterval = setInterval(() => {
-                                bannerEl.style.opacity = '0';
+                                if(bannerEl) bannerEl.style.opacity = '0';
                                 setTimeout(() => {
                                     window.currentBannerIndex = (window.currentBannerIndex + 1) % window.offerBanners.length;
-                                    bannerEl.src = window.offerBanners[window.currentBannerIndex];
-                                    bannerEl.style.opacity = '1';
+                                    if(bannerEl) {
+                                        bannerEl.src = window.offerBanners[window.currentBannerIndex];
+                                        bannerEl.style.opacity = '1';
+                                    }
                                     
                                     if(dotsContainer) {
                                         Array.from(dotsContainer.children).forEach((dot, i) => {
@@ -1187,18 +1252,25 @@
                             }, 4000);
                         }
                     } else if (data.offerBanner) {
-                        bannerEl.src = data.offerBanner;
+                        if(bannerEl) bannerEl.src = data.offerBanner;
                         if(dotsContainer) dotsContainer.innerHTML = '';
                         if (window.bannerInterval) clearInterval(window.bannerInterval);
                     }
                     
-                    if (data.marqueeText && marqueeEl && data.marqueeText.trim() !== '') {
-                        marqueeEl.innerHTML = `${data.marqueeText} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${data.marqueeText} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${data.marqueeText}`;
+                    if (data.marqueeText && data.marqueeText.trim() !== '') {
+                        if(marqueeContainer) marqueeContainer.classList.remove('hidden');
+                        if(mainContent) mainContent.classList.replace('pt-[110px]', 'pt-[135px]');
+                        if(mainContent) mainContent.classList.replace('sm:pt-[135px]', 'sm:pt-[160px]');
+                        if(marqueeEl) marqueeEl.innerHTML = `${data.marqueeText} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${data.marqueeText} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${data.marqueeText}`;
+                    } else {
+                        if(marqueeContainer) marqueeContainer.classList.add('hidden');
+                        if(mainContent) mainContent.classList.replace('pt-[135px]', 'pt-[110px]');
+                        if(mainContent) mainContent.classList.replace('sm:pt-[160px]', 'sm:pt-[135px]');
                     }
                 }
             }, (err) => console.error("Config Error:", err));
 
-            const dummyProducts = []; // Cleared dummies for production
+            const dummyProducts = [];
 
             const unsub = onSnapshot(getCol('products'), (snap) => {
                 const listEl = document.getElementById('market-list');
@@ -1470,7 +1542,7 @@
                                             <span class="font-mono font-normal text-[10px] text-gray-500">${displayPhone || 'N/A'}</span>
                                         </td>
                                         <td class="p-4 text-[10px] text-gray-500">
-                                            ${u.role === 'Partner' ? `<span class="font-bold text-gray-700">Shop:</span> ${u.shopName || 'N/A'} - ${u.approvalStatus}` : `Active`}
+                                            ${u.role === 'Partner' ? `<span class="font-bold text-gray-700">Shop:</span> ${u.shopName || 'N/A'}<br/><span class="font-bold text-gray-700">Status:</span> <span class="${u.approvalStatus === 'Approved' ? 'text-emerald-500' : 'text-orange-500'} font-bold">${u.approvalStatus}</span>` : `Verified`}
                                         </td>
                                         <td class="p-4 text-right font-mono font-black text-gray-900 text-xs">${u.pin || '-'}</td>
                                     </tr>
@@ -1668,7 +1740,7 @@
         window.acceptFoodOrder = async (orderId) => {
             if(!currentUser) return;
             try {
-                await window.dbCall(updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), {
+                await window.dbCall(updateDoc(getDocRef('orders', orderId), {
                     status: 'Accepted'
                 }), 10000);
                 window.showToast("Order Accepted!", "success");
@@ -1678,7 +1750,7 @@
         window.rejectOrder = async (orderId) => {
             if(!currentUser) return;
             try {
-                await window.dbCall(updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), {
+                await window.dbCall(updateDoc(getDocRef('orders', orderId), {
                     status: 'Rejected'
                 }), 10000);
                 window.showToast("Order Rejected.", "error");
@@ -1688,7 +1760,7 @@
         window.markPreparing = async (orderId) => {
             if(!currentUser) return;
             try {
-                await window.dbCall(updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), {
+                await window.dbCall(updateDoc(getDocRef('orders', orderId), {
                     status: 'Preparing'
                 }), 10000);
                 window.showToast("Order is Preparing!", "success");
@@ -1698,7 +1770,7 @@
         window.markReady = async (orderId) => {
             if(!currentUser) return;
             try {
-                await window.dbCall(updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), {
+                await window.dbCall(updateDoc(getDocRef('orders', orderId), {
                     status: 'Ready'
                 }), 10000);
                 window.showToast("Marked as Ready!", "success");
@@ -1708,7 +1780,7 @@
         window.markOutForDelivery = async (orderId) => {
             if(!currentUser || currentUser.category !== 'Food Owner') return;
             try {
-                await window.dbCall(updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), {
+                await window.dbCall(updateDoc(getDocRef('orders', orderId), {
                     status: 'Out for Delivery'
                 }), 10000);
                 window.showToast("Order is out for delivery!", "success");
@@ -1720,12 +1792,22 @@
         window.markDelivered = async (orderId) => {
             if(!currentUser || currentUser.role !== 'Partner') return;
             try {
-                await window.dbCall(updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), {
+                await window.dbCall(updateDoc(getDocRef('orders', orderId), {
                     status: 'Delivered'
                 }), 10000);
                 window.showToast("Order Delivered Successfully!", "success");
             } catch(e) {
                 window.showToast("Failed to update order status.", "error");
+            }
+        };
+
+        window.adminReviewPartner = async (partnerPhone, status) => {
+            if(currentUser.role !== 'Admin') return;
+            try {
+                await window.dbCall(setDoc(getDocRef('users', partnerPhone), { approvalStatus: status }, { merge: true }), 10000);
+                window.showToast(`Restaurant ${status}!`, "success");
+            } catch(e) {
+                window.showToast("Error updating status.", "error");
             }
         };
 
@@ -1745,7 +1827,7 @@
                     const base64 = await window.resizeImage(fileInput.files[i], 800); 
                     base64Array.push(base64);
                 }
-                await window.dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'app_config'), { offerBanners: base64Array }, { merge: true }), 15000);
+                await window.dbCall(setDoc(getDocRef('settings', 'app_config'), { offerBanners: base64Array }, { merge: true }), 15000);
                 window.showToast("Offer Banners Updated!", "success");
                 fileInput.value = "";
             } catch(e) {
@@ -1767,7 +1849,7 @@
             btn.disabled = true;
 
             try {
-                await window.dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'app_config'), { marqueeText: text }, { merge: true }), 10000);
+                await window.dbCall(setDoc(getDocRef('settings', 'app_config'), { marqueeText: text }, { merge: true }), 10000);
                 window.showToast("Marquee Updated!", "success");
                 document.getElementById('admin-marquee-text').value = "";
             } catch(e) {
@@ -1786,14 +1868,14 @@
             document.getElementById('shop-status-text').innerText = `Currently ${newStatus}`;
             
             try {
-                await window.dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.phone), { shopStatus: newStatus }, { merge: true }), 10000);
+                await window.dbCall(setDoc(getDocRef('users', currentUser.phone), { shopStatus: newStatus }, { merge: true }), 10000);
                 currentUser.shopStatus = newStatus;
                 
                 const snap = await window.dbCall(getDocs(getCol('products')), 10000);
                 const myProducts = snap.docs.filter(d => d.data().partnerId === currentUser.phone);
                 
                 myProducts.forEach(d => {
-                    updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', d.id), { shopStatus: newStatus });
+                    updateDoc(getDocRef('products', d.id), { shopStatus: newStatus });
                 });
                 
                 window.showToast(`Restaurant marked as ${newStatus}`, "success");
@@ -1806,7 +1888,7 @@
 
         window.togglePartnerStock = async (productId, currentInStock) => {
             try {
-                await window.dbCall(updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', productId), { inStock: !currentInStock }), 10000);
+                await window.dbCall(updateDoc(getDocRef('products', productId), { inStock: !currentInStock }), 10000);
                 window.showToast(currentInStock ? "Marked Out of Stock" : "Marked In Stock", "success");
             } catch(e) {
                 window.showToast("Error updating stock", "error");
@@ -1891,7 +1973,7 @@
             } finally {
                 btn.innerText = originalText;
                 btn.disabled = false;
-            }
+            });
         };
 
         window.submitPartnerProfile = async () => {
@@ -1917,7 +1999,7 @@
                     qrBase64 = await window.resizeImage(qrInput.files[0], 600);
                 }
 
-                const newStatus = 'Approved'; // Changed from Pending to Approved directly
+                const newStatus = 'Approved'; 
 
                 const updateData = { 
                     shopName: shopName, 
@@ -1928,9 +2010,9 @@
                 };
 
                 try {
-                    await window.dbCall(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.phone), updateData, { merge: true }), 10000);
+                    await window.dbCall(setDoc(getDocRef('users', currentUser.phone), updateData, { merge: true }), 10000);
                 } catch(dbErr) {
-                    console.warn("DB Write timeout/failed. Reverting to local state.", dbErr);
+                    console.warn("DB Write timeout/failed.", dbErr);
                 }
 
                 currentUser.shopName = shopName;
@@ -1950,13 +2032,206 @@
             }
         };
 
+        window.deletePartnerProduct = (productId) => {
+            window.dbCall(deleteDoc(getDocRef('products', productId)), 10000)
+                .then(() => window.showToast("Dish removed from menu.", "success"))
+                .catch(e => window.showToast("Error removing product.", "error"));
+        };
+
+        window.addToCart = (name, price, partnerId = '', shopName = '') => {
+            if(!currentUser) { window.openAuthModal('User'); return; }
+            if(currentUser.role !== 'User') { window.showToast("Log in as User to order.", "error"); return; }
+            
+            if (cart.length > 0 && cart[0].partnerId !== partnerId && partnerId !== '') {
+                window.showToast("You can only order from one restaurant at a time. Clear cart first.", "error");
+                return;
+            }
+
+            cart.push({name, price, partnerId, shopName});
+            window.renderCartUI();
+            window.showToast(`${name} added!`, "success");
+            
+            const cartBtn = document.getElementById('nav-btn-Cart');
+            if(cartBtn) {
+                cartBtn.classList.add('scale-110', 'text-red-500');
+                setTimeout(() => cartBtn.classList.remove('scale-110', 'text-red-500'), 200);
+            }
+        };
+
+        window.renderCartUI = async () => {
+            const list = document.getElementById('cart-items-list');
+            const sub = cart.reduce((s, i) => s + i.price, 0);
+            
+            const handlingFee = cart.length > 0 ? (10 + (cart.length * 2 > 20 ? 20 : cart.length * 2)) : 0;
+            const total = sub + handlingFee;
+
+            document.getElementById('cart-subtotal').innerText = `₹${sub}`;
+            document.getElementById('cart-handling').innerText = `₹${handlingFee}`;
+            document.getElementById('cart-total').innerText = `₹${total}`;
+
+            const btn = document.getElementById('btn-place-order');
+            const detailsSection = document.getElementById('checkout-details-section');
+
+            if (!cart.length) {
+                list.innerHTML = `
+                    <div class="text-center py-10">
+                        <img src="https://cdn-icons-png.flaticon.com/512/1161/1161388.png" class="w-16 h-16 mx-auto mb-3 opacity-20 grayscale">
+                        <p class="text-gray-400 font-medium text-sm">Your basket is looking empty!</p>
+                    </div>`;
+                btn.disabled = true;
+                detailsSection.style.display = 'none';
+                return;
+            }
+            
+            btn.disabled = false;
+            detailsSection.style.display = 'block';
+
+            list.innerHTML = cart.map((i, idx) => `
+                <div class="flex justify-between items-center py-3 border-b border-gray-50 last:border-0 group">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-regular fa-square-caret-up text-emerald-500"></i>
+                        <span class="text-sm font-bold text-gray-800">${i.name}</span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span class="text-sm font-black text-gray-900">₹${i.price}</span>
+                        <button type="button" onclick="window.removeFromCart(${idx})" class="w-6 h-6 rounded bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors">
+                            <i class="fa-solid fa-minus text-[10px]"></i>
+                        </button>
+                    </div>
+                </div>`).join('');
+
+            // Fetch Partner Details to render payment options
+            const partnerId = cart[0].partnerId;
+            if(partnerId) {
+                const partnerSnap = await window.dbCall(getDoc(getDocRef('users', partnerId)), 5000).catch(e=>null);
+                const paymentContainer = document.getElementById('payment-options-container');
+                const paymentSection = document.getElementById('payment-section');
+                
+                if(partnerSnap && partnerSnap.exists()) {
+                    const pData = partnerSnap.data();
+                    window.currentCartPartner = pData;
+                    paymentSection.classList.remove('hidden');
+                    
+                    let html = '';
+                    if(pData.codEnabled !== false) {
+                        html += `
+                            <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition">
+                                <input type="radio" name="payment_mode" value="COD" checked onchange="document.getElementById('qr-payment-box').classList.add('hidden')" class="w-4 h-4 text-red-600 focus:ring-red-500 border-gray-300">
+                                <span class="text-sm font-bold text-gray-800"><i class="fa-solid fa-money-bill-1-wave text-emerald-600 w-5"></i> Pay on Delivery</span>
+                            </label>
+                        `;
+                    }
+                    if(pData.qrCode) {
+                        const isPrepaidChecked = (pData.codEnabled === false) ? 'checked' : '';
+                        if (pData.codEnabled === false) {
+                            document.getElementById('qr-payment-box').classList.remove('hidden');
+                        }
+                        
+                        html += `
+                            <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition">
+                                <input type="radio" name="payment_mode" value="Prepaid" ${isPrepaidChecked} onchange="document.getElementById('qr-payment-box').classList.remove('hidden')" class="w-4 h-4 text-red-600 focus:ring-red-500 border-gray-300">
+                                <span class="text-sm font-bold text-gray-800"><i class="fa-solid fa-qrcode text-blue-600 w-5"></i> Pay via QR (Prepaid)</span>
+                            </label>
+                        `;
+                        document.getElementById('partner-qr-display').src = pData.qrCode;
+                    }
+                    
+                    if(!html) html = '<p class="text-xs text-red-500 font-bold">No payment methods configured by restaurant.</p>';
+                    paymentContainer.innerHTML = html;
+                } else {
+                    paymentSection.classList.add('hidden');
+                }
+            }
+        };
+
+        window.removeFromCart = (idx) => { 
+            cart.splice(idx, 1); 
+            window.renderCartUI(); 
+        };
+
+        window.placeOrder = async () => {
+            if(cart.length === 0) return;
+            const addr = document.getElementById('cart-address').value.trim();
+            if(!addr) {
+                window.showToast("Please provide delivery address.", "error");
+                document.getElementById('cart-address').focus();
+                return;
+            }
+
+            const paymentRadio = document.querySelector('input[name="payment_mode"]:checked');
+            if(!paymentRadio && window.currentCartPartner) {
+                window.showToast("Please select a payment method.", "error");
+                return;
+            }
+
+            const paymentMode = paymentRadio ? paymentRadio.value : 'COD';
+            let paymentScreenshot = null;
+
+            if (paymentMode === 'Prepaid') {
+                const fileInput = document.getElementById('payment-screenshot');
+                if (!fileInput.files || fileInput.files.length === 0) {
+                    window.showToast("Please upload payment screenshot for Prepaid order.", "error");
+                    return;
+                }
+                try {
+                    paymentScreenshot = await window.resizeImage(fileInput.files[0], 800);
+                } catch(e) {
+                    window.showToast("Failed to process image.", "error");
+                    return;
+                }
+            }
+
+            const sub = cart.reduce((s,i) => s + i.price, 0);
+            const handlingFee = cart.length > 0 ? (10 + (cart.length * 2 > 20 ? 20 : cart.length * 2)) : 0;
+            const total = sub + handlingFee;
+            
+            const restaurantId = cart[0].partnerId || null;
+            const restaurantName = cart[0].shopName || null;
+
+            const btn = document.getElementById('btn-place-order');
+            const originalText = btn.innerText;
+            btn.innerText = "PLACING ORDER...";
+            btn.disabled = true;
+
+            try {
+                await window.dbCall(addDoc(getCol('orders'), { 
+                    customer: currentUser.name, 
+                    phone: currentUser.phone, 
+                    items: cart, 
+                    total, 
+                    address: addr, 
+                    status: 'Placed', 
+                    restaurantId: restaurantId,
+                    restaurantName: restaurantName,
+                    paymentMode: paymentMode,
+                    paymentScreenshot: paymentScreenshot,
+                    time: serverTimestamp() 
+                }), 10000);
+                
+                cart = []; 
+                document.getElementById('cart-address').value = '';
+                if(document.getElementById('payment-screenshot')) document.getElementById('payment-screenshot').value = '';
+                window.renderCartUI(); 
+                window.showToast("Order Placed Successfully!", "success");
+                window.switchMainView('Orders'); 
+            } catch(e) {
+                window.showToast("Network delayed. Syncing in background.", "info");
+                cart = []; 
+                window.renderCartUI();
+                window.switchMainView('Orders');
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        };
+
         // Initialize Session Handlers
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 if (!currentUser) {
                     let sessionPhone = null;
                     try {
-                        const sessionSnap = await window.dbCall(getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', user.uid)), 5000);
+                        const sessionSnap = await window.dbCall(getDoc(getDocRef('sessions', user.uid)), 5000);
                         if (sessionSnap && sessionSnap.exists()) {
                             sessionPhone = sessionSnap.data().phone;
                         }
@@ -1968,7 +2243,7 @@
                             const matchedUser = usersSnap.docs.find(d => d.data().uid === user.uid);
                             if (matchedUser) {
                                 sessionPhone = matchedUser.id;
-                                setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', user.uid), { phone: sessionPhone }, { merge: true }).catch(()=>{});
+                                setDoc(getDocRef('sessions', user.uid), { phone: sessionPhone }, { merge: true }).catch(()=>{});
                             }
                         } catch(e) { console.warn("Fallback fetch failed."); }
                     }
@@ -1979,7 +2254,7 @@
                             window.finalizeLoginSequence(true);
                         } else {
                             try {
-                                const userSnap = await window.dbCall(getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', sessionPhone)), 5000);
+                                const userSnap = await window.dbCall(getDoc(getDocRef('users', sessionPhone)), 5000);
                                 if (userSnap && userSnap.exists()) {
                                     currentUser = { ...userSnap.data(), docId: sessionPhone };
                                     window.finalizeLoginSequence(true); 
