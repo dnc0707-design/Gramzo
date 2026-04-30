@@ -273,7 +273,7 @@
                 <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                     <div class="text-center sm:text-left">
                         <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                        <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v6.5.1 - Final Scope Patch</p>
+                        <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v7.1.0 - Auth Initialization Fix</p>
                     </div>
                     <!-- EXPLICIT ADMIN BUTTON IN FOOTER -->
                     <div class="mt-4 sm:mt-0 text-center sm:text-right">
@@ -677,7 +677,9 @@
             appId: "1:674262956986:web:772f68694c77e15bf3fb83"
         };
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : userConfig;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'gramzo-super-v4';
+        
+        // CRITICAL FIX: REVERTED APP ID TO MATCH EXISTING 96 USERS DATABASE!
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'gramzo-super-v2'; 
         
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -929,6 +931,22 @@
                 window.showToast("System error during admin login.", "error");
             } finally {
                 if (btn) { btn.innerText = orig; btn.disabled = false; }
+            }
+        };
+
+        window.startApp = async () => {
+            try {
+                if (!auth.currentUser) {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await window.dbCall(signInWithCustomToken(auth, __initial_auth_token), 10000);
+                    } else {
+                        await window.dbCall(signInAnonymously(auth), 10000);
+                    }
+                }
+            } catch (e) {
+                console.error("Auth Init Error:", e);
+                window.showToast("Network delayed. Loading cached data.", "error");
+                window.loadMarketplaceData(); 
             }
         };
 
@@ -2180,7 +2198,50 @@
             }
         };
 
-        window.startApp(); 
+        // Initialize Session Handlers
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                if (!currentUser) {
+                    let sessionPhone = null;
+                    try {
+                        const sessionSnap = await window.dbCall(getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', user.uid)), 5000);
+                        if (sessionSnap && sessionSnap.exists()) {
+                            sessionPhone = sessionSnap.data().phone;
+                        }
+                    } catch(e) { console.warn("Session fetch delayed."); }
+
+                    if (!sessionPhone) {
+                        try {
+                            const usersSnap = await window.dbCall(getDocs(getCol('users')), 5000);
+                            const matchedUser = usersSnap.docs.find(d => d.data().uid === user.uid);
+                            if (matchedUser) {
+                                sessionPhone = matchedUser.id;
+                                setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sessions', user.uid), { phone: sessionPhone }, { merge: true }).catch(()=>{});
+                            }
+                        } catch(e) { console.warn("Fallback fetch failed."); }
+                    }
+
+                    if (sessionPhone) {
+                        if (sessionPhone === 'admin_session' || sessionPhone === 'Gramzo_admin') {
+                            currentUser = { name: 'Super Admin', role: 'Admin', phone: 'Admin', docId: 'admin_session', uid: user.uid };
+                            window.finalizeLoginSequence(true);
+                        } else {
+                            try {
+                                const userSnap = await window.dbCall(getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', sessionPhone)), 5000);
+                                if (userSnap && userSnap.exists()) {
+                                    currentUser = { ...userSnap.data(), docId: sessionPhone };
+                                    window.finalizeLoginSequence(true); 
+                                }
+                            } catch(e) { console.warn("Profile fetch failed."); }
+                        }
+                    }
+                    window.loadMarketplaceData();
+                }
+            } else {
+                if(window.startApp) window.startApp(); 
+            }
+        });
+
     </script>
 </body>
 </html>
