@@ -151,9 +151,9 @@
     </nav>
 
     <!-- Upgraded Marquee -->
-    <div id="marquee-container" class="fixed top-[65px] sm:top-[80px] w-full bg-gray-900 border-b border-gray-800 z-30 overflow-hidden h-8 flex items-center shadow-sm hidden">
-        <div id="dynamic-marquee" class="animate-marquee inline-block whitespace-nowrap text-xs font-bold text-gray-200 tracking-widest">
-            🚀 Fast Food Delivery available now! Order from your favorite local restaurants instantly. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 🚀 Support local businesses, order directly from Gramzo!
+    <div id="marquee-container" class="fixed top-[65px] sm:top-[80px] w-full bg-gray-900 border-b border-gray-800 z-30 overflow-hidden h-8 flex items-center shadow-sm">
+        <div id="dynamic-marquee" class="animate-marquee inline-block whitespace-nowrap text-xs font-bold text-white tracking-widest uppercase">
+            🚀 khabar order korun ekhon ghore bosei- service availbale at- Kotaldi, Sakambari plant area, lalgarh , ramchandrapur , krishnapur, kinaidi, muradi , baranti 🚀
         </div>
     </div>
 
@@ -198,38 +198,15 @@
                 <div id="banner-dots" class="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex gap-1.5 z-10"></div>
             </div>
 
-            <!-- Categories -->
+            <!-- Restaurants Near You (Dynamic) -->
             <div>
                 <div class="flex justify-between items-end mb-3">
-                    <h3 class="font-black text-lg text-gray-900 tracking-tight" id="marketplace-title">Eat what makes you happy</h3>
-                    <button type="button" id="btn-clear-filter" onclick="window.filterCategory(null)" class="hidden text-xs font-bold text-red-600 bg-red-50 px-3 py-1 rounded-full border border-red-100">Clear Search</button>
+                    <h3 class="font-black text-lg text-gray-900 tracking-tight" id="marketplace-title">Restaurants Near You</h3>
+                    <button type="button" id="btn-clear-filter" onclick="window.filterRestaurant(null, '')" class="hidden text-xs font-bold text-red-600 bg-red-50 px-3 py-1 rounded-full border border-red-100">Clear</button>
                 </div>
                 
-                <div class="flex gap-4 overflow-x-auto pb-4 no-scrollbar px-1">
-                    <div class="cursor-pointer group shrink-0" onclick="window.filterCategory('Food', 'Biryani')">
-                        <div class="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden mb-2 shadow-sm border border-gray-200 group-hover:border-red-500 transition-colors">
-                            <img src="https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=200&q=80" class="w-full h-full object-cover group-hover:scale-110 transition-transform" alt="Biryani">
-                        </div>
-                        <p class="text-center text-xs font-bold text-gray-700 group-hover:text-red-600">Biryani</p>
-                    </div>
-                    <div class="cursor-pointer group shrink-0" onclick="window.filterCategory('Food', 'Fast Food')">
-                        <div class="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden mb-2 shadow-sm border border-gray-200 group-hover:border-red-500 transition-colors">
-                            <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200&q=80" class="w-full h-full object-cover group-hover:scale-110 transition-transform" alt="Fast Food">
-                        </div>
-                        <p class="text-center text-xs font-bold text-gray-700 group-hover:text-red-600">Fast Food</p>
-                    </div>
-                    <div class="cursor-pointer group shrink-0" onclick="window.filterCategory('Food', 'Sweets')">
-                        <div class="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden mb-2 shadow-sm border border-gray-200 group-hover:border-red-500 transition-colors">
-                            <img src="https://images.unsplash.com/photo-1588195538326-c5b1e9f80a1b?w=200&q=80" class="w-full h-full object-cover group-hover:scale-110 transition-transform" alt="Sweets">
-                        </div>
-                        <p class="text-center text-xs font-bold text-gray-700 group-hover:text-red-600">Sweets</p>
-                    </div>
-                    <div class="cursor-pointer group shrink-0" onclick="window.filterCategory('Food', 'Thali')">
-                        <div class="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden mb-2 shadow-sm border border-gray-200 group-hover:border-red-500 transition-colors">
-                            <img src="https://images.unsplash.com/photo-1626804475297-41607ea0d4eb?w=200&q=80" class="w-full h-full object-cover group-hover:scale-110 transition-transform" alt="Thali">
-                        </div>
-                        <p class="text-center text-xs font-bold text-gray-700 group-hover:text-red-600">Thali</p>
-                    </div>
+                <div id="restaurant-list-carousel" class="flex gap-4 overflow-x-auto pb-4 no-scrollbar px-1">
+                    <!-- Populated dynamically by JS -->
                 </div>
             </div>
 
@@ -289,7 +266,7 @@
                 <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                     <div class="text-center sm:text-left">
                         <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                        <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v8.4.0 - Global Search & Manual Input Fix</p>
+                        <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v9.0.0 - Full Featured Engine</p>
                     </div>
                     <!-- EXPLICIT ADMIN BUTTON IN FOOTER -->
                     <div class="mt-4 sm:mt-0 text-center sm:text-right">
@@ -322,11 +299,19 @@
                     <div>
                         <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2 ml-2">Delivery Address (Manual Edit Allowed)</label>
                         <div class="relative">
-                            <!-- Changed back to TEXTAREA for multi-line manual input without strict maps override -->
                             <textarea id="cart-address" rows="3" class="input-field !py-3 resize-none !rounded-xl pr-20" placeholder="E.g. House No, Village Name, Landmark... Type your detailed address here"></textarea>
                             <button type="button" onclick="window.getCurrentLocation('cart-address')" class="absolute right-3 top-3 text-red-500 text-xs font-bold bg-red-50 px-2 py-1 rounded border border-red-100 hover:bg-red-100 transition-colors" title="Fetch via GPS">
                                 <i class="fa-solid fa-location-crosshairs"></i> GPS
                             </button>
+                        </div>
+                    </div>
+
+                    <!-- PROMO CODE SECTION -->
+                    <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100 mt-4">
+                        <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2">Apply Promo Code</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="promo-code-input" class="input-field !py-2.5 !rounded-xl text-xs font-bold uppercase" placeholder="e.g. GRAMZO50">
+                            <button type="button" onclick="window.applyPromo()" class="bg-gray-900 text-white px-5 py-2.5 rounded-xl text-xs font-bold shrink-0 hover:bg-gray-800 transition-colors">APPLY</button>
                         </div>
                     </div>
 
@@ -346,15 +331,8 @@
                         </div>
                     </div>
                     
-                    <div class="bg-gray-50 rounded-2xl p-4 space-y-3 border border-gray-100">
-                        <div class="flex justify-between text-sm text-gray-600 font-medium"><span>Item Subtotal</span><span id="cart-subtotal">₹0</span></div>
-                        <div class="flex justify-between text-sm text-red-600 font-bold"><span>Delivery Fee</span><span>FREE</span></div>
-                        <div class="flex justify-between text-sm text-gray-600 font-medium"><span>Platform Fee</span><span id="cart-handling">₹0</span></div>
-                        
-                        <div class="pt-3 mt-3 border-t border-gray-200 border-dashed flex justify-between items-center">
-                            <span class="text-sm font-black text-gray-900">Grand Total</span>
-                            <span id="cart-total" class="text-2xl font-black text-gray-900 tracking-tight">₹0</span>
-                        </div>
+                    <div class="bg-gray-50 rounded-2xl p-4 space-y-3 border border-gray-100" id="cart-summary-totals">
+                        <!-- Populated by JS to support discounts -->
                     </div>
                     
                     <button type="button" id="btn-place-order" onclick="window.placeOrder()" class="w-full bg-red-600 hover:bg-red-700 text-white py-4 rounded-2xl font-black text-lg shadow-lg shadow-red-600/30 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
@@ -412,6 +390,7 @@
                     <!-- Display Only Details -->
                     <div id="hub-display-details" class="bg-gray-50 p-4 rounded-xl border border-gray-100 space-y-2 text-sm text-gray-700">
                         <p><strong>Restaurant Name:</strong> <span id="hub-name-val"></span></p>
+                        <p id="hub-address-row" class="hidden"><strong>Location:</strong> <span id="hub-address-val"></span></p>
                         <p id="hub-fssai-row" class="hidden"><strong>FSSAI/Reg No:</strong> <span id="hub-fssai-val"></span></p>
                     </div>
 
@@ -419,6 +398,9 @@
                     <div id="partner-setup-form" class="space-y-3 mt-4 border-t border-gray-200 pt-4">
                         <label class="block text-xs font-bold text-gray-600 mb-1 ml-1">Restaurant / Shop Name</label>
                         <input id="partner-shop-name" class="input-field" placeholder="Enter Business Name">
+
+                        <label class="block text-xs font-bold text-gray-600 mb-1 ml-1 mt-3">Full Address</label>
+                        <input id="partner-shop-address" class="input-field" placeholder="Enter full restaurant address">
                         
                         <label class="block text-xs font-bold text-gray-600 mb-1 ml-1 mt-3">FSSAI / Registration (Optional)</label>
                         <input id="partner-fssai-number" type="text" class="input-field uppercase" placeholder="Enter Registration Number">
@@ -618,6 +600,7 @@
                 <div id="partner-fields" class="hidden bg-gray-50 p-4 rounded-2xl border border-gray-100 space-y-3 mt-2">
                     <p class="text-xs font-bold text-gray-600 uppercase tracking-wider text-center border-b border-gray-200 pb-2 mb-2">Restaurant Registration</p>
                     <input id="reg-shop-name" type="text" class="input-field !bg-white" placeholder="Restaurant / Shop Name">
+                    <input id="reg-shop-address" type="text" class="input-field !bg-white" placeholder="Restaurant Full Address">
                     <input id="reg-fssai-number" type="text" class="input-field !bg-white uppercase" placeholder="FSSAI License Number (Optional)">
                 </div>
 
@@ -704,8 +687,7 @@
         });
 
         let currentUser = null;
-        let currentFilter = null;
-        let currentSubFilter = null;
+        let currentRestaurantFilter = null;
         let cart = [];
         let unsubscribeListeners = []; 
         let currentAuthRole = 'User'; 
@@ -713,6 +695,8 @@
         window.currentSearchQuery = '';
         window.currentCartPartner = null;
         window.bannerInterval = null;
+        window.appliedPromo = 0;
+        window.promoCode = '';
         
         // --- Dynamic Path Helper ---
         const getCol = (name) => IS_LIVE_WEBSITE ? collection(db, name) : collection(db, 'artifacts', appId, 'public', 'data', name);
@@ -881,27 +865,6 @@
             }
         };
 
-        window.togglePartnerRegFields = () => {
-            const cat = document.getElementById('reg-partner-category').value;
-            const shopName = document.getElementById('reg-shop-name');
-            const fssaiNum = document.getElementById('reg-fssai-number');
-            const vehCont = document.getElementById('reg-vehicle-container');
-
-            if(cat === 'Food Owner') {
-                shopName.classList.remove('hidden');
-                fssaiNum.classList.remove('hidden');
-                if (vehCont) vehCont.classList.add('hidden');
-            } else if (cat === 'Rider') {
-                shopName.classList.add('hidden');
-                fssaiNum.classList.add('hidden');
-                if (vehCont) vehCont.classList.remove('hidden');
-            } else {
-                shopName.classList.add('hidden');
-                fssaiNum.classList.add('hidden');
-                if (vehCont) vehCont.classList.add('hidden');
-            }
-        };
-
         window.openAuthModal = (role = 'User') => {
             currentAuthRole = role;
             const overlay = document.getElementById('auth-overlay');
@@ -978,6 +941,11 @@
                     console.warn("Sign out error:", e);
                 }
             }
+            
+            currentUser = null;
+            cart = [];
+            window.appliedPromo = 0;
+            window.promoCode = '';
             
             window.showToast("Signing out...", "info");
             
@@ -1066,10 +1034,12 @@
 
                     let partnerCategory = currentAuthRole === 'Partner' ? 'Food Owner' : null;
                     let shopName = null;
+                    let shopAddress = null;
                     let fssaiNumber = null;
 
                     if (currentAuthRole === 'Partner') {
                         shopName = document.getElementById('reg-shop-name').value.trim();
+                        shopAddress = document.getElementById('reg-shop-address').value.trim();
                         fssaiNumber = document.getElementById('reg-fssai-number').value.trim();
                     }
 
@@ -1082,7 +1052,8 @@
                         created: new Date().toISOString(),
                         ...(currentAuthRole === 'Partner' && { 
                             category: partnerCategory, 
-                            shopName: shopName || name + "'s Kitchen", 
+                            shopName: shopName || name + "'s Kitchen",
+                            shopAddress: shopAddress || '',
                             fssaiNumber: fssaiNumber || null,
                             codEnabled: true,
                             qrCode: null
@@ -1197,6 +1168,12 @@
                 
                 document.getElementById('hub-name-val').innerText = currentUser.shopName || currentUser.name;
                 
+                const hubAddressRow = document.getElementById('hub-address-row');
+                if(hubAddressRow && currentUser.shopAddress) {
+                    hubAddressRow.classList.remove('hidden');
+                    document.getElementById('hub-address-val').innerText = currentUser.shopAddress;
+                }
+
                 const hubFssaiRow = document.getElementById('hub-fssai-row');
                 const pSetupForm = document.getElementById('partner-setup-form');
 
@@ -1252,9 +1229,8 @@
                     catListCont.classList.add('hidden');
                 }
                 
-                const fssaiCont = document.getElementById('fssai-container');
-                if(fssaiCont) fssaiCont.classList.remove('hidden');
                 if(currentUser.shopName) document.getElementById('partner-shop-name').value = currentUser.shopName;
+                if(currentUser.shopAddress) document.getElementById('partner-shop-address').value = currentUser.shopAddress;
                 if(currentUser.fssaiNumber) document.getElementById('partner-fssai-number').value = currentUser.fssaiNumber;
                 
                 if(currentUser.codEnabled !== undefined) {
@@ -1274,19 +1250,50 @@
             window.loadMarketplaceData();
         };
 
+        window.renderRestaurants = (restaurants) => {
+            const carousel = document.getElementById('restaurant-list-carousel');
+            if (!carousel) return;
+            
+            if(restaurants.length === 0) {
+                carousel.innerHTML = '<p class="text-xs text-gray-400">No restaurants available.</p>';
+                return;
+            }
+
+            carousel.innerHTML = restaurants.map(r => {
+                const isActive = currentRestaurantFilter === r.partnerId;
+                return `
+                <div class="cursor-pointer group shrink-0 flex flex-col items-center w-20" onclick="window.filterRestaurant('${r.partnerId}', '${r.shopName.replace(/'/g, "\\'")}')">
+                    <div class="w-16 h-16 rounded-full flex items-center justify-center overflow-hidden mb-2 shadow-sm border-2 transition-all ${isActive ? 'border-red-500 scale-105' : 'border-gray-100 bg-gray-50 group-hover:border-red-300'}">
+                        <img src="${r.image}" class="w-full h-full object-cover" alt="${r.shopName}">
+                    </div>
+                    <p class="text-center text-[10px] font-bold ${isActive ? 'text-red-600' : 'text-gray-700'} leading-tight w-full px-1 truncate">${r.shopName}</p>
+                </div>`;
+            }).join('');
+        };
+
+        const extractRestaurants = (items) => {
+            const uniqueRestaurants = [];
+            const map = new Map();
+            items.forEach(p => {
+                if(p.shopName && !map.has(p.partnerId)) {
+                    map.set(p.partnerId, true);
+                    uniqueRestaurants.push({
+                        partnerId: p.partnerId,
+                        shopName: p.shopName,
+                        shopAddress: p.shopAddress || '',
+                        image: p.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&q=80'
+                    });
+                }
+            });
+            window.renderRestaurants(uniqueRestaurants);
+        };
+
         const renderProducts = (items) => {
             const listEl = document.getElementById('market-list');
             if (!listEl) return;
             
             const filtered = items.filter(i => {
-                if (currentFilter && i.category !== currentFilter) return false;
-                
-                if (currentSubFilter) {
-                    const term = currentSubFilter.toLowerCase();
-                    const matchName = i.name && i.name.toLowerCase().includes(term);
-                    const matchSubCat = i.subCategory && i.subCategory.toLowerCase().includes(term);
-                    if (!matchName && !matchSubCat) return false;
-                }
+                if (currentRestaurantFilter && i.partnerId !== currentRestaurantFilter) return false;
 
                 if (window.currentSearchQuery) {
                     const q = window.currentSearchQuery.toLowerCase();
@@ -1306,6 +1313,7 @@
                 const isClosed = p.shopStatus === 'Closed';
                 const isOutOfStock = p.inStock === false;
                 
+                let addressDisplay = p.shopAddress ? `<p class="text-[9px] text-gray-400 font-medium leading-none mb-2 truncate"><i class="fa-solid fa-location-dot"></i> ${p.shopAddress}</p>` : '';
                 let qtyDisplay = `<p class="text-[10px] text-gray-500 uppercase tracking-wide font-medium mb-3">${p.qty || ''} • <span class="text-red-600 font-bold">${p.shopName || 'Gramzo'}</span></p>`;
                 
                 if (hasVariants) {
@@ -1328,7 +1336,7 @@
                 } else {
                     actionHtml = `
                         <span id="price-${p.id}" class="text-lg font-black text-red-600 tracking-tight">₹${displayPrice}</span>
-                        <button type="button" onclick="window.addToCart('${p.id}', '${p.name.replace(/'/g, "\\'")}', ${!hasVariants ? p.price : 'null'}, '${(!hasVariants && p.qty) ? p.qty : ''}', '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')" class="w-8 h-8 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition-colors active:scale-90 shrink-0 border border-red-100">
+                        <button type="button" onclick="${hasVariants ? `window.addToCartVariant('${p.id}', '${p.name.replace(/'/g, "\\'")}', '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')` : `window.addToCartStandard('${p.id}', '${p.name.replace(/'/g, "\\'")}', ${p.price}, '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')`}" class="w-8 h-8 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition-colors active:scale-90 shrink-0 border border-red-100">
                             <i class="fa-solid fa-plus text-xs"></i>
                         </button>
                     `;
@@ -1338,11 +1346,12 @@
                     <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex flex-col transform transition hover:-translate-y-1 hover:shadow-md ${isClosed || isOutOfStock ? 'opacity-60 grayscale-[0.5]' : ''}">
                         <div class="h-32 bg-gray-100 relative">
                             <img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x300/f3f4f6/a1a1aa?text=Image'">
-                            <span class="absolute top-2 left-2 bg-white/90 backdrop-blur text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded text-gray-800 shadow-sm">${p.subCategory || p.category}</span>
+                            ${p.category ? `<span class="absolute top-2 left-2 bg-white/90 backdrop-blur text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded text-gray-800 shadow-sm">${p.category}</span>` : ''}
                         </div>
                         <div class="p-3 flex-1 flex flex-col justify-between">
                             <div>
                                 <h4 class="font-bold text-gray-900 text-sm leading-tight mb-1">${p.name}</h4>
+                                ${addressDisplay}
                                 ${qtyDisplay}
                             </div>
                             <div class="flex justify-between items-center mt-auto pt-2 border-t border-gray-50">
@@ -1356,8 +1365,6 @@
 
         window.loadMarketplaceData = () => {
             if (!auth.currentUser) return;
-            
-            const defaultBanner = "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80";
             
             onSnapshot(getDocRef('settings', 'app_config'), (snap) => {
                 const bannerEl = document.getElementById('user-offer-banner');
@@ -1412,19 +1419,20 @@
                         if(mainContent) mainContent.classList.replace('pt-[135px]', 'pt-[110px]');
                         if(mainContent) mainContent.classList.replace('sm:pt-[160px]', 'sm:pt-[135px]');
                     }
+                } else {
+                    // Default Marquee if DB is empty
+                    if(marqueeContainer) marqueeContainer.classList.remove('hidden');
+                    if(marqueeEl) marqueeEl.innerHTML = `🚀 khabar order korun ekhon ghore bosei- service availbale at- Kotaldi, Sakambari plant area, lalgarh , ramchandrapur , krishnapur, kinaidi, muradi , baranti 🚀`;
                 }
             }, (err) => console.error("Config Error:", err));
 
-            const dummyProducts = [
-                { id: "dummy1", name: "Chicken Dum Biryani", variants: [{qty: "Half", price: 90}, {qty: "Full", price: 150}], category: "Food", subCategory: "Biryani", image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&q=80", shopName: "Local Kitchen", partnerId: "111", inStock: true, shopStatus: 'Open' },
-                { id: "dummy2", name: "Paneer Butter Masala", price: 120, category: "Food", subCategory: "Thali", image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80", shopName: "Desi Dhaba", partnerId: "222", inStock: true, shopStatus: 'Open' },
-                { id: "dummy3", name: "Veg Chowmein", price: 60, category: "Food", subCategory: "Fast Food", image: "https://images.unsplash.com/photo-1585032226651-759b368d7246?w=400&q=80", shopName: "Fast Food Corner", partnerId: "333", inStock: true, shopStatus: 'Open' },
-                { id: "dummy4", name: "Rasgulla (2 Pcs)", price: 30, category: "Food", subCategory: "Sweets", image: "https://images.unsplash.com/photo-1588195538326-c5b1e9f80a1b?w=400&q=80", shopName: "Mishti Mukh", partnerId: "444", inStock: true, shopStatus: 'Open' }
-            ];
+            const dummyProducts = [];
 
             const unsub = onSnapshot(getCol('products'), (snap) => {
                 let items = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
                 if(items.length === 0) items = dummyProducts;
+                
+                extractRestaurants(items);
                 renderProducts(items);
             }, (error) => {
                 console.error("Products error:", error);
@@ -1435,16 +1443,16 @@
             });
         };
 
-        window.filterCategory = (cat, subCat = null) => {
-            currentFilter = cat;
-            currentSubFilter = subCat;
-            
-            const clearBtn = document.getElementById('btn-clear-filter');
-            document.getElementById('marketplace-title').innerText = cat ? `${subCat || cat} Options` : 'Eat what makes you happy';
-
-            if (cat || subCat) clearBtn.classList.remove('hidden');
-            else clearBtn.classList.add('hidden');
-
+        window.filterRestaurant = (partnerId, shopName) => {
+            if (currentRestaurantFilter === partnerId) {
+                currentRestaurantFilter = null;
+                document.getElementById('marketplace-title').innerText = 'Restaurants Near You';
+                document.getElementById('btn-clear-filter').classList.add('hidden');
+            } else {
+                currentRestaurantFilter = partnerId;
+                document.getElementById('marketplace-title').innerText = `${shopName} Menu`;
+                document.getElementById('btn-clear-filter').classList.remove('hidden');
+            }
             window.loadMarketplaceData();
         };
 
@@ -2058,6 +2066,7 @@
                     subCategory: null,
                     partnerId: currentUser.phone,
                     shopName: currentUser.shopName,
+                    shopAddress: currentUser.shopAddress || '',
                     image: defaultImg,
                     inStock: true,
                     shopStatus: currentUser.shopStatus || 'Open',
@@ -2086,12 +2095,16 @@
             if(!currentUser || !currentUser.phone) return;
             
             const shopNameInput = document.getElementById('partner-shop-name');
+            const shopAddressInput = document.getElementById('partner-shop-address');
+            
             const shopName = shopNameInput ? shopNameInput.value.trim() : null;
+            const shopAddress = shopAddressInput ? shopAddressInput.value.trim() : '';
             const fssaiNumber = document.getElementById('partner-fssai-number').value.trim();
             const codEnabled = document.getElementById('partner-cod-toggle-setup').checked;
             const qrInput = document.getElementById('partner-qr-upload');
 
             if (!shopName) return window.showToast("Enter a restaurant name.", "error");
+            if (!shopAddress) return window.showToast("Enter restaurant address.", "error");
             
             const btn = document.getElementById('btn-submit-profile');
             const orig = btn.innerText;
@@ -2109,6 +2122,7 @@
 
                 const updateData = { 
                     shopName: shopName, 
+                    shopAddress: shopAddress,
                     approvalStatus: newStatus,
                     fssaiNumber: fssaiNumber || null,
                     codEnabled: codEnabled,
@@ -2122,6 +2136,7 @@
                 }
 
                 currentUser.shopName = shopName;
+                currentUser.shopAddress = shopAddress;
                 currentUser.approvalStatus = newStatus;
                 currentUser.fssaiNumber = fssaiNumber;
                 currentUser.codEnabled = codEnabled;
@@ -2135,6 +2150,257 @@
             } finally { 
                 btn.innerText = orig; 
                 btn.disabled = false; 
+            }
+        };
+
+        window.applyPromo = () => {
+            const codeInput = document.getElementById('promo-code-input');
+            if (!codeInput) return;
+            const code = codeInput.value.trim().toUpperCase();
+            
+            if (code === 'GRAMZO10') window.appliedPromo = 10;
+            else if (code === 'GRAMZO20') window.appliedPromo = 20;
+            else if (code === 'GRAMZO50') window.appliedPromo = 50;
+            else {
+                window.showToast("Invalid Promo Code", "error");
+                window.appliedPromo = 0;
+                window.promoCode = '';
+                window.renderCartUI();
+                return;
+            }
+            window.promoCode = code;
+            window.showToast(`${window.appliedPromo}% Discount Applied!`, "success");
+            window.renderCartUI();
+        };
+
+        window.addToCartStandard = (id, name, price, partnerId, shopName) => {
+            window.addToCartActual(name, price, partnerId, shopName);
+        };
+
+        window.addToCartVariant = (id, name, partnerId, shopName) => {
+            const selectEl = document.getElementById(`sel-${id}`);
+            if(!selectEl) return;
+            const selectedOpt = selectEl.options[selectEl.selectedIndex];
+            const price = parseFloat(selectedOpt.dataset.price);
+            const qty = selectedOpt.text;
+            window.addToCartActual(`${name} (${qty})`, price, partnerId, shopName);
+        };
+
+        window.addToCartActual = (name, price, partnerId, shopName) => {
+            if(!currentUser) { window.openAuthModal('User'); return; }
+            if(currentUser.role !== 'User') { window.showToast("Log in as User to order.", "error"); return; }
+            
+            if (cart.length > 0 && cart[0].partnerId !== partnerId && partnerId !== '') {
+                window.showToast("You can only order from one restaurant at a time. Clear cart first.", "error");
+                return;
+            }
+
+            cart.push({name, price, partnerId, shopName});
+            window.renderCartUI();
+            window.showToast(`${name} added!`, "success");
+            window.setupBottomNav(currentUser.role);
+        };
+
+        window.renderCartUI = async () => {
+            const list = document.getElementById('cart-items-list');
+            const summaryTotals = document.getElementById('cart-summary-totals');
+            
+            const sub = cart.reduce((s, i) => s + i.price, 0);
+            const handlingFee = cart.length > 0 ? (10 + (cart.length * 2 > 20 ? 20 : cart.length * 2)) : 0;
+            const discountAmt = (sub * (window.appliedPromo || 0)) / 100;
+            const total = sub - discountAmt + handlingFee;
+
+            if (summaryTotals) {
+                const discountHtml = window.appliedPromo > 0 
+                    ? `<div class="flex justify-between text-sm text-emerald-600 font-bold"><span>Promo Discount (${window.appliedPromo}%)</span><span>-₹${discountAmt.toFixed(2)}</span></div>` 
+                    : '';
+                
+                summaryTotals.innerHTML = `
+                    <div class="flex justify-between text-sm text-gray-600 font-medium"><span>Item Subtotal</span><span id="cart-subtotal">₹${sub.toFixed(2)}</span></div>
+                    ${discountHtml}
+                    <div class="flex justify-between text-sm text-red-600 font-bold"><span>Delivery Fee</span><span>FREE</span></div>
+                    <div class="flex justify-between text-sm text-gray-600 font-medium"><span>Platform Fee</span><span id="cart-handling">₹${handlingFee.toFixed(2)}</span></div>
+                    
+                    <div class="pt-3 mt-3 border-t border-gray-200 border-dashed flex justify-between items-center">
+                        <span class="text-sm font-black text-gray-900">Grand Total</span>
+                        <span id="cart-total" class="text-2xl font-black text-gray-900 tracking-tight">₹${total.toFixed(2)}</span>
+                    </div>
+                `;
+            }
+
+            const btn = document.getElementById('btn-place-order');
+            const detailsSection = document.getElementById('checkout-details-section');
+
+            if (!cart.length) {
+                list.innerHTML = `
+                    <div class="text-center py-10">
+                        <img src="https://cdn-icons-png.flaticon.com/512/1161/1161388.png" class="w-16 h-16 mx-auto mb-3 opacity-20 grayscale">
+                        <p class="text-gray-400 font-medium text-sm">Your basket is looking empty!</p>
+                    </div>`;
+                btn.disabled = true;
+                detailsSection.style.display = 'none';
+                return;
+            }
+            
+            btn.disabled = false;
+            detailsSection.style.display = 'block';
+
+            list.innerHTML = cart.map((i, idx) => `
+                <div class="flex justify-between items-center py-3 border-b border-gray-50 last:border-0 group">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-regular fa-square-caret-up text-emerald-500"></i>
+                        <span class="text-sm font-bold text-gray-800">${i.name}</span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span class="text-sm font-black text-gray-900">₹${i.price}</span>
+                        <button type="button" onclick="window.removeFromCart(${idx})" class="w-6 h-6 rounded bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors">
+                            <i class="fa-solid fa-minus text-[10px]"></i>
+                        </button>
+                    </div>
+                </div>`).join('');
+
+            // Fetch Partner Details to render payment options
+            const partnerId = cart[0].partnerId;
+            if(partnerId) {
+                const partnerSnap = await window.dbCall(getDoc(getDocRef('users', partnerId)), 5000).catch(e=>null);
+                const paymentContainer = document.getElementById('payment-options-container');
+                const paymentSection = document.getElementById('payment-section');
+                
+                if(partnerSnap && partnerSnap.exists()) {
+                    const pData = partnerSnap.data();
+                    window.currentCartPartner = pData;
+                    paymentSection.classList.remove('hidden');
+                    
+                    let html = '';
+                    if(pData.codEnabled !== false) {
+                        html += `
+                            <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition">
+                                <input type="radio" name="payment_mode" value="COD" checked onchange="document.getElementById('qr-payment-box').classList.add('hidden')" class="w-4 h-4 text-red-600 focus:ring-red-500 border-gray-300">
+                                <span class="text-sm font-bold text-gray-800"><i class="fa-solid fa-money-bill-1-wave text-emerald-600 w-5"></i> Pay on Delivery</span>
+                            </label>
+                        `;
+                    }
+                    if(pData.qrCode) {
+                        const isPrepaidChecked = (pData.codEnabled === false) ? 'checked' : '';
+                        if (pData.codEnabled === false) {
+                            document.getElementById('qr-payment-box').classList.remove('hidden');
+                        }
+                        
+                        html += `
+                            <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition">
+                                <input type="radio" name="payment_mode" value="Prepaid" ${isPrepaidChecked} onchange="document.getElementById('qr-payment-box').classList.remove('hidden')" class="w-4 h-4 text-red-600 focus:ring-red-500 border-gray-300">
+                                <span class="text-sm font-bold text-gray-800"><i class="fa-solid fa-qrcode text-blue-600 w-5"></i> Pay via QR (Prepaid)</span>
+                            </label>
+                        `;
+                        document.getElementById('partner-qr-display').src = pData.qrCode;
+                    }
+                    
+                    if(!html) html = '<p class="text-xs text-red-500 font-bold">No payment methods configured by restaurant.</p>';
+                    paymentContainer.innerHTML = html;
+                } else {
+                    paymentSection.classList.add('hidden');
+                }
+            }
+        };
+
+        window.removeFromCart = (idx) => { 
+            cart.splice(idx, 1);
+            if(cart.length === 0) {
+                window.appliedPromo = 0;
+                window.promoCode = '';
+                const promoInput = document.getElementById('promo-code-input');
+                if(promoInput) promoInput.value = '';
+            }
+            window.renderCartUI(); 
+            window.setupBottomNav(currentUser?.role);
+        };
+
+        window.placeOrder = async () => {
+            if(cart.length === 0) return;
+            const addr = document.getElementById('cart-address').value.trim();
+            if(!addr) {
+                window.showToast("Please provide delivery address.", "error");
+                document.getElementById('cart-address').focus();
+                return;
+            }
+
+            const paymentRadio = document.querySelector('input[name="payment_mode"]:checked');
+            if(!paymentRadio && window.currentCartPartner) {
+                window.showToast("Please select a payment method.", "error");
+                return;
+            }
+
+            const paymentMode = paymentRadio ? paymentRadio.value : 'COD';
+            let paymentScreenshot = null;
+
+            if (paymentMode === 'Prepaid') {
+                const fileInput = document.getElementById('payment-screenshot');
+                if (!fileInput.files || fileInput.files.length === 0) {
+                    window.showToast("Please upload payment screenshot for Prepaid order.", "error");
+                    return;
+                }
+                try {
+                    paymentScreenshot = await window.resizeImage(fileInput.files[0], 800);
+                } catch(e) {
+                    window.showToast("Failed to process image.", "error");
+                    return;
+                }
+            }
+
+            const sub = cart.reduce((s,i) => s + i.price, 0);
+            const handlingFee = cart.length > 0 ? (10 + (cart.length * 2 > 20 ? 20 : cart.length * 2)) : 0;
+            const discountAmt = (sub * (window.appliedPromo || 0)) / 100;
+            const total = sub - discountAmt + handlingFee;
+            
+            const restaurantId = cart[0].partnerId || null;
+            const restaurantName = cart[0].shopName || null;
+
+            const btn = document.getElementById('btn-place-order');
+            const originalText = btn.innerText;
+            btn.innerText = "PLACING ORDER...";
+            btn.disabled = true;
+
+            try {
+                await window.dbCall(addDoc(getCol('orders'), { 
+                    customer: currentUser.name, 
+                    phone: currentUser.phone, 
+                    items: cart, 
+                    subtotal: sub,
+                    discount: discountAmt,
+                    promoCode: window.promoCode || null,
+                    total: total, 
+                    address: addr, 
+                    status: 'Placed', 
+                    restaurantId: restaurantId,
+                    restaurantName: restaurantName,
+                    paymentMode: paymentMode,
+                    paymentScreenshot: paymentScreenshot,
+                    time: serverTimestamp() 
+                }), 10000);
+                
+                cart = []; 
+                window.appliedPromo = 0;
+                window.promoCode = '';
+                document.getElementById('cart-address').value = '';
+                const promoInput = document.getElementById('promo-code-input');
+                if(promoInput) promoInput.value = '';
+                if(document.getElementById('payment-screenshot')) document.getElementById('payment-screenshot').value = '';
+                
+                window.renderCartUI(); 
+                window.setupBottomNav(currentUser?.role);
+                window.showToast("Order Placed Successfully!", "success");
+                window.switchMainView('Orders'); 
+            } catch(e) {
+                window.showToast("Network delayed. Syncing in background.", "info");
+                cart = []; 
+                window.appliedPromo = 0;
+                window.promoCode = '';
+                window.renderCartUI();
+                window.setupBottomNav(currentUser?.role);
+                window.switchMainView('Orders');
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
             }
         };
 
