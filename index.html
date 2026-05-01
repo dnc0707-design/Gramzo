@@ -286,7 +286,7 @@
                 <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                     <div class="text-center sm:text-left">
                         <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                        <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v8.2.4 - DB Rule Fallback Added</p>
+                        <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v8.2.5 - Admin Logout Enabled</p>
                     </div>
                     <!-- EXPLICIT ADMIN BUTTON IN FOOTER -->
                     <div class="mt-4 sm:mt-0 text-center sm:text-right">
@@ -499,6 +499,7 @@
                 <h2 class="text-2xl font-black text-gray-900">Admin Control</h2>
                 <div class="flex gap-2">
                     <button type="button" onclick="window.initRoleListeners()" class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-xs font-bold shadow-sm hover:bg-gray-200 transition-colors"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+                    <button type="button" onclick="window.logout()" class="bg-red-50 text-red-600 px-3 py-1.5 rounded-full text-xs font-bold shadow-sm hover:bg-red-100 transition-colors"><i class="fa-solid fa-power-off"></i> Logout</button>
                 </div>
             </div>
             
@@ -947,6 +948,24 @@
                 window.renderCartUI();
                 if (window.setupMapsFeatures) window.setupMapsFeatures();
             }
+        };
+        
+        window.logout = async () => {
+            document.getElementById('profile-menu').classList.add('hidden');
+            
+            if(auth.currentUser) {
+                try {
+                    await window.dbCall(deleteDoc(getDocRef('sessions', auth.currentUser.uid)), 5000);
+                } catch(e) {
+                    console.warn("Session error:", e);
+                }
+            }
+            
+            window.showToast("Signing out...", "info");
+            
+            setTimeout(() => {
+                window.location.reload();
+            }, 800);
         };
 
         window.handleAdminLogin = async () => {
