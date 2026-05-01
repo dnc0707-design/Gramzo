@@ -25,6 +25,7 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Righteous&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap');
         
         :root {
             --primary: #E23744; /* Zomato Red */
@@ -42,6 +43,7 @@
         }
 
         .font-logo { font-family: 'Righteous', cursive; }
+        .font-bengali { font-family: 'Hind Siliguri', sans-serif; }
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -65,7 +67,7 @@
         .animate-marquee {
             display: inline-block;
             white-space: nowrap;
-            animation: marquee 20s linear infinite;
+            animation: marquee 25s linear infinite;
             will-change: transform;
         }
 
@@ -151,14 +153,14 @@
     </nav>
 
     <!-- Upgraded Marquee -->
-    <div id="marquee-container" class="fixed top-[65px] sm:top-[80px] w-full bg-gray-900 border-b border-gray-800 z-30 overflow-hidden h-8 flex items-center shadow-sm">
-        <div id="dynamic-marquee" class="animate-marquee inline-block whitespace-nowrap text-xs font-bold text-white tracking-widest uppercase">
-            🚀 khabar order korun ekhon ghore bosei- service availbale at- Kotaldi, Sakambari plant area, lalgarh , ramchandrapur , krishnapur, kinaidi, muradi , baranti 🚀
+    <div id="marquee-container" class="fixed top-[65px] sm:top-[80px] w-full bg-gray-900 border-b border-gray-800 z-30 overflow-hidden h-10 flex items-center shadow-lg">
+        <div id="dynamic-marquee" class="animate-marquee inline-block whitespace-nowrap text-sm sm:text-base font-black font-bengali text-yellow-300 tracking-wide drop-shadow-md">
+            🚀 ঘরে বসেই আপনার প্রিয় খাবার অর্ডার করুন! 🛵 দ্রুত ডেলিভারি এখন কোটালডিহ, শাকাম্বরী প্ল্যান্ট এলাকা, লালগড়, রামচন্দ্রপুর, কৃষ্ণপুর, কিনাইডিহ, মুরাডি এবং বড়ন্তি তে! 🚀 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 🚀 ঘরে বসেই আপনার প্রিয় খাবার অর্ডার করুন! 🛵 দ্রুত ডেলিভারি এখন কোটালডিহ, শাকাম্বরী প্ল্যান্ট এলাকা, লালগড়, রামচন্দ্রপুর, কৃষ্ণপুর, কিনাইডিহ, মুরাডি এবং বড়ন্তি তে! 🚀
         </div>
     </div>
 
     <!-- Main Content Area -->
-    <main id="main-content" class="pt-[110px] sm:pt-[135px] px-4 pb-24 max-w-md mx-auto sm:max-w-4xl sm:px-6">
+    <main id="main-content" class="pt-[115px] sm:pt-[140px] px-4 pb-24 max-w-md mx-auto sm:max-w-4xl sm:px-6">
         
         <!-- ========================================== -->
         <!-- VIEW: USER (Marketplace & Services)        -->
@@ -1422,7 +1424,7 @@
                 } else {
                     // Default Marquee if DB is empty
                     if(marqueeContainer) marqueeContainer.classList.remove('hidden');
-                    if(marqueeEl) marqueeEl.innerHTML = `🚀 khabar order korun ekhon ghore bosei- service availbale at- Kotaldi, Sakambari plant area, lalgarh , ramchandrapur , krishnapur, kinaidi, muradi , baranti 🚀`;
+                    if(marqueeEl) marqueeEl.innerHTML = `🚀 ঘরে বসেই আপনার প্রিয় খাবার অর্ডার করুন! 🛵 দ্রুত ডেলিভারি এখন কোটালডিহ, শাকাম্বরী প্ল্যান্ট এলাকা, লালগড়, রামচন্দ্রপুর, কৃষ্ণপুর, কিনাইডিহ, মুরাডি এবং বড়ন্তি তে! 🚀`;
                 }
             }, (err) => console.error("Config Error:", err));
 
@@ -2150,257 +2152,6 @@
             } finally { 
                 btn.innerText = orig; 
                 btn.disabled = false; 
-            }
-        };
-
-        window.applyPromo = () => {
-            const codeInput = document.getElementById('promo-code-input');
-            if (!codeInput) return;
-            const code = codeInput.value.trim().toUpperCase();
-            
-            if (code === 'GRAMZO10') window.appliedPromo = 10;
-            else if (code === 'GRAMZO20') window.appliedPromo = 20;
-            else if (code === 'GRAMZO50') window.appliedPromo = 50;
-            else {
-                window.showToast("Invalid Promo Code", "error");
-                window.appliedPromo = 0;
-                window.promoCode = '';
-                window.renderCartUI();
-                return;
-            }
-            window.promoCode = code;
-            window.showToast(`${window.appliedPromo}% Discount Applied!`, "success");
-            window.renderCartUI();
-        };
-
-        window.addToCartStandard = (id, name, price, partnerId, shopName) => {
-            window.addToCartActual(name, price, partnerId, shopName);
-        };
-
-        window.addToCartVariant = (id, name, partnerId, shopName) => {
-            const selectEl = document.getElementById(`sel-${id}`);
-            if(!selectEl) return;
-            const selectedOpt = selectEl.options[selectEl.selectedIndex];
-            const price = parseFloat(selectedOpt.dataset.price);
-            const qty = selectedOpt.text;
-            window.addToCartActual(`${name} (${qty})`, price, partnerId, shopName);
-        };
-
-        window.addToCartActual = (name, price, partnerId, shopName) => {
-            if(!currentUser) { window.openAuthModal('User'); return; }
-            if(currentUser.role !== 'User') { window.showToast("Log in as User to order.", "error"); return; }
-            
-            if (cart.length > 0 && cart[0].partnerId !== partnerId && partnerId !== '') {
-                window.showToast("You can only order from one restaurant at a time. Clear cart first.", "error");
-                return;
-            }
-
-            cart.push({name, price, partnerId, shopName});
-            window.renderCartUI();
-            window.showToast(`${name} added!`, "success");
-            window.setupBottomNav(currentUser.role);
-        };
-
-        window.renderCartUI = async () => {
-            const list = document.getElementById('cart-items-list');
-            const summaryTotals = document.getElementById('cart-summary-totals');
-            
-            const sub = cart.reduce((s, i) => s + i.price, 0);
-            const handlingFee = cart.length > 0 ? (10 + (cart.length * 2 > 20 ? 20 : cart.length * 2)) : 0;
-            const discountAmt = (sub * (window.appliedPromo || 0)) / 100;
-            const total = sub - discountAmt + handlingFee;
-
-            if (summaryTotals) {
-                const discountHtml = window.appliedPromo > 0 
-                    ? `<div class="flex justify-between text-sm text-emerald-600 font-bold"><span>Promo Discount (${window.appliedPromo}%)</span><span>-₹${discountAmt.toFixed(2)}</span></div>` 
-                    : '';
-                
-                summaryTotals.innerHTML = `
-                    <div class="flex justify-between text-sm text-gray-600 font-medium"><span>Item Subtotal</span><span id="cart-subtotal">₹${sub.toFixed(2)}</span></div>
-                    ${discountHtml}
-                    <div class="flex justify-between text-sm text-red-600 font-bold"><span>Delivery Fee</span><span>FREE</span></div>
-                    <div class="flex justify-between text-sm text-gray-600 font-medium"><span>Platform Fee</span><span id="cart-handling">₹${handlingFee.toFixed(2)}</span></div>
-                    
-                    <div class="pt-3 mt-3 border-t border-gray-200 border-dashed flex justify-between items-center">
-                        <span class="text-sm font-black text-gray-900">Grand Total</span>
-                        <span id="cart-total" class="text-2xl font-black text-gray-900 tracking-tight">₹${total.toFixed(2)}</span>
-                    </div>
-                `;
-            }
-
-            const btn = document.getElementById('btn-place-order');
-            const detailsSection = document.getElementById('checkout-details-section');
-
-            if (!cart.length) {
-                list.innerHTML = `
-                    <div class="text-center py-10">
-                        <img src="https://cdn-icons-png.flaticon.com/512/1161/1161388.png" class="w-16 h-16 mx-auto mb-3 opacity-20 grayscale">
-                        <p class="text-gray-400 font-medium text-sm">Your basket is looking empty!</p>
-                    </div>`;
-                btn.disabled = true;
-                detailsSection.style.display = 'none';
-                return;
-            }
-            
-            btn.disabled = false;
-            detailsSection.style.display = 'block';
-
-            list.innerHTML = cart.map((i, idx) => `
-                <div class="flex justify-between items-center py-3 border-b border-gray-50 last:border-0 group">
-                    <div class="flex items-center gap-3">
-                        <i class="fa-regular fa-square-caret-up text-emerald-500"></i>
-                        <span class="text-sm font-bold text-gray-800">${i.name}</span>
-                    </div>
-                    <div class="flex items-center gap-4">
-                        <span class="text-sm font-black text-gray-900">₹${i.price}</span>
-                        <button type="button" onclick="window.removeFromCart(${idx})" class="w-6 h-6 rounded bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors">
-                            <i class="fa-solid fa-minus text-[10px]"></i>
-                        </button>
-                    </div>
-                </div>`).join('');
-
-            // Fetch Partner Details to render payment options
-            const partnerId = cart[0].partnerId;
-            if(partnerId) {
-                const partnerSnap = await window.dbCall(getDoc(getDocRef('users', partnerId)), 5000).catch(e=>null);
-                const paymentContainer = document.getElementById('payment-options-container');
-                const paymentSection = document.getElementById('payment-section');
-                
-                if(partnerSnap && partnerSnap.exists()) {
-                    const pData = partnerSnap.data();
-                    window.currentCartPartner = pData;
-                    paymentSection.classList.remove('hidden');
-                    
-                    let html = '';
-                    if(pData.codEnabled !== false) {
-                        html += `
-                            <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition">
-                                <input type="radio" name="payment_mode" value="COD" checked onchange="document.getElementById('qr-payment-box').classList.add('hidden')" class="w-4 h-4 text-red-600 focus:ring-red-500 border-gray-300">
-                                <span class="text-sm font-bold text-gray-800"><i class="fa-solid fa-money-bill-1-wave text-emerald-600 w-5"></i> Pay on Delivery</span>
-                            </label>
-                        `;
-                    }
-                    if(pData.qrCode) {
-                        const isPrepaidChecked = (pData.codEnabled === false) ? 'checked' : '';
-                        if (pData.codEnabled === false) {
-                            document.getElementById('qr-payment-box').classList.remove('hidden');
-                        }
-                        
-                        html += `
-                            <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition">
-                                <input type="radio" name="payment_mode" value="Prepaid" ${isPrepaidChecked} onchange="document.getElementById('qr-payment-box').classList.remove('hidden')" class="w-4 h-4 text-red-600 focus:ring-red-500 border-gray-300">
-                                <span class="text-sm font-bold text-gray-800"><i class="fa-solid fa-qrcode text-blue-600 w-5"></i> Pay via QR (Prepaid)</span>
-                            </label>
-                        `;
-                        document.getElementById('partner-qr-display').src = pData.qrCode;
-                    }
-                    
-                    if(!html) html = '<p class="text-xs text-red-500 font-bold">No payment methods configured by restaurant.</p>';
-                    paymentContainer.innerHTML = html;
-                } else {
-                    paymentSection.classList.add('hidden');
-                }
-            }
-        };
-
-        window.removeFromCart = (idx) => { 
-            cart.splice(idx, 1);
-            if(cart.length === 0) {
-                window.appliedPromo = 0;
-                window.promoCode = '';
-                const promoInput = document.getElementById('promo-code-input');
-                if(promoInput) promoInput.value = '';
-            }
-            window.renderCartUI(); 
-            window.setupBottomNav(currentUser?.role);
-        };
-
-        window.placeOrder = async () => {
-            if(cart.length === 0) return;
-            const addr = document.getElementById('cart-address').value.trim();
-            if(!addr) {
-                window.showToast("Please provide delivery address.", "error");
-                document.getElementById('cart-address').focus();
-                return;
-            }
-
-            const paymentRadio = document.querySelector('input[name="payment_mode"]:checked');
-            if(!paymentRadio && window.currentCartPartner) {
-                window.showToast("Please select a payment method.", "error");
-                return;
-            }
-
-            const paymentMode = paymentRadio ? paymentRadio.value : 'COD';
-            let paymentScreenshot = null;
-
-            if (paymentMode === 'Prepaid') {
-                const fileInput = document.getElementById('payment-screenshot');
-                if (!fileInput.files || fileInput.files.length === 0) {
-                    window.showToast("Please upload payment screenshot for Prepaid order.", "error");
-                    return;
-                }
-                try {
-                    paymentScreenshot = await window.resizeImage(fileInput.files[0], 800);
-                } catch(e) {
-                    window.showToast("Failed to process image.", "error");
-                    return;
-                }
-            }
-
-            const sub = cart.reduce((s,i) => s + i.price, 0);
-            const handlingFee = cart.length > 0 ? (10 + (cart.length * 2 > 20 ? 20 : cart.length * 2)) : 0;
-            const discountAmt = (sub * (window.appliedPromo || 0)) / 100;
-            const total = sub - discountAmt + handlingFee;
-            
-            const restaurantId = cart[0].partnerId || null;
-            const restaurantName = cart[0].shopName || null;
-
-            const btn = document.getElementById('btn-place-order');
-            const originalText = btn.innerText;
-            btn.innerText = "PLACING ORDER...";
-            btn.disabled = true;
-
-            try {
-                await window.dbCall(addDoc(getCol('orders'), { 
-                    customer: currentUser.name, 
-                    phone: currentUser.phone, 
-                    items: cart, 
-                    subtotal: sub,
-                    discount: discountAmt,
-                    promoCode: window.promoCode || null,
-                    total: total, 
-                    address: addr, 
-                    status: 'Placed', 
-                    restaurantId: restaurantId,
-                    restaurantName: restaurantName,
-                    paymentMode: paymentMode,
-                    paymentScreenshot: paymentScreenshot,
-                    time: serverTimestamp() 
-                }), 10000);
-                
-                cart = []; 
-                window.appliedPromo = 0;
-                window.promoCode = '';
-                document.getElementById('cart-address').value = '';
-                const promoInput = document.getElementById('promo-code-input');
-                if(promoInput) promoInput.value = '';
-                if(document.getElementById('payment-screenshot')) document.getElementById('payment-screenshot').value = '';
-                
-                window.renderCartUI(); 
-                window.setupBottomNav(currentUser?.role);
-                window.showToast("Order Placed Successfully!", "success");
-                window.switchMainView('Orders'); 
-            } catch(e) {
-                window.showToast("Network delayed. Syncing in background.", "info");
-                cart = []; 
-                window.appliedPromo = 0;
-                window.promoCode = '';
-                window.renderCartUI();
-                window.setupBottomNav(currentUser?.role);
-                window.switchMainView('Orders');
-            } finally {
-                btn.innerText = originalText;
-                btn.disabled = false;
             }
         };
 
