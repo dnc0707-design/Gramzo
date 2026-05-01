@@ -7,7 +7,17 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
-    <!-- Google Maps API for Address Location only -->
+    <!-- Google Maps API Setup -->
+    <script>
+        // Ensure the callback is globally available before the API loads
+        window.initGoogleMap = function() {
+            console.log("Google Maps API loaded.");
+            window.isGoogleMapsLoaded = true;
+            if (typeof window.setupMapsFeatures === 'function') {
+                window.setupMapsFeatures();
+            }
+        };
+    </script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDTwDel0JxkWaXuXSHf-whhxJTkqlNlxa0&libraries=places&callback=initGoogleMap" async defer></script>
     
     <!-- jsPDF for Invoice Generation -->
@@ -276,7 +286,7 @@
                 <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                     <div class="text-center sm:text-left">
                         <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                        <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v8.2.0 - HTML Export Ready</p>
+                        <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v8.2.4 - DB Rule Fallback Added</p>
                     </div>
                     <!-- EXPLICIT ADMIN BUTTON IN FOOTER -->
                     <div class="mt-4 sm:mt-0 text-center sm:text-right">
@@ -309,7 +319,7 @@
                     <div>
                         <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2 ml-2">Delivery Address</label>
                         <div class="relative">
-                            <textarea id="cart-address" rows="2" class="input-field !py-3 resize-none !rounded-xl" placeholder="E.g. House No, Village Name, Landmark..."></textarea>
+                            <input type="text" id="cart-address" class="input-field !py-3 !rounded-xl pr-20" placeholder="E.g. House No, Village Name, Landmark...">
                             <button type="button" onclick="window.getCurrentLocation('cart-address')" class="absolute right-3 top-3 text-red-500 text-xs font-bold bg-red-50 px-2 py-1 rounded border border-red-100 hover:bg-red-100 transition-colors">
                                 <i class="fa-solid fa-location-crosshairs"></i> GPS
                             </button>
@@ -763,40 +773,57 @@
         window.startApp = async () => {
             try {
                 if (!auth.currentUser) {
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await window.dbCall(signInWithCustomToken(auth, __initial_auth_token), 10000);
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token && !IS_LIVE_WEBSITE) {
+                        try {
+                            await window.dbCall(signInWithCustomToken(auth, __initial_auth_token), 10000);
+                        } catch (tokenErr) {
+                            console.warn("Custom token mismatch, using anonymous login...", tokenErr);
+                            await window.dbCall(signInAnonymously(auth), 10000);
+                        }
                     } else {
                         await window.dbCall(signInAnonymously(auth), 10000);
                     }
                 }
             } catch (e) {
                 console.error("Auth Init Error:", e);
-                window.showToast("Network delayed. Loading cached data.", "error");
-                window.loadMarketplaceData(); 
+                window.showToast("Network delayed. Retrying connection...", "info");
             }
         };
 
-        window.initGoogleMap = () => {
-            console.log("Google Maps API loaded.");
-            const userLocInput = document.getElementById('user-location-input');
-            if(userLocInput) {
-                const userLocAutocomplete = new google.maps.places.Autocomplete(userLocInput, { componentRestrictions: { country: "in" } });
-                userLocAutocomplete.addListener('place_changed', () => {
-                    const place = userLocAutocomplete.getPlace();
-                    if(place && place.formatted_address) {
-                        userLocInput.value = place.formatted_address;
-                    }
-                });
-            }
+        window.setupMapsFeatures = () => {
+            const initInput = (id) => {
+                const input = document.getElementById(id);
+                if (input && input.tagName === 'INPUT' && !input.dataset.mapsInit && typeof google !== 'undefined') {
+                    const autocomplete = new google.maps.places.Autocomplete(input, { componentRestrictions: { country: "in" } });
+                    autocomplete.addListener('place_changed', () => {
+                        const place = autocomplete.getPlace();
+                        if(place && place.formatted_address) {
+                            input.value = place.formatted_address;
+                        }
+                    });
+                    input.dataset.mapsInit = 'true';
+                }
+            };
+            initInput('user-location-input');
+            initInput('cart-address');
         };
+
+        if (window.isGoogleMapsLoaded) {
+            window.setupMapsFeatures();
+        }
 
         window.getCurrentLocation = (inputId) => {
             const inputEl = document.getElementById(inputId);
             let locationFound = false;
+            
+            const origPlaceholder = inputEl.placeholder;
+            inputEl.value = "Fetching your location...";
+
             const fallbackTimer = setTimeout(() => {
                 if (locationFound) return;
+                inputEl.value = "";
                 window.showToast("Please type your address manually.", "error");
-            }, 3500);
+            }, 6000);
             
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(async (pos) => {
@@ -825,16 +852,19 @@
                             }
                         });
                     } catch(e) {
+                        inputEl.value = "";
                         window.showToast("GPS coordinates acquired.", "success");
                     }
                 }, (err) => {
                     locationFound = true;
                     clearTimeout(fallbackTimer);
+                    inputEl.value = "";
                     window.showToast("Please type your address manually.", "error");
                 }, { timeout: 10000, maximumAge: 0, enableHighAccuracy: true });
             } else {
                 clearTimeout(fallbackTimer);
-                window.showToast("Geolocation not supported. Please select manually.", "error");
+                inputEl.value = "";
+                window.showToast("Geolocation not supported.", "error");
             }
         };
 
@@ -915,6 +945,7 @@
 
             if (viewName === 'Cart') {
                 window.renderCartUI();
+                if (window.setupMapsFeatures) window.setupMapsFeatures();
             }
         };
 
@@ -1206,11 +1237,88 @@
             window.loadMarketplaceData();
         };
 
-        window.loadMarketplaceData = () => {
-            if (!auth.currentUser && !currentUser) {
-                setTimeout(window.loadMarketplaceData, 500);
+        const renderProducts = (items) => {
+            const listEl = document.getElementById('market-list');
+            if (!listEl) return;
+            
+            const filtered = items.filter(i => {
+                if (currentFilter && i.category !== currentFilter) return false;
+                
+                if (currentSubFilter) {
+                    const term = currentSubFilter.toLowerCase();
+                    const matchName = i.name && i.name.toLowerCase().includes(term);
+                    const matchSubCat = i.subCategory && i.subCategory.toLowerCase().includes(term);
+                    if (!matchName && !matchSubCat) return false;
+                }
+
+                if (window.currentSearchQuery) {
+                    const q = window.currentSearchQuery.toLowerCase();
+                    return i.name.toLowerCase().includes(q) || (i.shopName && i.shopName.toLowerCase().includes(q));
+                }
+                return true;
+            });
+            
+            if (filtered.length === 0) {
+                listEl.innerHTML = '<div class="col-span-full py-10 text-center text-gray-400 font-medium text-sm border border-gray-200 rounded-3xl">No items found. Try a different search.</div>';
                 return;
             }
+
+            listEl.innerHTML = filtered.map(p => {
+                const hasVariants = p.variants && p.variants.length > 0;
+                const displayPrice = hasVariants ? p.variants[0].price : p.price;
+                const isClosed = p.shopStatus === 'Closed';
+                const isOutOfStock = p.inStock === false;
+                
+                let qtyDisplay = `<p class="text-[10px] text-gray-500 uppercase tracking-wide font-medium mb-3">${p.qty || ''} • <span class="text-red-600 font-bold">${p.shopName || 'Gramzo'}</span></p>`;
+                
+                if (hasVariants) {
+                    const options = p.variants.map((v, i) => `<option value="${i}" data-price="${v.price}">${v.qty}</option>`).join('');
+                    qtyDisplay = `
+                        <div class="mb-3 flex items-center justify-between">
+                            <select onchange="window.updatePriceDisplay(this, 'price-${p.id}')" id="sel-${p.id}" class="text-xs bg-gray-50 border border-gray-200 rounded-lg p-1.5 outline-none focus:ring-1 ring-red-500 font-medium text-gray-700 w-full mr-2">
+                                ${options}
+                            </select>
+                            <span class="text-[9px] text-red-600 font-bold shrink-0">${p.shopName || 'Gramzo'}</span>
+                        </div>
+                    `;
+                }
+
+                let actionHtml = '';
+                if (isClosed) {
+                    actionHtml = `<span class="text-[10px] font-black text-red-500 uppercase tracking-widest bg-red-50 px-2 py-1 rounded">Shop Closed</span>`;
+                } else if (isOutOfStock) {
+                    actionHtml = `<span class="text-[10px] font-black text-orange-500 uppercase tracking-widest bg-orange-50 px-2 py-1 rounded">Out of Stock</span>`;
+                } else {
+                    actionHtml = `
+                        <span id="price-${p.id}" class="text-lg font-black text-red-600 tracking-tight">₹${displayPrice}</span>
+                        <button type="button" onclick="window.addToCart('${p.id}', '${p.name.replace(/'/g, "\\'")}', ${!hasVariants ? p.price : 'null'}, '${(!hasVariants && p.qty) ? p.qty : ''}', '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')" class="w-8 h-8 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition-colors active:scale-90 shrink-0 border border-red-100">
+                            <i class="fa-solid fa-plus text-xs"></i>
+                        </button>
+                    `;
+                }
+
+                return `
+                    <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex flex-col transform transition hover:-translate-y-1 hover:shadow-md ${isClosed || isOutOfStock ? 'opacity-60 grayscale-[0.5]' : ''}">
+                        <div class="h-32 bg-gray-100 relative">
+                            <img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x300/f3f4f6/a1a1aa?text=Image'">
+                            <span class="absolute top-2 left-2 bg-white/90 backdrop-blur text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded text-gray-800 shadow-sm">${p.subCategory || p.category}</span>
+                        </div>
+                        <div class="p-3 flex-1 flex flex-col justify-between">
+                            <div>
+                                <h4 class="font-bold text-gray-900 text-sm leading-tight mb-1">${p.name}</h4>
+                                ${qtyDisplay}
+                            </div>
+                            <div class="flex justify-between items-center mt-auto pt-2 border-t border-gray-50">
+                                ${actionHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        };
+
+        window.loadMarketplaceData = () => {
+            if (!auth.currentUser) return;
             
             const defaultBanner = "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80";
             
@@ -1270,93 +1378,27 @@
                 }
             }, (err) => console.error("Config Error:", err));
 
-            const dummyProducts = [];
+            const dummyProducts = [
+                { id: "dummy1", name: "Chicken Dum Biryani", variants: [{qty: "Half", price: 90}, {qty: "Full", price: 150}], category: "Food", subCategory: "Biryani", image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&q=80", shopName: "Local Kitchen", partnerId: "111", inStock: true, shopStatus: 'Open' },
+                { id: "dummy2", name: "Paneer Butter Masala", price: 120, category: "Food", subCategory: "Thali", image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80", shopName: "Desi Dhaba", partnerId: "222", inStock: true, shopStatus: 'Open' },
+                { id: "dummy3", name: "Veg Chowmein", price: 60, category: "Food", subCategory: "Fast Food", image: "https://images.unsplash.com/photo-1585032226651-759b368d7246?w=400&q=80", shopName: "Fast Food Corner", partnerId: "333", inStock: true, shopStatus: 'Open' },
+                { id: "dummy4", name: "Rasgulla (2 Pcs)", price: 30, category: "Food", subCategory: "Sweets", image: "https://images.unsplash.com/photo-1588195538326-c5b1e9f80a1b?w=400&q=80", shopName: "Mishti Mukh", partnerId: "444", inStock: true, shopStatus: 'Open' }
+            ];
 
             const unsub = onSnapshot(getCol('products'), (snap) => {
-                const listEl = document.getElementById('market-list');
-                if (!listEl) return;
-                
                 let items = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
                 if(items.length === 0) items = dummyProducts;
-
-                const filtered = items.filter(i => {
-                    if (currentFilter && i.category !== currentFilter) return false;
-                    if (currentSubFilter && i.subCategory !== currentSubFilter) return false;
-                    if (window.currentSearchQuery) {
-                        const q = window.currentSearchQuery.toLowerCase();
-                        return i.name.toLowerCase().includes(q) || (i.shopName && i.shopName.toLowerCase().includes(q));
-                    }
-                    return true;
-                });
-                
-                if (filtered.length === 0) {
-                    listEl.innerHTML = '<div class="col-span-full py-10 text-center text-gray-400 font-medium text-sm border border-gray-200 rounded-3xl">No items found. Try a different search.</div>';
-                    return;
+                renderProducts(items);
+            }, (error) => {
+                console.error("Products error:", error);
+                if (error.code === 'permission-denied' || error.message.includes('permission')) {
+                     window.showToast("Firebase Permissions Denied! Check rules.", "error");
+                     renderProducts(dummyProducts);
                 }
-
-                listEl.innerHTML = filtered.map(p => {
-                    const hasVariants = p.variants && p.variants.length > 0;
-                    const displayPrice = hasVariants ? p.variants[0].price : p.price;
-                    const isClosed = p.shopStatus === 'Closed';
-                    const isOutOfStock = p.inStock === false;
-                    
-                    let qtyDisplay = `<p class="text-[10px] text-gray-500 uppercase tracking-wide font-medium mb-3">${p.qty || ''} • <span class="text-red-600 font-bold">${p.shopName || 'Gramzo'}</span></p>`;
-                    
-                    if (hasVariants) {
-                        const options = p.variants.map((v, i) => `<option value="${i}" data-price="${v.price}">${v.qty}</option>`).join('');
-                        qtyDisplay = `
-                            <div class="mb-3 flex items-center justify-between">
-                                <select onchange="window.updatePriceDisplay(this, 'price-${p.id}')" id="sel-${p.id}" class="text-xs bg-gray-50 border border-gray-200 rounded-lg p-1.5 outline-none focus:ring-1 ring-red-500 font-medium text-gray-700 w-full mr-2">
-                                    ${options}
-                                </select>
-                                <span class="text-[9px] text-red-600 font-bold shrink-0">${p.shopName || 'Gramzo'}</span>
-                            </div>
-                        `;
-                    }
-
-                    let actionHtml = '';
-                    if (isClosed) {
-                        actionHtml = `<span class="text-[10px] font-black text-red-500 uppercase tracking-widest bg-red-50 px-2 py-1 rounded">Shop Closed</span>`;
-                    } else if (isOutOfStock) {
-                        actionHtml = `<span class="text-[10px] font-black text-orange-500 uppercase tracking-widest bg-orange-50 px-2 py-1 rounded">Out of Stock</span>`;
-                    } else {
-                        actionHtml = `
-                            <span id="price-${p.id}" class="text-lg font-black text-red-600 tracking-tight">₹${displayPrice}</span>
-                            <button type="button" onclick="window.addToCart('${p.id}', '${p.name.replace(/'/g, "\\'")}', ${!hasVariants ? p.price : 'null'}, '${(!hasVariants && p.qty) ? p.qty : ''}', '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')" class="w-8 h-8 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition-colors active:scale-90 shrink-0 border border-red-100">
-                                <i class="fa-solid fa-plus text-xs"></i>
-                            </button>
-                        `;
-                    }
-
-                    return `
-                        <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex flex-col transform transition hover:-translate-y-1 hover:shadow-md ${isClosed || isOutOfStock ? 'opacity-60 grayscale-[0.5]' : ''}">
-                            <div class="h-32 bg-gray-100 relative">
-                                <img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x300/f3f4f6/a1a1aa?text=Image'">
-                                <span class="absolute top-2 left-2 bg-white/90 backdrop-blur text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded text-gray-800 shadow-sm">${p.subCategory || p.category}</span>
-                            </div>
-                            <div class="p-3 flex-1 flex flex-col justify-between">
-                                <div>
-                                    <h4 class="font-bold text-gray-900 text-sm leading-tight mb-1">${p.name}</h4>
-                                    ${qtyDisplay}
-                                </div>
-                                <div class="flex justify-between items-center mt-auto pt-2 border-t border-gray-50">
-                                    ${actionHtml}
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            }, (error) => console.error("Products error:", error));
+            });
         };
 
         window.filterCategory = (cat, subCat = null) => {
-            const locInput = document.getElementById('user-location-input');
-            if (cat === 'Food' && locInput && !locInput.value) {
-                window.showToast("Please enter your delivery location first!", "error");
-                locInput.focus();
-                return;
-            }
-
             currentFilter = cat;
             currentSubFilter = subCat;
             
@@ -1473,11 +1515,7 @@
         };
 
         window.initRoleListeners = () => {
-            if (!currentUser) return;
-            if (!auth.currentUser && currentUser.role !== 'Admin') {
-                setTimeout(window.initRoleListeners, 500);
-                return;
-            }
+            if (!auth.currentUser || !currentUser) return; // Strict auth guard
 
             unsubscribeListeners.forEach(u => u());
             unsubscribeListeners = [];
@@ -1513,7 +1551,13 @@
                     });
                     document.getElementById('stat-rev').innerText = `₹${rev}`;
                     document.getElementById('stat-ord').innerText = count;
-                }, (error) => {});
+                }, (error) => {
+                    console.error("Admin Orders Error:", error);
+                    if(error.code === 'permission-denied') {
+                        const adminLog = document.getElementById('admin-log-body');
+                        if(adminLog) adminLog.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-red-500 text-xs font-bold">Permission Denied! Check Firebase Rules.</td></tr>';
+                    }
+                });
                 unsubscribeListeners.push(unsubOrders);
 
                 const unsubUsers = onSnapshot(getCol('users'), (snap) => {
@@ -1552,7 +1596,13 @@
                     } catch(err) {
                         console.error("Error rendering users:", err);
                     }
-                }, (error) => {});
+                }, (error) => {
+                    console.error("Users Error:", error);
+                    if(error.code === 'permission-denied') {
+                        const usersBody = document.getElementById('admin-users-body');
+                        if(usersBody) usersBody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-red-500 text-xs font-bold">Permission Denied! Check Firebase Rules.</td></tr>';
+                    }
+                });
                 unsubscribeListeners.push(unsubUsers);
             } 
             else if (currentUser.role === 'User') {
@@ -1612,7 +1662,13 @@
                             </div>
                         `;
                     }).join('');
-                }, (error) => console.error("User Orders Error:", error));
+                }, (error) => {
+                    console.error("User Orders Error:", error);
+                    if(error.code === 'permission-denied') {
+                        const listEl = document.getElementById('user-orders-list');
+                        if(listEl) listEl.innerHTML = '<div class="text-center py-10 bg-white rounded-3xl border border-gray-100"><p class="text-red-500 font-bold text-sm">Database Permission Denied!</p><p class="text-xs text-gray-400 mt-2">Please update your Firebase Firestore Security Rules.</p></div>';
+                    }
+                });
                 unsubscribeListeners.push(unsubUserOrders);
             }
             else if (currentUser.role === 'Partner') {
@@ -1691,7 +1747,13 @@
                         `;
                     });
                     listEl.innerHTML = html;
-                }, (error) => console.error("Partner Orders Error:", error));
+                }, (error) => {
+                    console.error("Partner Orders Error:", error);
+                    if(error.code === 'permission-denied') {
+                        const listEl = document.getElementById('partner-orders-list');
+                        if(listEl) listEl.innerHTML = '<p class="text-red-500 font-bold text-sm text-center py-10 bg-white rounded-3xl shadow-sm border border-gray-100">Permission Denied! Check Firebase Rules.</p>';
+                    }
+                });
                 unsubscribeListeners.push(orderUnsub);
 
                 if (currentUser.category === 'Food Owner') {
@@ -1731,7 +1793,13 @@
                                 </div>
                             `;
                         }).join('');
-                    }, (error) => console.error("Partner Catalog Error:", error));
+                    }, (error) => {
+                        console.error("Partner Catalog Error:", error);
+                        if(error.code === 'permission-denied') {
+                            const list = document.getElementById('partner-catalog-list');
+                            if (list) list.innerHTML = '<p class="text-sm text-red-500 font-bold text-center py-4 bg-white rounded-2xl border border-gray-100">Permission Denied! Update Firebase Rules.</p>';
+                        }
+                    });
                     unsubscribeListeners.push(catalogUnsub);
                 }
             }
@@ -1973,7 +2041,7 @@
             } finally {
                 btn.innerText = originalText;
                 btn.disabled = false;
-            });
+            }
         };
 
         window.submitPartnerProfile = async () => {
@@ -2029,199 +2097,6 @@
             } finally { 
                 btn.innerText = orig; 
                 btn.disabled = false; 
-            }
-        };
-
-        window.deletePartnerProduct = (productId) => {
-            window.dbCall(deleteDoc(getDocRef('products', productId)), 10000)
-                .then(() => window.showToast("Dish removed from menu.", "success"))
-                .catch(e => window.showToast("Error removing product.", "error"));
-        };
-
-        window.addToCart = (name, price, partnerId = '', shopName = '') => {
-            if(!currentUser) { window.openAuthModal('User'); return; }
-            if(currentUser.role !== 'User') { window.showToast("Log in as User to order.", "error"); return; }
-            
-            if (cart.length > 0 && cart[0].partnerId !== partnerId && partnerId !== '') {
-                window.showToast("You can only order from one restaurant at a time. Clear cart first.", "error");
-                return;
-            }
-
-            cart.push({name, price, partnerId, shopName});
-            window.renderCartUI();
-            window.showToast(`${name} added!`, "success");
-            
-            const cartBtn = document.getElementById('nav-btn-Cart');
-            if(cartBtn) {
-                cartBtn.classList.add('scale-110', 'text-red-500');
-                setTimeout(() => cartBtn.classList.remove('scale-110', 'text-red-500'), 200);
-            }
-        };
-
-        window.renderCartUI = async () => {
-            const list = document.getElementById('cart-items-list');
-            const sub = cart.reduce((s, i) => s + i.price, 0);
-            
-            const handlingFee = cart.length > 0 ? (10 + (cart.length * 2 > 20 ? 20 : cart.length * 2)) : 0;
-            const total = sub + handlingFee;
-
-            document.getElementById('cart-subtotal').innerText = `₹${sub}`;
-            document.getElementById('cart-handling').innerText = `₹${handlingFee}`;
-            document.getElementById('cart-total').innerText = `₹${total}`;
-
-            const btn = document.getElementById('btn-place-order');
-            const detailsSection = document.getElementById('checkout-details-section');
-
-            if (!cart.length) {
-                list.innerHTML = `
-                    <div class="text-center py-10">
-                        <img src="https://cdn-icons-png.flaticon.com/512/1161/1161388.png" class="w-16 h-16 mx-auto mb-3 opacity-20 grayscale">
-                        <p class="text-gray-400 font-medium text-sm">Your basket is looking empty!</p>
-                    </div>`;
-                btn.disabled = true;
-                detailsSection.style.display = 'none';
-                return;
-            }
-            
-            btn.disabled = false;
-            detailsSection.style.display = 'block';
-
-            list.innerHTML = cart.map((i, idx) => `
-                <div class="flex justify-between items-center py-3 border-b border-gray-50 last:border-0 group">
-                    <div class="flex items-center gap-3">
-                        <i class="fa-regular fa-square-caret-up text-emerald-500"></i>
-                        <span class="text-sm font-bold text-gray-800">${i.name}</span>
-                    </div>
-                    <div class="flex items-center gap-4">
-                        <span class="text-sm font-black text-gray-900">₹${i.price}</span>
-                        <button type="button" onclick="window.removeFromCart(${idx})" class="w-6 h-6 rounded bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors">
-                            <i class="fa-solid fa-minus text-[10px]"></i>
-                        </button>
-                    </div>
-                </div>`).join('');
-
-            // Fetch Partner Details to render payment options
-            const partnerId = cart[0].partnerId;
-            if(partnerId) {
-                const partnerSnap = await window.dbCall(getDoc(getDocRef('users', partnerId)), 5000).catch(e=>null);
-                const paymentContainer = document.getElementById('payment-options-container');
-                const paymentSection = document.getElementById('payment-section');
-                
-                if(partnerSnap && partnerSnap.exists()) {
-                    const pData = partnerSnap.data();
-                    window.currentCartPartner = pData;
-                    paymentSection.classList.remove('hidden');
-                    
-                    let html = '';
-                    if(pData.codEnabled !== false) {
-                        html += `
-                            <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition">
-                                <input type="radio" name="payment_mode" value="COD" checked onchange="document.getElementById('qr-payment-box').classList.add('hidden')" class="w-4 h-4 text-red-600 focus:ring-red-500 border-gray-300">
-                                <span class="text-sm font-bold text-gray-800"><i class="fa-solid fa-money-bill-1-wave text-emerald-600 w-5"></i> Pay on Delivery</span>
-                            </label>
-                        `;
-                    }
-                    if(pData.qrCode) {
-                        const isPrepaidChecked = (pData.codEnabled === false) ? 'checked' : '';
-                        if (pData.codEnabled === false) {
-                            document.getElementById('qr-payment-box').classList.remove('hidden');
-                        }
-                        
-                        html += `
-                            <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition">
-                                <input type="radio" name="payment_mode" value="Prepaid" ${isPrepaidChecked} onchange="document.getElementById('qr-payment-box').classList.remove('hidden')" class="w-4 h-4 text-red-600 focus:ring-red-500 border-gray-300">
-                                <span class="text-sm font-bold text-gray-800"><i class="fa-solid fa-qrcode text-blue-600 w-5"></i> Pay via QR (Prepaid)</span>
-                            </label>
-                        `;
-                        document.getElementById('partner-qr-display').src = pData.qrCode;
-                    }
-                    
-                    if(!html) html = '<p class="text-xs text-red-500 font-bold">No payment methods configured by restaurant.</p>';
-                    paymentContainer.innerHTML = html;
-                } else {
-                    paymentSection.classList.add('hidden');
-                }
-            }
-        };
-
-        window.removeFromCart = (idx) => { 
-            cart.splice(idx, 1); 
-            window.renderCartUI(); 
-        };
-
-        window.placeOrder = async () => {
-            if(cart.length === 0) return;
-            const addr = document.getElementById('cart-address').value.trim();
-            if(!addr) {
-                window.showToast("Please provide delivery address.", "error");
-                document.getElementById('cart-address').focus();
-                return;
-            }
-
-            const paymentRadio = document.querySelector('input[name="payment_mode"]:checked');
-            if(!paymentRadio && window.currentCartPartner) {
-                window.showToast("Please select a payment method.", "error");
-                return;
-            }
-
-            const paymentMode = paymentRadio ? paymentRadio.value : 'COD';
-            let paymentScreenshot = null;
-
-            if (paymentMode === 'Prepaid') {
-                const fileInput = document.getElementById('payment-screenshot');
-                if (!fileInput.files || fileInput.files.length === 0) {
-                    window.showToast("Please upload payment screenshot for Prepaid order.", "error");
-                    return;
-                }
-                try {
-                    paymentScreenshot = await window.resizeImage(fileInput.files[0], 800);
-                } catch(e) {
-                    window.showToast("Failed to process image.", "error");
-                    return;
-                }
-            }
-
-            const sub = cart.reduce((s,i) => s + i.price, 0);
-            const handlingFee = cart.length > 0 ? (10 + (cart.length * 2 > 20 ? 20 : cart.length * 2)) : 0;
-            const total = sub + handlingFee;
-            
-            const restaurantId = cart[0].partnerId || null;
-            const restaurantName = cart[0].shopName || null;
-
-            const btn = document.getElementById('btn-place-order');
-            const originalText = btn.innerText;
-            btn.innerText = "PLACING ORDER...";
-            btn.disabled = true;
-
-            try {
-                await window.dbCall(addDoc(getCol('orders'), { 
-                    customer: currentUser.name, 
-                    phone: currentUser.phone, 
-                    items: cart, 
-                    total, 
-                    address: addr, 
-                    status: 'Placed', 
-                    restaurantId: restaurantId,
-                    restaurantName: restaurantName,
-                    paymentMode: paymentMode,
-                    paymentScreenshot: paymentScreenshot,
-                    time: serverTimestamp() 
-                }), 10000);
-                
-                cart = []; 
-                document.getElementById('cart-address').value = '';
-                if(document.getElementById('payment-screenshot')) document.getElementById('payment-screenshot').value = '';
-                window.renderCartUI(); 
-                window.showToast("Order Placed Successfully!", "success");
-                window.switchMainView('Orders'); 
-            } catch(e) {
-                window.showToast("Network delayed. Syncing in background.", "info");
-                cart = []; 
-                window.renderCartUI();
-                window.switchMainView('Orders');
-            } finally {
-                btn.innerText = originalText;
-                btn.disabled = false;
             }
         };
 
