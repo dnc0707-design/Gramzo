@@ -165,14 +165,17 @@
         <!-- ========================================== -->
         <div id="view-User" class="view-section active space-y-6">
             
-            <!-- Dynamic Location Area with Input -->
+            <!-- Dynamic Location Area with Input & Edit Button -->
             <div class="flex items-center gap-3">
                 <i class="fa-solid fa-location-dot text-red-500 text-xl mt-1"></i>
-                <div class="flex-1 border-b border-gray-200 pb-1 relative">
+                <div class="flex-1 border-b border-gray-200 pb-1 relative pr-6">
                     <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-0.5">Delivering To</p>
                     <input type="text" id="user-location-input" class="w-full text-sm font-black text-gray-900 bg-transparent outline-none truncate p-0 border-none focus:ring-0 placeholder-gray-300" placeholder="Type your delivery location...">
+                    <button type="button" onclick="document.getElementById('user-location-input').value=''; document.getElementById('user-location-input').focus();" class="absolute right-0 bottom-1 text-gray-400 hover:text-red-600" title="Edit/Clear Location">
+                        <i class="fa-solid fa-pen text-[10px]"></i>
+                    </button>
                 </div>
-                <button type="button" onclick="window.getCurrentLocation('user-location-input')" class="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-100 transition shrink-0 border border-red-100" title="Locate Me">
+                <button type="button" onclick="window.getCurrentLocation('user-location-input')" class="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-100 transition shrink-0 border border-red-100" title="Locate Me via GPS">
                     <i class="fa-solid fa-location-crosshairs"></i>
                 </button>
             </div>
@@ -286,7 +289,7 @@
                 <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                     <div class="text-center sm:text-left">
                         <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                        <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v8.3.0 - Global Fix Applied</p>
+                        <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v8.4.0 - Global Search & Manual Input Fix</p>
                     </div>
                     <!-- EXPLICIT ADMIN BUTTON IN FOOTER -->
                     <div class="mt-4 sm:mt-0 text-center sm:text-right">
@@ -317,10 +320,11 @@
                 
                 <div class="space-y-5 pt-6 border-t border-gray-100" id="checkout-details-section" style="display:none;">
                     <div>
-                        <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2 ml-2">Delivery Address</label>
+                        <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2 ml-2">Delivery Address (Manual Edit Allowed)</label>
                         <div class="relative">
-                            <input type="text" id="cart-address" class="input-field !py-3 !rounded-xl pr-20" placeholder="E.g. House No, Village Name, Landmark...">
-                            <button type="button" onclick="window.getCurrentLocation('cart-address')" class="absolute right-3 top-3 text-red-500 text-xs font-bold bg-red-50 px-2 py-1 rounded border border-red-100 hover:bg-red-100 transition-colors">
+                            <!-- Changed back to TEXTAREA for multi-line manual input without strict maps override -->
+                            <textarea id="cart-address" rows="3" class="input-field !py-3 resize-none !rounded-xl pr-20" placeholder="E.g. House No, Village Name, Landmark... Type your detailed address here"></textarea>
+                            <button type="button" onclick="window.getCurrentLocation('cart-address')" class="absolute right-3 top-3 text-red-500 text-xs font-bold bg-red-50 px-2 py-1 rounded border border-red-100 hover:bg-red-100 transition-colors" title="Fetch via GPS">
                                 <i class="fa-solid fa-location-crosshairs"></i> GPS
                             </button>
                         </div>
@@ -771,6 +775,12 @@
             }, 3000);
         };
 
+        // --- NEW: Global Search Function restored ---
+        window.handleSearchInput = () => {
+            window.currentSearchQuery = document.getElementById('global-search').value.toLowerCase();
+            window.loadMarketplaceData();
+        };
+
         window.startApp = async () => {
             try {
                 if (!auth.currentUser) {
@@ -794,6 +804,8 @@
         window.setupMapsFeatures = () => {
             const initInput = (id) => {
                 const input = document.getElementById(id);
+                // We only attach Google Maps Autocomplete if it's an INPUT tag.
+                // cart-address is now a TEXTAREA so it skips this and allows free manual typing!
                 if (input && input.tagName === 'INPUT' && !input.dataset.mapsInit && typeof google !== 'undefined') {
                     const autocomplete = new google.maps.places.Autocomplete(input, { componentRestrictions: { country: "in" } });
                     autocomplete.addListener('place_changed', () => {
