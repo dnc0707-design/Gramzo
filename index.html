@@ -228,7 +228,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v10.2.0 - Marquee & Prep Time Added</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v10.3.0 - UI Updates</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right">
                             <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
@@ -1030,18 +1030,22 @@
                 const isClosed = p.shopStatus === 'Closed';
                 const isOutOfStock = p.inStock === false;
                 
-                let addressDisplay = p.shopAddress ? `<p class="text-[9px] text-gray-400 font-medium leading-none mb-2 truncate"><i class="fa-solid fa-location-dot"></i> ${p.shopAddress}</p>` : '';
-                let prepTimeDisplay = p.prepTime ? `<p class="text-[10px] text-orange-600 font-bold mb-1"><i class="fa-regular fa-clock"></i> Prep time: ${p.prepTime} mins</p>` : '';
-                let qtyDisplay = `<p class="text-[10px] text-gray-500 uppercase tracking-wide font-medium mb-3">${p.qty || ''} • <span class="text-red-600 font-bold">${p.shopName || 'Gramzo'}</span></p>`;
+                let addressDisplay = `<div class="mb-2">
+                    <p class="text-[10px] font-bold text-gray-800"><i class="fa-solid fa-store text-red-500 mr-1"></i> ${p.shopName || 'Gramzo'}</p>
+                    ${p.shopAddress ? `<p class="text-[9px] text-gray-500 font-medium mt-0.5 leading-tight"><i class="fa-solid fa-location-dot text-gray-400 mr-1"></i> ${p.shopAddress}</p>` : ''}
+                </div>`;
+                
+                let prepTimeDisplay = p.prepTime ? `<p class="text-[10px] text-orange-600 font-bold mb-2"><i class="fa-regular fa-clock mr-1"></i> Prep time: ${p.prepTime} mins</p>` : '';
+                
+                let qtyDisplay = `<p class="text-[10px] text-gray-500 uppercase tracking-wide font-medium mb-3">${p.qty || ''}</p>`;
                 
                 if (hasVariants) {
                     const options = p.variants.map((v, i) => `<option value="${i}" data-price="${v.price}">${v.qty}</option>`).join('');
                     qtyDisplay = `
-                        <div class="mb-3 flex items-center justify-between">
-                            <select onchange="window.updatePriceDisplay(this, 'price-${p.id}')" id="sel-${p.id}" class="text-xs bg-gray-50 border border-gray-200 rounded-lg p-1.5 outline-none focus:ring-1 ring-red-500 font-medium text-gray-700 w-full mr-2">
+                        <div class="mb-3">
+                            <select onchange="window.updatePriceDisplay(this, 'price-${p.id}')" id="sel-${p.id}" class="text-xs bg-gray-50 border border-gray-200 rounded-lg p-1.5 outline-none focus:ring-1 ring-red-500 font-medium text-gray-700 w-full">
                                 ${options}
                             </select>
-                            <span class="text-[9px] text-red-600 font-bold shrink-0">${p.shopName || 'Gramzo'}</span>
                         </div>
                     `;
                 }
@@ -1068,7 +1072,7 @@
                         </div>
                         <div class="p-3 flex-1 flex flex-col justify-between">
                             <div>
-                                <h4 class="font-bold text-gray-900 text-sm leading-tight mb-1">${p.name}</h4>
+                                <h4 class="font-bold text-gray-900 text-sm leading-tight mb-2">${p.name}</h4>
                                 ${addressDisplay}
                                 ${prepTimeDisplay}
                                 ${qtyDisplay}
@@ -1126,6 +1130,17 @@
 
             onSnapshot(getCol('products'), (snap) => {
                 let items = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
+                
+                // Add dummy products if empty for preview
+                if(items.length === 0) {
+                    items = [
+                        { id: "dummy1", name: "Chicken Dum Biryani", variants: [{qty: "Half", price: 90}, {qty: "Full", price: 150}], prepTime: 20, category: "Food", image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&q=80", shopName: "Local Kitchen", shopAddress: "Kotaldi, Purulia", partnerId: "111", inStock: true, shopStatus: 'Open' },
+                        { id: "dummy2", name: "Paneer Butter Masala", price: 120, qty: "Full", prepTime: 15, category: "Food", image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80", shopName: "Desi Dhaba", shopAddress: "Lalgarh Bazaar", partnerId: "222", inStock: true, shopStatus: 'Open' },
+                        { id: "dummy3", name: "Veg Chowmein", price: 60, qty: "Full", prepTime: 10, category: "Food", image: "https://images.unsplash.com/photo-1585032226651-759b368d7246?w=400&q=80", shopName: "Fast Food Corner", shopAddress: "Krishnapur More", partnerId: "333", inStock: true, shopStatus: 'Open' },
+                        { id: "dummy4", name: "Rasgulla (2 Pcs)", price: 30, qty: "2 Pcs", prepTime: 5, category: "Food", image: "https://images.unsplash.com/photo-1588195538326-c5b1e9f80a1b?w=400&q=80", shopName: "Mishti Mukh", shopAddress: "Ramchandrapur Market", partnerId: "444", inStock: true, shopStatus: 'Open' }
+                    ];
+                }
+                
                 extractRestaurants(items);
                 renderProducts(items);
             }, (err) => {
@@ -1386,6 +1401,7 @@
             
             const restaurantId = window.cart[0].partnerId || null;
             const restaurantName = window.cart[0].shopName || null;
+            const restaurantAddress = window.currentCartPartner ? window.currentCartPartner.shopAddress : null;
 
             const btn = document.getElementById('btn-place-order');
             const originalText = btn.innerText;
@@ -1396,7 +1412,7 @@
                     customer: currentUser.name, phone: currentUser.phone, 
                     items: window.cart, subtotal: sub, discount: discountAmt, promoCode: window.promoCode || null,
                     total: total, address: addr, status: 'Placed', 
-                    restaurantId: restaurantId, restaurantName: restaurantName,
+                    restaurantId: restaurantId, restaurantName: restaurantName, restaurantAddress: restaurantAddress,
                     paymentMode: paymentMode, paymentScreenshot: paymentScreenshot,
                     time: serverTimestamp() 
                 }), 10000);
@@ -1587,16 +1603,19 @@
                             trackingHtml = `<p class="text-xs font-bold text-red-500 mt-3 bg-red-50 p-2 rounded-lg border border-red-100"><i class="fa-solid fa-circle-info mr-1"></i> Reason: ${o.rejectReason}</p>`;
                         }
 
+                        let resAddressHtml = o.restaurantAddress ? `<p class="text-[9px] text-gray-500 font-medium mb-1"><i class="fa-solid fa-location-dot"></i> ${o.restaurantAddress}</p>` : '';
+
                         return `
                             <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 relative overflow-hidden transition-all hover:shadow-md">
-                                <div class="flex justify-between items-start mb-3">
+                                <div class="flex justify-between items-start mb-2">
                                     <div>
                                         <div class="flex items-center gap-2 mb-1"><span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Order #${o.id.slice(-5).toUpperCase()}</span>${paymentBadge}</div>
-                                        <h4 class="font-black text-gray-900 text-base">${o.restaurantName || 'Gramzo Partner'}</h4>
+                                        <h4 class="font-black text-gray-900 text-base leading-none">${o.restaurantName || 'Gramzo Partner'}</h4>
                                     </div>
                                     <span class="text-xl font-black text-gray-900">₹${o.total.toFixed(2)}</span>
                                 </div>
-                                <p class="text-xs text-gray-500 mb-5 font-medium line-clamp-2">${itemsList}</p>
+                                ${resAddressHtml}
+                                <p class="text-xs text-gray-500 mb-5 font-medium line-clamp-2 mt-2">${itemsList}</p>
                                 <div class="mb-5 bg-gray-50 p-3 rounded-xl">
                                     <div class="flex justify-between text-[10px] font-black uppercase tracking-wider mb-2 ${statusColor}"><span>${statusText}</span></div>
                                     <div class="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden"><div class="bg-current h-1.5 rounded-full transition-all duration-1000 ${statusColor.replace('text-', 'bg-')}" style="width: ${progressWidth}"></div></div>
