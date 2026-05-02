@@ -9,7 +9,6 @@
     
     <!-- Google Maps API Setup -->
     <script>
-        // Ensure the callback is globally available before the API loads
         window.initGoogleMap = function() {
             console.log("Google Maps API loaded.");
             window.isGoogleMapsLoaded = true;
@@ -28,8 +27,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap');
         
         :root {
-            --primary: #E23744; /* Zomato Red */
-            --primary-hover: #CB202D;
+            --primary: #E23744;
             --bg-color: #f8f9fa; 
             --text-main: #1c1c1c;
         }
@@ -51,9 +49,6 @@
         
         .view-section { display: none; animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         .view-section.active { display: block; }
-        
-        /* Flex Overrides for Immersive Views */
-        .view-section.active.flex-view { display: flex; }
 
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
@@ -85,20 +80,10 @@
         }
         .modal-overlay.active .modal-content { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 
-        /* Zomato-style Search Bar */
         .search-shadow { box-shadow: 0 4px 12px rgba(226, 55, 68, 0.08); }
-        
-        /* Product Card specific */
-        .food-card { box-shadow: 0 2px 8px rgba(28, 28, 28, 0.08); transition: transform 0.2s ease, box-shadow 0.2s ease; border: 1px solid #f0f0f0; }
-        .food-card:hover { transform: translateY(-4px); box-shadow: 0 8px 16px rgba(28, 28, 28, 0.12); }
-        
-        /* Google Maps Specific Overrides */
-        .pac-container { border-radius: 1.5rem; border: 1px solid #e5e7eb; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); font-family: 'Outfit', sans-serif; z-index: 9999; padding: 0.5rem; }
-        .pac-item { padding: 12px; font-size: 14px; font-weight: 500; color: #374151; border-bottom: 1px solid #f3f4f6; cursor: pointer; display: flex; align-items: center; gap: 8px; border-radius: 12px; }
+        .pac-container { border-radius: 1.5rem; border: 1px solid #e5e7eb; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); font-family: 'Outfit', sans-serif; z-index: 9999; padding: 0.5rem; }
+        .pac-item { padding: 12px; font-size: 14px; font-weight: 500; color: #374151; border-bottom: 1px solid #f3f4f6; cursor: pointer; }
         .pac-item:hover { background-color: #f0fdf4; color: #E23744; }
-        .pac-item-query { font-size: 15px; font-weight: 800; color: #111827; }
-        .pac-icon { display: none; }
-        
         select { -webkit-appearance: none; -moz-appearance: none; appearance: none; }
     </style>
 </head>
@@ -108,7 +93,6 @@
     <nav class="glass-nav fixed top-0 w-full z-40 h-[65px] sm:h-[80px]">
         <div class="max-w-md mx-auto px-4 py-2 flex justify-between items-center h-full sm:max-w-4xl gap-2">
             
-            <!-- Left Side Logo & Tagline -->
             <div class="flex items-center flex-1 h-full cursor-pointer overflow-hidden pr-2" onclick="location.reload()">
                 <div class="flex flex-col justify-center shrink-0">
                     <h1 class="text-[2.2rem] sm:text-[3.5rem] font-black font-logo italic tracking-tight text-red-600 drop-shadow-sm leading-none">Gramzo</h1>
@@ -120,7 +104,6 @@
                 </div>
             </div>
 
-            <!-- Right Side Controls -->
             <div id="auth-container" class="flex items-center gap-2 sm:gap-3 shrink-0 justify-end h-full">
                 <button type="button" id="btn-login-trigger" onclick="window.openAuthModal('User')" class="bg-red-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md hover:bg-red-700 transition-colors active:scale-95 flex items-center gap-1.5 whitespace-nowrap">
                     <i class="fa-solid fa-user"></i> Login
@@ -159,15 +142,13 @@
         </div>
     </div>
 
-    <!-- Main Content Area -->
     <main id="main-content" class="pt-[115px] sm:pt-[140px] px-4 pb-24 max-w-md mx-auto sm:max-w-4xl sm:px-6">
         
         <!-- ========================================== -->
-        <!-- VIEW: USER (Marketplace & Services)        -->
+        <!-- VIEW: USER                                 -->
         <!-- ========================================== -->
         <div id="view-User" class="view-section active space-y-6">
             
-            <!-- Dynamic Location Area with Input & Edit Button -->
             <div class="flex items-center gap-3">
                 <i class="fa-solid fa-location-dot text-red-500 text-xl mt-1"></i>
                 <div class="flex-1 border-b border-gray-200 pb-1 relative pr-6">
@@ -177,42 +158,33 @@
                         <i class="fa-solid fa-pen text-[10px]"></i>
                     </button>
                 </div>
-                <button type="button" onclick="window.getCurrentLocation('user-location-input')" class="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-100 transition shrink-0 border border-red-100" title="Locate Me via GPS">
+                <button type="button" onclick="window.getCurrentLocation('user-location-input')" class="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-100 transition shrink-0 border border-red-100">
                     <i class="fa-solid fa-location-crosshairs"></i>
                 </button>
             </div>
 
-            <!-- Smart Search Bar -->
             <div class="relative w-full search-shadow rounded-2xl bg-white border border-gray-100 flex items-center px-4 py-3.5 focus-within:ring-2 focus-within:ring-red-500/20 transition-all mt-4">
                 <i class="fa-solid fa-magnifying-glass text-red-500 text-lg"></i>
                 <div class="w-px h-5 bg-gray-200 mx-3"></div>
                 <input type="text" id="global-search" onkeyup="window.handleSearchInput()" placeholder="Restaurant name or dish..." class="w-full bg-transparent outline-none text-sm font-medium text-gray-800 placeholder-gray-400">
             </div>
 
-            <!-- Dynamic Offer Banner Slider -->
             <div class="w-full relative rounded-3xl overflow-hidden shadow-sm border border-gray-100 h-36 sm:h-48 group bg-red-50 mt-4 flex items-center justify-center">
                 <span class="absolute top-3 left-3 z-10 inline-flex items-center gap-1.5 py-1 px-2.5 rounded-full bg-black/70 backdrop-blur text-[10px] font-black text-white uppercase tracking-widest">
                     <i class="fa-solid fa-bolt text-yellow-400"></i> PROMO
                 </span>
-                <img id="user-offer-banner" src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80" class="w-full h-full object-cover transition-opacity duration-500" alt="Special Offers">
-                
-                <!-- Dot Indicators for Slider -->
+                <img id="user-offer-banner" src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80" class="w-full h-full object-cover transition-opacity duration-500" alt="Offers">
                 <div id="banner-dots" class="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex gap-1.5 z-10"></div>
             </div>
 
-            <!-- Restaurants Near You (Dynamic) -->
             <div>
                 <div class="flex justify-between items-end mb-3">
                     <h3 class="font-black text-lg text-gray-900 tracking-tight" id="marketplace-title">Restaurants Near You</h3>
                     <button type="button" id="btn-clear-filter" onclick="window.filterRestaurant(null, '')" class="hidden text-xs font-bold text-red-600 bg-red-50 px-3 py-1 rounded-full border border-red-100">Clear</button>
                 </div>
-                
-                <div id="restaurant-list-carousel" class="flex gap-4 overflow-x-auto pb-4 no-scrollbar px-1">
-                    <!-- Populated dynamically by JS -->
-                </div>
+                <div id="restaurant-list-carousel" class="flex gap-4 overflow-x-auto pb-4 no-scrollbar px-1"></div>
             </div>
 
-            <!-- Restaurant / Food List -->
             <div>
                 <h3 class="font-black text-xl text-gray-900 mb-4 tracking-tight">Top rated near you</h3>
                 <div id="market-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -220,12 +192,11 @@
                 </div>
             </div>
 
-            <!-- Partner CTA (Hidden when logged in) -->
-            <div id="partner-cta" class="mt-8 bg-gray-900 rounded-3xl p-6 text-white shadow-xl shadow-gray-900/20 relative overflow-hidden flex items-center justify-between">
+            <div id="partner-cta" class="mt-8 bg-gray-900 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden flex items-center justify-between">
                 <div class="relative z-10">
                     <h3 class="text-xl font-black mb-1">Partner with us</h3>
                     <p class="text-gray-300 text-xs mb-3 font-medium">List your restaurant on Gramzo and boost sales.</p>
-                    <button type="button" onclick="window.openAuthModal('Partner')" class="bg-red-600 text-white px-5 py-2.5 rounded-xl text-xs font-black shadow-sm transition-transform active:scale-95 uppercase tracking-widest hover:bg-red-500">
+                    <button type="button" onclick="window.openAuthModal('Partner')" class="bg-red-600 text-white px-5 py-2.5 rounded-xl text-xs font-black shadow-sm active:scale-95 uppercase tracking-widest hover:bg-red-500">
                         Register Restaurant
                     </button>
                 </div>
@@ -236,43 +207,13 @@
                 <div class="w-full mb-8 flex justify-center sm:justify-start">
                     <h1 class="text-4xl font-black text-gray-300 tracking-tight font-logo text-center sm:text-left w-full">Gramzo</h1>
                 </div>
-
-                <div class="mb-10 text-center sm:text-left bg-emerald-50 rounded-2xl p-6 border border-emerald-100 shadow-sm">
-                    <p class="text-sm sm:text-base text-emerald-900 font-bold leading-relaxed">
-                        🌟 WHY SHOULD CITIES HAVE ALL THE FUN? <br class="hidden sm:block"> Convenience, now in every village. Food, grocery, rides, and daily essentials—everything your village needs, now just one tap away with Gramzo! 🚀
-                    </p>
-                </div>
-
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-8 mb-8">
-                    <div class="col-span-2 sm:col-span-2">
-                        <p class="text-xs text-gray-500 font-medium leading-relaxed max-w-xs mb-4">
-                            Bringing convenience to every village. Connect directly with your favorite local restaurants.
-                        </p>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-gray-900 mb-4 tracking-tight">Company</h4>
-                        <ul class="space-y-3 text-xs text-gray-500 font-medium">
-                            <li><a href="#" onclick="window.showToast('About Us page coming soon!', 'info'); return false;" class="hover:text-red-600 transition">About Us</a></li>
-                            <li><a href="#" onclick="window.showToast('Contact Us page coming soon!', 'info'); return false;" class="hover:text-red-600 transition">Contact Us</a></li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-gray-900 mb-4 tracking-tight">Legal</h4>
-                        <ul class="space-y-3 text-xs text-gray-500 font-medium">
-                            <li><a href="#" onclick="window.showToast('Terms & Conditions coming soon!', 'info'); return false;" class="hover:text-red-600 transition">Terms & Conditions</a></li>
-                            <li><a href="#" onclick="window.showToast('Privacy Policy coming soon!', 'info'); return false;" class="hover:text-red-600 transition">Privacy Policy</a></li>
-                        </ul>
-                    </div>
-                </div>
-                
                 <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                     <div class="text-center sm:text-left">
                         <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                        <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v9.0.0 - Full Featured Engine</p>
+                        <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v9.1.0 - Full Features Final</p>
                     </div>
-                    <!-- EXPLICIT ADMIN BUTTON IN FOOTER -->
                     <div class="mt-4 sm:mt-0 text-center sm:text-right">
-                        <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 hover:text-red-900 border border-red-200 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95 flex items-center justify-center mx-auto sm:ml-auto sm:mr-0">
+                        <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
                             <i class="fa-solid fa-shield-halved mr-1 text-sm"></i> Secure Admin Portal
                         </button>
                     </div>
@@ -281,7 +222,7 @@
         </div>
 
         <!-- ========================================== -->
-        <!-- VIEW: CART & CHECKOUT                      -->
+        <!-- VIEW: CART                                 -->
         <!-- ========================================== -->
         <div id="view-Cart" class="view-section space-y-6">
             <div class="flex items-center gap-3">
@@ -290,54 +231,41 @@
             </div>
             
             <div class="bg-white rounded-[2rem] p-5 sm:p-6 shadow-sm border border-gray-100">
-                <div id="cart-items-list" class="space-y-4 mb-6">
-                    <div class="text-center py-10">
-                        <img src="https://cdn-icons-png.flaticon.com/512/1161/1161388.png" class="w-16 h-16 mx-auto mb-3 opacity-20 grayscale">
-                        <p class="text-gray-400 font-medium text-sm">Your basket is looking empty!</p>
-                    </div>
-                </div>
+                <div id="cart-items-list" class="space-y-4 mb-6"></div>
                 
                 <div class="space-y-5 pt-6 border-t border-gray-100" id="checkout-details-section" style="display:none;">
                     <div>
-                        <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2 ml-2">Delivery Address (Manual Edit Allowed)</label>
+                        <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2 ml-2">Delivery Address</label>
                         <div class="relative">
-                            <textarea id="cart-address" rows="3" class="input-field !py-3 resize-none !rounded-xl pr-20" placeholder="E.g. House No, Village Name, Landmark... Type your detailed address here"></textarea>
-                            <button type="button" onclick="window.getCurrentLocation('cart-address')" class="absolute right-3 top-3 text-red-500 text-xs font-bold bg-red-50 px-2 py-1 rounded border border-red-100 hover:bg-red-100 transition-colors" title="Fetch via GPS">
+                            <textarea id="cart-address" rows="3" class="input-field !py-3 resize-none !rounded-xl pr-20" placeholder="E.g. House No, Village Name, Landmark..."></textarea>
+                            <button type="button" onclick="window.getCurrentLocation('cart-address')" class="absolute right-3 top-3 text-red-500 text-xs font-bold bg-red-50 px-2 py-1 rounded border border-red-100 hover:bg-red-100">
                                 <i class="fa-solid fa-location-crosshairs"></i> GPS
                             </button>
                         </div>
                     </div>
 
-                    <!-- PROMO CODE SECTION -->
                     <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100 mt-4">
                         <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2">Apply Promo Code</label>
                         <div class="flex gap-2">
                             <input type="text" id="promo-code-input" class="input-field !py-2.5 !rounded-xl text-xs font-bold uppercase" placeholder="e.g. GRAMZO50">
-                            <button type="button" onclick="window.applyPromo()" class="bg-gray-900 text-white px-5 py-2.5 rounded-xl text-xs font-bold shrink-0 hover:bg-gray-800 transition-colors">APPLY</button>
+                            <button type="button" onclick="window.applyPromo()" class="bg-gray-900 text-white px-5 py-2.5 rounded-xl text-xs font-bold shrink-0 hover:bg-gray-800">APPLY</button>
                         </div>
                     </div>
 
-                    <!-- Payment Selection -->
                     <div id="payment-section" class="bg-gray-50 rounded-2xl p-4 border border-gray-100 hidden">
                         <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-3">Payment Method</label>
-                        
-                        <div class="space-y-3" id="payment-options-container">
-                            <!-- Populated dynamically based on restaurant settings -->
-                        </div>
-                        
+                        <div class="space-y-3" id="payment-options-container"></div>
                         <div id="qr-payment-box" class="hidden mt-4 pt-4 border-t border-gray-200">
                             <p class="text-xs font-bold text-gray-800 mb-2 text-center">Scan QR to Pay</p>
                             <img id="partner-qr-display" src="" class="w-40 h-40 mx-auto border-2 border-gray-200 rounded-xl mb-3 object-contain bg-white">
                             <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">Upload Payment Screenshot</label>
-                            <input type="file" id="payment-screenshot" accept="image/*" class="w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-red-50 file:text-red-600 border border-gray-200 rounded-xl p-1.5 bg-white">
+                            <input type="file" id="payment-screenshot" accept="image/*" class="w-full text-xs text-gray-500 file:bg-red-50 file:text-red-600 border border-gray-200 rounded-xl p-1.5 bg-white">
                         </div>
                     </div>
                     
-                    <div class="bg-gray-50 rounded-2xl p-4 space-y-3 border border-gray-100" id="cart-summary-totals">
-                        <!-- Populated by JS to support discounts -->
-                    </div>
+                    <div class="bg-gray-50 rounded-2xl p-4 space-y-3 border border-gray-100" id="cart-summary-totals"></div>
                     
-                    <button type="button" id="btn-place-order" onclick="window.placeOrder()" class="w-full bg-red-600 hover:bg-red-700 text-white py-4 rounded-2xl font-black text-lg shadow-lg shadow-red-600/30 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <button type="button" id="btn-place-order" onclick="window.placeOrder()" class="w-full bg-red-600 hover:bg-red-700 text-white py-4 rounded-2xl font-black text-lg shadow-lg shadow-red-600/30 active:scale-95 disabled:opacity-50">
                         PLACE ORDER
                     </button>
                 </div>
@@ -345,13 +273,11 @@
         </div>
 
         <!-- ========================================== -->
-        <!-- VIEW: ORDERS (User Order Tracking)         -->
+        <!-- VIEW: ORDERS                               -->
         <!-- ========================================== -->
         <div id="view-Orders" class="view-section space-y-6">
             <h2 class="text-2xl font-black text-gray-900">My Orders</h2>
-            <div id="user-orders-list" class="space-y-4">
-                <div class="text-center py-10 bg-white rounded-3xl border border-gray-100"><span class="animate-pulse text-gray-400 font-bold text-sm">Loading history...</span></div>
-            </div>
+            <div id="user-orders-list" class="space-y-4"></div>
         </div>
 
         <!-- ========================================== -->
@@ -362,18 +288,11 @@
                 <div class="relative z-10">
                     <p class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">Restaurant Dashboard</p>
                     <h2 class="text-2xl font-black mb-4" id="partner-welcome">Welcome, Partner!</h2>
-                    <div class="flex items-center gap-2 bg-white/10 w-fit px-3 py-1.5 rounded-lg border border-white/10">
-                        <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
-                        <span class="text-xs font-bold" id="partner-category-badge">Receiving Orders</span>
-                    </div>
                 </div>
                 <i class="fa-solid fa-utensils absolute right-[-20px] bottom-[-20px] text-8xl text-gray-800"></i>
             </div>
-
             <h3 class="font-black text-xl text-gray-800 border-b border-gray-200 pb-2">Active Orders</h3>
-            <div id="partner-orders-list" class="space-y-4">
-                <p class="text-gray-400 font-medium text-sm text-center py-10 bg-white rounded-3xl shadow-sm border border-gray-100">Listening for new orders...</p>
-            </div>
+            <div id="partner-orders-list" class="space-y-4"></div>
         </div>
 
         <!-- ========================================== -->
@@ -385,79 +304,49 @@
             <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="font-bold text-gray-900">Store Profile</h3>
-                    <span id="partner-approval-status" class="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-1 rounded uppercase tracking-widest border border-emerald-100">Active</span>
+                    <span id="partner-approval-status" class="text-[10px] font-black uppercase border px-2 py-1 rounded">Active</span>
                 </div>
                 
                 <div class="space-y-4">
-                    <!-- Display Only Details -->
                     <div id="hub-display-details" class="bg-gray-50 p-4 rounded-xl border border-gray-100 space-y-2 text-sm text-gray-700">
-                        <p><strong>Restaurant Name:</strong> <span id="hub-name-val"></span></p>
+                        <p><strong>Name:</strong> <span id="hub-name-val"></span></p>
                         <p id="hub-address-row" class="hidden"><strong>Location:</strong> <span id="hub-address-val"></span></p>
-                        <p id="hub-fssai-row" class="hidden"><strong>FSSAI/Reg No:</strong> <span id="hub-fssai-val"></span></p>
                     </div>
 
-                    <!-- Add/Edit Details for Partner Setup -->
                     <div id="partner-setup-form" class="space-y-3 mt-4 border-t border-gray-200 pt-4">
-                        <label class="block text-xs font-bold text-gray-600 mb-1 ml-1">Restaurant / Shop Name</label>
+                        <label class="block text-xs font-bold text-gray-600 mb-1 ml-1">Restaurant Name</label>
                         <input id="partner-shop-name" class="input-field" placeholder="Enter Business Name">
 
                         <label class="block text-xs font-bold text-gray-600 mb-1 ml-1 mt-3">Full Address</label>
-                        <input id="partner-shop-address" class="input-field" placeholder="Enter full restaurant address">
+                        <input id="partner-shop-address" class="input-field" placeholder="Enter full address">
                         
-                        <label class="block text-xs font-bold text-gray-600 mb-1 ml-1 mt-3">FSSAI / Registration (Optional)</label>
-                        <input id="partner-fssai-number" type="text" class="input-field uppercase" placeholder="Enter Registration Number">
-
-                        <!-- NEW: QR Code and COD Settings -->
                         <div class="mt-4 p-4 bg-red-50/30 border border-red-100 rounded-xl space-y-4">
                             <div>
-                                <label class="block text-xs font-bold text-gray-800 mb-1 ml-1">Store Payment QR Code (For Prepaid Orders)</label>
-                                <input type="file" id="partner-qr-upload" accept="image/*" class="w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-gray-100 file:text-gray-700 border border-gray-200 rounded-xl p-1.5 bg-white">
+                                <label class="block text-xs font-bold text-gray-800 mb-1 ml-1">Payment QR Code</label>
+                                <input type="file" id="partner-qr-upload" accept="image/*" class="w-full text-xs text-gray-500 border border-gray-200 rounded-xl p-1.5 bg-white">
                                 <img id="partner-qr-preview" class="hidden w-24 h-24 mt-2 border border-gray-200 rounded-lg object-contain bg-white">
                             </div>
-
                             <div class="flex items-center justify-between pt-2 border-t border-red-100">
-                                <div>
-                                    <p class="text-xs font-bold text-gray-800">Enable Pay on Delivery (COD)</p>
-                                    <p class="text-[9px] text-gray-500">Allow users to order without pre-paying.</p>
-                                </div>
-                                <label class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" id="partner-cod-toggle-setup" class="sr-only peer" checked>
-                                    <div class="w-9 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
-                                </label>
+                                <div><p class="text-xs font-bold">Enable Pay on Delivery</p></div>
+                                <input type="checkbox" id="partner-cod-toggle-setup" checked class="w-4 h-4 text-emerald-500">
                             </div>
                         </div>
-
-                        <button type="button" onclick="window.submitPartnerProfile()" id="btn-submit-profile" class="w-full bg-gray-900 text-white px-6 py-4 rounded-2xl font-bold active:scale-95 transition mt-4">Save Configuration</button>
-                    </div>
-
-                    <!-- Shop Status Toggle -->
-                    <div id="shop-status-container" class="mt-2 flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
-                        <div>
-                            <p class="font-bold text-sm text-gray-900">Accepting Orders</p>
-                            <p class="text-[10px] text-gray-500" id="shop-status-text">Currently Open</p>
-                        </div>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="partner-status-toggle" class="sr-only peer" onchange="window.toggleShopStatus()">
-                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
-                        </label>
+                        <button type="button" onclick="window.submitPartnerProfile()" id="btn-submit-profile" class="w-full bg-gray-900 text-white px-6 py-4 rounded-2xl font-bold">Save Config</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Add Product -->
-            <div id="add-product-container" class="bg-white rounded-3xl p-6 border border-gray-200 shadow-sm relative overflow-hidden">
+            <div id="add-product-container" class="bg-white rounded-3xl p-6 border border-gray-200 shadow-sm relative">
                 <h3 class="font-black text-gray-900 mb-4">Add Menu Item</h3>
                 <div class="space-y-4 relative z-10">
                     <div>
                         <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Dish Name</label>
                         <input id="prod-name" class="input-field mt-1" placeholder="E.g. Chicken Biryani">
                     </div>
-                    
                     <div>
-                        <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Dish Image (400x300 pixels)</label>
-                        <input type="file" id="prod-image-upload" accept="image/*" class="w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-gray-100 file:text-gray-700 border border-gray-200 rounded-xl p-1.5 bg-gray-50 mt-1">
+                        <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Dish Image</label>
+                        <input type="file" id="prod-image-upload" accept="image/*" class="w-full text-xs text-gray-500 border border-gray-200 rounded-xl p-1.5 bg-gray-50 mt-1">
                     </div>
-
                     <div id="variant-container" class="space-y-2">
                         <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Portion & Price</label>
                         <div class="flex gap-2 variant-row">
@@ -465,17 +354,14 @@
                             <input type="number" class="input-field w-1/2 var-price" placeholder="Price (₹)">
                         </div>
                     </div>
-                    
-                    <button type="button" onclick="window.addVariantRow()" class="text-xs text-red-600 font-bold hover:underline transition">+ Add another size/price</button>
-                    <button type="button" onclick="window.addPartnerProduct()" id="btn-add-prod" class="w-full bg-red-600 hover:bg-red-700 text-white py-3.5 rounded-xl font-bold shadow-md active:scale-95 transition mt-4">Save to Menu</button>
+                    <button type="button" onclick="window.addVariantRow()" class="text-xs text-red-600 font-bold hover:underline">+ Add size</button>
+                    <button type="button" onclick="window.addPartnerProduct()" id="btn-add-prod" class="w-full bg-red-600 hover:bg-red-700 text-white py-3.5 rounded-xl font-bold mt-4">Save to Menu</button>
                 </div>
             </div>
 
             <div id="partner-catalog-list-container">
                 <h3 class="font-black text-gray-900 mb-3 border-b border-gray-200 pb-2">Your Menu</h3>
-                <div id="partner-catalog-list" class="space-y-3">
-                    <p class="text-sm text-gray-400 text-center py-4">Loading catalog...</p>
-                </div>
+                <div id="partner-catalog-list" class="space-y-3"></div>
             </div>
         </div>
 
@@ -486,90 +372,48 @@
             <div class="flex justify-between items-center">
                 <h2 class="text-2xl font-black text-gray-900">Admin Control</h2>
                 <div class="flex gap-2">
-                    <button type="button" onclick="window.initRoleListeners()" class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-xs font-bold shadow-sm hover:bg-gray-200 transition-colors"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
-                    <button type="button" onclick="window.logout()" class="bg-red-50 text-red-600 px-3 py-1.5 rounded-full text-xs font-bold shadow-sm hover:bg-red-100 transition-colors"><i class="fa-solid fa-power-off"></i> Logout</button>
+                    <button type="button" onclick="window.initRoleListeners()" class="bg-gray-100 px-3 py-1.5 rounded-full text-xs font-bold"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+                    <button type="button" onclick="window.logout()" class="bg-red-50 text-red-600 px-3 py-1.5 rounded-full text-xs font-bold"><i class="fa-solid fa-power-off"></i> Logout</button>
                 </div>
             </div>
             
             <div class="grid grid-cols-3 gap-3">
-                <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm text-center flex flex-col justify-center">
-                    <p class="text-[9px] font-bold text-gray-400 uppercase">Sales</p>
-                    <h4 id="stat-rev" class="text-lg font-black text-emerald-600">₹0</h4>
-                </div>
-                <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm text-center flex flex-col justify-center">
-                    <p class="text-[9px] font-bold text-gray-400 uppercase">Orders</p>
-                    <h4 id="stat-ord" class="text-lg font-black text-blue-600">0</h4>
-                </div>
-                <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm text-center flex flex-col justify-center">
-                    <p class="text-[9px] font-bold text-gray-400 uppercase">Users</p>
-                    <h4 id="stat-users" class="text-lg font-black text-purple-600">0</h4>
+                <div class="bg-white p-4 rounded-2xl border border-gray-100 text-center"><p class="text-[9px] font-bold text-gray-400">Sales</p><h4 id="stat-rev" class="text-lg font-black text-emerald-600">₹0</h4></div>
+                <div class="bg-white p-4 rounded-2xl border border-gray-100 text-center"><p class="text-[9px] font-bold text-gray-400">Orders</p><h4 id="stat-ord" class="text-lg font-black text-blue-600">0</h4></div>
+                <div class="bg-white p-4 rounded-2xl border border-gray-100 text-center"><p class="text-[9px] font-bold text-gray-400">Users</p><h4 id="stat-users" class="text-lg font-black text-purple-600">0</h4></div>
+            </div>
+
+            <div class="bg-white rounded-3xl border border-gray-100 p-5 mt-6">
+                <h3 class="font-bold text-gray-900 mb-2 border-b border-gray-100 pb-2">Manage Promo Banners</h3>
+                <div class="space-y-3 mt-3">
+                    <input type="file" id="admin-offer-file" accept="image/*" multiple class="w-full text-sm border p-1.5 bg-gray-50 rounded-xl">
+                    <button type="button" onclick="window.adminUpdateOffer()" id="btn-update-offer" class="w-full bg-red-600 text-white py-3 rounded-xl font-bold text-sm">Publish Offer Banners</button>
                 </div>
             </div>
 
-            <!-- ADMIN OFFER ZONE MANAGEMENT -->
-            <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden mt-6 p-5 relative">
-                <div class="relative z-10">
-                    <h3 class="font-bold text-gray-900 mb-2 border-b border-gray-100 pb-2">Manage Promo Banners</h3>
-                    <p class="text-[10px] text-gray-500 mb-3">You can upload multiple banners for the slider. (Recommended size: 800x400 pixels)</p>
-                    <div class="space-y-3 mt-3">
-                        <input type="file" id="admin-offer-file" accept="image/*" multiple class="w-full text-sm text-gray-500 file:mr-4 file:py-1.5 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-red-50 file:text-red-600 hover:file:bg-red-100 transition-all border border-gray-200 rounded-xl p-1.5 bg-gray-50">
-                        <button type="button" onclick="window.adminUpdateOffer()" id="btn-update-offer" class="w-full bg-red-600 text-white py-3 rounded-xl font-bold shadow-md hover:bg-red-700 active:scale-95 transition text-sm">Publish Offer Banners</button>
-                    </div>
+            <div class="bg-gray-900 rounded-3xl border border-gray-800 p-5 mt-6">
+                <h3 class="font-bold text-white mb-2 border-b border-gray-700 pb-2">Manage Scrolling Marquee</h3>
+                <div class="space-y-3 mt-3">
+                    <input type="text" id="admin-marquee-text" class="input-field !bg-gray-800 !text-white !border-gray-700" placeholder="Enter text...">
+                    <button type="button" onclick="window.adminUpdateMarquee()" id="btn-update-marquee" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm">Publish Marquee</button>
                 </div>
             </div>
 
-            <!-- ADMIN MARQUEE MANAGEMENT -->
-            <div class="bg-gray-900 rounded-3xl border border-gray-800 shadow-sm overflow-hidden mt-6 p-5 relative">
-                <div class="relative z-10">
-                    <h3 class="font-bold text-white mb-2 border-b border-gray-700 pb-2">Manage Scrolling Marquee</h3>
-                    <div class="space-y-3 mt-3">
-                        <input type="text" id="admin-marquee-text" class="input-field !bg-gray-800 !text-white !border-gray-700 !py-3" placeholder="Enter new scrolling announcement...">
-                        <button type="button" onclick="window.adminUpdateMarquee()" id="btn-update-marquee" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold shadow-md hover:bg-emerald-600 active:scale-95 transition text-sm">Publish Marquee Text</button>
-                    </div>
-                </div>
+            <div class="bg-white rounded-3xl border border-gray-100 overflow-hidden mt-6">
+                <div class="p-4 bg-gray-50 border-b border-gray-100 font-bold text-sm">Users & Partners</div>
+                <div class="overflow-x-auto"><table class="w-full text-left text-xs"><tbody id="admin-users-body"></tbody></table></div>
             </div>
 
-            <!-- ALL SYSTEM USERS DATA -->
-            <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden mt-6">
-                <div class="p-4 bg-gray-50 border-b border-gray-100 font-bold">
-                    <span class="text-sm">All Accounts Directory</span>
-                </div>
-                <div class="overflow-x-auto no-scrollbar">
-                    <table class="w-full text-left text-xs whitespace-nowrap">
-                        <thead class="bg-gray-50 border-b border-gray-100 text-gray-400 text-[10px] uppercase tracking-wider">
-                            <tr><th class="p-3 font-bold">Role</th><th class="p-3 font-bold">Name/Phone</th><th class="p-3 font-bold">Status</th><th class="p-3 font-bold text-right">PIN</th></tr>
-                        </thead>
-                        <tbody id="admin-users-body" class="divide-y divide-gray-50">
-                            <tr><td colspan="4" class="p-6 text-center text-gray-400 text-xs italic">Loading users...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden mt-6">
-                <div class="p-4 bg-gray-50 border-b border-gray-100 font-bold">
-                    <span class="text-sm">Live Orders</span>
-                </div>
-                <div class="overflow-x-auto no-scrollbar">
-                    <table class="w-full text-left text-xs whitespace-nowrap">
-                        <thead class="bg-gray-50 border-b border-gray-100 text-gray-400 text-[10px] uppercase tracking-wider">
-                            <tr><th class="p-3 font-bold">ID</th><th class="p-3 font-bold">Customer</th><th class="p-3 font-bold">Restaurant</th><th class="p-3 font-bold">Amt</th><th class="p-3 font-bold text-right">Status</th></tr>
-                        </thead>
-                        <tbody id="admin-log-body" class="divide-y divide-gray-50">
-                            <tr><td colspan="5" class="p-6 text-center text-gray-400 text-xs italic">No data available</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+            <div class="bg-white rounded-3xl border border-gray-100 overflow-hidden mt-6">
+                <div class="p-4 bg-gray-50 border-b border-gray-100 font-bold text-sm">Live Orders</div>
+                <div class="overflow-x-auto"><table class="w-full text-left text-xs"><tbody id="admin-log-body"></tbody></table></div>
             </div>
         </div>
-
     </main>
 
-    <!-- Bottom Navigation (Zomato Style) -->
-    <div id="bottom-nav" class="fixed bottom-0 w-full bg-white border-t border-gray-200 pb-safe pt-2 px-2 pb-2 shadow-[0_-10px_20px_rgba(0,0,0,0.03)] z-40 hidden">
-        <div class="max-w-md mx-auto flex justify-between items-center sm:max-w-4xl px-4">
-            <!-- Dynamically populated -->
-        </div>
+    <!-- Bottom Navigation -->
+    <div id="bottom-nav" class="fixed bottom-0 w-full bg-white border-t border-gray-200 pb-safe pt-2 px-2 pb-2 shadow-lg z-40 hidden">
+        <div class="max-w-md mx-auto flex justify-between items-center sm:max-w-4xl px-4"></div>
     </div>
 
     <!-- Auth Modal -->
@@ -577,21 +421,15 @@
         <div class="modal-content">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="font-black text-2xl text-gray-900" id="auth-title">Login</h3>
-                <button type="button" onclick="window.closeAuthModal()" class="w-8 h-8 bg-gray-100 text-gray-500 rounded-full flex items-center justify-center hover:bg-gray-200 transition">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
+                <button type="button" onclick="window.closeAuthModal()" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
             </div>
-
-            <div id="auth-msg" class="text-xs text-center font-bold mb-4 min-h-[1.5rem] px-4 rounded-lg py-2 hidden transition-all"></div>
-
+            <div id="auth-msg" class="text-xs text-center font-bold mb-4 px-4 py-2 hidden"></div>
+            
             <div id="auth-view-login" class="space-y-4">
                 <input id="login-phone" type="tel" class="input-field" placeholder="10-Digit Mobile Number" maxlength="10">
                 <input id="login-pass" type="password" class="input-field" placeholder="Password">
-                <button type="button" id="submit-login" onclick="window.handleAuth('login')" class="w-full bg-red-600 text-white p-4 rounded-2xl font-bold text-sm shadow-md hover:bg-red-700 active:scale-95 transition">Secure Login</button>
-                
-                <p class="text-center text-xs font-medium text-gray-500 mt-4">
-                    New to Gramzo? <button type="button" onclick="window.switchAuthView('register')" class="text-red-600 font-bold hover:underline">Create Account</button>
-                </p>
+                <button type="button" id="submit-login" onclick="window.handleAuth('login')" class="w-full bg-red-600 text-white p-4 rounded-2xl font-bold">Secure Login</button>
+                <p class="text-center text-xs font-medium text-gray-500 mt-4">New to Gramzo? <button type="button" onclick="window.switchAuthView('register')" class="text-red-600 font-bold">Create Account</button></p>
             </div>
 
             <div id="auth-view-register" class="hidden space-y-3 max-h-[60vh] overflow-y-auto px-1 pb-2">
@@ -599,35 +437,29 @@
                 <input id="reg-phone" type="tel" class="input-field" placeholder="10-Digit Mobile Number" maxlength="10">
                 <input id="reg-pass" type="password" class="input-field" placeholder="Create Password">
                 
-                <div id="partner-fields" class="hidden bg-gray-50 p-4 rounded-2xl border border-gray-100 space-y-3 mt-2">
-                    <p class="text-xs font-bold text-gray-600 uppercase tracking-wider text-center border-b border-gray-200 pb-2 mb-2">Restaurant Registration</p>
-                    <input id="reg-shop-name" type="text" class="input-field !bg-white" placeholder="Restaurant / Shop Name">
-                    <input id="reg-shop-address" type="text" class="input-field !bg-white" placeholder="Restaurant Full Address">
-                    <input id="reg-fssai-number" type="text" class="input-field !bg-white uppercase" placeholder="FSSAI License Number (Optional)">
+                <div id="partner-fields" class="hidden bg-gray-50 p-4 rounded-2xl space-y-3 mt-2">
+                    <p class="text-xs font-bold text-center border-b pb-2">Restaurant Registration</p>
+                    <input id="reg-shop-name" type="text" class="input-field" placeholder="Restaurant Name">
+                    <input id="reg-shop-address" type="text" class="input-field" placeholder="Restaurant Full Address">
                 </div>
 
-                <button type="button" id="submit-register" onclick="window.handleAuth('register')" class="w-full bg-red-600 text-white p-4 rounded-2xl font-bold text-sm shadow-md active:scale-95 transition mt-4">Sign Up</button>
-
-                <p class="text-center text-xs font-medium text-gray-500 mt-4">
-                    Already have an account? <button type="button" onclick="window.switchAuthView('login')" class="text-red-600 font-bold hover:underline">Login</button>
-                </p>
+                <button type="button" id="submit-register" onclick="window.handleAuth('register')" class="w-full bg-red-600 text-white p-4 rounded-2xl font-bold mt-4">Sign Up</button>
+                <p class="text-center text-xs font-medium text-gray-500 mt-4">Already have an account? <button type="button" onclick="window.switchAuthView('login')" class="text-red-600 font-bold">Login</button></p>
             </div>
         </div>
     </div>
 
-    <!-- Admin Specific Modal -->
+    <!-- Admin Modal -->
     <div id="admin-auth-overlay" class="modal-overlay z-[150]">
         <div class="modal-content !bg-gray-900 border border-gray-800">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="font-black text-2xl text-white"><i class="fa-solid fa-shield-halved mr-2 text-emerald-400"></i>Portal</h3>
-                <button type="button" onclick="window.closeAdminModal()" class="w-8 h-8 bg-gray-800 text-gray-400 rounded-full flex items-center justify-center hover:text-white transition">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
+                <h3 class="font-black text-2xl text-white"><i class="fa-solid fa-shield-halved text-emerald-400"></i> Portal</h3>
+                <button type="button" onclick="window.closeAdminModal()" class="w-8 h-8 bg-gray-800 text-white rounded-full"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="space-y-4">
-                <input id="admin-id-input" type="text" class="input-field !bg-gray-800 !text-white !border-gray-700" placeholder="Admin ID">
-                <input id="admin-pass-input" type="password" class="input-field !bg-gray-800 !text-white !border-gray-700" placeholder="Admin Password">
-                <button type="button" onclick="window.handleAdminLogin()" class="w-full bg-emerald-500 text-white p-4 rounded-2xl font-bold text-sm shadow-xl hover:bg-emerald-600 active:scale-95 transition">Access Database</button>
+                <input id="admin-id-input" type="text" class="input-field !bg-gray-800 !text-white" placeholder="Admin ID">
+                <input id="admin-pass-input" type="password" class="input-field !bg-gray-800 !text-white" placeholder="Admin Password">
+                <button type="button" onclick="window.handleAdminLogin()" class="w-full bg-emerald-500 text-white p-4 rounded-2xl font-bold">Access Database</button>
             </div>
         </div>
     </div>
@@ -635,15 +467,14 @@
     <!-- Image View Modal -->
     <div id="image-view-modal" class="modal-overlay z-[200]">
         <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-md bg-white p-2 rounded-2xl shadow-2xl">
-            <div class="flex justify-between items-center px-2 py-1 mb-2 border-b border-gray-100">
-                <h3 class="font-bold text-gray-700 text-sm">Payment Screenshot</h3>
-                <button type="button" onclick="document.getElementById('image-view-modal').classList.remove('active')" class="w-8 h-8 bg-gray-100 text-gray-600 rounded-full flex items-center justify-center hover:bg-gray-200 transition"><i class="fa-solid fa-xmark"></i></button>
+            <div class="flex justify-between items-center px-2 py-1 mb-2 border-b">
+                <h3 class="font-bold text-sm">Payment Screenshot</h3>
+                <button type="button" onclick="document.getElementById('image-view-modal').classList.remove('active')" class="w-8 h-8 bg-gray-100 rounded-full"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <img id="modal-full-img" src="" class="w-full h-auto rounded-xl max-h-[70vh] object-contain bg-gray-50">
+            <img id="modal-full-img" src="" class="w-full h-auto rounded-xl max-h-[70vh] object-contain">
         </div>
     </div>
 
-    <!-- Global Toast Message -->
     <div id="toast-msg" class="fixed top-20 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full text-sm font-bold z-[300] shadow-2xl transition-all duration-300 transform -translate-y-10 opacity-0 pointer-events-none flex items-center gap-2">
         <i class="fa-solid fa-circle-info text-emerald-400"></i>
         <span id="toast-text">Message</span>
@@ -654,22 +485,9 @@
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, getDoc, getDocs, setDoc, onSnapshot, addDoc, updateDoc, deleteDoc, serverTimestamp, initializeFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // ==========================================
-        // 🔴 LIVE WEBSITE CONFIGURATION 🔴
-        // ==========================================
-        // Set this to TRUE when hosting on GitHub Pages, Vercel, Netlify etc.
         const IS_LIVE_WEBSITE = true;
 
-        const liveFirebaseConfig = {
-            apiKey: "AIzaSyCA4U4jva7HHeMP-yk1VJy3l_BBct3Gohg",
-            authDomain: "gramzo.firebaseapp.com",
-            projectId: "gramzo",
-            storageBucket: "gramzo.firebasestorage.app",
-            messagingSenderId: "674262956986",
-            appId: "1:674262956986:web:772f68694c77e15bf3fb83"
-        };
-
-        const canvasFallbackConfig = {
+        const firebaseConfig = {
             apiKey: "AIzaSyCA4U4jva7HHeMP-yk1VJy3l_BBct3Gohg",
             authDomain: "gramzo.firebaseapp.com",
             projectId: "gramzo",
@@ -678,36 +496,23 @@
             appId: "1:674262956986:web:772f68694c77e15bf3fb83"
         };
         
-        const firebaseConfig = IS_LIVE_WEBSITE ? liveFirebaseConfig : (typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : canvasFallbackConfig);
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'gramzo-super-v2'; 
-        
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        
-        const db = initializeFirestore(app, {
-            experimentalForceLongPolling: true
-        });
+        const db = initializeFirestore(app, { experimentalForceLongPolling: true });
 
+        // GLOBALS
         let currentUser = null;
         let currentRestaurantFilter = null;
-        let cart = [];
+        window.cart = [];
+        window.appliedPromo = 0;
+        window.promoCode = '';
+        window.currentSearchQuery = '';
         let unsubscribeListeners = []; 
         let currentAuthRole = 'User'; 
         
-        window.currentSearchQuery = '';
-        window.currentCartPartner = null;
-        window.bannerInterval = null;
-        window.appliedPromo = 0;
-        window.promoCode = '';
-        
-        // --- Dynamic Path Helper ---
         const getCol = (name) => IS_LIVE_WEBSITE ? collection(db, name) : collection(db, 'artifacts', appId, 'public', 'data', name);
         const getDocRef = (colName, docId) => IS_LIVE_WEBSITE ? doc(db, colName, docId) : doc(db, 'artifacts', appId, 'public', 'data', colName, docId);
-
-        // NATIVE FUNCTIONS
-        window.gm_authFailure = () => {
-            window.showToast("গুগল ম্যাপস বিলিং বা এপিআই এরর! অ্যাডমিনকে ক্লাউড কনসোল চেক করতে বলুন।", "error");
-        };
 
         window.dbCall = (promise, ms = 8000) => {
             return new Promise((resolve, reject) => {
@@ -730,10 +535,8 @@
                         ctx.drawImage(img, 0, 0, width, height);
                         resolve(canvas.toDataURL('image/jpeg', 0.6)); 
                     };
-                    img.onerror = reject;
                     img.src = e.target.result;
                 };
-                reader.onerror = reject;
                 reader.readAsDataURL(file);
             });
         };
@@ -746,7 +549,6 @@
         window.showToast = (text, type = "info") => {
             const toast = document.getElementById('toast-msg');
             const icon = toast.querySelector('i');
-            
             toast.querySelector('span').innerText = text;
             if (type === 'error') icon.className = "fa-solid fa-circle-exclamation text-red-400";
             else if (type === 'success') icon.className = "fa-solid fa-circle-check text-emerald-400";
@@ -761,63 +563,40 @@
             }, 3000);
         };
 
-        // --- NEW: Global Search Function restored ---
         window.handleSearchInput = () => {
             window.currentSearchQuery = document.getElementById('global-search').value.toLowerCase();
             window.loadMarketplaceData();
         };
 
         window.startApp = async () => {
-            try {
-                if (!auth.currentUser) {
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token && !IS_LIVE_WEBSITE) {
-                        try {
-                            await window.dbCall(signInWithCustomToken(auth, __initial_auth_token), 10000);
-                        } catch (tokenErr) {
-                            console.warn("Custom token mismatch, using anonymous login...", tokenErr);
-                            await window.dbCall(signInAnonymously(auth), 10000);
-                        }
-                    } else {
-                        await window.dbCall(signInAnonymously(auth), 10000);
-                    }
-                }
-            } catch (e) {
-                console.error("Auth Init Error:", e);
-                window.showToast("Network delayed. Retrying connection...", "info");
+            if (!auth.currentUser) {
+                try { await window.dbCall(signInAnonymously(auth), 10000); } 
+                catch (e) { console.error(e); }
             }
         };
 
         window.setupMapsFeatures = () => {
+            if(typeof google === 'undefined') return;
             const initInput = (id) => {
                 const input = document.getElementById(id);
-                // We only attach Google Maps Autocomplete if it's an INPUT tag.
-                // cart-address is now a TEXTAREA so it skips this and allows free manual typing!
-                if (input && input.tagName === 'INPUT' && !input.dataset.mapsInit && typeof google !== 'undefined') {
+                if (input && input.tagName === 'INPUT' && !input.dataset.mapsInit) {
                     const autocomplete = new google.maps.places.Autocomplete(input, { componentRestrictions: { country: "in" } });
                     autocomplete.addListener('place_changed', () => {
                         const place = autocomplete.getPlace();
-                        if(place && place.formatted_address) {
-                            input.value = place.formatted_address;
-                        }
+                        if(place && place.formatted_address) input.value = place.formatted_address;
                     });
                     input.dataset.mapsInit = 'true';
                 }
             };
             initInput('user-location-input');
-            initInput('cart-address');
         };
 
-        if (window.isGoogleMapsLoaded) {
-            window.setupMapsFeatures();
-        }
+        if (window.isGoogleMapsLoaded) window.setupMapsFeatures();
 
         window.getCurrentLocation = (inputId) => {
             const inputEl = document.getElementById(inputId);
             let locationFound = false;
-            
-            const origPlaceholder = inputEl.placeholder;
             inputEl.value = "Fetching your location...";
-
             const fallbackTimer = setTimeout(() => {
                 if (locationFound) return;
                 inputEl.value = "";
@@ -829,84 +608,51 @@
                     locationFound = true;
                     clearTimeout(fallbackTimer);
                     try {
-                        if (typeof google === 'undefined') throw new Error("Google Maps not loaded");
                         const geocoder = new google.maps.Geocoder();
-                        const latlng = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-                        
-                        geocoder.geocode({ location: latlng }, (results, status) => {
+                        geocoder.geocode({ location: { lat: pos.coords.latitude, lng: pos.coords.longitude } }, (results, status) => {
                             if (status === "OK" && results[0]) {
-                                if(inputEl.tagName === 'SELECT') {
-                                    let option = document.createElement("option");
-                                    option.text = "📍 " + results[0].formatted_address.substring(0, 30) + '...';
-                                    option.value = results[0].formatted_address;
-                                    inputEl.add(option);
-                                    inputEl.value = results[0].formatted_address;
-                                } else {
-                                    inputEl.value = results[0].formatted_address;
-                                }
+                                inputEl.value = results[0].formatted_address;
                                 window.showToast("Location detected successfully!", "success");
                             } else {
-                                console.error("Geocoder failed due to: " + status);
-                                window.showToast("GPS coordinates acquired.", "success");
+                                inputEl.value = "";
                             }
                         });
-                    } catch(e) {
-                        inputEl.value = "";
-                        window.showToast("GPS coordinates acquired.", "success");
-                    }
-                }, (err) => {
+                    } catch(e) { inputEl.value = ""; }
+                }, () => {
                     locationFound = true;
                     clearTimeout(fallbackTimer);
                     inputEl.value = "";
-                    window.showToast("Please type your address manually.", "error");
-                }, { timeout: 10000, maximumAge: 0, enableHighAccuracy: true });
+                }, { timeout: 10000, enableHighAccuracy: true });
             } else {
                 clearTimeout(fallbackTimer);
                 inputEl.value = "";
-                window.showToast("Geolocation not supported.", "error");
             }
         };
 
+        // --- AUTH UI ---
         window.openAuthModal = (role = 'User') => {
             currentAuthRole = role;
-            const overlay = document.getElementById('auth-overlay');
-            overlay.classList.add('active');
+            document.getElementById('auth-overlay').classList.add('active');
             window.switchAuthView('login'); 
         };
-
-        window.closeAuthModal = () => {
-            document.getElementById('auth-overlay').classList.remove('active');
-            document.getElementById('auth-msg').classList.add('hidden');
-        };
-        
-        window.openAdminModal = () => { document.getElementById('admin-auth-overlay').classList.add('active'); };
-        window.closeAdminModal = () => { document.getElementById('admin-auth-overlay').classList.remove('active'); };
+        window.closeAuthModal = () => document.getElementById('auth-overlay').classList.remove('active');
+        window.openAdminModal = () => document.getElementById('admin-auth-overlay').classList.add('active');
+        window.closeAdminModal = () => document.getElementById('admin-auth-overlay').classList.remove('active');
 
         window.switchAuthView = (view) => {
             document.getElementById('auth-view-login').style.display = view === 'login' ? 'block' : 'none';
             document.getElementById('auth-view-register').style.display = view === 'register' ? 'block' : 'none';
-            
-            const titlePrefix = currentAuthRole === 'Partner' ? 'Restaurant' : 'User';
-            document.getElementById('auth-title').innerText = view === 'login' ? `${titlePrefix} Login` : `Join as ${titlePrefix}`;
-            
-            if(view === 'register') {
-                document.getElementById('partner-fields').style.display = currentAuthRole === 'Partner' ? 'block' : 'none';
-            }
+            document.getElementById('auth-title').innerText = view === 'login' ? `${currentAuthRole === 'Partner' ? 'Restaurant' : 'User'} Login` : `Join as ${currentAuthRole === 'Partner' ? 'Restaurant' : 'User'}`;
+            document.getElementById('partner-fields').style.display = (view === 'register' && currentAuthRole === 'Partner') ? 'block' : 'none';
             document.getElementById('auth-msg').classList.add('hidden');
         };
 
-        window.toggleProfileMenu = () => {
-            const menu = document.getElementById('profile-menu');
-            menu.classList.toggle('hidden');
-        };
+        window.toggleProfileMenu = () => document.getElementById('profile-menu').classList.toggle('hidden');
 
         window.switchMainView = (viewName) => {
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-            const target = document.getElementById(`view-${viewName}`);
-            if (target) {
-                target.classList.add('active');
-                window.scrollTo(0,0);
-            }
+            document.getElementById(`view-${viewName}`).classList.add('active');
+            window.scrollTo(0,0);
             
             const cta = document.getElementById('partner-cta');
             if(cta) cta.style.display = currentUser ? 'none' : 'flex';
@@ -921,123 +667,70 @@
                 activeNav.classList.add('text-red-600', 'font-black');
             }
 
-            if (viewName === 'Cart') {
-                window.renderCartUI();
-                if (window.setupMapsFeatures) window.setupMapsFeatures();
-            }
+            if (viewName === 'Cart') window.renderCartUI();
         };
         
         window.logout = async () => {
             document.getElementById('profile-menu').classList.add('hidden');
-            
             if(auth.currentUser) {
-                try {
-                    await window.dbCall(deleteDoc(getDocRef('sessions', auth.currentUser.uid)), 5000);
-                } catch(e) {
-                    console.warn("Session error:", e);
-                }
-                
-                try {
-                    await signOut(auth); // Clear Firebase Auth Session
-                } catch(e) {
-                    console.warn("Sign out error:", e);
-                }
+                try { await window.dbCall(deleteDoc(getDocRef('sessions', auth.currentUser.uid)), 5000); } catch(e) {}
+                try { await signOut(auth); } catch(e) {}
             }
-            
             currentUser = null;
-            cart = [];
+            window.cart = [];
             window.appliedPromo = 0;
             window.promoCode = '';
-            
             window.showToast("Signing out...", "info");
-            
-            setTimeout(() => {
-                window.location.reload();
-            }, 800);
+            setTimeout(() => window.location.reload(), 800);
         };
 
         window.handleAdminLogin = async () => {
             const btn = document.querySelector('#admin-auth-overlay button');
-            const orig = btn.innerText;
-            btn.innerText = "Verifying...";
-            btn.disabled = true;
+            const orig = btn.innerText; btn.innerText = "Verifying..."; btn.disabled = true;
 
             try {
-                if (!auth.currentUser) {
-                    try { await window.dbCall(signInAnonymously(auth), 4000); } catch(e) {}
-                }
-
+                if (!auth.currentUser) await window.dbCall(signInAnonymously(auth), 4000);
                 const id = document.getElementById('admin-id-input').value.trim();
                 const pass = document.getElementById('admin-pass-input').value.trim();
 
                 if (id === 'Gramzo_admin' && pass === '1234') {
                     currentUser = { name: 'Super Admin', role: 'Admin', phone: 'Admin', docId: 'admin_session', uid: auth.currentUser?.uid || 'admin' };
-                    
-                    if(auth.currentUser) {
-                        window.dbCall(setDoc(getDocRef('sessions', auth.currentUser.uid), { phone: 'admin_session' }, { merge: true }), 3000).catch(e=>{});
-                    }
-                    
+                    if(auth.currentUser) window.dbCall(setDoc(getDocRef('sessions', auth.currentUser.uid), { phone: 'admin_session' }, { merge: true }), 3000).catch(e=>{});
                     window.closeAdminModal();
-                    document.getElementById('admin-id-input').value = '';
-                    document.getElementById('admin-pass-input').value = '';
                     window.finalizeLoginSequence();
                 } else {
                     window.showToast("Invalid Admin Credentials.", "error");
                 }
-            } catch (e) {
-                window.showToast("System error during admin login.", "error");
-            } finally {
-                if (btn) { btn.innerText = orig; btn.disabled = false; }
-            }
+            } catch (e) { window.showToast("System error.", "error"); } 
+            finally { btn.innerText = orig; btn.disabled = false; }
         };
 
         window.handleAuth = async (type) => {
             const msgEl = document.getElementById('auth-msg');
             msgEl.classList.remove('hidden');
-            msgEl.className = "text-xs text-center font-bold mb-4 min-h-[1.5rem] px-4 rounded-lg py-2 bg-blue-50 text-blue-600 block";
-            msgEl.innerText = "Processing Request..."; 
+            msgEl.className = "text-xs text-center font-bold mb-4 px-4 rounded-lg py-2 bg-blue-50 text-blue-600 block";
+            msgEl.innerText = "Processing..."; 
             
-            let btnId = type === 'register' ? 'submit-register' : 'submit-login';
-            const btn = document.getElementById(btnId);
-            const originalText = btn.innerText;
-            btn.innerText = "Please wait...";
-            btn.disabled = true;
+            const btn = document.getElementById(type === 'register' ? 'submit-register' : 'submit-login');
+            const originalText = btn.innerText; btn.innerText = "Please wait..."; btn.disabled = true;
 
             try {
-                if (!auth.currentUser) {
-                    try {
-                        await window.dbCall(signInAnonymously(auth), 4000);
-                    } catch(e) {
-                        console.warn("Auth timeout, proceeding offline");
-                    }
-                }
+                if (!auth.currentUser) await window.dbCall(signInAnonymously(auth), 4000);
 
                 if (type === 'register') {
                     const name = document.getElementById('reg-name').value.trim();
                     const phone = document.getElementById('reg-phone').value.trim();
                     const pass = document.getElementById('reg-pass').value.trim();
 
-                    if (!name || phone.length < 4 || pass.length < 3) {
-                        throw new Error("Please enter a valid Name, Phone, and Password.");
-                    }
+                    if (!name || phone.length < 4 || pass.length < 3) throw new Error("Please enter valid details.");
 
                     const userRef = getDocRef('users', phone);
-                    
                     let snap = null;
-                    try {
-                        snap = await window.dbCall(getDoc(userRef), 4000);
-                    } catch (e) {
-                        console.warn("getDoc timeout. Assuming new user.");
-                    }
+                    try { snap = await window.dbCall(getDoc(userRef), 4000); } catch (e) {}
 
-                    if (snap && snap.exists()) {
-                        throw new Error("Number already registered. Please login.");
-                    }
+                    if (snap && snap.exists()) throw new Error("Number already registered.");
 
-                    let partnerCategory = currentAuthRole === 'Partner' ? 'Food Owner' : null;
-                    let shopName = null;
-                    let shopAddress = null;
-                    let fssaiNumber = null;
+                    let shopName = null, shopAddress = null, fssaiNumber = null;
 
                     if (currentAuthRole === 'Partner') {
                         shopName = document.getElementById('reg-shop-name').value.trim();
@@ -1046,248 +739,73 @@
                     }
 
                     const userData = { 
-                        name, phone, pin: pass, 
-                        role: currentAuthRole, 
-                        shopStatus: 'Open',
-                        approvalStatus: currentAuthRole === 'Partner' ? 'Approved' : 'Approved', 
-                        uid: auth?.currentUser?.uid || 'unknown',
+                        name, phone, pin: pass, role: currentAuthRole, shopStatus: 'Open',
+                        approvalStatus: 'Approved', uid: auth?.currentUser?.uid || 'unknown',
                         created: new Date().toISOString(),
                         ...(currentAuthRole === 'Partner' && { 
-                            category: partnerCategory, 
-                            shopName: shopName || name + "'s Kitchen",
-                            shopAddress: shopAddress || '',
-                            fssaiNumber: fssaiNumber || null,
-                            codEnabled: true,
-                            qrCode: null
+                            category: 'Food Owner', shopName: shopName || name + "'s Kitchen",
+                            shopAddress: shopAddress || '', fssaiNumber: fssaiNumber || null,
+                            codEnabled: true, qrCode: null
                         })
                     };
                     
-                    window.dbCall(setDoc(userRef, userData, { merge: true }), 4000).catch(e => console.warn("Offline save"));
-                    
-                    if(auth.currentUser) {
-                        window.dbCall(setDoc(getDocRef('sessions', auth.currentUser.uid), { phone: phone }, { merge: true }), 3000).catch(e => {});
-                    }
+                    window.dbCall(setDoc(userRef, userData, { merge: true }), 4000).catch(e=>{});
+                    if(auth.currentUser) window.dbCall(setDoc(getDocRef('sessions', auth.currentUser.uid), { phone }, { merge: true }), 3000).catch(e=>{});
                     
                     currentUser = { ...userData, docId: phone };
                     window.finalizeLoginSequence();
-
                 } else if (type === 'login') {
                     const phone = document.getElementById('login-phone').value.trim();
                     const pass = document.getElementById('login-pass').value.trim();
 
-                    if (phone.length < 4 || !pass) {
-                        throw new Error("Please enter your registered Phone and Password.");
-                    }
+                    if (phone.length < 4 || !pass) throw new Error("Please enter valid Phone and Password.");
 
                     const userRef = getDocRef('users', phone);
+                    const snap = await window.dbCall(getDoc(userRef), 6000);
                     
-                    let snap;
-                    try {
-                        snap = await window.dbCall(getDoc(userRef), 6000);
-                    } catch (e) {
-                        throw new Error("Poor connection. Cannot verify login right now.");
-                    }
-                    
-                    if (!snap || !snap.exists()) {
-                        throw new Error("Account not found. Please register.");
-                    }
-
+                    if (!snap || !snap.exists()) throw new Error("Account not found. Please register.");
                     const data = snap.data();
-                    if (data.pin !== pass) {
-                        throw new Error("Incorrect password.");
-                    }
+                    if (data.pin !== pass) throw new Error("Incorrect password.");
 
                     currentUser = { ...data, docId: phone };
-                    
-                    if(auth.currentUser) {
-                        window.dbCall(setDoc(getDocRef('sessions', auth.currentUser.uid), { phone: phone }, { merge: true }), 3000).catch(e => {});
-                    }
-                    
+                    if(auth.currentUser) window.dbCall(setDoc(getDocRef('sessions', auth.currentUser.uid), { phone }, { merge: true }), 3000).catch(e=>{});
                     window.finalizeLoginSequence();
                 }
             } catch (e) {
-                console.error("Auth Error:", e);
-                msgEl.className = "text-xs text-center font-bold mb-4 min-h-[1.5rem] px-4 rounded-lg py-2 bg-red-50 text-red-600 block";
-                msgEl.innerText = e.message || "Connection failed. Please check network.";
-            } finally {
-                btn.innerText = originalText;
-                btn.disabled = false;
-            }
+                msgEl.className = "text-xs text-center font-bold mb-4 px-4 rounded-lg py-2 bg-red-50 text-red-600 block";
+                msgEl.innerText = e.message || "Connection failed.";
+            } finally { btn.innerText = originalText; btn.disabled = false; }
         };
 
-        window.finalizeLoginSequence = (isRestore = false) => {
+        window.finalizeLoginSequence = () => {
             window.closeAuthModal();
-            if (!isRestore) {
-                window.showToast(`Welcome back, ${currentUser.name.split(' ')[0] || 'User'}!`, "success");
-            }
+            window.showToast(`Welcome back, ${currentUser.name.split(' ')[0]}!`, "success");
 
             document.getElementById('btn-login-trigger').classList.add('hidden');
-            const pTrigger = document.getElementById('profile-trigger');
-            pTrigger.classList.remove('hidden');
-            document.getElementById('nav-initial').innerText = currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U';
-            document.getElementById('nav-name').innerText = currentUser.name || 'Unknown';
-            document.getElementById('nav-role').innerText = currentUser.role || 'User';
-            
-            const roleSpan = document.getElementById('nav-role');
-            roleSpan.className = `text-[9px] font-bold uppercase ${currentUser.role === 'Admin' ? 'text-purple-500' : currentUser.role === 'Partner' ? 'text-orange-500' : 'text-blue-500'}`;
-
-            document.getElementById('menu-name').innerText = currentUser.name || 'Unknown';
-            let displayPhone = currentUser.phone ? String(currentUser.phone) : '';
-            if(displayPhone && displayPhone.includes('@')) {
-                displayPhone = displayPhone.split('@')[0] + '@...';
-            } else if (currentUser.role !== 'Admin') {
-                displayPhone = `+91 ${displayPhone}`;
-            } else {
-                displayPhone = `Admin ID: ${displayPhone}`;
-            }
-            document.getElementById('menu-phone').innerText = displayPhone;
+            document.getElementById('profile-trigger').classList.remove('hidden');
+            document.getElementById('nav-initial').innerText = currentUser.name.charAt(0).toUpperCase();
+            document.getElementById('nav-name').innerText = currentUser.name;
+            document.getElementById('nav-role').innerText = currentUser.role;
+            document.getElementById('nav-role').className = `text-[9px] font-bold uppercase ${currentUser.role === 'Admin' ? 'text-purple-500' : currentUser.role === 'Partner' ? 'text-orange-500' : 'text-blue-500'}`;
+            document.getElementById('menu-name').innerText = currentUser.name;
+            document.getElementById('menu-phone').innerText = currentUser.phone;
 
             window.setupBottomNav(currentUser.role);
             window.switchMainView(currentUser.role === 'Admin' ? 'Admin' : currentUser.role === 'Partner' ? 'Partner' : 'User');
 
-            if (currentUser.role === 'Admin') {
-                const adminBadge = document.getElementById('admin-id-badge');
-                if (adminBadge) adminBadge.innerText = `Admin Access`;
-            }
-
             if (currentUser.role === 'Partner') {
                 document.getElementById('partner-welcome').innerText = `Hello, ${currentUser.name.split(' ')[0]}!`;
-                if(currentUser.category) {
-                    document.getElementById('partner-category-badge').innerText = `Online Menu Active`;
-                }
-
-                const statusCont = document.getElementById('shop-status-container');
-                const addProdCont = document.getElementById('add-product-container');
-                const catListCont = document.getElementById('partner-catalog-list-container');
-
-                const statusToggle = document.getElementById('partner-status-toggle');
-                if(statusToggle) statusToggle.checked = (currentUser.shopStatus !== 'Closed');
-                document.getElementById('shop-status-text').innerText = (currentUser.shopStatus === 'Closed') ? 'Currently Closed' : 'Currently Open';
-
-                const statusLabel = document.getElementById('partner-approval-status');
-                const approvalWarning = document.getElementById('approval-warning');
-                const canAddProducts = (currentUser.category === 'Food Owner');
-                
-                document.getElementById('hub-name-val').innerText = currentUser.shopName || currentUser.name;
-                
-                const hubAddressRow = document.getElementById('hub-address-row');
-                if(hubAddressRow && currentUser.shopAddress) {
-                    hubAddressRow.classList.remove('hidden');
+                if(currentUser.shopName) document.getElementById('hub-name-val').innerText = currentUser.shopName;
+                if(currentUser.shopAddress) {
+                    document.getElementById('hub-address-row').classList.remove('hidden');
                     document.getElementById('hub-address-val').innerText = currentUser.shopAddress;
+                    document.getElementById('partner-shop-address').value = currentUser.shopAddress;
                 }
-
-                const hubFssaiRow = document.getElementById('hub-fssai-row');
-                const pSetupForm = document.getElementById('partner-setup-form');
-
-                if (currentUser.fssaiNumber) {
-                    hubFssaiRow.classList.remove('hidden');
-                    document.getElementById('hub-fssai-val').innerText = currentUser.fssaiNumber;
-                } else {
-                    hubFssaiRow.classList.add('hidden');
-                }
-
-                if (currentUser.approvalStatus === 'Approved') {
-                    statusLabel.innerText = "Verified Restaurant";
-                    statusLabel.className = "text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-1 rounded uppercase tracking-widest border border-emerald-100";
-                    if(approvalWarning) approvalWarning.classList.add('hidden');
-                    statusCont.classList.remove('hidden');
-                    pSetupForm.classList.remove('hidden');
-                    document.getElementById('btn-submit-profile').innerText = "Update Settings";
-                    if (canAddProducts) {
-                        addProdCont.classList.remove('hidden');
-                        catListCont.classList.remove('hidden');
-                    } else {
-                        addProdCont.classList.add('hidden');
-                        catListCont.classList.add('hidden');
-                    }
-                } else if (currentUser.approvalStatus === 'Rejected') {
-                    statusLabel.innerText = "Rejected";
-                    statusLabel.className = "text-[10px] font-black text-red-600 bg-red-50 px-2 py-1 rounded uppercase tracking-widest";
-                    addProdCont.classList.add('hidden');
-                    catListCont.classList.add('hidden');
-                    statusCont.classList.add('hidden');
-                    pSetupForm.classList.remove('hidden');
-                    if(approvalWarning) {
-                        approvalWarning.classList.remove('hidden');
-                        document.getElementById('approval-warning-text').innerText = "Your restaurant application was rejected by Admin. Please update details.";
-                    }
-                } else if (currentUser.approvalStatus === 'Pending') {
-                    statusLabel.innerText = "Pending Verification";
-                    statusLabel.className = "text-[10px] font-black text-orange-600 bg-orange-50 px-2 py-1 rounded uppercase tracking-widest";
-                    addProdCont.classList.add('hidden');
-                    catListCont.classList.add('hidden');
-                    statusCont.classList.add('hidden');
-                    pSetupForm.classList.add('hidden');
-                    if(approvalWarning) {
-                        approvalWarning.classList.remove('hidden');
-                        document.getElementById('approval-warning-text').innerText = "Your restaurant details are under review. Menu editing will unlock after approval.";
-                    }
-                } else {
-                    statusLabel.innerText = "Setup Needed";
-                    statusLabel.className = "text-[10px] font-black text-gray-500 bg-gray-100 px-2 py-1 rounded uppercase tracking-widest";
-                    pSetupForm.classList.remove('hidden');
-                    if(approvalWarning) approvalWarning.classList.add('hidden');
-                    addProdCont.classList.add('hidden');
-                    catListCont.classList.add('hidden');
-                }
-                
                 if(currentUser.shopName) document.getElementById('partner-shop-name').value = currentUser.shopName;
-                if(currentUser.shopAddress) document.getElementById('partner-shop-address').value = currentUser.shopAddress;
-                if(currentUser.fssaiNumber) document.getElementById('partner-fssai-number').value = currentUser.fssaiNumber;
-                
-                if(currentUser.codEnabled !== undefined) {
-                    const codToggle = document.getElementById('partner-cod-toggle-setup');
-                    if (codToggle) codToggle.checked = currentUser.codEnabled;
-                }
-                if(currentUser.qrCode) {
-                    const preview = document.getElementById('partner-qr-preview');
-                    if(preview) {
-                        preview.src = currentUser.qrCode;
-                        preview.classList.remove('hidden');
-                    }
-                }
             }
 
             window.initRoleListeners();
             window.loadMarketplaceData();
-        };
-
-        window.renderRestaurants = (restaurants) => {
-            const carousel = document.getElementById('restaurant-list-carousel');
-            if (!carousel) return;
-            
-            if(restaurants.length === 0) {
-                carousel.innerHTML = '<p class="text-xs text-gray-400">No restaurants available.</p>';
-                return;
-            }
-
-            carousel.innerHTML = restaurants.map(r => {
-                const isActive = currentRestaurantFilter === r.partnerId;
-                return `
-                <div class="cursor-pointer group shrink-0 flex flex-col items-center w-20" onclick="window.filterRestaurant('${r.partnerId}', '${r.shopName.replace(/'/g, "\\'")}')">
-                    <div class="w-16 h-16 rounded-full flex items-center justify-center overflow-hidden mb-2 shadow-sm border-2 transition-all ${isActive ? 'border-red-500 scale-105' : 'border-gray-100 bg-gray-50 group-hover:border-red-300'}">
-                        <img src="${r.image}" class="w-full h-full object-cover" alt="${r.shopName}">
-                    </div>
-                    <p class="text-center text-[10px] font-bold ${isActive ? 'text-red-600' : 'text-gray-700'} leading-tight w-full px-1 truncate">${r.shopName}</p>
-                </div>`;
-            }).join('');
-        };
-
-        const extractRestaurants = (items) => {
-            const uniqueRestaurants = [];
-            const map = new Map();
-            items.forEach(p => {
-                if(p.shopName && !map.has(p.partnerId)) {
-                    map.set(p.partnerId, true);
-                    uniqueRestaurants.push({
-                        partnerId: p.partnerId,
-                        shopName: p.shopName,
-                        shopAddress: p.shopAddress || '',
-                        image: p.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&q=80'
-                    });
-                }
-            });
-            window.renderRestaurants(uniqueRestaurants);
         };
 
         const renderProducts = (items) => {
@@ -1296,7 +814,6 @@
             
             const filtered = items.filter(i => {
                 if (currentRestaurantFilter && i.partnerId !== currentRestaurantFilter) return false;
-
                 if (window.currentSearchQuery) {
                     const q = window.currentSearchQuery.toLowerCase();
                     return i.name.toLowerCase().includes(q) || (i.shopName && i.shopName.toLowerCase().includes(q));
@@ -1365,83 +882,54 @@
             }).join('');
         };
 
+        window.renderRestaurants = (restaurants) => {
+            const carousel = document.getElementById('restaurant-list-carousel');
+            if (!carousel) return;
+            if(restaurants.length === 0) {
+                carousel.innerHTML = '<p class="text-xs text-gray-400">No restaurants available.</p>';
+                return;
+            }
+            carousel.innerHTML = restaurants.map(r => {
+                const isActive = currentRestaurantFilter === r.partnerId;
+                return `
+                <div class="cursor-pointer group shrink-0 flex flex-col items-center w-20" onclick="window.filterRestaurant('${r.partnerId}', '${r.shopName.replace(/'/g, "\\'")}')">
+                    <div class="w-16 h-16 rounded-full flex items-center justify-center overflow-hidden mb-2 shadow-sm border-2 transition-all ${isActive ? 'border-red-500 scale-105' : 'border-gray-100 bg-gray-50 group-hover:border-red-300'}">
+                        <img src="${r.image}" class="w-full h-full object-cover" alt="${r.shopName}">
+                    </div>
+                    <p class="text-center text-[10px] font-bold ${isActive ? 'text-red-600' : 'text-gray-700'} leading-tight w-full px-1 truncate">${r.shopName}</p>
+                </div>`;
+            }).join('');
+        };
+
+        const extractRestaurants = (items) => {
+            const uniqueRestaurants = [];
+            const map = new Map();
+            items.forEach(p => {
+                if(p.shopName && !map.has(p.partnerId)) {
+                    map.set(p.partnerId, true);
+                    uniqueRestaurants.push({
+                        partnerId: p.partnerId, shopName: p.shopName, shopAddress: p.shopAddress || '',
+                        image: p.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&q=80'
+                    });
+                }
+            });
+            window.renderRestaurants(uniqueRestaurants);
+        };
+
         window.loadMarketplaceData = () => {
-            if (!auth.currentUser) return;
-            
             onSnapshot(getDocRef('settings', 'app_config'), (snap) => {
                 const bannerEl = document.getElementById('user-offer-banner');
-                const marqueeContainer = document.getElementById('marquee-container');
-                const marqueeEl = document.getElementById('dynamic-marquee');
-                const dotsContainer = document.getElementById('banner-dots');
-                const mainContent = document.getElementById('main-content');
-                
-                if (snap.exists()) {
-                    const data = snap.data();
-                    
-                    if (data.offerBanners && data.offerBanners.length > 0) {
-                        window.offerBanners = data.offerBanners;
-                        window.currentBannerIndex = 0;
-                        if(bannerEl) bannerEl.src = window.offerBanners[0];
-                        
-                        if(dotsContainer) {
-                            dotsContainer.innerHTML = window.offerBanners.map((_, i) => `<div class="w-1.5 h-1.5 rounded-full ${i === 0 ? 'bg-white' : 'bg-white/40'}"></div>`).join('');
-                        }
-                        
-                        if (!window.bannerInterval) {
-                            window.bannerInterval = setInterval(() => {
-                                if(bannerEl) bannerEl.style.opacity = '0';
-                                setTimeout(() => {
-                                    window.currentBannerIndex = (window.currentBannerIndex + 1) % window.offerBanners.length;
-                                    if(bannerEl) {
-                                        bannerEl.src = window.offerBanners[window.currentBannerIndex];
-                                        bannerEl.style.opacity = '1';
-                                    }
-                                    
-                                    if(dotsContainer) {
-                                        Array.from(dotsContainer.children).forEach((dot, i) => {
-                                            dot.className = `w-1.5 h-1.5 rounded-full transition-colors ${i === window.currentBannerIndex ? 'bg-white' : 'bg-white/40'}`;
-                                        });
-                                    }
-                                }, 300);
-                            }, 4000);
-                        }
-                    } else if (data.offerBanner) {
-                        if(bannerEl) bannerEl.src = data.offerBanner;
-                        if(dotsContainer) dotsContainer.innerHTML = '';
-                        if (window.bannerInterval) clearInterval(window.bannerInterval);
-                    }
-                    
-                    if (data.marqueeText && data.marqueeText.trim() !== '') {
-                        if(marqueeContainer) marqueeContainer.classList.remove('hidden');
-                        if(mainContent) mainContent.classList.replace('pt-[110px]', 'pt-[135px]');
-                        if(mainContent) mainContent.classList.replace('sm:pt-[135px]', 'sm:pt-[160px]');
-                        if(marqueeEl) marqueeEl.innerHTML = `${data.marqueeText} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${data.marqueeText} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${data.marqueeText}`;
-                    } else {
-                        if(marqueeContainer) marqueeContainer.classList.add('hidden');
-                        if(mainContent) mainContent.classList.replace('pt-[135px]', 'pt-[110px]');
-                        if(mainContent) mainContent.classList.replace('sm:pt-[160px]', 'sm:pt-[135px]');
-                    }
-                } else {
-                    // Default Marquee if DB is empty
-                    if(marqueeContainer) marqueeContainer.classList.remove('hidden');
-                    if(marqueeEl) marqueeEl.innerHTML = `🚀 ঘরে বসেই আপনার প্রিয় খাবার অর্ডার করুন! 🛵 দ্রুত ডেলিভারি এখন কোটালডিহ, শাকাম্বরী প্ল্যান্ট এলাকা, লালগড়, রামচন্দ্রপুর, কৃষ্ণপুর, কিনাইডিহ, মুরাডি এবং বড়ন্তি তে! 🚀`;
+                if (snap.exists() && snap.data().offerBanners && snap.data().offerBanners.length > 0) {
+                    if(bannerEl) bannerEl.src = snap.data().offerBanners[0];
                 }
-            }, (err) => console.error("Config Error:", err));
+            }, (err) => console.error(err));
 
-            const dummyProducts = [];
-
-            const unsub = onSnapshot(getCol('products'), (snap) => {
+            onSnapshot(getCol('products'), (snap) => {
                 let items = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
-                if(items.length === 0) items = dummyProducts;
-                
                 extractRestaurants(items);
                 renderProducts(items);
-            }, (error) => {
-                console.error("Products error:", error);
-                if (error.code === 'permission-denied' || error.message.includes('permission')) {
-                     window.showToast("Firebase Permissions Denied! Check rules.", "error");
-                     renderProducts(dummyProducts);
-                }
+            }, (err) => {
+                if (err.code === 'permission-denied') window.showToast("Firebase Permissions Denied! Check rules.", "error");
             });
         };
 
@@ -1473,7 +961,7 @@
                 <button type="button" id="nav-btn-${id}" onclick="window.switchMainView('${targetView}')" class="b-nav-item flex flex-col items-center gap-1 w-16 text-gray-400 font-medium transition-colors relative">
                     <i class="${icon} text-xl mb-0.5"></i>
                     <span class="text-[10px] tracking-wide">${label}</span>
-                    ${id === 'Cart' && cart.length > 0 ? `<span class="absolute -top-1 right-2 bg-red-600 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-sm">${cart.length}</span>` : ''}
+                    ${id === 'Cart' && window.cart.length > 0 ? `<span class="absolute -top-1 right-2 bg-red-600 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-sm">${window.cart.length}</span>` : ''}
                 </button>
             `;
 
@@ -1497,73 +985,222 @@
             }, 100);
         };
 
-        window.downloadInvoice = (orderId) => {
-            const order = window.userOrderHistory?.find(o => o.id === orderId);
-            if(!order) return window.showToast("Unable to find order details.", "error");
+        // --- CART & PROMO LOGIC ---
+        window.applyPromo = () => {
+            const codeInput = document.getElementById('promo-code-input');
+            if (!codeInput) return;
+            const code = codeInput.value.trim().toUpperCase();
             
-            if(typeof window.jspdf === 'undefined') {
-                return window.showToast("PDF Library loading... Try again in a moment.", "info");
+            if (code === 'GRAMZO10') window.appliedPromo = 10;
+            else if (code === 'GRAMZO20') window.appliedPromo = 20;
+            else if (code === 'GRAMZO50') window.appliedPromo = 50;
+            else {
+                window.showToast("Invalid Promo Code", "error");
+                window.appliedPromo = 0;
+                window.promoCode = '';
+                window.renderCartUI();
+                return;
+            }
+            window.promoCode = code;
+            window.showToast(`${window.appliedPromo}% Discount Applied!`, "success");
+            window.renderCartUI();
+        };
+
+        window.addToCartStandard = (id, name, price, partnerId, shopName) => {
+            window.addToCartActual(name, price, partnerId, shopName);
+        };
+
+        window.addToCartVariant = (id, name, partnerId, shopName) => {
+            const selectEl = document.getElementById(`sel-${id}`);
+            if(!selectEl) return;
+            const selectedOpt = selectEl.options[selectEl.selectedIndex];
+            const price = parseFloat(selectedOpt.dataset.price);
+            const qty = selectedOpt.text;
+            window.addToCartActual(`${name} (${qty})`, price, partnerId, shopName);
+        };
+
+        window.addToCartActual = (name, price, partnerId, shopName) => {
+            if(!currentUser) { window.openAuthModal('User'); return; }
+            if(currentUser.role !== 'User') { window.showToast("Log in as User to order.", "error"); return; }
+            
+            if (window.cart.length > 0 && window.cart[0].partnerId !== partnerId && partnerId !== '') {
+                window.showToast("You can only order from one restaurant at a time. Clear cart first.", "error");
+                return;
+            }
+
+            window.cart.push({name, price, partnerId, shopName});
+            window.renderCartUI();
+            window.showToast(`${name} added!`, "success");
+            window.setupBottomNav(currentUser.role);
+        };
+
+        window.renderCartUI = async () => {
+            const list = document.getElementById('cart-items-list');
+            const summaryTotals = document.getElementById('cart-summary-totals');
+            
+            const sub = window.cart.reduce((s, i) => s + i.price, 0);
+            const handlingFee = window.cart.length > 0 ? (10 + (window.cart.length * 2 > 20 ? 20 : window.cart.length * 2)) : 0;
+            const discountAmt = (sub * (window.appliedPromo || 0)) / 100;
+            const total = sub - discountAmt + handlingFee;
+
+            if (summaryTotals) {
+                const discountHtml = window.appliedPromo > 0 
+                    ? `<div class="flex justify-between text-sm text-emerald-600 font-bold"><span>Promo Discount (${window.appliedPromo}%)</span><span>-₹${discountAmt.toFixed(2)}</span></div>` 
+                    : '';
+                
+                summaryTotals.innerHTML = `
+                    <div class="flex justify-between text-sm text-gray-600 font-medium"><span>Item Subtotal</span><span id="cart-subtotal">₹${sub.toFixed(2)}</span></div>
+                    ${discountHtml}
+                    <div class="flex justify-between text-sm text-red-600 font-bold"><span>Delivery Fee</span><span>FREE</span></div>
+                    <div class="flex justify-between text-sm text-gray-600 font-medium"><span>Platform Fee</span><span id="cart-handling">₹${handlingFee.toFixed(2)}</span></div>
+                    
+                    <div class="pt-3 mt-3 border-t border-gray-200 border-dashed flex justify-between items-center">
+                        <span class="text-sm font-black text-gray-900">Grand Total</span>
+                        <span id="cart-total" class="text-2xl font-black text-gray-900 tracking-tight">₹${total.toFixed(2)}</span>
+                    </div>
+                `;
+            }
+
+            const btn = document.getElementById('btn-place-order');
+            const detailsSection = document.getElementById('checkout-details-section');
+
+            if (!window.cart.length) {
+                list.innerHTML = `
+                    <div class="text-center py-10">
+                        <img src="https://cdn-icons-png.flaticon.com/512/1161/1161388.png" class="w-16 h-16 mx-auto mb-3 opacity-20 grayscale">
+                        <p class="text-gray-400 font-medium text-sm">Your basket is looking empty!</p>
+                    </div>`;
+                btn.disabled = true;
+                detailsSection.style.display = 'none';
+                return;
             }
             
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            
-            doc.setFontSize(22);
-            doc.setTextColor(226, 55, 68); // Zomato Red
-            doc.text("GRAMZO SUPER APP", 20, 20);
-            
-            doc.setFontSize(14);
-            doc.setTextColor(0, 0, 0);
-            doc.text("Order Invoice", 20, 30);
-            
-            doc.setFontSize(10);
-            doc.text(`Order ID: #${order.id.slice(-5).toUpperCase()}`, 20, 45);
-            
-            let dateStr = "N/A";
-            if(order.time && order.time.toMillis) {
-                dateStr = new Date(order.time.toMillis()).toLocaleString();
-            } else {
-                dateStr = new Date().toLocaleString();
+            btn.disabled = false;
+            detailsSection.style.display = 'block';
+
+            list.innerHTML = window.cart.map((i, idx) => `
+                <div class="flex justify-between items-center py-3 border-b border-gray-50 last:border-0 group">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-regular fa-square-caret-up text-emerald-500"></i>
+                        <span class="text-sm font-bold text-gray-800">${i.name}</span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span class="text-sm font-black text-gray-900">₹${i.price}</span>
+                        <button type="button" onclick="window.removeFromCart(${idx})" class="w-6 h-6 rounded bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors">
+                            <i class="fa-solid fa-minus text-[10px]"></i>
+                        </button>
+                    </div>
+                </div>`).join('');
+
+            const partnerId = window.cart[0].partnerId;
+            if(partnerId) {
+                const partnerSnap = await window.dbCall(getDoc(getDocRef('users', partnerId)), 5000).catch(e=>null);
+                const paymentContainer = document.getElementById('payment-options-container');
+                const paymentSection = document.getElementById('payment-section');
+                
+                if(partnerSnap && partnerSnap.exists()) {
+                    const pData = partnerSnap.data();
+                    window.currentCartPartner = pData;
+                    paymentSection.classList.remove('hidden');
+                    
+                    let html = '';
+                    if(pData.codEnabled !== false) {
+                        html += `
+                            <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition">
+                                <input type="radio" name="payment_mode" value="COD" checked onchange="document.getElementById('qr-payment-box').classList.add('hidden')" class="w-4 h-4 text-red-600 focus:ring-red-500 border-gray-300">
+                                <span class="text-sm font-bold text-gray-800"><i class="fa-solid fa-money-bill-1-wave text-emerald-600 w-5"></i> Pay on Delivery</span>
+                            </label>
+                        `;
+                    }
+                    if(pData.qrCode) {
+                        const isPrepaidChecked = (pData.codEnabled === false) ? 'checked' : '';
+                        if (pData.codEnabled === false) document.getElementById('qr-payment-box').classList.remove('hidden');
+                        
+                        html += `
+                            <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition">
+                                <input type="radio" name="payment_mode" value="Prepaid" ${isPrepaidChecked} onchange="document.getElementById('qr-payment-box').classList.remove('hidden')" class="w-4 h-4 text-red-600 focus:ring-red-500 border-gray-300">
+                                <span class="text-sm font-bold text-gray-800"><i class="fa-solid fa-qrcode text-blue-600 w-5"></i> Pay via QR (Prepaid)</span>
+                            </label>
+                        `;
+                        document.getElementById('partner-qr-display').src = pData.qrCode;
+                    }
+                    
+                    if(!html) html = '<p class="text-xs text-red-500 font-bold">No payment methods configured by restaurant.</p>';
+                    paymentContainer.innerHTML = html;
+                } else {
+                    paymentSection.classList.add('hidden');
+                }
             }
-            doc.text(`Date: ${dateStr}`, 20, 50);
-            doc.text(`Status: ${order.status}`, 20, 55);
-            doc.text(`Restaurant: ${order.restaurantName || order.partnerName || 'Gramzo Services'}`, 20, 60);
-            doc.text(`Payment Mode: ${order.paymentMode || 'COD'}`, 20, 65);
+        };
+
+        window.removeFromCart = (idx) => { 
+            window.cart.splice(idx, 1);
+            if(window.cart.length === 0) {
+                window.appliedPromo = 0;
+                window.promoCode = '';
+                const promoInput = document.getElementById('promo-code-input');
+                if(promoInput) promoInput.value = '';
+            }
+            window.renderCartUI(); 
+            window.setupBottomNav(currentUser?.role);
+        };
+
+        window.placeOrder = async () => {
+            if(window.cart.length === 0) return;
+            const addr = document.getElementById('cart-address').value.trim();
+            if(!addr) return window.showToast("Please provide delivery address.", "error");
+
+            const paymentRadio = document.querySelector('input[name="payment_mode"]:checked');
+            if(!paymentRadio && window.currentCartPartner) return window.showToast("Please select a payment method.", "error");
+
+            const paymentMode = paymentRadio ? paymentRadio.value : 'COD';
+            let paymentScreenshot = null;
+
+            if (paymentMode === 'Prepaid') {
+                const fileInput = document.getElementById('payment-screenshot');
+                if (!fileInput.files || fileInput.files.length === 0) return window.showToast("Please upload payment screenshot for Prepaid order.", "error");
+                try { paymentScreenshot = await window.resizeImage(fileInput.files[0], 800); } catch(e) { return window.showToast("Failed to process image.", "error"); }
+            }
+
+            const sub = window.cart.reduce((s,i) => s + i.price, 0);
+            const handlingFee = window.cart.length > 0 ? (10 + (window.cart.length * 2 > 20 ? 20 : window.cart.length * 2)) : 0;
+            const discountAmt = (sub * (window.appliedPromo || 0)) / 100;
+            const total = sub - discountAmt + handlingFee;
             
-            doc.text(`Customer: ${order.customer}`, 20, 80);
-            doc.text(`Phone: ${order.phone}`, 20, 85);
-            doc.text(`Delivery Address: ${order.address}`, 20, 90);
-            
-            doc.line(20, 100, 190, 100);
-            
-            let y = 110;
-            doc.setFontSize(12);
-            doc.text("Items:", 20, y);
-            y += 10;
-            
-            doc.setFontSize(10);
-            order.items.forEach((item, idx) => {
-                doc.text(`${idx + 1}. ${item.name}`, 20, y);
-                doc.text(`Rs. ${item.price}`, 170, y);
-                y += 8;
-            });
-            
-            doc.line(20, y+5, 190, y+5);
-            
-            doc.setFontSize(12);
-            doc.text("Total Paid:", 140, y+15);
-            doc.text(`Rs. ${order.total}`, 170, y+15);
-            
-            doc.setFontSize(10);
-            doc.setTextColor(150, 150, 150);
-            doc.text("Thank you for using Gramzo!", 20, y+40);
-            
-            doc.save(`Gramzo_Invoice_${order.id.slice(-5).toUpperCase()}.pdf`);
-            window.showToast("Downloading Invoice...", "success");
+            const restaurantId = window.cart[0].partnerId || null;
+            const restaurantName = window.cart[0].shopName || null;
+
+            const btn = document.getElementById('btn-place-order');
+            const originalText = btn.innerText;
+            btn.innerText = "PLACING ORDER..."; btn.disabled = true;
+
+            try {
+                await window.dbCall(addDoc(getCol('orders'), { 
+                    customer: currentUser.name, phone: currentUser.phone, 
+                    items: window.cart, subtotal: sub, discount: discountAmt, promoCode: window.promoCode || null,
+                    total: total, address: addr, status: 'Placed', 
+                    restaurantId: restaurantId, restaurantName: restaurantName,
+                    paymentMode: paymentMode, paymentScreenshot: paymentScreenshot,
+                    time: serverTimestamp() 
+                }), 10000);
+                
+                window.cart = []; window.appliedPromo = 0; window.promoCode = '';
+                document.getElementById('cart-address').value = '';
+                if(document.getElementById('promo-code-input')) document.getElementById('promo-code-input').value = '';
+                if(document.getElementById('payment-screenshot')) document.getElementById('payment-screenshot').value = '';
+                
+                window.renderCartUI(); window.setupBottomNav(currentUser?.role);
+                window.showToast("Order Placed Successfully!", "success");
+                window.switchMainView('Orders'); 
+            } catch(e) {
+                window.showToast("Network Error. Try Again.", "error");
+            } finally {
+                btn.innerText = originalText; btn.disabled = false;
+            }
         };
 
         window.initRoleListeners = () => {
-            if (!auth.currentUser || !currentUser) return; // Strict auth guard
+            if (!auth.currentUser || !currentUser) return;
 
             unsubscribeListeners.forEach(u => u());
             unsubscribeListeners = [];
@@ -1573,19 +1210,15 @@
                     let rev = 0, count = 0;
                     const adminLog = document.getElementById('admin-log-body');
                     if(adminLog) adminLog.innerHTML = '';
-
                     const orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
                     orders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0));
 
-                    if(orders.length === 0 && adminLog) {
-                        adminLog.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-gray-400 text-xs italic">No orders yet</td></tr>';
-                    }
+                    if(orders.length === 0 && adminLog) adminLog.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-gray-400 text-xs italic">No orders yet</td></tr>';
 
                     orders.forEach(o => {
                         rev += o.total; count++;
                         if(adminLog) {
                             let statusColor = o.status === 'Placed' ? 'text-amber-500' : o.status === 'Preparing' || o.status === 'Out for Delivery' ? 'text-blue-500' : 'text-emerald-500';
-                            
                             adminLog.innerHTML += `
                                 <tr class="hover:bg-gray-50 transition-colors">
                                     <td class="p-4 font-mono font-bold text-[10px] text-gray-500">#${o.id.slice(-5).toUpperCase()}</td>
@@ -1593,62 +1226,33 @@
                                     <td class="p-4 font-medium text-gray-500 text-xs">${o.restaurantName || '-'}</td>
                                     <td class="p-4 font-black text-gray-900 text-xs">₹${o.total}</td>
                                     <td class="p-4 text-right uppercase text-[9px] font-black ${statusColor} tracking-wider">${o.status}</td>
-                                </tr>
-                            `;
+                                </tr>`;
                         }
                     });
-                    document.getElementById('stat-rev').innerText = `₹${rev}`;
+                    document.getElementById('stat-rev').innerText = `₹${rev.toFixed(2)}`;
                     document.getElementById('stat-ord').innerText = count;
-                }, (error) => {
-                    console.error("Admin Orders Error:", error);
-                    if(error.code === 'permission-denied') {
-                        const adminLog = document.getElementById('admin-log-body');
-                        if(adminLog) adminLog.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-red-500 text-xs font-bold">Permission Denied! Check Firebase Rules.</td></tr>';
-                    }
                 });
                 unsubscribeListeners.push(unsubOrders);
 
                 const unsubUsers = onSnapshot(getCol('users'), (snap) => {
-                    try {
-                        const allUsers = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                        
-                        const usersStatEl = document.getElementById('stat-users');
-                        if (usersStatEl) usersStatEl.innerText = allUsers.length;
-
-                        const usersBody = document.getElementById('admin-users-body');
-                        if(usersBody) {
-                            if(allUsers.length === 0) {
-                                usersBody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-gray-400 text-xs italic">No users found.</td></tr>';
-                            } else {
-                                usersBody.innerHTML = allUsers.map(u => {
-                                    let displayPhone = u.phone ? String(u.phone) : '';
-                                    if(displayPhone.includes('@')) displayPhone = displayPhone.split('@')[0] + '@...';
-
-                                    return `
-                                    <tr class="hover:bg-gray-50 transition-colors border-b border-gray-50">
-                                        <td class="p-4 font-bold text-xs">
-                                            <span class="px-2 py-0.5 rounded text-[9px] uppercase tracking-widest ${u.role === 'Admin' ? 'bg-purple-100 text-purple-700' : u.role === 'Partner' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'}">${u.role || 'USER'}</span>
-                                        </td>
-                                        <td class="p-4 font-bold text-gray-900 text-xs">
-                                            ${u.name || 'N/A'}<br/>
-                                            <span class="font-mono font-normal text-[10px] text-gray-500">${displayPhone || 'N/A'}</span>
-                                        </td>
-                                        <td class="p-4 text-[10px] text-gray-500">
-                                            ${u.role === 'Partner' ? `<span class="font-bold text-gray-700">Shop:</span> ${u.shopName || 'N/A'}<br/><span class="font-bold text-gray-700">Status:</span> <span class="${u.approvalStatus === 'Approved' ? 'text-emerald-500' : 'text-orange-500'} font-bold">${u.approvalStatus}</span>` : `Verified`}
-                                        </td>
-                                        <td class="p-4 text-right font-mono font-black text-gray-900 text-xs">${u.pin || '-'}</td>
-                                    </tr>
-                                `}).join('');
-                            }
+                    const allUsers = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                    document.getElementById('stat-users').innerText = allUsers.length;
+                    const usersBody = document.getElementById('admin-users-body');
+                    if(usersBody) {
+                        if(allUsers.length === 0) usersBody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-gray-400 text-xs italic">No users found.</td></tr>';
+                        else {
+                            usersBody.innerHTML = allUsers.map(u => {
+                                let displayPhone = u.phone ? String(u.phone) : '';
+                                if(displayPhone.includes('@')) displayPhone = displayPhone.split('@')[0] + '@...';
+                                return `
+                                <tr class="hover:bg-gray-50 transition-colors border-b border-gray-50">
+                                    <td class="p-4 font-bold text-xs"><span class="px-2 py-0.5 rounded text-[9px] uppercase tracking-widest ${u.role === 'Admin' ? 'bg-purple-100 text-purple-700' : u.role === 'Partner' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'}">${u.role || 'USER'}</span></td>
+                                    <td class="p-4 font-bold text-gray-900 text-xs">${u.name || 'N/A'}<br/><span class="font-mono font-normal text-[10px] text-gray-500">${displayPhone || 'N/A'}</span></td>
+                                    <td class="p-4 text-[10px] text-gray-500">${u.role === 'Partner' ? `<span class="font-bold text-gray-700">Shop:</span> ${u.shopName || 'N/A'}<br/><span class="font-bold text-gray-700">Status:</span> <span class="${u.approvalStatus === 'Approved' ? 'text-emerald-500' : 'text-orange-500'} font-bold">${u.approvalStatus}</span>` : `Verified`}</td>
+                                    <td class="p-4 text-right font-mono font-black text-gray-900 text-xs">${u.pin || '-'}</td>
+                                </tr>`;
+                            }).join('');
                         }
-                    } catch(err) {
-                        console.error("Error rendering users:", err);
-                    }
-                }, (error) => {
-                    console.error("Users Error:", error);
-                    if(error.code === 'permission-denied') {
-                        const usersBody = document.getElementById('admin-users-body');
-                        if(usersBody) usersBody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-red-500 text-xs font-bold">Permission Denied! Check Firebase Rules.</td></tr>';
                     }
                 });
                 unsubscribeListeners.push(unsubUsers);
@@ -1657,10 +1261,8 @@
                 const unsubUserOrders = onSnapshot(getCol('orders'), (snap) => {
                     const listEl = document.getElementById('user-orders-list');
                     if(!listEl) return;
-                    
                     const myOrders = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(o => o.phone === currentUser.phone);
                     myOrders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0));
-
                     window.userOrderHistory = myOrders;
 
                     if(myOrders.length === 0) {
@@ -1669,16 +1271,13 @@
                     }
 
                     listEl.innerHTML = myOrders.map(o => {
-                        let statusColor = 'text-orange-500';
-                        let progressWidth = '15%';
-                        let statusText = 'Pending Approval';
-                        
+                        let statusColor = 'text-orange-500', progressWidth = '15%', statusText = 'Pending Approval';
                         if(o.status === 'Accepted') { statusColor = 'text-blue-500'; progressWidth = '30%'; statusText = 'Order Confirmed'; }
                         if(o.status === 'Preparing') { statusColor = 'text-blue-500'; progressWidth = '50%'; statusText = 'Food is Preparing'; }
                         if(o.status === 'Ready') { statusColor = 'text-yellow-500'; progressWidth = '65%'; statusText = 'Waiting for Delivery'; }
                         if(o.status === 'Out for Delivery') { statusColor = 'text-yellow-500'; progressWidth = '85%'; statusText = 'Out for Delivery'; }
                         if(o.status === 'Delivered') { statusColor = 'text-emerald-500'; progressWidth = '100%'; statusText = 'Delivered Successfully'; }
-                        if(o.status === 'Rejected') { statusColor = 'text-red-500'; progressWidth = '100%'; statusText = 'Order Rejected/Cancelled'; }
+                        if(o.status === 'Rejected') { statusColor = 'text-red-500'; progressWidth = '100%'; statusText = 'Order Rejected'; }
 
                         const itemsList = o.items.map(i => i.name).join(', ');
                         const paymentBadge = o.paymentMode === 'Prepaid' ? `<span class="bg-blue-100 text-blue-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">Prepaid</span>` : `<span class="bg-gray-100 text-gray-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">COD</span>`;
@@ -1687,35 +1286,19 @@
                             <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 relative overflow-hidden transition-all hover:shadow-md">
                                 <div class="flex justify-between items-start mb-3">
                                     <div>
-                                        <div class="flex items-center gap-2 mb-1">
-                                            <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Order #${o.id.slice(-5).toUpperCase()}</span>
-                                            ${paymentBadge}
-                                        </div>
+                                        <div class="flex items-center gap-2 mb-1"><span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Order #${o.id.slice(-5).toUpperCase()}</span>${paymentBadge}</div>
                                         <h4 class="font-black text-gray-900 text-base">${o.restaurantName || 'Gramzo Partner'}</h4>
                                     </div>
-                                    <span class="text-xl font-black text-gray-900">₹${o.total}</span>
+                                    <span class="text-xl font-black text-gray-900">₹${o.total.toFixed(2)}</span>
                                 </div>
                                 <p class="text-xs text-gray-500 mb-5 font-medium line-clamp-2">${itemsList}</p>
-                                
                                 <div class="mb-5 bg-gray-50 p-3 rounded-xl">
-                                    <div class="flex justify-between text-[10px] font-black uppercase tracking-wider mb-2 ${statusColor} transition-colors">
-                                        <span>${statusText}</span>
-                                    </div>
-                                    <div class="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
-                                        <div class="bg-current h-1.5 rounded-full transition-all duration-1000 ${statusColor.replace('text-', 'bg-')}" style="width: ${progressWidth}"></div>
-                                    </div>
+                                    <div class="flex justify-between text-[10px] font-black uppercase tracking-wider mb-2 ${statusColor}"><span>${statusText}</span></div>
+                                    <div class="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden"><div class="bg-current h-1.5 rounded-full transition-all duration-1000 ${statusColor.replace('text-', 'bg-')}" style="width: ${progressWidth}"></div></div>
                                 </div>
-                                
                                 <button onclick="window.downloadInvoice('${o.id}')" class="w-full bg-white text-red-600 py-3 rounded-xl font-bold text-xs border border-red-100 hover:bg-red-50 transition-colors"><i class="fa-solid fa-file-pdf mr-1"></i> Download Invoice</button>
-                            </div>
-                        `;
+                            </div>`;
                     }).join('');
-                }, (error) => {
-                    console.error("User Orders Error:", error);
-                    if(error.code === 'permission-denied') {
-                        const listEl = document.getElementById('user-orders-list');
-                        if(listEl) listEl.innerHTML = '<div class="text-center py-10 bg-white rounded-3xl border border-gray-100"><p class="text-red-500 font-bold text-sm">Database Permission Denied!</p><p class="text-xs text-gray-400 mt-2">Please update your Firebase Firestore Security Rules.</p></div>';
-                    }
                 });
                 unsubscribeListeners.push(unsubUserOrders);
             }
@@ -1723,7 +1306,6 @@
                 const orderUnsub = onSnapshot(getCol('orders'), (snap) => {
                     const listEl = document.getElementById('partner-orders-list');
                     let html = '';
-                    
                     const orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
                     let relevantOrders = orders.filter(o => o.restaurantId === currentUser.phone);
 
@@ -1734,73 +1316,24 @@
 
                     relevantOrders.forEach(o => {
                         const itemsStr = o.items.map(i => `${i.name}`).join(', ');
-                        
-                        let cardStyle = 'border-gray-100';
-                        let actionButtons = '';
+                        let cardStyle = 'border-gray-100', actionButtons = '';
                         let paymentBadge = o.paymentMode === 'Prepaid' ? `<span class="bg-blue-100 text-blue-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">Prepaid</span>` : `<span class="bg-gray-100 text-gray-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">COD</span>`;
-                        let screenshotHtml = '';
+                        let screenshotHtml = o.paymentMode === 'Prepaid' && o.paymentScreenshot ? `<button type="button" onclick="window.viewImage('${o.paymentScreenshot}')" class="text-[10px] text-blue-600 bg-blue-50 px-2 py-1 rounded font-bold hover:bg-blue-100 transition mt-2 w-full text-left"><i class="fa-solid fa-image"></i> View Payment Screenshot</button>` : '';
                         
-                        if (o.paymentMode === 'Prepaid' && o.paymentScreenshot) {
-                            screenshotHtml = `<button type="button" onclick="window.viewImage('${o.paymentScreenshot}')" class="text-[10px] text-blue-600 bg-blue-50 px-2 py-1 rounded font-bold hover:bg-blue-100 transition mt-2 w-full text-left"><i class="fa-solid fa-image"></i> View Payment Screenshot</button>`;
-                        }
+                        if (o.status === 'Placed') actionButtons = `<div class="flex gap-2"><button type="button" onclick="window.acceptFoodOrder('${o.id}')" class="flex-1 bg-black text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-gray-800 transition-colors active:scale-95"><i class="fa-solid fa-check"></i> Accept</button><button type="button" onclick="window.rejectOrder('${o.id}')" class="flex-1 bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm hover:bg-red-100 transition-colors active:scale-95"><i class="fa-solid fa-xmark"></i> Reject</button></div>`;
+                        else if (o.status === 'Accepted') { cardStyle = 'border-blue-200 bg-blue-50/30'; actionButtons = `<button type="button" onclick="window.markPreparing('${o.id}')" class="w-full bg-blue-600 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-blue-700 active:scale-95">Start Preparing</button>`; }
+                        else if (o.status === 'Preparing') { cardStyle = 'border-orange-200 bg-orange-50/30'; actionButtons = `<button type="button" onclick="window.markReady('${o.id}')" class="w-full bg-orange-500 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-orange-600 active:scale-95">Mark Ready</button>`; }
+                        else if (o.status === 'Ready') { cardStyle = 'border-yellow-200 bg-yellow-50/30'; actionButtons = `<button type="button" onclick="window.markOutForDelivery('${o.id}')" class="w-full bg-yellow-500 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-yellow-600 active:scale-95">Mark Out For Delivery</button>`; }
+                        else if (o.status === 'Out for Delivery') actionButtons = `<div class="flex gap-2"><a href="tel:${o.phone}" class="flex-1 bg-white border border-gray-200 text-gray-700 py-3.5 rounded-xl font-bold text-sm text-center active:scale-95 shadow-sm"><i class="fa-solid fa-phone mr-1"></i> Call User</a><button type="button" onclick="window.markDelivered('${o.id}')" class="flex-1 bg-emerald-500 text-white py-3.5 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-check-double mr-1"></i> Delivered</button></div>`;
+                        else if (o.status === 'Delivered') actionButtons = `<div class="w-full bg-emerald-50 text-emerald-600 py-3 rounded-xl font-bold text-sm text-center border border-emerald-100"><i class="fa-solid fa-circle-check mr-1"></i> Order Completed</div>`;
+                        else if (o.status === 'Rejected') actionButtons = `<div class="w-full bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm text-center border border-red-100"><i class="fa-solid fa-circle-xmark mr-1"></i> Order Rejected</div>`;
 
-                        if (o.status === 'Placed') {
-                            actionButtons = `
-                                <div class="flex gap-2">
-                                    <button type="button" onclick="window.acceptFoodOrder('${o.id}')" class="flex-1 bg-black text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-gray-800 transition-colors active:scale-95"><i class="fa-solid fa-check"></i> Accept</button>
-                                    <button type="button" onclick="window.rejectOrder('${o.id}')" class="flex-1 bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm hover:bg-red-100 transition-colors active:scale-95"><i class="fa-solid fa-xmark"></i> Reject</button>
-                                </div>
-                            `;
-                        } else if (o.status === 'Accepted') {
-                            cardStyle = 'border-blue-200 bg-blue-50/30';
-                            actionButtons = `<button type="button" onclick="window.markPreparing('${o.id}')" class="w-full bg-blue-600 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-blue-700 transition-colors active:scale-95"><i class="fa-solid fa-fire-burner mr-1"></i> Start Preparing</button>`;
-                        } else if (o.status === 'Preparing') {
-                            cardStyle = 'border-orange-200 bg-orange-50/30';
-                            actionButtons = `<button type="button" onclick="window.markReady('${o.id}')" class="w-full bg-orange-500 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-orange-600 transition-colors active:scale-95"><i class="fa-solid fa-box-open mr-1"></i> Mark Ready (Waiting for Rider)</button>`;
-                        } else if (o.status === 'Ready') {
-                            cardStyle = 'border-yellow-200 bg-yellow-50/30';
-                            actionButtons = `<button type="button" onclick="window.markOutForDelivery('${o.id}')" class="w-full bg-yellow-500 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-yellow-600 transition-colors active:scale-95"><i class="fa-solid fa-motorcycle mr-1"></i> Mark Out For Delivery</button>`;
-                        } else if (o.status === 'Out for Delivery') {
-                            actionButtons = `
-                                <div class="flex gap-2">
-                                    <a href="tel:${o.phone}" class="flex-1 bg-white border border-gray-200 text-gray-700 py-3.5 rounded-xl font-bold text-sm text-center active:scale-95 transition-transform shadow-sm"><i class="fa-solid fa-phone mr-1"></i> Call User</a>
-                                    <button type="button" onclick="window.markDelivered('${o.id}')" class="flex-1 bg-emerald-500 text-white py-3.5 rounded-xl font-bold text-sm shadow-md active:scale-95 transition-transform"><i class="fa-solid fa-check-double mr-1"></i> Delivered</button>
-                                </div>
-                            `;
-                        } else if (o.status === 'Delivered') {
-                            actionButtons = `<div class="w-full bg-emerald-50 text-emerald-600 py-3 rounded-xl font-bold text-sm text-center border border-emerald-100"><i class="fa-solid fa-circle-check mr-1"></i> Order Completed</div>`;
-                        } else if (o.status === 'Rejected') {
-                            actionButtons = `<div class="w-full bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm text-center border border-red-100"><i class="fa-solid fa-circle-xmark mr-1"></i> Order Rejected</div>`;
-                        }
-
-                        html += `
-                            <div class="bg-white rounded-3xl p-5 shadow-sm border ${cardStyle}">
-                                <div class="flex justify-between items-start mb-3">
-                                    <div>
-                                        <div class="flex items-center gap-2 mb-1">
-                                            <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Order #${o.id.slice(-4).toUpperCase()}</span>
-                                            ${paymentBadge}
-                                        </div>
-                                        <h4 class="font-bold text-gray-900 text-sm"><i class="fa-solid fa-map-pin text-red-500 mr-1"></i> ${o.address}</h4>
-                                    </div>
-                                    <span class="text-xl font-black text-emerald-600">₹${o.total}</span>
-                                </div>
-                                <div class="bg-gray-50 p-3 rounded-xl mb-4 border border-gray-100">
-                                    <p class="text-xs text-gray-700 font-bold mb-1"><i class="fa-solid fa-clipboard-list text-gray-400 mr-1"></i> Items:</p>
-                                    <p class="text-sm text-gray-600 font-medium">${itemsStr}</p>
-                                    ${screenshotHtml}
-                                </div>
-                                ${actionButtons}
-                            </div>
-                        `;
+                        html += `<div class="bg-white rounded-3xl p-5 shadow-sm border ${cardStyle}">
+                                <div class="flex justify-between items-start mb-3"><div><div class="flex items-center gap-2 mb-1"><span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Order #${o.id.slice(-4).toUpperCase()}</span>${paymentBadge}</div><h4 class="font-bold text-gray-900 text-sm"><i class="fa-solid fa-map-pin text-red-500 mr-1"></i> ${o.address}</h4></div><span class="text-xl font-black text-emerald-600">₹${o.total.toFixed(2)}</span></div>
+                                <div class="bg-gray-50 p-3 rounded-xl mb-4 border border-gray-100"><p class="text-xs text-gray-700 font-bold mb-1"><i class="fa-solid fa-clipboard-list text-gray-400 mr-1"></i> Items:</p><p class="text-sm text-gray-600 font-medium">${itemsStr}</p>${screenshotHtml}</div>
+                                ${actionButtons}</div>`;
                     });
                     listEl.innerHTML = html;
-                }, (error) => {
-                    console.error("Partner Orders Error:", error);
-                    if(error.code === 'permission-denied') {
-                        const listEl = document.getElementById('partner-orders-list');
-                        if(listEl) listEl.innerHTML = '<p class="text-red-500 font-bold text-sm text-center py-10 bg-white rounded-3xl shadow-sm border border-gray-100">Permission Denied! Check Firebase Rules.</p>';
-                    }
                 });
                 unsubscribeListeners.push(orderUnsub);
 
@@ -1808,228 +1341,83 @@
                     const catalogUnsub = onSnapshot(getCol('products'), (snap) => {
                         const list = document.getElementById('partner-catalog-list');
                         if (!list) return;
-                        
-                        const items = snap.docs
-                            .map(d => ({id: d.id, ...d.data()}))
-                            .filter(p => p.partnerId === currentUser.phone); 
-                        
-                        if (items.length === 0) {
-                            list.innerHTML = '<p class="text-sm text-gray-400 text-center py-4 bg-white rounded-2xl border border-gray-100">No products added to menu yet.</p>';
-                            return;
-                        }
-                        
+                        const items = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(p => p.partnerId === currentUser.phone); 
+                        if (items.length === 0) { list.innerHTML = '<p class="text-sm text-gray-400 text-center py-4 bg-white rounded-2xl border border-gray-100">No products added to menu yet.</p>'; return; }
                         list.innerHTML = items.map(p => {
                             const variantsDisplay = p.variants ? p.variants.map(v => `${v.qty}: ₹${v.price}`).join(', ') : `${p.qty || ''}: ₹${p.price}`;
                             const stockColor = p.inStock !== false ? 'text-emerald-600 border-emerald-200 bg-emerald-50' : 'text-red-500 border-red-200 bg-red-50';
                             const stockText = p.inStock !== false ? 'In Stock' : 'Out of Stock';
-
-                            return `
-                                <div class="flex justify-between items-center bg-white border border-gray-100 p-4 rounded-2xl shadow-sm">
-                                    <div class="flex-1 mr-4">
-                                        <p class="font-black text-sm text-gray-900">${p.name}</p>
-                                        <p class="text-[10px] text-gray-500">${p.subCategory || p.category}</p>
-                                        <p class="text-xs text-gray-700 font-bold mt-1">${variantsDisplay}</p>
-                                    </div>
-                                    <div class="flex items-center gap-3 shrink-0">
-                                        <button type="button" onclick="window.togglePartnerStock('${p.id}', ${p.inStock !== false})" class="text-[10px] font-black uppercase tracking-wider ${stockColor} border px-2 py-1 rounded transition whitespace-nowrap">
-                                            ${stockText}
-                                        </button>
-                                        <button type="button" onclick="window.deletePartnerProduct('${p.id}')" class="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors shrink-0">
-                                            <i class="fa-solid fa-trash text-xs"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            `;
+                            return `<div class="flex justify-between items-center bg-white border border-gray-100 p-4 rounded-2xl shadow-sm"><div class="flex-1 mr-4"><p class="font-black text-sm text-gray-900">${p.name}</p><p class="text-[10px] text-gray-500">${p.subCategory || p.category}</p><p class="text-xs text-gray-700 font-bold mt-1">${variantsDisplay}</p></div><div class="flex items-center gap-3 shrink-0"><button type="button" onclick="window.togglePartnerStock('${p.id}', ${p.inStock !== false})" class="text-[10px] font-black uppercase tracking-wider ${stockColor} border px-2 py-1 rounded transition whitespace-nowrap">${stockText}</button><button type="button" onclick="window.deletePartnerProduct('${p.id}')" class="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors shrink-0"><i class="fa-solid fa-trash text-xs"></i></button></div></div>`;
                         }).join('');
-                    }, (error) => {
-                        console.error("Partner Catalog Error:", error);
-                        if(error.code === 'permission-denied') {
-                            const list = document.getElementById('partner-catalog-list');
-                            if (list) list.innerHTML = '<p class="text-sm text-red-500 font-bold text-center py-4 bg-white rounded-2xl border border-gray-100">Permission Denied! Update Firebase Rules.</p>';
-                        }
                     });
                     unsubscribeListeners.push(catalogUnsub);
                 }
             }
         };
 
-        window.acceptFoodOrder = async (orderId) => {
-            if(!currentUser) return;
-            try {
-                await window.dbCall(updateDoc(getDocRef('orders', orderId), {
-                    status: 'Accepted'
-                }), 10000);
-                window.showToast("Order Accepted!", "success");
-            } catch(e) { window.showToast("Failed to update.", "error"); }
-        };
-
-        window.rejectOrder = async (orderId) => {
-            if(!currentUser) return;
-            try {
-                await window.dbCall(updateDoc(getDocRef('orders', orderId), {
-                    status: 'Rejected'
-                }), 10000);
-                window.showToast("Order Rejected.", "error");
-            } catch(e) { window.showToast("Failed to update.", "error"); }
-        };
-
-        window.markPreparing = async (orderId) => {
-            if(!currentUser) return;
-            try {
-                await window.dbCall(updateDoc(getDocRef('orders', orderId), {
-                    status: 'Preparing'
-                }), 10000);
-                window.showToast("Order is Preparing!", "success");
-            } catch(e) { window.showToast("Failed to update.", "error"); }
-        };
-
-        window.markReady = async (orderId) => {
-            if(!currentUser) return;
-            try {
-                await window.dbCall(updateDoc(getDocRef('orders', orderId), {
-                    status: 'Ready'
-                }), 10000);
-                window.showToast("Marked as Ready!", "success");
-            } catch(e) { window.showToast("Failed to update.", "error"); }
-        };
-
-        window.markOutForDelivery = async (orderId) => {
-            if(!currentUser || currentUser.category !== 'Food Owner') return;
-            try {
-                await window.dbCall(updateDoc(getDocRef('orders', orderId), {
-                    status: 'Out for Delivery'
-                }), 10000);
-                window.showToast("Order is out for delivery!", "success");
-            } catch(e) {
-                window.showToast("Failed to update status.", "error");
-            }
-        };
-
-        window.markDelivered = async (orderId) => {
-            if(!currentUser || currentUser.role !== 'Partner') return;
-            try {
-                await window.dbCall(updateDoc(getDocRef('orders', orderId), {
-                    status: 'Delivered'
-                }), 10000);
-                window.showToast("Order Delivered Successfully!", "success");
-            } catch(e) {
-                window.showToast("Failed to update order status.", "error");
-            }
-        };
-
-        window.adminReviewPartner = async (partnerPhone, status) => {
-            if(currentUser.role !== 'Admin') return;
-            try {
-                await window.dbCall(setDoc(getDocRef('users', partnerPhone), { approvalStatus: status }, { merge: true }), 10000);
-                window.showToast(`Restaurant ${status}!`, "success");
-            } catch(e) {
-                window.showToast("Error updating status.", "error");
-            }
-        };
+        window.acceptFoodOrder = async (orderId) => { try { await window.dbCall(updateDoc(getDocRef('orders', orderId), {status: 'Accepted'}), 10000); window.showToast("Order Accepted!", "success"); } catch(e) {} };
+        window.rejectOrder = async (orderId) => { try { await window.dbCall(updateDoc(getDocRef('orders', orderId), {status: 'Rejected'}), 10000); window.showToast("Order Rejected.", "error"); } catch(e) {} };
+        window.markPreparing = async (orderId) => { try { await window.dbCall(updateDoc(getDocRef('orders', orderId), {status: 'Preparing'}), 10000); window.showToast("Order is Preparing!", "success"); } catch(e) {} };
+        window.markReady = async (orderId) => { try { await window.dbCall(updateDoc(getDocRef('orders', orderId), {status: 'Ready'}), 10000); window.showToast("Marked as Ready!", "success"); } catch(e) {} };
+        window.markOutForDelivery = async (orderId) => { try { await window.dbCall(updateDoc(getDocRef('orders', orderId), {status: 'Out for Delivery'}), 10000); window.showToast("Order is out for delivery!", "success"); } catch(e) {} };
+        window.markDelivered = async (orderId) => { try { await window.dbCall(updateDoc(getDocRef('orders', orderId), {status: 'Delivered'}), 10000); window.showToast("Order Delivered Successfully!", "success"); } catch(e) {} };
 
         window.adminUpdateOffer = async () => {
-            if(currentUser.role !== 'Admin') return;
             const fileInput = document.getElementById('admin-offer-file');
             if(!fileInput.files || fileInput.files.length === 0) return window.showToast("Please select image files.", "error");
-
             const btn = document.getElementById('btn-update-offer');
-            const orig = btn.innerText;
-            btn.innerText = "Uploading...";
-            btn.disabled = true;
-
+            const orig = btn.innerText; btn.innerText = "Uploading..."; btn.disabled = true;
             try {
                 const base64Array = [];
-                for(let i=0; i<fileInput.files.length; i++) {
-                    const base64 = await window.resizeImage(fileInput.files[i], 800); 
-                    base64Array.push(base64);
-                }
+                for(let i=0; i<fileInput.files.length; i++) base64Array.push(await window.resizeImage(fileInput.files[i], 800));
                 await window.dbCall(setDoc(getDocRef('settings', 'app_config'), { offerBanners: base64Array }, { merge: true }), 15000);
-                window.showToast("Offer Banners Updated!", "success");
-                fileInput.value = "";
-            } catch(e) {
-                window.showToast("Error updating banners. Image might be too large.", "error");
-            } finally {
-                btn.innerText = orig;
-                btn.disabled = false;
-            }
+                window.showToast("Offer Banners Updated!", "success"); fileInput.value = "";
+            } catch(e) { window.showToast("Error updating banners. Image might be too large.", "error"); } 
+            finally { btn.innerText = orig; btn.disabled = false; }
         };
 
         window.adminUpdateMarquee = async () => {
-            if(currentUser.role !== 'Admin') return;
             const text = document.getElementById('admin-marquee-text').value.trim();
             if(!text) return window.showToast("Please enter marquee text.", "error");
-
             const btn = document.getElementById('btn-update-marquee');
-            const orig = btn.innerText;
-            btn.innerText = "Updating...";
-            btn.disabled = true;
-
+            const orig = btn.innerText; btn.innerText = "Updating..."; btn.disabled = true;
             try {
                 await window.dbCall(setDoc(getDocRef('settings', 'app_config'), { marqueeText: text }, { merge: true }), 10000);
-                window.showToast("Marquee Updated!", "success");
-                document.getElementById('admin-marquee-text').value = "";
-            } catch(e) {
-                window.showToast("Error updating marquee.", "error");
-            } finally {
-                btn.innerText = orig;
-                btn.disabled = false;
-            }
+                window.showToast("Marquee Updated!", "success"); document.getElementById('admin-marquee-text').value = "";
+            } catch(e) { window.showToast("Error updating marquee.", "error"); } 
+            finally { btn.innerText = orig; btn.disabled = false; }
         };
 
         window.toggleShopStatus = async () => {
             const toggle = document.getElementById('partner-status-toggle');
-            const isOpen = toggle.checked;
-            const newStatus = isOpen ? 'Open' : 'Closed';
-            
+            const newStatus = toggle.checked ? 'Open' : 'Closed';
             document.getElementById('shop-status-text').innerText = `Currently ${newStatus}`;
-            
             try {
                 await window.dbCall(setDoc(getDocRef('users', currentUser.phone), { shopStatus: newStatus }, { merge: true }), 10000);
                 currentUser.shopStatus = newStatus;
-                
                 const snap = await window.dbCall(getDocs(getCol('products')), 10000);
                 const myProducts = snap.docs.filter(d => d.data().partnerId === currentUser.phone);
-                
-                myProducts.forEach(d => {
-                    updateDoc(getDocRef('products', d.id), { shopStatus: newStatus });
-                });
-                
+                myProducts.forEach(d => updateDoc(getDocRef('products', d.id), { shopStatus: newStatus }));
                 window.showToast(`Restaurant marked as ${newStatus}`, "success");
             } catch(e) {
-                window.showToast("Error updating status", "error");
-                toggle.checked = !isOpen; 
-                document.getElementById('shop-status-text').innerText = `Currently ${!isOpen ? 'Open' : 'Closed'}`;
+                toggle.checked = !toggle.checked; 
+                document.getElementById('shop-status-text').innerText = `Currently ${!toggle.checked ? 'Open' : 'Closed'}`;
             }
         };
 
-        window.togglePartnerStock = async (productId, currentInStock) => {
-            try {
-                await window.dbCall(updateDoc(getDocRef('products', productId), { inStock: !currentInStock }), 10000);
-                window.showToast(currentInStock ? "Marked Out of Stock" : "Marked In Stock", "success");
-            } catch(e) {
-                window.showToast("Error updating stock", "error");
-            }
-        };
+        window.togglePartnerStock = async (productId, currentInStock) => { try { await window.dbCall(updateDoc(getDocRef('products', productId), { inStock: !currentInStock }), 10000); window.showToast(currentInStock ? "Marked Out of Stock" : "Marked In Stock", "success"); } catch(e) {} };
 
         window.addVariantRow = () => {
             const container = document.getElementById('variant-container');
             const row = document.createElement('div');
             row.className = "flex gap-2 variant-row mt-3";
-            row.innerHTML = `
-                <input class="input-field w-1/2 var-qty" placeholder="Size (e.g. Half)">
-                <input type="number" class="input-field w-1/2 var-price" placeholder="Price (₹)">
-                <button type="button" onclick="this.parentElement.remove()" class="w-12 shrink-0 bg-gray-100 text-gray-500 rounded-xl flex justify-center items-center hover:bg-red-50 hover:text-red-500 transition border border-gray-200"><i class="fa-solid fa-xmark"></i></button>
-            `;
+            row.innerHTML = `<input class="input-field w-1/2 var-qty" placeholder="Size (e.g. Half)"><input type="number" class="input-field w-1/2 var-price" placeholder="Price (₹)"><button type="button" onclick="this.parentElement.remove()" class="w-12 shrink-0 bg-gray-100 text-gray-500 rounded-xl flex justify-center items-center hover:bg-red-50 hover:text-red-500 border border-gray-200"><i class="fa-solid fa-xmark"></i></button>`;
             container.appendChild(row);
         };
 
         window.addPartnerProduct = async () => {
-            if(!currentUser) return;
-            if(currentUser.approvalStatus !== 'Approved') return window.showToast("Restaurant not approved yet.", "error");
-
             const name = document.getElementById('prod-name').value.trim();
             if(!name) return window.showToast("Enter dish name.", "error");
-
             const rows = document.querySelectorAll('.variant-row');
             let variants = [];
             rows.forEach(row => {
@@ -2037,68 +1425,29 @@
                 const price = parseInt(row.querySelector('.var-price').value);
                 if(qty && !isNaN(price)) variants.push({ qty, price });
             });
-
             if(variants.length === 0) return window.showToast("Add at least one size and price.", "error");
-
-            if(!currentUser.shopName) {
-                window.showToast("Please setup and Save your Restaurant Profile first.", "error");
-                document.getElementById('partner-shop-name').focus();
-                return;
-            }
-
-            let defaultImg = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80';
-            const imgInput = document.getElementById('prod-image-upload');
             
             const btn = document.getElementById('btn-add-prod');
-            const originalText = btn.innerText;
-            btn.innerText = "Saving...";
-            btn.disabled = true;
-
+            const orig = btn.innerText; btn.innerText = "Saving..."; btn.disabled = true;
+            let defaultImg = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80';
+            const imgInput = document.getElementById('prod-image-upload');
             try {
-                if (imgInput && imgInput.files.length > 0) {
-                    defaultImg = await window.resizeImage(imgInput.files[0], 400);
-                }
-
+                if (imgInput && imgInput.files.length > 0) defaultImg = await window.resizeImage(imgInput.files[0], 400);
                 await window.dbCall(addDoc(getCol('products'), {
-                    name, 
-                    variants,
-                    price: variants[0].price, 
-                    qty: variants[0].qty,     
-                    category: 'Food',
-                    subCategory: null,
-                    partnerId: currentUser.phone,
-                    shopName: currentUser.shopName,
-                    shopAddress: currentUser.shopAddress || '',
-                    image: defaultImg,
-                    inStock: true,
-                    shopStatus: currentUser.shopStatus || 'Open',
-                    created: new Date().toISOString()
+                    name, variants, price: variants[0].price, qty: variants[0].qty, category: 'Food', subCategory: null,
+                    partnerId: currentUser.phone, shopName: currentUser.shopName, shopAddress: currentUser.shopAddress || '',
+                    image: defaultImg, inStock: true, shopStatus: currentUser.shopStatus || 'Open', created: new Date().toISOString()
                 }), 15000);
-                
                 document.getElementById('prod-name').value = '';
                 if(imgInput) imgInput.value = '';
-                document.getElementById('variant-container').innerHTML = `
-                    <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Portion & Price</label>
-                    <div class="flex gap-2 variant-row">
-                        <input class="input-field w-1/2 var-qty" placeholder="Size (e.g. Full)">
-                        <input type="number" class="input-field w-1/2 var-price" placeholder="Price (₹)">
-                    </div>
-                `;
+                document.getElementById('variant-container').innerHTML = `<label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Portion & Price</label><div class="flex gap-2 variant-row"><input class="input-field w-1/2 var-qty" placeholder="Size (e.g. Full)"><input type="number" class="input-field w-1/2 var-price" placeholder="Price (₹)"></div>`;
                 window.showToast("Successfully added to Menu!", "success");
-            } catch(e) {
-                window.showToast("Network delayed. Saving in background.", "info");
-            } finally {
-                btn.innerText = originalText;
-                btn.disabled = false;
-            }
+            } catch(e) {} finally { btn.innerText = orig; btn.disabled = false; }
         };
 
         window.submitPartnerProfile = async () => {
-            if(!currentUser || !currentUser.phone) return;
-            
             const shopNameInput = document.getElementById('partner-shop-name');
             const shopAddressInput = document.getElementById('partner-shop-address');
-            
             const shopName = shopNameInput ? shopNameInput.value.trim() : null;
             const shopAddress = shopAddressInput ? shopAddressInput.value.trim() : '';
             const fssaiNumber = document.getElementById('partner-fssai-number').value.trim();
@@ -2109,74 +1458,30 @@
             if (!shopAddress) return window.showToast("Enter restaurant address.", "error");
             
             const btn = document.getElementById('btn-submit-profile');
-            const orig = btn.innerText;
-            btn.innerText = "Submitting...";
-            btn.disabled = true;
+            const orig = btn.innerText; btn.innerText = "Submitting..."; btn.disabled = true;
 
             let qrBase64 = currentUser.qrCode || null;
-
             try {
-                if (qrInput && qrInput.files.length > 0) {
-                    qrBase64 = await window.resizeImage(qrInput.files[0], 600);
-                }
-
-                const newStatus = 'Approved'; 
-
-                const updateData = { 
-                    shopName: shopName, 
-                    shopAddress: shopAddress,
-                    approvalStatus: newStatus,
-                    fssaiNumber: fssaiNumber || null,
-                    codEnabled: codEnabled,
-                    qrCode: qrBase64
-                };
-
-                try {
-                    await window.dbCall(setDoc(getDocRef('users', currentUser.phone), updateData, { merge: true }), 10000);
-                } catch(dbErr) {
-                    console.warn("DB Write timeout/failed.", dbErr);
-                }
-
-                currentUser.shopName = shopName;
-                currentUser.shopAddress = shopAddress;
-                currentUser.approvalStatus = newStatus;
-                currentUser.fssaiNumber = fssaiNumber;
-                currentUser.codEnabled = codEnabled;
-                currentUser.qrCode = qrBase64;
+                if (qrInput && qrInput.files.length > 0) qrBase64 = await window.resizeImage(qrInput.files[0], 600);
+                const updateData = { shopName, shopAddress, approvalStatus: 'Approved', fssaiNumber: fssaiNumber || null, codEnabled, qrCode: qrBase64 };
+                await window.dbCall(setDoc(getDocRef('users', currentUser.phone), updateData, { merge: true }), 10000);
                 
+                currentUser.shopName = shopName; currentUser.shopAddress = shopAddress; currentUser.approvalStatus = 'Approved';
+                currentUser.fssaiNumber = fssaiNumber; currentUser.codEnabled = codEnabled; currentUser.qrCode = qrBase64;
                 window.showToast("Profile submitted successfully!", "success");
                 window.finalizeLoginSequence(); 
-            } catch(e) {
-                console.error(e);
-                window.showToast("Network error. Try again.", "error");
-            } finally { 
-                btn.innerText = orig; 
-                btn.disabled = false; 
-            }
+            } catch(e) { window.showToast("Network error. Try again.", "error"); } 
+            finally { btn.innerText = orig; btn.disabled = false; }
         };
 
-        // Initialize Session Handlers
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 if (!currentUser) {
                     let sessionPhone = null;
                     try {
                         const sessionSnap = await window.dbCall(getDoc(getDocRef('sessions', user.uid)), 5000);
-                        if (sessionSnap && sessionSnap.exists()) {
-                            sessionPhone = sessionSnap.data().phone;
-                        }
-                    } catch(e) { console.warn("Session fetch delayed."); }
-
-                    if (!sessionPhone) {
-                        try {
-                            const usersSnap = await window.dbCall(getDocs(getCol('users')), 5000);
-                            const matchedUser = usersSnap.docs.find(d => d.data().uid === user.uid);
-                            if (matchedUser) {
-                                sessionPhone = matchedUser.id;
-                                setDoc(getDocRef('sessions', user.uid), { phone: sessionPhone }, { merge: true }).catch(()=>{});
-                            }
-                        } catch(e) { console.warn("Fallback fetch failed."); }
-                    }
+                        if (sessionSnap && sessionSnap.exists()) sessionPhone = sessionSnap.data().phone;
+                    } catch(e) {}
 
                     if (sessionPhone) {
                         if (sessionPhone === 'admin_session' || sessionPhone === 'Gramzo_admin') {
@@ -2189,14 +1494,12 @@
                                     currentUser = { ...userSnap.data(), docId: sessionPhone };
                                     window.finalizeLoginSequence(true); 
                                 }
-                            } catch(e) { console.warn("Profile fetch failed."); }
+                            } catch(e) {}
                         }
                     }
                     window.loadMarketplaceData();
                 }
-            } else {
-                if(window.startApp) window.startApp(); 
-            }
+            } else { if(window.startApp) window.startApp(); }
         });
 
     </script>
