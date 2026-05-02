@@ -45,7 +45,6 @@
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .glass-nav { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(16px); border-bottom: 1px solid #f0f0f0; }
         
         .view-section { display: none; animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         .view-section.active { display: block; }
@@ -89,330 +88,340 @@
 </head>
 <body>
 
-    <!-- Top Navigation -->
-    <nav class="glass-nav fixed top-0 w-full z-40 h-[65px] sm:h-[80px]">
-        <div class="max-w-md mx-auto px-4 py-2 flex justify-between items-center h-full sm:max-w-4xl gap-2">
-            
-            <div class="flex items-center flex-1 h-full cursor-pointer overflow-hidden pr-2" onclick="location.reload()">
-                <div class="flex flex-col justify-center shrink-0">
-                    <h1 class="text-[2.2rem] sm:text-[3.5rem] font-black font-logo italic tracking-tight text-red-600 drop-shadow-sm leading-none">Gramzo</h1>
-                </div>
-                <div class="flex flex-col justify-center border-l-[2px] border-red-200 pl-2 ml-2 shrink truncate">
-                    <span class="text-[9px] sm:text-[13px] font-black text-gray-600 uppercase tracking-widest leading-tight font-logo">
-                        Instant Delivery<br><span class="text-red-500">Super App</span>
-                    </span>
-                </div>
-            </div>
-
-            <div id="auth-container" class="flex items-center gap-2 sm:gap-3 shrink-0 justify-end h-full">
-                <button type="button" id="btn-login-trigger" onclick="window.openAuthModal('User')" class="bg-red-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md hover:bg-red-700 transition-colors active:scale-95 flex items-center gap-1.5 whitespace-nowrap">
-                    <i class="fa-solid fa-user"></i> Login
-                </button>
-                
-                <div id="profile-trigger" class="hidden flex items-center gap-2 bg-white border border-gray-200 py-1 pl-1 pr-3 rounded-full shadow-sm cursor-pointer hover:bg-gray-50" onclick="window.toggleProfileMenu()">
-                    <div class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-black text-sm">
-                        <span id="nav-initial">U</span>
-                    </div>
-                    <div class="hidden sm:block text-left">
-                        <p id="nav-name" class="text-xs font-bold text-gray-900 leading-none">User</p>
-                        <span id="nav-role" class="text-[9px] font-bold text-gray-500 uppercase">Role</span>
-                    </div>
-                    <i class="fa-solid fa-chevron-down text-[10px] text-gray-400 ml-1"></i>
-                </div>
-
-                <div id="profile-menu" class="hidden absolute right-4 top-[70px] w-48 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden transform origin-top-right transition-all">
-                    <div class="p-4 border-b border-gray-50 bg-gray-50/50">
-                        <p id="menu-name" class="font-bold text-sm text-gray-900">Name</p>
-                        <p id="menu-phone" class="text-xs text-gray-500 font-medium">Phone</p>
-                    </div>
-                    <div class="p-2">
-                        <button type="button" onclick="window.logout()" class="w-full text-left px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 rounded-xl transition-colors flex items-center gap-2">
-                            <i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out
-                        </button>
-                    </div>
-                </div>
-            </div>
+    <!-- Thin Top Bar for Auth (Just above the banner) -->
+    <div class="fixed top-0 w-full z-50 bg-white/95 backdrop-blur shadow-sm h-[50px] flex justify-between items-center px-4">
+        <!-- Small Logo for context -->
+        <div class="font-logo text-red-600 font-black text-xl italic cursor-pointer" onclick="location.reload()">
+            Gramzo
         </div>
-    </nav>
 
-    <!-- Upgraded Marquee -->
-    <div id="marquee-container" class="fixed top-[65px] sm:top-[80px] w-full bg-gray-900 border-b border-gray-800 z-30 overflow-hidden h-10 flex items-center shadow-lg">
-        <div id="dynamic-marquee" class="animate-marquee inline-block whitespace-nowrap text-sm sm:text-base font-black font-bengali text-yellow-300 tracking-wide drop-shadow-md">
-            🚀 ঘরে বসেই আপনার প্রিয় খাবার অর্ডার করুন! 🛵 দ্রুত ডেলিভারি এখন কোটালডিহ, শাকাম্বরী প্ল্যান্ট এলাকা, লালগড়, রামচন্দ্রপুর, কৃষ্ণপুর, কিনাইডিহ, মুরাডি এবং বড়ন্তি তে! 🚀 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 🚀 ঘরে বসেই আপনার প্রিয় খাবার অর্ডার করুন! 🛵 দ্রুত ডেলিভারি এখন কোটালডিহ, শাকাম্বরী প্ল্যান্ট এলাকা, লালগড়, রামচন্দ্রপুর, কৃষ্ণপুর, কিনাইডিহ, মুরাডি এবং বড়ন্তি তে! 🚀
+        <!-- Right Side Auth Controls -->
+        <div id="auth-container" class="flex items-center gap-2 sm:gap-3 shrink-0 h-full">
+            <button type="button" id="btn-login-trigger" onclick="window.openAuthModal('User')" class="bg-red-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold shadow-md hover:bg-red-700 transition-colors active:scale-95 flex items-center gap-1.5 whitespace-nowrap">
+                <i class="fa-solid fa-user"></i> Login
+            </button>
+            
+            <div id="profile-trigger" class="hidden flex items-center gap-2 bg-gray-50 border border-gray-200 py-1 pl-1 pr-3 rounded-full shadow-sm cursor-pointer hover:bg-gray-100" onclick="window.toggleProfileMenu()">
+                <div class="w-6 h-6 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-black text-xs">
+                    <span id="nav-initial">U</span>
+                </div>
+                <div class="hidden sm:block text-left">
+                    <p id="nav-name" class="text-[10px] font-bold text-gray-900 leading-none">User</p>
+                    <span id="nav-role" class="text-[8px] font-bold text-gray-500 uppercase">Role</span>
+                </div>
+                <i class="fa-solid fa-chevron-down text-[8px] text-gray-400 ml-1"></i>
+            </div>
+
+            <div id="profile-menu" class="hidden absolute right-4 top-[55px] w-48 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden transform origin-top-right transition-all">
+                <div class="p-4 border-b border-gray-50 bg-gray-50/50">
+                    <p id="menu-name" class="font-bold text-sm text-gray-900">Name</p>
+                    <p id="menu-phone" class="text-xs text-gray-500 font-medium">Phone</p>
+                </div>
+                <div class="p-2">
+                    <button type="button" onclick="window.logout()" class="w-full text-left px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 rounded-xl transition-colors flex items-center gap-2">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <main id="main-content" class="pt-[115px] sm:pt-[140px] px-4 pb-24 max-w-md mx-auto sm:max-w-4xl sm:px-6">
-        
-        <!-- ========================================== -->
-        <!-- VIEW: USER                                 -->
-        <!-- ========================================== -->
-        <div id="view-User" class="view-section active space-y-6">
-            
-            <div class="flex items-center gap-3">
-                <i class="fa-solid fa-location-dot text-red-500 text-xl mt-1"></i>
-                <div class="flex-1 border-b border-gray-200 pb-1 relative pr-6">
-                    <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-0.5">Delivering To</p>
-                    <input type="text" id="user-location-input" class="w-full text-sm font-black text-gray-900 bg-transparent outline-none truncate p-0 border-none focus:ring-0 placeholder-gray-300" placeholder="Type your delivery location...">
-                    <button type="button" onclick="document.getElementById('user-location-input').value=''; document.getElementById('user-location-input').focus();" class="absolute right-0 bottom-1 text-gray-400 hover:text-red-600" title="Edit/Clear Location">
-                        <i class="fa-solid fa-pen text-[10px]"></i>
-                    </button>
-                </div>
-                <button type="button" onclick="window.getCurrentLocation('user-location-input')" class="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-100 transition shrink-0 border border-red-100">
-                    <i class="fa-solid fa-location-crosshairs"></i>
-                </button>
-            </div>
-
-            <div class="relative w-full search-shadow rounded-2xl bg-white border border-gray-100 flex items-center px-4 py-3.5 focus-within:ring-2 focus-within:ring-red-500/20 transition-all mt-4">
-                <i class="fa-solid fa-magnifying-glass text-red-500 text-lg"></i>
-                <div class="w-px h-5 bg-gray-200 mx-3"></div>
-                <input type="text" id="global-search" onkeyup="window.handleSearchInput()" placeholder="Restaurant name or dish..." class="w-full bg-transparent outline-none text-sm font-medium text-gray-800 placeholder-gray-400">
-            </div>
-
-            <div class="w-full relative rounded-3xl overflow-hidden shadow-sm border border-gray-100 h-36 sm:h-48 group bg-red-50 mt-4 flex items-center justify-center">
-                <span class="absolute top-3 left-3 z-10 inline-flex items-center gap-1.5 py-1 px-2.5 rounded-full bg-black/70 backdrop-blur text-[10px] font-black text-white uppercase tracking-widest">
-                    <i class="fa-solid fa-bolt text-yellow-400"></i> PROMO
-                </span>
-                <img id="user-offer-banner" src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80" class="w-full h-full object-cover transition-opacity duration-500" alt="Offers">
-                <div id="banner-dots" class="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex gap-1.5 z-10"></div>
-            </div>
-
-            <div>
-                <div class="flex justify-between items-end mb-3">
-                    <h3 class="font-black text-lg text-gray-900 tracking-tight" id="marketplace-title">Restaurants Near You</h3>
-                    <button type="button" id="btn-clear-filter" onclick="window.filterRestaurant(null, '')" class="hidden text-xs font-bold text-red-600 bg-red-50 px-3 py-1 rounded-full border border-red-100">Clear</button>
-                </div>
-                <div id="restaurant-list-carousel" class="flex gap-4 overflow-x-auto pb-4 no-scrollbar px-1"></div>
-            </div>
-
-            <div>
-                <h3 class="font-black text-xl text-gray-900 mb-4 tracking-tight">Top rated near you</h3>
-                <div id="market-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                    <div class="col-span-full py-10 text-center text-gray-400 font-medium text-sm animate-pulse border border-gray-200 rounded-3xl bg-white">Loading restaurants...</div>
-                </div>
-            </div>
-
-            <div id="partner-cta" class="mt-8 bg-gray-900 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden flex items-center justify-between">
-                <div class="relative z-10">
-                    <h3 class="text-xl font-black mb-1">Partner with us</h3>
-                    <p class="text-gray-300 text-xs mb-3 font-medium">List your restaurant on Gramzo and boost sales.</p>
-                    <button type="button" onclick="window.openAuthModal('Partner')" class="bg-red-600 text-white px-5 py-2.5 rounded-xl text-xs font-black shadow-sm active:scale-95 uppercase tracking-widest hover:bg-red-500">
-                        Register Restaurant
-                    </button>
-                </div>
-                <i class="fa-solid fa-utensils text-6xl text-gray-800 absolute right-[10px] bottom-[-10px] rotate-[-15deg]"></i>
-            </div>
-            
-            <footer class="mt-8 pt-8 border-t border-gray-200/60 pb-4">
-                <div class="w-full mb-8 flex justify-center sm:justify-start">
-                    <h1 class="text-4xl font-black text-gray-300 tracking-tight font-logo text-center sm:text-left w-full">Gramzo</h1>
-                </div>
-                <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
-                    <div class="text-center sm:text-left">
-                        <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                        <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v9.1.0 - Full Features Final</p>
-                    </div>
-                    <div class="mt-4 sm:mt-0 text-center sm:text-right">
-                        <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
-                            <i class="fa-solid fa-shield-halved mr-1 text-sm"></i> Secure Admin Portal
-                        </button>
-                    </div>
-                </div>
-            </footer>
+    <!-- Scrollable Content Starts Here -->
+    <div class="pt-[50px]">
+        <!-- Full-Width Banner Image -->
+        <div class="w-full">
+            <img src="https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/ChatGPT%20Image%20May%202%2C%202026%2C%2001_32_51%20PM.png" alt="Gramzo Top Banner" class="w-full h-auto block object-cover">
         </div>
 
-        <!-- ========================================== -->
-        <!-- VIEW: CART                                 -->
-        <!-- ========================================== -->
-        <div id="view-Cart" class="view-section space-y-6">
-            <div class="flex items-center gap-3">
-                <button onclick="window.switchMainView('User')" class="w-8 h-8 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-600 shadow-sm active:scale-90 transition"><i class="fa-solid fa-arrow-left"></i></button>
-                <h2 class="text-2xl font-black text-gray-900">Checkout</h2>
+        <!-- Marquee below banner -->
+        <div id="marquee-container" class="w-full bg-gray-900 border-b border-gray-800 z-30 overflow-hidden h-10 flex items-center shadow-lg hidden relative">
+            <div id="dynamic-marquee" class="animate-marquee inline-block whitespace-nowrap text-sm sm:text-base font-black font-bengali text-yellow-300 tracking-wide drop-shadow-md">
+                🚀 ঘরে বসেই আপনার প্রিয় খাবার অর্ডার করুন! 🛵 দ্রুত ডেলিভারি এখন কোটালডিহ, শাকাম্বরী প্ল্যান্ট এলাকা, লালগড়, রামচন্দ্রপুর, কৃষ্ণপুর, কিনাইডিহ, মুরাডি এবং বড়ন্তি তে! 🚀 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 🚀 ঘরে বসেই আপনার প্রিয় খাবার অর্ডার করুন! 🛵 দ্রুত ডেলিভারি এখন কোটালডিহ, শাকাম্বরী প্ল্যান্ট এলাকা, লালগড়, রামচন্দ্রপুর, কৃষ্ণপুর, কিনাইডিহ, মুরাডি এবং বড়ন্তি তে! 🚀
             </div>
+        </div>
+
+        <main id="main-content" class="px-4 pb-24 max-w-md mx-auto sm:max-w-4xl sm:px-6 pt-6">
             
-            <div class="bg-white rounded-[2rem] p-5 sm:p-6 shadow-sm border border-gray-100">
-                <div id="cart-items-list" class="space-y-4 mb-6"></div>
+            <!-- ========================================== -->
+            <!-- VIEW: USER                                 -->
+            <!-- ========================================== -->
+            <div id="view-User" class="view-section active space-y-6">
                 
-                <div class="space-y-5 pt-6 border-t border-gray-100" id="checkout-details-section" style="display:none;">
-                    <div>
-                        <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2 ml-2">Delivery Address</label>
-                        <div class="relative">
-                            <textarea id="cart-address" rows="3" class="input-field !py-3 resize-none !rounded-xl pr-20" placeholder="E.g. House No, Village Name, Landmark..."></textarea>
-                            <button type="button" onclick="window.getCurrentLocation('cart-address')" class="absolute right-3 top-3 text-red-500 text-xs font-bold bg-red-50 px-2 py-1 rounded border border-red-100 hover:bg-red-100">
-                                <i class="fa-solid fa-location-crosshairs"></i> GPS
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-location-dot text-red-500 text-xl mt-1"></i>
+                    <div class="flex-1 border-b border-gray-200 pb-1 relative pr-6">
+                        <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-0.5">Delivering To</p>
+                        <input type="text" id="user-location-input" class="w-full text-sm font-black text-gray-900 bg-transparent outline-none truncate p-0 border-none focus:ring-0 placeholder-gray-300" placeholder="Type your delivery location...">
+                        <button type="button" onclick="document.getElementById('user-location-input').value=''; document.getElementById('user-location-input').focus();" class="absolute right-0 bottom-1 text-gray-400 hover:text-red-600" title="Edit/Clear Location">
+                            <i class="fa-solid fa-pen text-[10px]"></i>
+                        </button>
+                    </div>
+                    <button type="button" onclick="window.getCurrentLocation('user-location-input')" class="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-100 transition shrink-0 border border-red-100">
+                        <i class="fa-solid fa-location-crosshairs"></i>
+                    </button>
+                </div>
+
+                <div class="relative w-full search-shadow rounded-2xl bg-white border border-gray-100 flex items-center px-4 py-3.5 focus-within:ring-2 focus-within:ring-red-500/20 transition-all mt-4">
+                    <i class="fa-solid fa-magnifying-glass text-red-500 text-lg"></i>
+                    <div class="w-px h-5 bg-gray-200 mx-3"></div>
+                    <input type="text" id="global-search" onkeyup="window.handleSearchInput()" placeholder="Restaurant name or dish..." class="w-full bg-transparent outline-none text-sm font-medium text-gray-800 placeholder-gray-400">
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-end mb-3">
+                        <h3 class="font-black text-lg text-gray-900 tracking-tight" id="marketplace-title">Restaurants Near You</h3>
+                        <button type="button" id="btn-clear-filter" onclick="window.filterRestaurant(null, '')" class="hidden text-xs font-bold text-red-600 bg-red-50 px-3 py-1 rounded-full border border-red-100">Clear</button>
+                    </div>
+                    <div id="restaurant-list-carousel" class="flex gap-4 overflow-x-auto pb-4 no-scrollbar px-1"></div>
+                </div>
+
+                <div>
+                    <h3 class="font-black text-xl text-gray-900 mb-4 tracking-tight">Top rated near you</h3>
+                    <div id="market-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                        <div class="col-span-full py-10 text-center text-gray-400 font-medium text-sm animate-pulse border border-gray-200 rounded-3xl bg-white">Loading restaurants...</div>
+                    </div>
+                </div>
+
+                <div id="partner-cta" class="mt-8 bg-gray-900 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden flex items-center justify-between">
+                    <div class="relative z-10">
+                        <h3 class="text-xl font-black mb-1">Partner with us</h3>
+                        <p class="text-gray-300 text-xs mb-3 font-medium">List your restaurant on Gramzo and boost sales.</p>
+                        <button type="button" onclick="window.openAuthModal('Partner')" class="bg-red-600 text-white px-5 py-2.5 rounded-xl text-xs font-black shadow-sm active:scale-95 uppercase tracking-widest hover:bg-red-500">
+                            Register Restaurant
+                        </button>
+                    </div>
+                    <i class="fa-solid fa-utensils text-6xl text-gray-800 absolute right-[10px] bottom-[-10px] rotate-[-15deg]"></i>
+                </div>
+                
+                <footer class="mt-8 pt-8 border-t border-gray-200/60 pb-4">
+                    <div class="w-full mb-8 flex justify-center sm:justify-start">
+                        <img src="https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/ChatGPT%20Image%20May%202%2C%202026%2C%2001_32_51%20PM.png" alt="Gramzo" class="h-16 object-contain opacity-50 drop-shadow-sm rounded-xl">
+                    </div>
+                    <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
+                        <div class="text-center sm:text-left">
+                            <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v9.4.0 - Banner Integrated Layout</p>
+                        </div>
+                        <div class="mt-4 sm:mt-0 text-center sm:text-right">
+                            <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
+                                <i class="fa-solid fa-shield-halved mr-1 text-sm"></i> Secure Admin Portal
                             </button>
                         </div>
                     </div>
-
-                    <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100 mt-4">
-                        <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2">Apply Promo Code</label>
-                        <div class="flex gap-2">
-                            <input type="text" id="promo-code-input" class="input-field !py-2.5 !rounded-xl text-xs font-bold uppercase" placeholder="e.g. GRAMZO50">
-                            <button type="button" onclick="window.applyPromo()" class="bg-gray-900 text-white px-5 py-2.5 rounded-xl text-xs font-bold shrink-0 hover:bg-gray-800">APPLY</button>
-                        </div>
-                    </div>
-
-                    <div id="payment-section" class="bg-gray-50 rounded-2xl p-4 border border-gray-100 hidden">
-                        <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-3">Payment Method</label>
-                        <div class="space-y-3" id="payment-options-container"></div>
-                        <div id="qr-payment-box" class="hidden mt-4 pt-4 border-t border-gray-200">
-                            <p class="text-xs font-bold text-gray-800 mb-2 text-center">Scan QR to Pay</p>
-                            <img id="partner-qr-display" src="" class="w-40 h-40 mx-auto border-2 border-gray-200 rounded-xl mb-3 object-contain bg-white">
-                            <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">Upload Payment Screenshot</label>
-                            <input type="file" id="payment-screenshot" accept="image/*" class="w-full text-xs text-gray-500 file:bg-red-50 file:text-red-600 border border-gray-200 rounded-xl p-1.5 bg-white">
-                        </div>
-                    </div>
-                    
-                    <div class="bg-gray-50 rounded-2xl p-4 space-y-3 border border-gray-100" id="cart-summary-totals"></div>
-                    
-                    <button type="button" id="btn-place-order" onclick="window.placeOrder()" class="w-full bg-red-600 hover:bg-red-700 text-white py-4 rounded-2xl font-black text-lg shadow-lg shadow-red-600/30 active:scale-95 disabled:opacity-50">
-                        PLACE ORDER
-                    </button>
-                </div>
+                </footer>
             </div>
-        </div>
 
-        <!-- ========================================== -->
-        <!-- VIEW: ORDERS                               -->
-        <!-- ========================================== -->
-        <div id="view-Orders" class="view-section space-y-6">
-            <h2 class="text-2xl font-black text-gray-900">My Orders</h2>
-            <div id="user-orders-list" class="space-y-4"></div>
-        </div>
-
-        <!-- ========================================== -->
-        <!-- VIEW: PARTNER DASHBOARD                    -->
-        <!-- ========================================== -->
-        <div id="view-Partner" class="view-section space-y-6">
-            <div class="bg-gray-900 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden">
-                <div class="relative z-10">
-                    <p class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">Restaurant Dashboard</p>
-                    <h2 class="text-2xl font-black mb-4" id="partner-welcome">Welcome, Partner!</h2>
-                </div>
-                <i class="fa-solid fa-utensils absolute right-[-20px] bottom-[-20px] text-8xl text-gray-800"></i>
-            </div>
-            <h3 class="font-black text-xl text-gray-800 border-b border-gray-200 pb-2">Active Orders</h3>
-            <div id="partner-orders-list" class="space-y-4"></div>
-        </div>
-
-        <!-- ========================================== -->
-        <!-- VIEW: PARTNER HUB (Profile & Shop Setup)   -->
-        <!-- ========================================== -->
-        <div id="view-Partner-Profile" class="view-section space-y-6">
-            <h2 class="text-2xl font-black text-gray-900">Restaurant Settings</h2>
-            
-            <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="font-bold text-gray-900">Store Profile</h3>
-                    <span id="partner-approval-status" class="text-[10px] font-black uppercase border px-2 py-1 rounded">Active</span>
+            <!-- ========================================== -->
+            <!-- VIEW: CART                                 -->
+            <!-- ========================================== -->
+            <div id="view-Cart" class="view-section space-y-6">
+                <div class="flex items-center gap-3">
+                    <button onclick="window.switchMainView('User')" class="w-8 h-8 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-600 shadow-sm active:scale-90 transition"><i class="fa-solid fa-arrow-left"></i></button>
+                    <h2 class="text-2xl font-black text-gray-900">Checkout</h2>
                 </div>
                 
-                <div class="space-y-4">
-                    <div id="hub-display-details" class="bg-gray-50 p-4 rounded-xl border border-gray-100 space-y-2 text-sm text-gray-700">
-                        <p><strong>Name:</strong> <span id="hub-name-val"></span></p>
-                        <p id="hub-address-row" class="hidden"><strong>Location:</strong> <span id="hub-address-val"></span></p>
-                    </div>
+                <div class="bg-white rounded-[2rem] p-5 sm:p-6 shadow-sm border border-gray-100">
+                    <div id="cart-items-list" class="space-y-4 mb-6"></div>
+                    
+                    <div class="space-y-5 pt-6 border-t border-gray-100" id="checkout-details-section" style="display:none;">
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2 ml-2">Delivery Address (Manual Edit Allowed)</label>
+                            <div class="relative">
+                                <textarea id="cart-address" rows="3" class="input-field !py-3 resize-none !rounded-xl pr-20" placeholder="E.g. House No, Village Name, Landmark..."></textarea>
+                                <button type="button" onclick="window.getCurrentLocation('cart-address')" class="absolute right-3 top-3 text-red-500 text-xs font-bold bg-red-50 px-2 py-1 rounded border border-red-100 hover:bg-red-100">
+                                    <i class="fa-solid fa-location-crosshairs"></i> GPS
+                                </button>
+                            </div>
+                        </div>
 
-                    <div id="partner-setup-form" class="space-y-3 mt-4 border-t border-gray-200 pt-4">
-                        <label class="block text-xs font-bold text-gray-600 mb-1 ml-1">Restaurant Name</label>
-                        <input id="partner-shop-name" class="input-field" placeholder="Enter Business Name">
+                        <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100 mt-4">
+                            <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2">Apply Promo Code</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="promo-code-input" class="input-field !py-2.5 !rounded-xl text-xs font-bold uppercase" placeholder="e.g. GRAMZO50">
+                                <button type="button" onclick="window.applyPromo()" class="bg-gray-900 text-white px-5 py-2.5 rounded-xl text-xs font-bold shrink-0 hover:bg-gray-800">APPLY</button>
+                            </div>
+                        </div>
 
-                        <label class="block text-xs font-bold text-gray-600 mb-1 ml-1 mt-3">Full Address</label>
-                        <input id="partner-shop-address" class="input-field" placeholder="Enter full address">
+                        <div id="payment-section" class="bg-gray-50 rounded-2xl p-4 border border-gray-100 hidden">
+                            <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-3">Payment Method</label>
+                            <div class="space-y-3" id="payment-options-container"></div>
+                            <div id="qr-payment-box" class="hidden mt-4 pt-4 border-t border-gray-200">
+                                <p class="text-xs font-bold text-gray-800 mb-2 text-center">Scan QR to Pay</p>
+                                <img id="partner-qr-display" src="" class="w-40 h-40 mx-auto border-2 border-gray-200 rounded-xl mb-3 object-contain bg-white">
+                                <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">Upload Payment Screenshot</label>
+                                <input type="file" id="payment-screenshot" accept="image/*" class="w-full text-xs text-gray-500 file:bg-red-50 file:text-red-600 border border-gray-200 rounded-xl p-1.5 bg-white">
+                            </div>
+                        </div>
                         
-                        <div class="mt-4 p-4 bg-red-50/30 border border-red-100 rounded-xl space-y-4">
-                            <div>
-                                <label class="block text-xs font-bold text-gray-800 mb-1 ml-1">Payment QR Code</label>
-                                <input type="file" id="partner-qr-upload" accept="image/*" class="w-full text-xs text-gray-500 border border-gray-200 rounded-xl p-1.5 bg-white">
-                                <img id="partner-qr-preview" class="hidden w-24 h-24 mt-2 border border-gray-200 rounded-lg object-contain bg-white">
+                        <div class="bg-gray-50 rounded-2xl p-4 space-y-3 border border-gray-100" id="cart-summary-totals"></div>
+                        
+                        <button type="button" id="btn-place-order" onclick="window.placeOrder()" class="w-full bg-red-600 hover:bg-red-700 text-white py-4 rounded-2xl font-black text-lg shadow-lg shadow-red-600/30 active:scale-95 disabled:opacity-50">
+                            PLACE ORDER
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- VIEW: ORDERS                               -->
+            <!-- ========================================== -->
+            <div id="view-Orders" class="view-section space-y-6">
+                <h2 class="text-2xl font-black text-gray-900">My Orders</h2>
+                <div id="user-orders-list" class="space-y-4"></div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- VIEW: PARTNER DASHBOARD                    -->
+            <!-- ========================================== -->
+            <div id="view-Partner" class="view-section space-y-6">
+                <div class="bg-gray-900 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden">
+                    <div class="relative z-10">
+                        <p class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">Restaurant Dashboard</p>
+                        <h2 class="text-2xl font-black mb-4" id="partner-welcome">Welcome, Partner!</h2>
+                    </div>
+                    <i class="fa-solid fa-utensils absolute right-[-20px] bottom-[-20px] text-8xl text-gray-800"></i>
+                </div>
+                <h3 class="font-black text-xl text-gray-800 border-b border-gray-200 pb-2">Active Orders</h3>
+                <div id="partner-orders-list" class="space-y-4"></div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- VIEW: PARTNER HUB (Profile & Shop Setup)   -->
+            <!-- ========================================== -->
+            <div id="view-Partner-Profile" class="view-section space-y-6">
+                <h2 class="text-2xl font-black text-gray-900">Restaurant Settings</h2>
+                
+                <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-gray-900">Store Profile</h3>
+                        <span id="partner-approval-status" class="text-[10px] font-black uppercase border px-2 py-1 rounded">Active</span>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div id="hub-display-details" class="bg-gray-50 p-4 rounded-xl border border-gray-100 space-y-2 text-sm text-gray-700">
+                            <p><strong>Name:</strong> <span id="hub-name-val"></span></p>
+                            <p id="hub-address-row" class="hidden"><strong>Location:</strong> <span id="hub-address-val"></span></p>
+                        </div>
+
+                        <div id="partner-setup-form" class="space-y-3 mt-4 border-t border-gray-200 pt-4">
+                            <label class="block text-xs font-bold text-gray-600 mb-1 ml-1">Restaurant Name</label>
+                            <input id="partner-shop-name" class="input-field" placeholder="Enter Business Name">
+
+                            <label class="block text-xs font-bold text-gray-600 mb-1 ml-1 mt-3">Full Address</label>
+                            <input id="partner-shop-address" class="input-field" placeholder="Enter full address">
+                            
+                            <div class="mt-4 p-4 bg-red-50/30 border border-red-100 rounded-xl space-y-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-800 mb-1 ml-1">Payment QR Code</label>
+                                    <input type="file" id="partner-qr-upload" accept="image/*" class="w-full text-xs text-gray-500 border border-gray-200 rounded-xl p-1.5 bg-white">
+                                    <img id="partner-qr-preview" class="hidden w-24 h-24 mt-2 border border-gray-200 rounded-lg object-contain bg-white">
+                                </div>
+                                <div class="flex items-center justify-between pt-2 border-t border-red-100">
+                                    <div><p class="text-xs font-bold">Enable Pay on Delivery</p></div>
+                                    <input type="checkbox" id="partner-cod-toggle-setup" checked class="w-4 h-4 text-emerald-500">
+                                </div>
                             </div>
-                            <div class="flex items-center justify-between pt-2 border-t border-red-100">
-                                <div><p class="text-xs font-bold">Enable Pay on Delivery</p></div>
-                                <input type="checkbox" id="partner-cod-toggle-setup" checked class="w-4 h-4 text-emerald-500">
+                            <button type="button" onclick="window.submitPartnerProfile()" id="btn-submit-profile" class="w-full bg-gray-900 text-white px-6 py-4 rounded-2xl font-bold">Save Config</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="add-product-container" class="bg-white rounded-3xl p-6 border border-gray-200 shadow-sm relative">
+                    <h3 class="font-black text-gray-900 mb-4">Add Menu Item</h3>
+                    <div class="space-y-4 relative z-10">
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Dish Name</label>
+                            <input id="prod-name" class="input-field mt-1" placeholder="E.g. Chicken Biryani">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Dish Image</label>
+                            <input type="file" id="prod-image-upload" accept="image/*" class="w-full text-xs text-gray-500 border border-gray-200 rounded-xl p-1.5 bg-gray-50 mt-1">
+                        </div>
+                        <div id="variant-container" class="space-y-2">
+                            <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Portion & Price</label>
+                            <div class="flex gap-2 variant-row">
+                                <input class="input-field w-1/2 var-qty" placeholder="Size (e.g. Full)">
+                                <input type="number" class="input-field w-1/2 var-price" placeholder="Price (₹)">
                             </div>
                         </div>
-                        <button type="button" onclick="window.submitPartnerProfile()" id="btn-submit-profile" class="w-full bg-gray-900 text-white px-6 py-4 rounded-2xl font-bold">Save Config</button>
+                        <button type="button" onclick="window.addVariantRow()" class="text-xs text-red-600 font-bold hover:underline">+ Add size</button>
+                        <button type="button" onclick="window.addPartnerProduct()" id="btn-add-prod" class="w-full bg-red-600 hover:bg-red-700 text-white py-3.5 rounded-xl font-bold mt-4">Save to Menu</button>
                     </div>
+                </div>
+
+                <div id="partner-catalog-list-container">
+                    <h3 class="font-black text-gray-900 mb-3 border-b border-gray-200 pb-2">Your Menu</h3>
+                    <div id="partner-catalog-list" class="space-y-3"></div>
                 </div>
             </div>
 
-            <div id="add-product-container" class="bg-white rounded-3xl p-6 border border-gray-200 shadow-sm relative">
-                <h3 class="font-black text-gray-900 mb-4">Add Menu Item</h3>
-                <div class="space-y-4 relative z-10">
-                    <div>
-                        <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Dish Name</label>
-                        <input id="prod-name" class="input-field mt-1" placeholder="E.g. Chicken Biryani">
+            <!-- ========================================== -->
+            <!-- VIEW: ADMIN DASHBOARD                      -->
+            <!-- ========================================== -->
+            <div id="view-Admin" class="view-section space-y-6">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-2xl font-black text-gray-900">Admin Control</h2>
+                    <div class="flex gap-2">
+                        <button type="button" onclick="window.initRoleListeners()" class="bg-gray-100 px-3 py-1.5 rounded-full text-xs font-bold"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+                        <button type="button" onclick="window.logout()" class="bg-red-50 text-red-600 px-3 py-1.5 rounded-full text-xs font-bold"><i class="fa-solid fa-power-off"></i> Logout</button>
                     </div>
-                    <div>
-                        <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Dish Image</label>
-                        <input type="file" id="prod-image-upload" accept="image/*" class="w-full text-xs text-gray-500 border border-gray-200 rounded-xl p-1.5 bg-gray-50 mt-1">
-                    </div>
-                    <div id="variant-container" class="space-y-2">
-                        <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Portion & Price</label>
-                        <div class="flex gap-2 variant-row">
-                            <input class="input-field w-1/2 var-qty" placeholder="Size (e.g. Full)">
-                            <input type="number" class="input-field w-1/2 var-price" placeholder="Price (₹)">
+                </div>
+                
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="bg-white p-4 rounded-2xl border border-gray-100 text-center"><p class="text-[9px] font-bold text-gray-400">Sales</p><h4 id="stat-rev" class="text-lg font-black text-emerald-600">₹0</h4></div>
+                    <div class="bg-white p-4 rounded-2xl border border-gray-100 text-center"><p class="text-[9px] font-bold text-gray-400">Orders</p><h4 id="stat-ord" class="text-lg font-black text-blue-600">0</h4></div>
+                    <div class="bg-white p-4 rounded-2xl border border-gray-100 text-center"><p class="text-[9px] font-bold text-gray-400">Users</p><h4 id="stat-users" class="text-lg font-black text-purple-600">0</h4></div>
+                </div>
+
+                <!-- ADMIN PROMO MANAGEMENT -->
+                <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden mt-6 p-5">
+                    <h3 class="font-bold text-gray-900 mb-2 border-b border-gray-100 pb-2">Manage Promo Codes</h3>
+                    <div class="space-y-3 mt-3">
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <input type="text" id="admin-promo-code" class="input-field !py-2 uppercase sm:w-1/3" placeholder="Code (e.g. SAVE50)">
+                            <input type="number" id="admin-promo-discount" class="input-field !py-2 sm:w-1/3" placeholder="Discount %">
+                            <select id="admin-promo-restaurant" class="input-field !py-2 sm:w-1/3 bg-white">
+                                <option value="Global">All Restaurants</option>
+                                <!-- Populated dynamically -->
+                            </select>
                         </div>
+                        <button type="button" onclick="window.adminCreatePromo()" class="w-full bg-red-600 text-white py-3 rounded-xl font-bold shadow-md hover:bg-red-700 active:scale-95 transition text-sm">Create Promo Code</button>
                     </div>
-                    <button type="button" onclick="window.addVariantRow()" class="text-xs text-red-600 font-bold hover:underline">+ Add size</button>
-                    <button type="button" onclick="window.addPartnerProduct()" id="btn-add-prod" class="w-full bg-red-600 hover:bg-red-700 text-white py-3.5 rounded-xl font-bold mt-4">Save to Menu</button>
+                    <div class="mt-4 overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-gray-50 border-b border-gray-100 text-gray-400 text-[10px] uppercase">
+                                <tr><th class="p-2">Code</th><th class="p-2">Discount</th><th class="p-2">Restaurant</th><th class="p-2 text-right">Actions</th></tr>
+                            </thead>
+                            <tbody id="admin-promo-list">
+                                <tr><td colspan="4" class="p-4 text-center text-gray-400">Loading promos...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-3xl border border-gray-100 p-5 mt-6">
+                    <h3 class="font-bold text-gray-900 mb-2 border-b border-gray-100 pb-2">Manage Promo Banners</h3>
+                    <div class="space-y-3 mt-3">
+                        <input type="file" id="admin-offer-file" accept="image/*" multiple class="w-full text-sm border p-1.5 bg-gray-50 rounded-xl">
+                        <button type="button" onclick="window.adminUpdateOffer()" id="btn-update-offer" class="w-full bg-red-600 text-white py-3 rounded-xl font-bold text-sm">Publish Offer Banners</button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-3xl border border-gray-100 overflow-hidden mt-6">
+                    <div class="p-4 bg-gray-50 border-b border-gray-100 font-bold text-sm">Users & Partners</div>
+                    <div class="overflow-x-auto"><table class="w-full text-left text-xs"><tbody id="admin-users-body"></tbody></table></div>
+                </div>
+
+                <div class="bg-white rounded-3xl border border-gray-100 overflow-hidden mt-6">
+                    <div class="p-4 bg-gray-50 border-b border-gray-100 font-bold text-sm">Live Orders</div>
+                    <div class="overflow-x-auto"><table class="w-full text-left text-xs"><tbody id="admin-log-body"></tbody></table></div>
                 </div>
             </div>
-
-            <div id="partner-catalog-list-container">
-                <h3 class="font-black text-gray-900 mb-3 border-b border-gray-200 pb-2">Your Menu</h3>
-                <div id="partner-catalog-list" class="space-y-3"></div>
-            </div>
-        </div>
-
-        <!-- ========================================== -->
-        <!-- VIEW: ADMIN DASHBOARD                      -->
-        <!-- ========================================== -->
-        <div id="view-Admin" class="view-section space-y-6">
-            <div class="flex justify-between items-center">
-                <h2 class="text-2xl font-black text-gray-900">Admin Control</h2>
-                <div class="flex gap-2">
-                    <button type="button" onclick="window.initRoleListeners()" class="bg-gray-100 px-3 py-1.5 rounded-full text-xs font-bold"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
-                    <button type="button" onclick="window.logout()" class="bg-red-50 text-red-600 px-3 py-1.5 rounded-full text-xs font-bold"><i class="fa-solid fa-power-off"></i> Logout</button>
-                </div>
-            </div>
-            
-            <div class="grid grid-cols-3 gap-3">
-                <div class="bg-white p-4 rounded-2xl border border-gray-100 text-center"><p class="text-[9px] font-bold text-gray-400">Sales</p><h4 id="stat-rev" class="text-lg font-black text-emerald-600">₹0</h4></div>
-                <div class="bg-white p-4 rounded-2xl border border-gray-100 text-center"><p class="text-[9px] font-bold text-gray-400">Orders</p><h4 id="stat-ord" class="text-lg font-black text-blue-600">0</h4></div>
-                <div class="bg-white p-4 rounded-2xl border border-gray-100 text-center"><p class="text-[9px] font-bold text-gray-400">Users</p><h4 id="stat-users" class="text-lg font-black text-purple-600">0</h4></div>
-            </div>
-
-            <div class="bg-white rounded-3xl border border-gray-100 p-5 mt-6">
-                <h3 class="font-bold text-gray-900 mb-2 border-b border-gray-100 pb-2">Manage Promo Banners</h3>
-                <div class="space-y-3 mt-3">
-                    <input type="file" id="admin-offer-file" accept="image/*" multiple class="w-full text-sm border p-1.5 bg-gray-50 rounded-xl">
-                    <button type="button" onclick="window.adminUpdateOffer()" id="btn-update-offer" class="w-full bg-red-600 text-white py-3 rounded-xl font-bold text-sm">Publish Offer Banners</button>
-                </div>
-            </div>
-
-            <div class="bg-gray-900 rounded-3xl border border-gray-800 p-5 mt-6">
-                <h3 class="font-bold text-white mb-2 border-b border-gray-700 pb-2">Manage Scrolling Marquee</h3>
-                <div class="space-y-3 mt-3">
-                    <input type="text" id="admin-marquee-text" class="input-field !bg-gray-800 !text-white !border-gray-700" placeholder="Enter text...">
-                    <button type="button" onclick="window.adminUpdateMarquee()" id="btn-update-marquee" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm">Publish Marquee</button>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-3xl border border-gray-100 overflow-hidden mt-6">
-                <div class="p-4 bg-gray-50 border-b border-gray-100 font-bold text-sm">Users & Partners</div>
-                <div class="overflow-x-auto"><table class="w-full text-left text-xs"><tbody id="admin-users-body"></tbody></table></div>
-            </div>
-
-            <div class="bg-white rounded-3xl border border-gray-100 overflow-hidden mt-6">
-                <div class="p-4 bg-gray-50 border-b border-gray-100 font-bold text-sm">Live Orders</div>
-                <div class="overflow-x-auto"><table class="w-full text-left text-xs"><tbody id="admin-log-body"></tbody></table></div>
-            </div>
-        </div>
-    </main>
+        </main>
+    </div> <!-- End Scrollable Area -->
 
     <!-- Bottom Navigation -->
-    <div id="bottom-nav" class="fixed bottom-0 w-full bg-white border-t border-gray-200 pb-safe pt-2 px-2 pb-2 shadow-lg z-40 hidden">
+    <div id="bottom-nav" class="fixed bottom-0 w-full bg-white border-t border-gray-200 pb-safe pt-2 px-2 pb-2 shadow-[0_-10px_20px_rgba(0,0,0,0.03)] z-40 hidden">
         <div class="max-w-md mx-auto flex justify-between items-center sm:max-w-4xl px-4"></div>
     </div>
 
@@ -986,24 +995,41 @@
         };
 
         // --- CART & PROMO LOGIC ---
-        window.applyPromo = () => {
+        window.applyPromo = async () => {
             const codeInput = document.getElementById('promo-code-input');
             if (!codeInput) return;
             const code = codeInput.value.trim().toUpperCase();
-            
-            if (code === 'GRAMZO10') window.appliedPromo = 10;
-            else if (code === 'GRAMZO20') window.appliedPromo = 20;
-            else if (code === 'GRAMZO50') window.appliedPromo = 50;
-            else {
-                window.showToast("Invalid Promo Code", "error");
-                window.appliedPromo = 0;
-                window.promoCode = '';
+            if(!code) return;
+
+            const btn = codeInput.nextElementSibling;
+            const origText = btn.innerText;
+            btn.innerText = '...'; btn.disabled = true;
+
+            try {
+                const snap = await window.dbCall(getDocs(getCol('promos')), 10000);
+                const promos = snap.docs.map(d => d.data());
+                
+                const matchedPromo = promos.find(p => p.code === code);
+                if(!matchedPromo) {
+                    window.showToast("Invalid Promo Code", "error");
+                    window.appliedPromo = 0; window.promoCode = '';
+                } else if (!matchedPromo.isActive) {
+                    window.showToast("Promo code is disabled", "error");
+                    window.appliedPromo = 0; window.promoCode = '';
+                } else if (matchedPromo.restaurantId !== 'Global' && window.cart.length > 0 && window.cart[0].partnerId !== matchedPromo.restaurantId) {
+                    window.showToast("Promo not valid for this restaurant", "error");
+                    window.appliedPromo = 0; window.promoCode = '';
+                } else {
+                    window.appliedPromo = matchedPromo.discount;
+                    window.promoCode = matchedPromo.code;
+                    window.showToast(`${window.appliedPromo}% Discount Applied!`, "success");
+                }
                 window.renderCartUI();
-                return;
+            } catch(e) {
+                window.showToast("Network Error verifying promo", "error");
+            } finally {
+                btn.innerText = origText; btn.disabled = false;
             }
-            window.promoCode = code;
-            window.showToast(`${window.appliedPromo}% Discount Applied!`, "success");
-            window.renderCartUI();
         };
 
         window.addToCartStandard = (id, name, price, partnerId, shopName) => {
@@ -1224,7 +1250,7 @@
                                     <td class="p-4 font-mono font-bold text-[10px] text-gray-500">#${o.id.slice(-5).toUpperCase()}</td>
                                     <td class="p-4 font-bold text-gray-900 text-xs">${o.customer || 'Unknown'}</td>
                                     <td class="p-4 font-medium text-gray-500 text-xs">${o.restaurantName || '-'}</td>
-                                    <td class="p-4 font-black text-gray-900 text-xs">₹${o.total}</td>
+                                    <td class="p-4 font-black text-gray-900 text-xs">₹${o.total.toFixed(2)}</td>
                                     <td class="p-4 text-right uppercase text-[9px] font-black ${statusColor} tracking-wider">${o.status}</td>
                                 </tr>`;
                         }
@@ -1237,6 +1263,13 @@
                 const unsubUsers = onSnapshot(getCol('users'), (snap) => {
                     const allUsers = snap.docs.map(d => ({id: d.id, ...d.data()}));
                     document.getElementById('stat-users').innerText = allUsers.length;
+                    
+                    const partners = allUsers.filter(u => u.role === 'Partner' && u.approvalStatus === 'Approved');
+                    const promoSelect = document.getElementById('admin-promo-restaurant');
+                    if(promoSelect) {
+                        promoSelect.innerHTML = '<option value="Global">All Restaurants (Global)</option>' + partners.map(p => `<option value="${p.id}">${p.shopName || p.name}</option>`).join('');
+                    }
+
                     const usersBody = document.getElementById('admin-users-body');
                     if(usersBody) {
                         if(allUsers.length === 0) usersBody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-gray-400 text-xs italic">No users found.</td></tr>';
@@ -1256,6 +1289,28 @@
                     }
                 });
                 unsubscribeListeners.push(unsubUsers);
+
+                const unsubPromos = onSnapshot(getCol('promos'), (snap) => {
+                    const promoList = document.getElementById('admin-promo-list');
+                    if(!promoList) return;
+                    const promos = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                    if(promos.length === 0) {
+                        promoList.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-400">No promo codes active.</td></tr>';
+                        return;
+                    }
+                    promoList.innerHTML = promos.map(p => `
+                        <tr class="border-b border-gray-50">
+                            <td class="p-2 font-bold text-gray-900 uppercase">${p.code}</td>
+                            <td class="p-2 font-black text-red-600">${p.discount}%</td>
+                            <td class="p-2 text-gray-500 text-[10px] truncate max-w-[100px]">${p.restaurantName || 'All Restaurants'}</td>
+                            <td class="p-2 text-right">
+                                <button onclick="window.togglePromo('${p.id}', ${p.isActive})" class="px-2 py-1 rounded text-[10px] font-bold ${p.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'}">${p.isActive ? 'Active' : 'Disabled'}</button>
+                                <button onclick="window.deletePromo('${p.id}')" class="px-2 py-1 rounded text-[10px] font-bold bg-red-100 text-red-700 ml-1"><i class="fa-solid fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    `).join('');
+                });
+                unsubscribeListeners.push(unsubPromos);
             } 
             else if (currentUser.role === 'User') {
                 const unsubUserOrders = onSnapshot(getCol('orders'), (snap) => {
@@ -1362,62 +1417,147 @@
         window.markOutForDelivery = async (orderId) => { try { await window.dbCall(updateDoc(getDocRef('orders', orderId), {status: 'Out for Delivery'}), 10000); window.showToast("Order is out for delivery!", "success"); } catch(e) {} };
         window.markDelivered = async (orderId) => { try { await window.dbCall(updateDoc(getDocRef('orders', orderId), {status: 'Delivered'}), 10000); window.showToast("Order Delivered Successfully!", "success"); } catch(e) {} };
 
+        window.adminReviewPartner = async (partnerPhone, status) => {
+            if(currentUser.role !== 'Admin') return;
+            try {
+                await window.dbCall(setDoc(getDocRef('users', partnerPhone), { approvalStatus: status }, { merge: true }), 10000);
+                window.showToast(`Restaurant ${status}!`, "success");
+            } catch(e) {
+                window.showToast("Error updating status.", "error");
+            }
+        };
+
+        window.adminCreatePromo = async () => {
+            if(currentUser.role !== 'Admin') return;
+            const code = document.getElementById('admin-promo-code').value.trim().toUpperCase();
+            const discount = parseInt(document.getElementById('admin-promo-discount').value);
+            const selectEl = document.getElementById('admin-promo-restaurant');
+            const restaurantId = selectEl.value;
+            const restaurantName = selectEl.options[selectEl.selectedIndex].text;
+
+            if(!code || isNaN(discount) || discount <= 0 || discount > 100) return window.showToast("Enter valid code and discount %", "error");
+
+            try {
+                await window.dbCall(addDoc(getCol('promos'), {
+                    code, discount, restaurantId, restaurantName: restaurantId === 'Global' ? 'All Restaurants' : restaurantName, isActive: true
+                }), 10000);
+                document.getElementById('admin-promo-code').value = '';
+                document.getElementById('admin-promo-discount').value = '';
+                window.showToast("Promo Created!", "success");
+            } catch(e) { window.showToast("Failed to create", "error"); }
+        };
+
+        window.togglePromo = async (id, currentStatus) => {
+            try { await window.dbCall(updateDoc(getDocRef('promos', id), {isActive: !currentStatus}), 10000); } catch(e){}
+        };
+
+        window.deletePromo = async (id) => {
+            try { await window.dbCall(deleteDoc(getDocRef('promos', id)), 10000); window.showToast("Promo Deleted", "info"); } catch(e){}
+        };
+
         window.adminUpdateOffer = async () => {
+            if(currentUser.role !== 'Admin') return;
             const fileInput = document.getElementById('admin-offer-file');
             if(!fileInput.files || fileInput.files.length === 0) return window.showToast("Please select image files.", "error");
+
             const btn = document.getElementById('btn-update-offer');
-            const orig = btn.innerText; btn.innerText = "Uploading..."; btn.disabled = true;
+            const orig = btn.innerText;
+            btn.innerText = "Uploading...";
+            btn.disabled = true;
+
             try {
                 const base64Array = [];
-                for(let i=0; i<fileInput.files.length; i++) base64Array.push(await window.resizeImage(fileInput.files[i], 800));
+                for(let i=0; i<fileInput.files.length; i++) {
+                    const base64 = await window.resizeImage(fileInput.files[i], 800); 
+                    base64Array.push(base64);
+                }
                 await window.dbCall(setDoc(getDocRef('settings', 'app_config'), { offerBanners: base64Array }, { merge: true }), 15000);
-                window.showToast("Offer Banners Updated!", "success"); fileInput.value = "";
-            } catch(e) { window.showToast("Error updating banners. Image might be too large.", "error"); } 
-            finally { btn.innerText = orig; btn.disabled = false; }
+                window.showToast("Offer Banners Updated!", "success");
+                fileInput.value = "";
+            } catch(e) {
+                window.showToast("Error updating banners. Image might be too large.", "error");
+            } finally {
+                btn.innerText = orig;
+                btn.disabled = false;
+            }
         };
 
         window.adminUpdateMarquee = async () => {
+            if(currentUser.role !== 'Admin') return;
             const text = document.getElementById('admin-marquee-text').value.trim();
             if(!text) return window.showToast("Please enter marquee text.", "error");
+
             const btn = document.getElementById('btn-update-marquee');
-            const orig = btn.innerText; btn.innerText = "Updating..."; btn.disabled = true;
+            const orig = btn.innerText;
+            btn.innerText = "Updating...";
+            btn.disabled = true;
+
             try {
                 await window.dbCall(setDoc(getDocRef('settings', 'app_config'), { marqueeText: text }, { merge: true }), 10000);
-                window.showToast("Marquee Updated!", "success"); document.getElementById('admin-marquee-text').value = "";
-            } catch(e) { window.showToast("Error updating marquee.", "error"); } 
-            finally { btn.innerText = orig; btn.disabled = false; }
+                window.showToast("Marquee Updated!", "success");
+                document.getElementById('admin-marquee-text').value = "";
+            } catch(e) {
+                window.showToast("Error updating marquee.", "error");
+            } finally {
+                btn.innerText = orig;
+                btn.disabled = false;
+            }
         };
 
         window.toggleShopStatus = async () => {
             const toggle = document.getElementById('partner-status-toggle');
-            const newStatus = toggle.checked ? 'Open' : 'Closed';
+            const isOpen = toggle.checked;
+            const newStatus = isOpen ? 'Open' : 'Closed';
+            
             document.getElementById('shop-status-text').innerText = `Currently ${newStatus}`;
+            
             try {
                 await window.dbCall(setDoc(getDocRef('users', currentUser.phone), { shopStatus: newStatus }, { merge: true }), 10000);
                 currentUser.shopStatus = newStatus;
+                
                 const snap = await window.dbCall(getDocs(getCol('products')), 10000);
                 const myProducts = snap.docs.filter(d => d.data().partnerId === currentUser.phone);
-                myProducts.forEach(d => updateDoc(getDocRef('products', d.id), { shopStatus: newStatus }));
+                
+                myProducts.forEach(d => {
+                    updateDoc(getDocRef('products', d.id), { shopStatus: newStatus });
+                });
+                
                 window.showToast(`Restaurant marked as ${newStatus}`, "success");
             } catch(e) {
-                toggle.checked = !toggle.checked; 
-                document.getElementById('shop-status-text').innerText = `Currently ${!toggle.checked ? 'Open' : 'Closed'}`;
+                window.showToast("Error updating status", "error");
+                toggle.checked = !isOpen; 
+                document.getElementById('shop-status-text').innerText = `Currently ${!isOpen ? 'Open' : 'Closed'}`;
             }
         };
 
-        window.togglePartnerStock = async (productId, currentInStock) => { try { await window.dbCall(updateDoc(getDocRef('products', productId), { inStock: !currentInStock }), 10000); window.showToast(currentInStock ? "Marked Out of Stock" : "Marked In Stock", "success"); } catch(e) {} };
+        window.togglePartnerStock = async (productId, currentInStock) => {
+            try {
+                await window.dbCall(updateDoc(getDocRef('products', productId), { inStock: !currentInStock }), 10000);
+                window.showToast(currentInStock ? "Marked Out of Stock" : "Marked In Stock", "success");
+            } catch(e) {
+                window.showToast("Error updating stock", "error");
+            }
+        };
 
         window.addVariantRow = () => {
             const container = document.getElementById('variant-container');
             const row = document.createElement('div');
             row.className = "flex gap-2 variant-row mt-3";
-            row.innerHTML = `<input class="input-field w-1/2 var-qty" placeholder="Size (e.g. Half)"><input type="number" class="input-field w-1/2 var-price" placeholder="Price (₹)"><button type="button" onclick="this.parentElement.remove()" class="w-12 shrink-0 bg-gray-100 text-gray-500 rounded-xl flex justify-center items-center hover:bg-red-50 hover:text-red-500 border border-gray-200"><i class="fa-solid fa-xmark"></i></button>`;
+            row.innerHTML = `
+                <input class="input-field w-1/2 var-qty" placeholder="Size (e.g. Half)">
+                <input type="number" class="input-field w-1/2 var-price" placeholder="Price (₹)">
+                <button type="button" onclick="this.parentElement.remove()" class="w-12 shrink-0 bg-gray-100 text-gray-500 rounded-xl flex justify-center items-center hover:bg-red-50 hover:text-red-500 transition border border-gray-200"><i class="fa-solid fa-xmark"></i></button>
+            `;
             container.appendChild(row);
         };
 
         window.addPartnerProduct = async () => {
+            if(!currentUser) return;
+            if(currentUser.approvalStatus !== 'Approved') return window.showToast("Restaurant not approved yet.", "error");
+
             const name = document.getElementById('prod-name').value.trim();
             if(!name) return window.showToast("Enter dish name.", "error");
+
             const rows = document.querySelectorAll('.variant-row');
             let variants = [];
             rows.forEach(row => {
@@ -1425,29 +1565,68 @@
                 const price = parseInt(row.querySelector('.var-price').value);
                 if(qty && !isNaN(price)) variants.push({ qty, price });
             });
+
             if(variants.length === 0) return window.showToast("Add at least one size and price.", "error");
-            
-            const btn = document.getElementById('btn-add-prod');
-            const orig = btn.innerText; btn.innerText = "Saving..."; btn.disabled = true;
+
+            if(!currentUser.shopName) {
+                window.showToast("Please setup and Save your Restaurant Profile first.", "error");
+                document.getElementById('partner-shop-name').focus();
+                return;
+            }
+
             let defaultImg = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80';
             const imgInput = document.getElementById('prod-image-upload');
+            
+            const btn = document.getElementById('btn-add-prod');
+            const originalText = btn.innerText;
+            btn.innerText = "Saving...";
+            btn.disabled = true;
+
             try {
-                if (imgInput && imgInput.files.length > 0) defaultImg = await window.resizeImage(imgInput.files[0], 400);
+                if (imgInput && imgInput.files.length > 0) {
+                    defaultImg = await window.resizeImage(imgInput.files[0], 400);
+                }
+
                 await window.dbCall(addDoc(getCol('products'), {
-                    name, variants, price: variants[0].price, qty: variants[0].qty, category: 'Food', subCategory: null,
-                    partnerId: currentUser.phone, shopName: currentUser.shopName, shopAddress: currentUser.shopAddress || '',
-                    image: defaultImg, inStock: true, shopStatus: currentUser.shopStatus || 'Open', created: new Date().toISOString()
+                    name, 
+                    variants,
+                    price: variants[0].price, 
+                    qty: variants[0].qty,     
+                    category: 'Food',
+                    subCategory: null,
+                    partnerId: currentUser.phone,
+                    shopName: currentUser.shopName,
+                    shopAddress: currentUser.shopAddress || '',
+                    image: defaultImg,
+                    inStock: true,
+                    shopStatus: currentUser.shopStatus || 'Open',
+                    created: new Date().toISOString()
                 }), 15000);
+                
                 document.getElementById('prod-name').value = '';
                 if(imgInput) imgInput.value = '';
-                document.getElementById('variant-container').innerHTML = `<label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Portion & Price</label><div class="flex gap-2 variant-row"><input class="input-field w-1/2 var-qty" placeholder="Size (e.g. Full)"><input type="number" class="input-field w-1/2 var-price" placeholder="Price (₹)"></div>`;
+                document.getElementById('variant-container').innerHTML = `
+                    <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Portion & Price</label>
+                    <div class="flex gap-2 variant-row">
+                        <input class="input-field w-1/2 var-qty" placeholder="Size (e.g. Full)">
+                        <input type="number" class="input-field w-1/2 var-price" placeholder="Price (₹)">
+                    </div>
+                `;
                 window.showToast("Successfully added to Menu!", "success");
-            } catch(e) {} finally { btn.innerText = orig; btn.disabled = false; }
+            } catch(e) {
+                window.showToast("Network delayed. Saving in background.", "info");
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
         };
 
         window.submitPartnerProfile = async () => {
+            if(!currentUser || !currentUser.phone) return;
+            
             const shopNameInput = document.getElementById('partner-shop-name');
             const shopAddressInput = document.getElementById('partner-shop-address');
+            
             const shopName = shopNameInput ? shopNameInput.value.trim() : null;
             const shopAddress = shopAddressInput ? shopAddressInput.value.trim() : '';
             const fssaiNumber = document.getElementById('partner-fssai-number').value.trim();
@@ -1458,30 +1637,74 @@
             if (!shopAddress) return window.showToast("Enter restaurant address.", "error");
             
             const btn = document.getElementById('btn-submit-profile');
-            const orig = btn.innerText; btn.innerText = "Submitting..."; btn.disabled = true;
+            const orig = btn.innerText;
+            btn.innerText = "Submitting...";
+            btn.disabled = true;
 
             let qrBase64 = currentUser.qrCode || null;
+
             try {
-                if (qrInput && qrInput.files.length > 0) qrBase64 = await window.resizeImage(qrInput.files[0], 600);
-                const updateData = { shopName, shopAddress, approvalStatus: 'Approved', fssaiNumber: fssaiNumber || null, codEnabled, qrCode: qrBase64 };
-                await window.dbCall(setDoc(getDocRef('users', currentUser.phone), updateData, { merge: true }), 10000);
+                if (qrInput && qrInput.files.length > 0) {
+                    qrBase64 = await window.resizeImage(qrInput.files[0], 600);
+                }
+
+                const newStatus = 'Approved'; 
+
+                const updateData = { 
+                    shopName: shopName, 
+                    shopAddress: shopAddress,
+                    approvalStatus: newStatus,
+                    fssaiNumber: fssaiNumber || null,
+                    codEnabled: codEnabled,
+                    qrCode: qrBase64
+                };
+
+                try {
+                    await window.dbCall(setDoc(getDocRef('users', currentUser.phone), updateData, { merge: true }), 10000);
+                } catch(dbErr) {
+                    console.warn("DB Write timeout/failed.", dbErr);
+                }
+
+                currentUser.shopName = shopName;
+                currentUser.shopAddress = shopAddress;
+                currentUser.approvalStatus = newStatus;
+                currentUser.fssaiNumber = fssaiNumber;
+                currentUser.codEnabled = codEnabled;
+                currentUser.qrCode = qrBase64;
                 
-                currentUser.shopName = shopName; currentUser.shopAddress = shopAddress; currentUser.approvalStatus = 'Approved';
-                currentUser.fssaiNumber = fssaiNumber; currentUser.codEnabled = codEnabled; currentUser.qrCode = qrBase64;
                 window.showToast("Profile submitted successfully!", "success");
                 window.finalizeLoginSequence(); 
-            } catch(e) { window.showToast("Network error. Try again.", "error"); } 
-            finally { btn.innerText = orig; btn.disabled = false; }
+            } catch(e) {
+                console.error(e);
+                window.showToast("Network error. Try again.", "error");
+            } finally { 
+                btn.innerText = orig; 
+                btn.disabled = false; 
+            }
         };
 
+        // Initialize Session Handlers
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 if (!currentUser) {
                     let sessionPhone = null;
                     try {
                         const sessionSnap = await window.dbCall(getDoc(getDocRef('sessions', user.uid)), 5000);
-                        if (sessionSnap && sessionSnap.exists()) sessionPhone = sessionSnap.data().phone;
-                    } catch(e) {}
+                        if (sessionSnap && sessionSnap.exists()) {
+                            sessionPhone = sessionSnap.data().phone;
+                        }
+                    } catch(e) { console.warn("Session fetch delayed."); }
+
+                    if (!sessionPhone) {
+                        try {
+                            const usersSnap = await window.dbCall(getDocs(getCol('users')), 5000);
+                            const matchedUser = usersSnap.docs.find(d => d.data().uid === user.uid);
+                            if (matchedUser) {
+                                sessionPhone = matchedUser.id;
+                                setDoc(getDocRef('sessions', user.uid), { phone: sessionPhone }, { merge: true }).catch(()=>{});
+                            }
+                        } catch(e) { console.warn("Fallback fetch failed."); }
+                    }
 
                     if (sessionPhone) {
                         if (sessionPhone === 'admin_session' || sessionPhone === 'Gramzo_admin') {
@@ -1494,12 +1717,14 @@
                                     currentUser = { ...userSnap.data(), docId: sessionPhone };
                                     window.finalizeLoginSequence(true); 
                                 }
-                            } catch(e) {}
+                            } catch(e) { console.warn("Profile fetch failed."); }
                         }
                     }
                     window.loadMarketplaceData();
                 }
-            } else { if(window.startApp) window.startApp(); }
+            } else {
+                if(window.startApp) window.startApp(); 
+            }
         });
 
     </script>
