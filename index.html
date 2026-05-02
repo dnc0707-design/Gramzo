@@ -45,6 +45,7 @@
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .glass-nav { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(16px); border-bottom: 1px solid #f0f0f0; }
         
         .view-section { display: none; animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         .view-section.active { display: block; }
@@ -185,12 +186,12 @@
                 <div id="partner-cta" class="mt-8 bg-gray-900 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden flex items-center justify-between">
                     <div class="relative z-10">
                         <h3 class="text-xl font-black mb-1">Partner with us</h3>
-                        <p class="text-gray-300 text-xs mb-3 font-medium">List your restaurant on Gramzo and boost sales.</p>
+                        <p class="text-gray-300 text-xs mb-3 font-medium">List your restaurant or ride with Gramzo.</p>
                         <button type="button" onclick="window.openAuthModal('Partner')" class="bg-red-600 text-white px-5 py-2.5 rounded-xl text-xs font-black shadow-sm active:scale-95 uppercase tracking-widest hover:bg-red-500">
-                            Register Restaurant
+                            Register Partner
                         </button>
                     </div>
-                    <i class="fa-solid fa-utensils text-6xl text-gray-800 absolute right-[10px] bottom-[-10px] rotate-[-15deg]"></i>
+                    <i class="fa-solid fa-motorcycle text-6xl text-gray-800 absolute right-[10px] bottom-[-10px] rotate-[15deg]"></i>
                 </div>
                 
                 <footer class="mt-8 pt-8 border-t border-gray-200/60 pb-4">
@@ -200,7 +201,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v9.4.0 - Banner Integrated Layout</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v10.0.0 - Full Feature Zomato Engine</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right">
                             <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
@@ -276,12 +277,12 @@
             <div id="view-Partner" class="view-section space-y-6">
                 <div class="bg-gray-900 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden">
                     <div class="relative z-10">
-                        <p class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">Restaurant Dashboard</p>
+                        <p class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">Partner Dashboard</p>
                         <h2 class="text-2xl font-black mb-4" id="partner-welcome">Welcome, Partner!</h2>
                     </div>
-                    <i class="fa-solid fa-utensils absolute right-[-20px] bottom-[-20px] text-8xl text-gray-800"></i>
+                    <i class="fa-solid fa-motorcycle absolute right-[-20px] bottom-[-20px] text-8xl text-gray-800"></i>
                 </div>
-                <h3 class="font-black text-xl text-gray-800 border-b border-gray-200 pb-2">Active Orders</h3>
+                <h3 class="font-black text-xl text-gray-800 border-b border-gray-200 pb-2">Active Tasks</h3>
                 <div id="partner-orders-list" class="space-y-4"></div>
             </div>
 
@@ -289,11 +290,11 @@
             <!-- VIEW: PARTNER HUB (Profile & Shop Setup)   -->
             <!-- ========================================== -->
             <div id="view-Partner-Profile" class="view-section space-y-6">
-                <h2 class="text-2xl font-black text-gray-900">Restaurant Settings</h2>
+                <h2 class="text-2xl font-black text-gray-900">Partner Settings</h2>
                 
                 <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="font-bold text-gray-900">Store Profile</h3>
+                        <h3 class="font-bold text-gray-900">Business Profile</h3>
                         <span id="partner-approval-status" class="text-[10px] font-black uppercase border px-2 py-1 rounded">Active</span>
                     </div>
                     
@@ -304,29 +305,30 @@
                         </div>
 
                         <div id="partner-setup-form" class="space-y-3 mt-4 border-t border-gray-200 pt-4">
-                            <label class="block text-xs font-bold text-gray-600 mb-1 ml-1">Restaurant Name</label>
-                            <input id="partner-shop-name" class="input-field" placeholder="Enter Business Name">
+                            <label class="block text-xs font-bold text-gray-600 mb-1 ml-1">Business/Vehicle Name</label>
+                            <input id="partner-shop-name" class="input-field" placeholder="Enter Name">
 
-                            <label class="block text-xs font-bold text-gray-600 mb-1 ml-1 mt-3">Full Address</label>
-                            <input id="partner-shop-address" class="input-field" placeholder="Enter full address">
+                            <label class="block text-xs font-bold text-gray-600 mb-1 ml-1 mt-3">Base Address</label>
+                            <input id="partner-shop-address" class="input-field" placeholder="Enter base location">
                             
-                            <div class="mt-4 p-4 bg-red-50/30 border border-red-100 rounded-xl space-y-4">
+                            <div id="partner-food-settings" class="mt-4 p-4 bg-red-50/30 border border-red-100 rounded-xl space-y-4">
+                                <p class="text-[10px] font-black uppercase text-red-600 tracking-wider">Payment Options (Can enable both)</p>
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-800 mb-1 ml-1">Payment QR Code</label>
+                                    <label class="block text-xs font-bold text-gray-800 mb-1 ml-1">Upload QR Code to enable Pay Online</label>
                                     <input type="file" id="partner-qr-upload" accept="image/*" class="w-full text-xs text-gray-500 border border-gray-200 rounded-xl p-1.5 bg-white">
                                     <img id="partner-qr-preview" class="hidden w-24 h-24 mt-2 border border-gray-200 rounded-lg object-contain bg-white">
                                 </div>
                                 <div class="flex items-center justify-between pt-2 border-t border-red-100">
-                                    <div><p class="text-xs font-bold">Enable Pay on Delivery</p></div>
+                                    <div><p class="text-xs font-bold">Enable Pay on Delivery (COD)</p></div>
                                     <input type="checkbox" id="partner-cod-toggle-setup" checked class="w-4 h-4 text-emerald-500">
                                 </div>
                             </div>
-                            <button type="button" onclick="window.submitPartnerProfile()" id="btn-submit-profile" class="w-full bg-gray-900 text-white px-6 py-4 rounded-2xl font-bold">Save Config</button>
+                            <button type="button" onclick="window.submitPartnerProfile()" id="btn-submit-profile" class="w-full bg-gray-900 text-white px-6 py-4 rounded-2xl font-bold mt-4">Save Config</button>
                         </div>
                     </div>
                 </div>
 
-                <div id="add-product-container" class="bg-white rounded-3xl p-6 border border-gray-200 shadow-sm relative">
+                <div id="add-product-container" class="bg-white rounded-3xl p-6 border border-gray-200 shadow-sm relative hidden">
                     <h3 class="font-black text-gray-900 mb-4">Add Menu Item</h3>
                     <div class="space-y-4 relative z-10">
                         <div>
@@ -349,7 +351,7 @@
                     </div>
                 </div>
 
-                <div id="partner-catalog-list-container">
+                <div id="partner-catalog-list-container" class="hidden">
                     <h3 class="font-black text-gray-900 mb-3 border-b border-gray-200 pb-2">Your Menu</h3>
                     <div id="partner-catalog-list" class="space-y-3"></div>
                 </div>
@@ -382,7 +384,6 @@
                             <input type="number" id="admin-promo-discount" class="input-field !py-2 sm:w-1/3" placeholder="Discount %">
                             <select id="admin-promo-restaurant" class="input-field !py-2 sm:w-1/3 bg-white">
                                 <option value="Global">All Restaurants</option>
-                                <!-- Populated dynamically -->
                             </select>
                         </div>
                         <button type="button" onclick="window.adminCreatePromo()" class="w-full bg-red-600 text-white py-3 rounded-xl font-bold shadow-md hover:bg-red-700 active:scale-95 transition text-sm">Create Promo Code</button>
@@ -404,6 +405,14 @@
                     <div class="space-y-3 mt-3">
                         <input type="file" id="admin-offer-file" accept="image/*" multiple class="w-full text-sm border p-1.5 bg-gray-50 rounded-xl">
                         <button type="button" onclick="window.adminUpdateOffer()" id="btn-update-offer" class="w-full bg-red-600 text-white py-3 rounded-xl font-bold text-sm">Publish Offer Banners</button>
+                    </div>
+                </div>
+
+                <div class="bg-gray-900 rounded-3xl border border-gray-800 p-5 mt-6">
+                    <h3 class="font-bold text-white mb-2 border-b border-gray-700 pb-2">Manage Scrolling Marquee</h3>
+                    <div class="space-y-3 mt-3">
+                        <input type="text" id="admin-marquee-text" class="input-field !bg-gray-800 !text-white !border-gray-700" placeholder="Enter text...">
+                        <button type="button" onclick="window.adminUpdateMarquee()" id="btn-update-marquee" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm">Publish Marquee</button>
                     </div>
                 </div>
 
@@ -447,9 +456,15 @@
                 <input id="reg-pass" type="password" class="input-field" placeholder="Create Password">
                 
                 <div id="partner-fields" class="hidden bg-gray-50 p-4 rounded-2xl space-y-3 mt-2">
-                    <p class="text-xs font-bold text-center border-b pb-2">Restaurant Registration</p>
-                    <input id="reg-shop-name" type="text" class="input-field" placeholder="Restaurant Name">
-                    <input id="reg-shop-address" type="text" class="input-field" placeholder="Restaurant Full Address">
+                    <p class="text-xs font-bold text-center border-b pb-2">Partner Registration</p>
+                    <select id="reg-partner-category" class="input-field bg-white" onchange="window.togglePartnerRegFields()">
+                        <option value="Food Owner">Restaurant Owner</option>
+                        <option value="Rider">Delivery Rider</option>
+                    </select>
+                    <div id="reg-restaurant-fields" class="space-y-3">
+                        <input id="reg-shop-name" type="text" class="input-field" placeholder="Business Name">
+                        <input id="reg-shop-address" type="text" class="input-field" placeholder="Full Address">
+                    </div>
                 </div>
 
                 <button type="button" id="submit-register" onclick="window.handleAuth('register')" class="w-full bg-red-600 text-white p-4 rounded-2xl font-bold mt-4">Sign Up</button>
@@ -484,6 +499,26 @@
         </div>
     </div>
 
+    <!-- Reject Reason Modal -->
+    <div id="reject-modal" class="modal-overlay z-[200]">
+        <div class="modal-content !max-w-xs">
+            <h3 class="font-black text-xl text-gray-900 mb-2">Reject Order</h3>
+            <p class="text-xs text-gray-500 mb-4">Please provide a reason for rejecting this order.</p>
+            <select id="reject-reason" class="input-field mb-4 bg-white">
+                <option value="">Select a reason</option>
+                <option value="Items out of stock">Items out of stock</option>
+                <option value="Store is closing">Store is closing</option>
+                <option value="Too busy/High volume">Too busy/High volume</option>
+                <option value="Delivery unavailable">Delivery unavailable</option>
+                <option value="Other">Other</option>
+            </select>
+            <div class="flex gap-2">
+                <button onclick="document.getElementById('reject-modal').classList.remove('active')" class="flex-1 bg-gray-100 text-gray-600 py-3 rounded-xl font-bold text-sm hover:bg-gray-200">Cancel</button>
+                <button onclick="window.confirmRejectOrder()" class="flex-1 bg-red-600 text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-red-700">Reject</button>
+            </div>
+        </div>
+    </div>
+
     <div id="toast-msg" class="fixed top-20 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full text-sm font-bold z-[300] shadow-2xl transition-all duration-300 transform -translate-y-10 opacity-0 pointer-events-none flex items-center gap-2">
         <i class="fa-solid fa-circle-info text-emerald-400"></i>
         <span id="toast-text">Message</span>
@@ -496,7 +531,7 @@
 
         const IS_LIVE_WEBSITE = true;
 
-        const firebaseConfig = {
+        const liveFirebaseConfig = {
             apiKey: "AIzaSyCA4U4jva7HHeMP-yk1VJy3l_BBct3Gohg",
             authDomain: "gramzo.firebaseapp.com",
             projectId: "gramzo",
@@ -506,7 +541,7 @@
         };
         
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'gramzo-super-v2'; 
-        const app = initializeApp(firebaseConfig);
+        const app = initializeApp(liveFirebaseConfig);
         const auth = getAuth(app);
         const db = initializeFirestore(app, { experimentalForceLongPolling: true });
 
@@ -517,6 +552,7 @@
         window.appliedPromo = 0;
         window.promoCode = '';
         window.currentSearchQuery = '';
+        window.currentRejectOrderId = null;
         let unsubscribeListeners = []; 
         let currentAuthRole = 'User'; 
         
@@ -656,6 +692,16 @@
             document.getElementById('auth-msg').classList.add('hidden');
         };
 
+        window.togglePartnerRegFields = () => {
+            const cat = document.getElementById('reg-partner-category').value;
+            const restFields = document.getElementById('reg-restaurant-fields');
+            if (cat === 'Food Owner') {
+                restFields.classList.remove('hidden');
+            } else {
+                restFields.classList.add('hidden');
+            }
+        };
+
         window.toggleProfileMenu = () => document.getElementById('profile-menu').classList.toggle('hidden');
 
         window.switchMainView = (viewName) => {
@@ -739,12 +785,13 @@
 
                     if (snap && snap.exists()) throw new Error("Number already registered.");
 
-                    let shopName = null, shopAddress = null, fssaiNumber = null;
+                    let partnerCategory = null, shopName = null, shopAddress = null;
 
                     if (currentAuthRole === 'Partner') {
+                        const catEl = document.getElementById('reg-partner-category');
+                        partnerCategory = catEl ? catEl.value : 'Food Owner';
                         shopName = document.getElementById('reg-shop-name').value.trim();
                         shopAddress = document.getElementById('reg-shop-address').value.trim();
-                        fssaiNumber = document.getElementById('reg-fssai-number').value.trim();
                     }
 
                     const userData = { 
@@ -752,8 +799,10 @@
                         approvalStatus: 'Approved', uid: auth?.currentUser?.uid || 'unknown',
                         created: new Date().toISOString(),
                         ...(currentAuthRole === 'Partner' && { 
-                            category: 'Food Owner', shopName: shopName || name + "'s Kitchen",
-                            shopAddress: shopAddress || '', fssaiNumber: fssaiNumber || null,
+                            category: partnerCategory, 
+                            shopName: partnerCategory === 'Food Owner' ? (shopName || name + "'s Kitchen") : null,
+                            shopAddress: partnerCategory === 'Food Owner' ? shopAddress : null,
+                            fssaiNumber: null,
                             codEnabled: true, qrCode: null
                         })
                     };
@@ -795,7 +844,7 @@
             document.getElementById('nav-initial').innerText = currentUser.name.charAt(0).toUpperCase();
             document.getElementById('nav-name').innerText = currentUser.name;
             document.getElementById('nav-role').innerText = currentUser.role;
-            document.getElementById('nav-role').className = `text-[9px] font-bold uppercase ${currentUser.role === 'Admin' ? 'text-purple-500' : currentUser.role === 'Partner' ? 'text-orange-500' : 'text-blue-500'}`;
+            document.getElementById('nav-role').className = `text-[8px] font-bold uppercase ${currentUser.role === 'Admin' ? 'text-purple-500' : currentUser.role === 'Partner' ? 'text-orange-500' : 'text-blue-500'}`;
             document.getElementById('menu-name').innerText = currentUser.name;
             document.getElementById('menu-phone').innerText = currentUser.phone;
 
@@ -803,7 +852,16 @@
             window.switchMainView(currentUser.role === 'Admin' ? 'Admin' : currentUser.role === 'Partner' ? 'Partner' : 'User');
 
             if (currentUser.role === 'Partner') {
-                document.getElementById('partner-welcome').innerText = `Hello, ${currentUser.name.split(' ')[0]}!`;
+                if(currentUser.category === 'Food Owner') {
+                    document.getElementById('partner-food-settings').classList.remove('hidden');
+                    document.getElementById('add-product-container').classList.remove('hidden');
+                    document.getElementById('partner-catalog-list-container').classList.remove('hidden');
+                } else {
+                    document.getElementById('partner-food-settings').classList.add('hidden');
+                    document.getElementById('add-product-container').classList.add('hidden');
+                    document.getElementById('partner-catalog-list-container').classList.add('hidden');
+                }
+
                 if(currentUser.shopName) document.getElementById('hub-name-val').innerText = currentUser.shopName;
                 if(currentUser.shopAddress) {
                     document.getElementById('hub-address-row').classList.remove('hidden');
@@ -979,8 +1037,8 @@
                 container.innerHTML += createNavItem('Cart', 'fa-solid fa-basket-shopping', 'Cart', 'Cart');
                 container.innerHTML += createNavItem('Orders', 'fa-solid fa-receipt', 'History', 'Orders'); 
             } else if (role === 'Partner') {
-                container.innerHTML += createNavItem('Partner', 'fa-solid fa-utensils', 'Orders', 'Partner');
-                container.innerHTML += createNavItem('Partner-Profile', 'fa-solid fa-store', 'Menu & Hub', 'Partner-Profile');
+                container.innerHTML += createNavItem('Partner', 'fa-solid fa-utensils', 'Tasks', 'Partner');
+                container.innerHTML += createNavItem('Partner-Profile', 'fa-solid fa-store', 'Settings', 'Partner-Profile');
             } else if (role === 'Admin') {
                 container.innerHTML += createNavItem('Admin', 'fa-solid fa-chart-line', 'Dashboard', 'Admin');
             }
@@ -1225,6 +1283,39 @@
             }
         };
 
+        window.openRejectModal = (id) => {
+            window.currentRejectOrderId = id;
+            document.getElementById('reject-modal').classList.add('active');
+        };
+
+        window.confirmRejectOrder = async () => {
+            const reason = document.getElementById('reject-reason').value;
+            if (!reason) return window.showToast("Please select a reason.", "error");
+            if (!window.currentRejectOrderId) return;
+
+            try {
+                await window.dbCall(updateDoc(getDocRef('orders', window.currentRejectOrderId), {
+                    status: 'Rejected',
+                    rejectReason: reason
+                }), 10000);
+                window.showToast("Order Rejected.", "success");
+                document.getElementById('reject-modal').classList.remove('active');
+            } catch(e) { window.showToast("Failed to update.", "error"); }
+        };
+
+        window.acceptDelivery = async (orderId) => {
+            if(!currentUser) return;
+            try {
+                await window.dbCall(updateDoc(getDocRef('orders', orderId), {
+                    status: 'Out for Delivery',
+                    riderId: currentUser.phone,
+                    riderName: currentUser.name,
+                    riderPhone: currentUser.phone
+                }), 10000);
+                window.showToast("Delivery Accepted!", "success");
+            } catch(e) { window.showToast("Failed to update.", "error"); }
+        };
+
         window.initRoleListeners = () => {
             if (!auth.currentUser || !currentUser) return;
 
@@ -1337,6 +1428,32 @@
                         const itemsList = o.items.map(i => i.name).join(', ');
                         const paymentBadge = o.paymentMode === 'Prepaid' ? `<span class="bg-blue-100 text-blue-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">Prepaid</span>` : `<span class="bg-gray-100 text-gray-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">COD</span>`;
 
+                        let trackingHtml = '';
+                        if (o.status === 'Out for Delivery' && o.riderName) {
+                            trackingHtml = `
+                            <div class="mt-4 bg-blue-50 border border-blue-100 rounded-xl p-3">
+                                <p class="text-[10px] font-black uppercase text-blue-600 mb-1">Delivery Partner Allocated</p>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center text-blue-700"><i class="fa-solid fa-motorcycle"></i></div>
+                                    <div class="flex-1">
+                                        <p class="text-xs font-bold text-gray-900">${o.riderName}</p>
+                                        <p class="text-[10px] text-gray-500">${o.riderPhone || ''}</p>
+                                    </div>
+                                    <a href="tel:${o.riderPhone}" class="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone text-xs"></i></a>
+                                </div>
+                                <div class="w-full h-32 mt-3 rounded-lg overflow-hidden border border-blue-200 bg-gray-200 relative pointer-events-none">
+                                    <iframe width="100%" height="100%" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" 
+                                        src="https://maps.google.com/maps?q=${encodeURIComponent(o.address)}&t=&z=15&ie=UTF8&iwloc=&output=embed">
+                                    </iframe>
+                                    <div class="absolute top-2 left-2 bg-white/90 backdrop-blur px-2 py-1 rounded text-[9px] font-black text-blue-600 shadow-sm animate-pulse">
+                                        <i class="fa-solid fa-satellite-dish mr-1"></i> Live Tracking
+                                    </div>
+                                </div>
+                            </div>`;
+                        } else if (o.status === 'Rejected' && o.rejectReason) {
+                            trackingHtml = `<p class="text-xs font-bold text-red-500 mt-3 bg-red-50 p-2 rounded-lg border border-red-100"><i class="fa-solid fa-circle-info mr-1"></i> Reason: ${o.rejectReason}</p>`;
+                        }
+
                         return `
                             <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 relative overflow-hidden transition-all hover:shadow-md">
                                 <div class="flex justify-between items-start mb-3">
@@ -1351,7 +1468,8 @@
                                     <div class="flex justify-between text-[10px] font-black uppercase tracking-wider mb-2 ${statusColor}"><span>${statusText}</span></div>
                                     <div class="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden"><div class="bg-current h-1.5 rounded-full transition-all duration-1000 ${statusColor.replace('text-', 'bg-')}" style="width: ${progressWidth}"></div></div>
                                 </div>
-                                <button onclick="window.downloadInvoice('${o.id}')" class="w-full bg-white text-red-600 py-3 rounded-xl font-bold text-xs border border-red-100 hover:bg-red-50 transition-colors"><i class="fa-solid fa-file-pdf mr-1"></i> Download Invoice</button>
+                                ${trackingHtml}
+                                <button onclick="window.downloadInvoice('${o.id}')" class="w-full mt-3 bg-white text-red-600 py-3 rounded-xl font-bold text-xs border border-red-100 hover:bg-red-50 transition-colors"><i class="fa-solid fa-file-pdf mr-1"></i> Download Invoice</button>
                             </div>`;
                     }).join('');
                 });
@@ -1362,7 +1480,19 @@
                     const listEl = document.getElementById('partner-orders-list');
                     let html = '';
                     const orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                    let relevantOrders = orders.filter(o => o.restaurantId === currentUser.phone);
+                    
+                    let relevantOrders = [];
+                    if (currentUser.category === 'Food Owner') {
+                        relevantOrders = orders.filter(o => o.restaurantId === currentUser.phone);
+                    } else if (currentUser.category === 'Rider') {
+                        relevantOrders = orders.filter(o => 
+                            (o.status === 'Ready' && !o.riderId) || 
+                            (o.status === 'Placed' && !o.restaurantId) || 
+                            (o.riderId === currentUser.phone && ['Out for Delivery'].includes(o.status))
+                        );
+                    }
+                    
+                    relevantOrders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0));
 
                     if (relevantOrders.length === 0) {
                         listEl.innerHTML = '<p class="text-gray-400 font-medium text-sm text-center py-10 bg-white rounded-3xl shadow-sm border border-gray-100">No active requests right now.</p>';
@@ -1375,16 +1505,30 @@
                         let paymentBadge = o.paymentMode === 'Prepaid' ? `<span class="bg-blue-100 text-blue-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">Prepaid</span>` : `<span class="bg-gray-100 text-gray-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">COD</span>`;
                         let screenshotHtml = o.paymentMode === 'Prepaid' && o.paymentScreenshot ? `<button type="button" onclick="window.viewImage('${o.paymentScreenshot}')" class="text-[10px] text-blue-600 bg-blue-50 px-2 py-1 rounded font-bold hover:bg-blue-100 transition mt-2 w-full text-left"><i class="fa-solid fa-image"></i> View Payment Screenshot</button>` : '';
                         
-                        if (o.status === 'Placed') actionButtons = `<div class="flex gap-2"><button type="button" onclick="window.acceptFoodOrder('${o.id}')" class="flex-1 bg-black text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-gray-800 transition-colors active:scale-95"><i class="fa-solid fa-check"></i> Accept</button><button type="button" onclick="window.rejectOrder('${o.id}')" class="flex-1 bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm hover:bg-red-100 transition-colors active:scale-95"><i class="fa-solid fa-xmark"></i> Reject</button></div>`;
-                        else if (o.status === 'Accepted') { cardStyle = 'border-blue-200 bg-blue-50/30'; actionButtons = `<button type="button" onclick="window.markPreparing('${o.id}')" class="w-full bg-blue-600 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-blue-700 active:scale-95">Start Preparing</button>`; }
-                        else if (o.status === 'Preparing') { cardStyle = 'border-orange-200 bg-orange-50/30'; actionButtons = `<button type="button" onclick="window.markReady('${o.id}')" class="w-full bg-orange-500 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-orange-600 active:scale-95">Mark Ready</button>`; }
-                        else if (o.status === 'Ready') { cardStyle = 'border-yellow-200 bg-yellow-50/30'; actionButtons = `<button type="button" onclick="window.markOutForDelivery('${o.id}')" class="w-full bg-yellow-500 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-yellow-600 active:scale-95">Mark Out For Delivery</button>`; }
-                        else if (o.status === 'Out for Delivery') actionButtons = `<div class="flex gap-2"><a href="tel:${o.phone}" class="flex-1 bg-white border border-gray-200 text-gray-700 py-3.5 rounded-xl font-bold text-sm text-center active:scale-95 shadow-sm"><i class="fa-solid fa-phone mr-1"></i> Call User</a><button type="button" onclick="window.markDelivered('${o.id}')" class="flex-1 bg-emerald-500 text-white py-3.5 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-check-double mr-1"></i> Delivered</button></div>`;
-                        else if (o.status === 'Delivered') actionButtons = `<div class="w-full bg-emerald-50 text-emerald-600 py-3 rounded-xl font-bold text-sm text-center border border-emerald-100"><i class="fa-solid fa-circle-check mr-1"></i> Order Completed</div>`;
-                        else if (o.status === 'Rejected') actionButtons = `<div class="w-full bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm text-center border border-red-100"><i class="fa-solid fa-circle-xmark mr-1"></i> Order Rejected</div>`;
+                        let customerInfo = `<div class="mb-3 bg-gray-50 p-2 rounded-xl border border-gray-100">
+                            <p class="text-xs font-black text-gray-800"><i class="fa-solid fa-user text-gray-400 mr-1"></i> ${o.customer}</p>
+                            <p class="text-xs font-bold text-blue-600 mt-1"><a href="tel:${o.phone}"><i class="fa-solid fa-phone mr-1"></i> ${o.phone}</a></p>
+                        </div>`;
+
+                        if (currentUser.category === 'Rider') {
+                            if (o.status === 'Ready' && !o.riderId) {
+                                actionButtons = `<button type="button" onclick="window.acceptDelivery('${o.id}')" class="w-full bg-gray-900 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-motorcycle mr-1"></i> Accept Delivery</button>`;
+                            } else if (o.status === 'Out for Delivery' && o.riderId === currentUser.phone) {
+                                actionButtons = `<div class="flex gap-2"><a href="tel:${o.phone}" class="flex-1 bg-white border border-gray-200 text-gray-700 py-3 rounded-xl font-bold text-sm text-center flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone mr-1"></i> Customer</a><button type="button" onclick="window.markDelivered('${o.id}')" class="flex-1 bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md"><i class="fa-solid fa-check-double mr-1"></i> Done</button></div>`;
+                            }
+                        } else {
+                            if (o.status === 'Placed') actionButtons = `<div class="flex gap-2"><button type="button" onclick="window.acceptFoodOrder('${o.id}')" class="flex-1 bg-black text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-gray-800 transition-colors active:scale-95"><i class="fa-solid fa-check"></i> Accept</button><button type="button" onclick="window.openRejectModal('${o.id}')" class="flex-1 bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm hover:bg-red-100 transition-colors active:scale-95"><i class="fa-solid fa-xmark"></i> Reject</button></div>`;
+                            else if (o.status === 'Accepted') { cardStyle = 'border-blue-200 bg-blue-50/30'; actionButtons = `<button type="button" onclick="window.markPreparing('${o.id}')" class="w-full bg-blue-600 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-blue-700 active:scale-95">Start Preparing</button>`; }
+                            else if (o.status === 'Preparing') { cardStyle = 'border-orange-200 bg-orange-50/30'; actionButtons = `<button type="button" onclick="window.markReady('${o.id}')" class="w-full bg-orange-500 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-orange-600 active:scale-95">Mark Ready for Rider</button>`; }
+                            else if (o.status === 'Ready') { cardStyle = 'border-yellow-200 bg-yellow-50/30'; actionButtons = `<p class="text-xs font-bold text-orange-600 text-center py-2 bg-orange-50 rounded-xl">Waiting for Delivery Partner...</p><button type="button" onclick="window.markOutForDelivery('${o.id}')" class="w-full mt-2 bg-yellow-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95 border border-yellow-600">Self Deliver (Skip Rider)</button>`; }
+                            else if (o.status === 'Out for Delivery') actionButtons = `<p class="text-xs font-bold text-yellow-600 text-center py-2 bg-yellow-50 rounded-xl">Out for Delivery via ${o.riderName || 'Self'}</p>`;
+                            else if (o.status === 'Delivered') actionButtons = `<div class="w-full bg-emerald-50 text-emerald-600 py-3 rounded-xl font-bold text-sm text-center border border-emerald-100"><i class="fa-solid fa-circle-check mr-1"></i> Order Completed</div>`;
+                            else if (o.status === 'Rejected') actionButtons = `<div class="w-full bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm text-center border border-red-100"><i class="fa-solid fa-circle-xmark mr-1"></i> Order Rejected</div>`;
+                        }
 
                         html += `<div class="bg-white rounded-3xl p-5 shadow-sm border ${cardStyle}">
                                 <div class="flex justify-between items-start mb-3"><div><div class="flex items-center gap-2 mb-1"><span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Order #${o.id.slice(-4).toUpperCase()}</span>${paymentBadge}</div><h4 class="font-bold text-gray-900 text-sm"><i class="fa-solid fa-map-pin text-red-500 mr-1"></i> ${o.address}</h4></div><span class="text-xl font-black text-emerald-600">₹${o.total.toFixed(2)}</span></div>
+                                ${customerInfo}
                                 <div class="bg-gray-50 p-3 rounded-xl mb-4 border border-gray-100"><p class="text-xs text-gray-700 font-bold mb-1"><i class="fa-solid fa-clipboard-list text-gray-400 mr-1"></i> Items:</p><p class="text-sm text-gray-600 font-medium">${itemsStr}</p>${screenshotHtml}</div>
                                 ${actionButtons}</div>`;
                     });
@@ -1411,7 +1555,6 @@
         };
 
         window.acceptFoodOrder = async (orderId) => { try { await window.dbCall(updateDoc(getDocRef('orders', orderId), {status: 'Accepted'}), 10000); window.showToast("Order Accepted!", "success"); } catch(e) {} };
-        window.rejectOrder = async (orderId) => { try { await window.dbCall(updateDoc(getDocRef('orders', orderId), {status: 'Rejected'}), 10000); window.showToast("Order Rejected.", "error"); } catch(e) {} };
         window.markPreparing = async (orderId) => { try { await window.dbCall(updateDoc(getDocRef('orders', orderId), {status: 'Preparing'}), 10000); window.showToast("Order is Preparing!", "success"); } catch(e) {} };
         window.markReady = async (orderId) => { try { await window.dbCall(updateDoc(getDocRef('orders', orderId), {status: 'Ready'}), 10000); window.showToast("Marked as Ready!", "success"); } catch(e) {} };
         window.markOutForDelivery = async (orderId) => { try { await window.dbCall(updateDoc(getDocRef('orders', orderId), {status: 'Out for Delivery'}), 10000); window.showToast("Order is out for delivery!", "success"); } catch(e) {} };
