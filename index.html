@@ -137,7 +137,7 @@
         <!-- Marquee below banner -->
         <div id="marquee-container" class="w-full bg-gray-900 border-b border-gray-800 z-30 overflow-hidden h-10 flex items-center shadow-lg hidden relative">
             <div id="dynamic-marquee" class="animate-marquee inline-block whitespace-nowrap text-sm sm:text-base font-black font-bengali text-yellow-300 tracking-wide drop-shadow-md">
-                🚀 ঘরে বসেই আপনার প্রিয় খাবার অর্ডার করুন! 🛵 দ্রুত ডেলিভারি এখন কোটালডিহ, শাকাম্বরী প্ল্যান্ট এলাকা, লালগড়, রামচন্দ্রপুর, কৃষ্ণপুর, কিনাইডিহ, মুরাডি এবং বড়ন্তি তে! 🚀 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 🚀 ঘরে বসেই আপনার প্রিয় খাবার অর্ডার করুন! 🛵 দ্রুত ডেলিভারি এখন কোটালডিহ, শাকাম্বরী প্ল্যান্ট এলাকা, লালগড়, রামচন্দ্রপুর, কৃষ্ণপুর, কিনাইডিহ, মুরাডি এবং বড়ন্তি তে! 🚀
+                🚀 কোটালডিহ, কিনাইডিহ, লালগড়, কৃষ্ণপুর, রামচন্দ্রপুর, মুরাডি, গাংপুর, যশপুর এবং বড়ন্তি এলাকা থেকে অর্ডার করুন 🚀 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 🚀 কোটালডিহ, কিনাইডিহ, লালগড়, কৃষ্ণপুর, রামচন্দ্রপুর, মুরাডি, গাংপুর, যশপুর এবং বড়ন্তি এলাকা থেকে অর্ডার করুন 🚀
             </div>
         </div>
 
@@ -228,7 +228,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v10.1.0 - Info & Policy Pages Added</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v10.2.0 - Marquee & Prep Time Added</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right">
                             <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
@@ -362,9 +362,15 @@
                             <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Dish Name</label>
                             <input id="prod-name" class="input-field mt-1" placeholder="E.g. Chicken Biryani">
                         </div>
-                        <div>
-                            <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Dish Image</label>
-                            <input type="file" id="prod-image-upload" accept="image/*" class="w-full text-xs text-gray-500 border border-gray-200 rounded-xl p-1.5 bg-gray-50 mt-1">
+                        <div class="flex gap-3">
+                            <div class="flex-1">
+                                <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Prep Time (Mins)</label>
+                                <input type="number" id="prod-prep-time" class="input-field mt-1" placeholder="E.g. 15">
+                            </div>
+                            <div class="flex-1">
+                                <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Dish Image</label>
+                                <input type="file" id="prod-image-upload" accept="image/*" class="w-full text-[10px] text-gray-500 border border-gray-200 rounded-xl p-1.5 bg-gray-50 mt-1">
+                            </div>
                         </div>
                         <div id="variant-container" class="space-y-2">
                             <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Portion & Price</label>
@@ -1025,6 +1031,7 @@
                 const isOutOfStock = p.inStock === false;
                 
                 let addressDisplay = p.shopAddress ? `<p class="text-[9px] text-gray-400 font-medium leading-none mb-2 truncate"><i class="fa-solid fa-location-dot"></i> ${p.shopAddress}</p>` : '';
+                let prepTimeDisplay = p.prepTime ? `<p class="text-[10px] text-orange-600 font-bold mb-1"><i class="fa-regular fa-clock"></i> Prep time: ${p.prepTime} mins</p>` : '';
                 let qtyDisplay = `<p class="text-[10px] text-gray-500 uppercase tracking-wide font-medium mb-3">${p.qty || ''} • <span class="text-red-600 font-bold">${p.shopName || 'Gramzo'}</span></p>`;
                 
                 if (hasVariants) {
@@ -1063,6 +1070,7 @@
                             <div>
                                 <h4 class="font-bold text-gray-900 text-sm leading-tight mb-1">${p.name}</h4>
                                 ${addressDisplay}
+                                ${prepTimeDisplay}
                                 ${qtyDisplay}
                             </div>
                             <div class="flex justify-between items-center mt-auto pt-2 border-t border-gray-50">
@@ -1824,6 +1832,8 @@
             if(currentUser.approvalStatus !== 'Approved') return window.showToast("Restaurant not approved yet.", "error");
 
             const name = document.getElementById('prod-name').value.trim();
+            const prepTime = document.getElementById('prod-prep-time').value.trim() || '15';
+            
             if(!name) return window.showToast("Enter dish name.", "error");
 
             const rows = document.querySelectorAll('.variant-row');
@@ -1860,6 +1870,7 @@
                     variants,
                     price: variants[0].price, 
                     qty: variants[0].qty,     
+                    prepTime: prepTime,
                     category: 'Food',
                     subCategory: null,
                     partnerId: currentUser.phone,
@@ -1872,6 +1883,7 @@
                 }), 15000);
                 
                 document.getElementById('prod-name').value = '';
+                document.getElementById('prod-prep-time').value = '';
                 if(imgInput) imgInput.value = '';
                 document.getElementById('variant-container').innerHTML = `
                     <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Portion & Price</label>
