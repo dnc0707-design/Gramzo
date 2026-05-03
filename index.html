@@ -138,9 +138,9 @@
         </div>
 
         <!-- Marquee below banner -->
-        <div id="marquee-container" class="w-full bg-gray-900 border-b border-gray-800 z-30 overflow-hidden h-10 flex items-center shadow-lg hidden relative">
+        <div id="marquee-container" class="w-full bg-gray-900 border-b border-gray-800 z-30 overflow-hidden h-10 flex items-center shadow-lg relative">
             <div id="dynamic-marquee" class="animate-marquee inline-block whitespace-nowrap text-sm sm:text-base font-black font-bengali text-yellow-300 tracking-wide drop-shadow-md">
-                🚀 কোটালডিহ, কিনাইডিহ, লালগড়, কৃষ্ণপুর, রামচন্দ্রপুর, মুরাডি, গাংপুর, যশপুর এবং বড়ন্তি এলাকা থেকে অর্ডার করুন 🚀 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 🚀 কোটালডিহ, কিনাইডিহ, লালগড়, কৃষ্ণপুর, রামচন্দ্রপুর, মুরাডি, গাংপুর, যশপুর এবং বড়ন্তি এলাকা থেকে অর্ডার করুন 🚀
+                🚀 খাবার অর্ডার করুন ঘরে বসেই - সার্ভিস অ্যাভেইলেবল অ্যাট কোটালডিহ, কিনাইডিহ, লালগড়, কৃষ্ণপুর, রামচন্দ্রপুর, মুরাডি, গাংপুর, যশপুর এবং বড়ন্তি এলাকা 🚀 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 🚀 খাবার অর্ডার করুন ঘরে বসেই - সার্ভিস অ্যাভেইলেবল অ্যাট কোটালডিহ, কিনাইডিহ, লালগড়, কৃষ্ণপুর, রামচন্দ্রপুর, মুরাডি, গাংপুর, যশপুর এবং বড়ন্তি এলাকা 🚀
             </div>
         </div>
 
@@ -208,7 +208,7 @@
                 
                 <footer class="mt-8 pt-8 border-t border-gray-200/60 pb-4">
                     <div class="w-full mb-8 flex justify-center sm:justify-start">
-                        <img src="https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/ChatGPT%20Image%20May%202%2C%202026%2C%2001_32_51%20PM.png" alt="Gramzo" class="h-12 object-contain opacity-50 drop-shadow-sm rounded-xl">
+                        <img src="https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/ChatGPT%20Image%20May%202%2C%202026%2C%2001_16_21%20PM.png" alt="Gramzo" class="h-16 object-contain opacity-50 drop-shadow-sm rounded-xl">
                     </div>
                     
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-8 mb-8 mt-6">
@@ -240,7 +240,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v10.4.0 - UI Reshaped</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.1.0 - Reverted to Gramzo</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right">
                             <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
@@ -277,7 +277,7 @@
                         <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100 mt-4">
                             <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2">Apply Promo Code</label>
                             <div class="flex gap-2">
-                                <input type="text" id="promo-code-input" class="input-field !py-2.5 !rounded-xl text-xs font-bold uppercase" placeholder="e.g. GRAMZO50">
+                                <input type="text" id="promo-code-input" class="input-field !py-2.5 !rounded-xl text-xs font-bold uppercase" placeholder="e.g. SAVE50">
                                 <button type="button" onclick="window.applyPromo()" class="bg-gray-900 text-white px-5 py-2.5 rounded-xl text-xs font-bold shrink-0 hover:bg-gray-800">APPLY</button>
                             </div>
                         </div>
@@ -856,10 +856,7 @@
 
         window.switchMainView = (viewName) => {
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-            
-            const targetView = document.getElementById(`view-${viewName}`);
-            if (targetView) targetView.classList.add('active');
-            
+            document.getElementById(`view-${viewName}`).classList.add('active');
             window.scrollTo(0,0);
             
             const cta = document.getElementById('partner-cta');
@@ -1079,7 +1076,7 @@
                 const isOutOfStock = p.inStock === false;
                 
                 let addressDisplay = `<div class="mb-2">
-                    <p class="text-[10px] font-bold text-gray-800"><i class="fa-solid fa-store text-red-500 mr-1"></i> ${p.shopName || 'Gramzo'}</p>
+                    <p class="text-[10px] font-bold text-gray-800"><i class="fa-solid fa-store text-red-500 mr-1"></i> ${p.shopName || 'Gramzo Partner'}</p>
                     ${p.shopAddress ? `<p class="text-[9px] text-gray-500 font-medium mt-0.5 leading-tight"><i class="fa-solid fa-location-dot text-gray-400 mr-1"></i> ${p.shopAddress}</p>` : ''}
                 </div>`;
                 
@@ -1169,10 +1166,28 @@
         };
 
         window.loadMarketplaceData = () => {
+            const defaultMarqueeText = "🚀 খাবার অর্ডার করুন ঘরে বসেই - সার্ভিস অ্যাভেইলেবল অ্যাট কোটালডিহ, কিনাইডিহ, লালগড়, কৃষ্ণপুর, রামচন্দ্রপুর, মুরাডি, গাংপুর, যশপুর এবং বড়ন্তি এলাকা 🚀";
+
             onSnapshot(getDocRef('settings', 'app_config'), (snap) => {
                 const bannerEl = document.getElementById('user-offer-banner');
-                if (snap.exists() && snap.data().offerBanners && snap.data().offerBanners.length > 0) {
-                    if(bannerEl) bannerEl.src = snap.data().offerBanners[0];
+                const marqueeContainer = document.getElementById('marquee-container');
+                const marqueeEl = document.getElementById('dynamic-marquee');
+                
+                if (snap.exists()) {
+                    const data = snap.data();
+                    if (data.offerBanners && data.offerBanners.length > 0 && bannerEl) {
+                        bannerEl.src = data.offerBanners[0];
+                    }
+                    if (data.marqueeText && data.marqueeText.trim() !== '') {
+                        if(marqueeContainer) marqueeContainer.classList.remove('hidden');
+                        if(marqueeEl) marqueeEl.innerHTML = `${data.marqueeText} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${data.marqueeText}`;
+                    } else {
+                        if(marqueeContainer) marqueeContainer.classList.remove('hidden');
+                        if(marqueeEl) marqueeEl.innerHTML = `${defaultMarqueeText} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${defaultMarqueeText}`;
+                    }
+                } else {
+                    if(marqueeContainer) marqueeContainer.classList.remove('hidden');
+                    if(marqueeEl) marqueeEl.innerHTML = `${defaultMarqueeText} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${defaultMarqueeText}`;
                 }
             }, (err) => console.error(err));
 
