@@ -1,7 +1,7 @@
 {
-  "name": "MuradiGo Super App",
-  "short_name": "MuradiGo",
-  "description": "Instant Delivery Super App for Food, Groceries, and More.",
+  "name": "Gramzo Super App",
+  "short_name": "Gramzo",
+  "description": "Instant Delivery Super App for Food, Groceries, and More- from Nearby Muradi station area villages.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f8f9fa",
