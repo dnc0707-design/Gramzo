@@ -240,7 +240,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.2.0 - Platform Fee Update</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.3.0 - Notification Systems Active</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right">
                             <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
@@ -348,20 +348,20 @@
                             <input id="partner-shop-name" class="input-field" placeholder="Enter Name">
 
                             <label class="block text-xs font-bold text-gray-600 mb-1 ml-1 mt-3">Base Address</label>
-                        <input id="partner-shop-address" class="input-field" placeholder="Enter base location">
+                            <input id="partner-shop-address" class="input-field" placeholder="Enter base location">
 
-                        <div class="flex gap-3 mt-3">
-                            <div class="flex-1">
-                                <label class="block text-xs font-bold text-gray-600 mb-1 ml-1">Opening Time</label>
-                                <input type="time" id="partner-open-time" class="input-field px-3">
+                            <div class="flex gap-3 mt-3">
+                                <div class="flex-1">
+                                    <label class="block text-xs font-bold text-gray-600 mb-1 ml-1">Opening Time</label>
+                                    <input type="time" id="partner-open-time" class="input-field px-3">
+                                </div>
+                                <div class="flex-1">
+                                    <label class="block text-xs font-bold text-gray-600 mb-1 ml-1">Closing Time</label>
+                                    <input type="time" id="partner-close-time" class="input-field px-3">
+                                </div>
                             </div>
-                            <div class="flex-1">
-                                <label class="block text-xs font-bold text-gray-600 mb-1 ml-1">Closing Time</label>
-                                <input type="time" id="partner-close-time" class="input-field px-3">
-                            </div>
-                        </div>
-                        
-                        <div id="partner-food-settings" class="mt-4 p-4 bg-red-50/30 border border-red-100 rounded-xl space-y-4">
+                            
+                            <div id="partner-food-settings" class="mt-4 p-4 bg-red-50/30 border border-red-100 rounded-xl space-y-4">
                                 <p class="text-[10px] font-black uppercase text-red-600 tracking-wider">Payment Options (Can enable both)</p>
                                 
                                 <div class="flex items-center justify-between pb-3 border-b border-red-100">
@@ -396,9 +396,8 @@
                         </label>
                     </div>
                 </div>
-            </div>
 
-            <div id="add-product-container" class="bg-white rounded-3xl p-6 border border-gray-200 shadow-sm relative hidden">
+                <div id="add-product-container" class="bg-white rounded-3xl p-6 border border-gray-200 shadow-sm relative hidden mt-6">
                     <h3 class="font-black text-gray-900 mb-4">Add Menu Item</h3>
                     <div class="space-y-4 relative z-10">
                         <div>
@@ -427,7 +426,7 @@
                     </div>
                 </div>
 
-                <div id="partner-catalog-list-container" class="hidden">
+                <div id="partner-catalog-list-container" class="hidden mt-6">
                     <h3 class="font-black text-gray-900 mb-3 border-b border-gray-200 pb-2">Your Menu</h3>
                     <div id="partner-catalog-list" class="space-y-3"></div>
                 </div>
@@ -642,6 +641,7 @@
         window.promoCode = '';
         window.currentSearchQuery = '';
         window.currentRejectOrderId = null;
+        window.lastKnownOrders = {}; // Notification tracking
         let unsubscribeListeners = []; 
         let currentAuthRole = 'User'; 
         
@@ -662,6 +662,26 @@
                 const timer = setTimeout(() => { reject(new Error("Timeout")); }, ms);
                 promise.then(res => { clearTimeout(timer); resolve(res); }).catch(err => { clearTimeout(timer); reject(err); });
             });
+        };
+
+        // --- Notification & Alert Logic ---
+        window.playAlertSound = () => {
+            try {
+                // Short notification ping
+                const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+                audio.play().catch(e => console.log("Audio blocked by browser. Interaction required."));
+            } catch(e) {}
+        };
+
+        window.sendAlert = (title, body) => {
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification(title, { 
+                    body: body, 
+                    icon: 'https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/ChatGPT%20Image%20May%202%2C%202026%2C%2001_16_21%20PM.png' 
+                });
+            } else {
+                window.showToast(title + " - " + body, "info");
+            }
         };
 
         window.resizeImage = (file, maxSize) => {
@@ -706,7 +726,6 @@
             }, 3000);
         };
 
-        // --- NEW STATIC INFO MODAL HANDLER ---
         window.openStaticPage = (page) => {
             const titleEl = document.getElementById('info-modal-title');
             const bodyEl = document.getElementById('info-modal-body');
@@ -889,7 +908,10 @@
 
         window.switchMainView = (viewName) => {
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-            document.getElementById(`view-${viewName}`).classList.add('active');
+            
+            const targetView = document.getElementById(`view-${viewName}`);
+            if (targetView) targetView.classList.add('active');
+            
             window.scrollTo(0,0);
             
             const cta = document.getElementById('partner-cta');
@@ -918,6 +940,7 @@
             window.cart = [];
             window.appliedPromo = 0;
             window.promoCode = '';
+            window.lastKnownOrders = {};
             window.showToast("Signing out...", "info");
             setTimeout(() => window.location.reload(), 800);
         };
@@ -1020,6 +1043,12 @@
 
         window.finalizeLoginSequence = () => {
             window.closeAuthModal();
+            
+            // Request Notification Permission on Login
+            if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
+                Notification.requestPermission();
+            }
+
             window.showToast(`Welcome back, ${currentUser.name.split(' ')[0]}!`, "success");
 
             document.getElementById('btn-partner-login-trigger').classList.add('hidden');
@@ -1580,10 +1609,19 @@
 
                     if(orders.length === 0 && adminLog) adminLog.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-gray-400 text-xs italic">No orders yet</td></tr>';
 
+                    let newOrderIds = {};
+                    let firstLoad = Object.keys(window.lastKnownOrders || {}).length === 0;
+
                     orders.forEach(o => {
                         if (o.status !== 'Rejected') {
                             rev += o.total; 
                             count++;
+                        }
+                        
+                        newOrderIds[o.id] = o.status;
+                        if (!firstLoad && !window.lastKnownOrders[o.id]) {
+                            window.playAlertSound();
+                            window.sendAlert("New Order Alert", `Order #${o.id.slice(-5).toUpperCase()} placed for ₹${o.total}`);
                         }
                         
                         if(adminLog) {
@@ -1598,6 +1636,9 @@
                                 </tr>`;
                         }
                     });
+                    
+                    window.lastKnownOrders = newOrderIds;
+                    
                     document.getElementById('stat-rev').innerText = `₹${rev.toFixed(2)}`;
                     document.getElementById('stat-ord').innerText = count;
                 });
@@ -1668,7 +1709,17 @@
                         return;
                     }
 
+                    let newOrderIds = {};
+                    let firstLoad = Object.keys(window.lastKnownOrders || {}).length === 0;
+
                     listEl.innerHTML = myOrders.map(o => {
+                        newOrderIds[o.id] = o.status;
+                        
+                        if (!firstLoad && window.lastKnownOrders[o.id] && window.lastKnownOrders[o.id] !== o.status) {
+                            window.playAlertSound();
+                            window.sendAlert("Order Update", `Your order #${o.id.slice(-5).toUpperCase()} is now ${o.status}`);
+                        }
+
                         let statusColor = 'text-orange-500', progressWidth = '15%', statusText = 'Pending Approval';
                         if(o.status === 'Accepted') { statusColor = 'text-blue-500'; progressWidth = '30%'; statusText = 'Order Confirmed'; }
                         if(o.status === 'Preparing') { statusColor = 'text-blue-500'; progressWidth = '50%'; statusText = 'Food is Preparing'; }
@@ -1727,6 +1778,8 @@
                                 <button onclick="window.downloadInvoice('${o.id}')" class="w-full mt-3 bg-white text-red-600 py-3 rounded-xl font-bold text-xs border border-red-100 hover:bg-red-50 transition-colors"><i class="fa-solid fa-file-pdf mr-1"></i> Download Invoice</button>
                             </div>`;
                     }).join('');
+                    
+                    window.lastKnownOrders = newOrderIds;
                 });
                 unsubscribeListeners.push(unsubUserOrders);
             }
@@ -1754,7 +1807,17 @@
                         return;
                     }
 
+                    let newOrderIds = {};
+                    let firstLoad = Object.keys(window.lastKnownOrders || {}).length === 0;
+
                     relevantOrders.forEach(o => {
+                        newOrderIds[o.id] = o.status;
+                        
+                        if (!firstLoad && !window.lastKnownOrders[o.id]) {
+                            window.playAlertSound();
+                            window.sendAlert("New Order Received!", `Please check your dashboard.`);
+                        }
+
                         const itemsStr = o.items.map(i => `${i.name}`).join(', ');
                         let cardStyle = 'border-gray-100', actionButtons = '';
                         let paymentBadge = o.paymentMode === 'Prepaid' ? `<span class="bg-blue-100 text-blue-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">Prepaid</span>` : `<span class="bg-gray-100 text-gray-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">COD</span>`;
@@ -1787,6 +1850,8 @@
                                 <div class="bg-gray-50 p-3 rounded-xl mb-4 border border-gray-100"><p class="text-xs text-gray-700 font-bold mb-1"><i class="fa-solid fa-clipboard-list text-gray-400 mr-1"></i> Items:</p><p class="text-sm text-gray-600 font-medium">${itemsStr}</p>${screenshotHtml}</div>
                                 ${actionButtons}</div>`;
                     });
+                    
+                    window.lastKnownOrders = newOrderIds;
                     listEl.innerHTML = html;
                 });
                 unsubscribeListeners.push(orderUnsub);
