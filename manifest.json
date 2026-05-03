@@ -1,6 +1,6 @@
 {
-  "name": "Gramzo Super App",
-  "short_name": "Gramzo",
+  "name": "MuradiGo Super App",
+  "short_name": "MuradiGo",
   "description": "Instant Delivery Super App for Food, Groceries, and More.",
   "start_url": "/",
   "display": "standalone",
@@ -8,14 +8,15 @@
   "theme_color": "#E23744",
   "icons": [
     {
-      "src": "https://github.com/dnc0707-design/Gramzo/blob/main/Android%20Icon.png",
+      "src": "https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/Android%20Icon.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "https://github.com/dnc0707-design/Gramzo/blob/main/Android%20Icon.png",
+      "src": "https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/Android%20Icon.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
