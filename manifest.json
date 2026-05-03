@@ -8,12 +8,12 @@
   "theme_color": "#E23744",
   "icons": [
     {
-      "src": "https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/MuradiGO_ChatGPT%20Image%20May%203%2C%202026%2C%2011_33_35%20AM.png",
+      "src": "https://github.com/dnc0707-design/Gramzo/blob/main/Android%20Icon.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/MuradiGO_ChatGPT%20Image%20May%203%2C%202026%2C%2011_33_35%20AM.png",
+      "src": "https://github.com/dnc0707-design/Gramzo/blob/main/Android%20Icon.png",
       "sizes": "512x512",
       "type": "image/png"
     }
