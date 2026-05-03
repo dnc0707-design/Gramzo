@@ -97,16 +97,18 @@
 
     <!-- Thin Top Bar for Auth (Just above the banner) -->
     <div class="fixed top-0 w-full z-50 bg-white/95 backdrop-blur shadow-sm h-[50px] flex justify-between items-center px-4">
-        <!-- Small Logo for context -->
-        <div class="font-logo text-red-600 font-black text-xl italic cursor-pointer" onclick="location.reload()">
-            Gramzo
+        <!-- Left Side: Logo & Partner Login -->
+        <div class="flex items-center gap-2 sm:gap-3">
+            <div class="font-logo text-red-600 font-black text-xl italic cursor-pointer" onclick="location.reload()">
+                Gramzo
+            </div>
+            <button type="button" id="btn-partner-login-trigger" onclick="window.openAuthModal('Partner')" class="bg-gray-900 text-white px-2 py-1.5 sm:px-3 sm:py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black shadow-md hover:bg-gray-800 transition-colors active:scale-95 flex items-center gap-1 whitespace-nowrap">
+                <i class="fa-solid fa-motorcycle"></i> <span>Restaurant / Rider Login</span>
+            </button>
         </div>
 
         <!-- Right Side Auth Controls -->
         <div id="auth-container" class="flex items-center gap-2 sm:gap-3 shrink-0 h-full">
-            <button type="button" id="btn-partner-login-trigger" onclick="window.openAuthModal('Partner')" class="bg-gray-900 text-white px-3 sm:px-4 py-1.5 rounded-lg text-[10px] sm:text-xs font-black shadow-md hover:bg-gray-800 transition-colors active:scale-95 flex items-center gap-1.5 whitespace-nowrap">
-                <i class="fa-solid fa-handshake"></i> <span class="hidden sm:inline">Partner Login</span>
-            </button>
             <button type="button" id="btn-login-trigger" onclick="window.openAuthModal('User')" class="bg-red-600 text-white px-3 sm:px-4 py-1.5 rounded-lg text-[10px] sm:text-xs font-bold shadow-md hover:bg-red-700 transition-colors active:scale-95 flex items-center gap-1.5 whitespace-nowrap">
                 <i class="fa-solid fa-user"></i> Login
             </button>
@@ -246,7 +248,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.5.0 - Reviews & Fixes</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.6.0 - Voice Alerts & Delivery Times</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right">
                             <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
@@ -314,6 +316,14 @@
             <div id="view-Orders" class="view-section space-y-6">
                 <h2 class="text-2xl font-black text-gray-900">My Orders</h2>
                 <div id="user-orders-list" class="space-y-4"></div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- VIEW: REVIEWS                              -->
+            <!-- ========================================== -->
+            <div id="view-Reviews" class="view-section space-y-6">
+                <h2 class="text-2xl font-black text-gray-900">User Reviews</h2>
+                <div id="user-reviews-list" class="space-y-4"></div>
             </div>
 
             <!-- ========================================== -->
@@ -667,7 +677,7 @@
         <span id="toast-text">Message</span>
     </div>
 
-    <!-- PWA Service Worker Registration (Added for Offline Support & APK) -->
+    <!-- PWA Service Worker Registration -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -735,6 +745,13 @@
             return `${h}:${m} ${ampm}`;
         };
 
+        window.formatOrderTime = (timestamp) => {
+            if (!timestamp) return 'Just now';
+            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+            if (isNaN(date)) return 'Just now';
+            return date.toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
+        };
+
         const getCol = (name) => IS_LIVE_WEBSITE ? collection(db, name) : collection(db, 'artifacts', appId, 'public', 'data', name);
         const getDocRef = (colName, docId) => IS_LIVE_WEBSITE ? doc(db, colName, docId) : doc(db, 'artifacts', appId, 'public', 'data', colName, docId);
 
@@ -749,8 +766,18 @@
         window.playAlertSound = () => {
             try {
                 const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-                audio.play().catch(e => console.log("Audio blocked by browser. Interaction required."));
+                audio.play().catch(e => console.log("Audio blocked by browser."));
             } catch(e) {}
+        };
+
+        window.speakAlert = (text) => {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // Stop any ongoing speech
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-IN';
+                utterance.rate = 0.95;
+                window.speechSynthesis.speak(utterance);
+            }
         };
 
         window.sendAlert = (title, body) => {
@@ -800,7 +827,8 @@
             try {
                 await window.dbCall(updateDoc(getDocRef('orders', window.currentRatingOrderId), {
                     rating: window.selectedRating,
-                    review: reviewText
+                    review: reviewText,
+                    reviewTime: serverTimestamp()
                 }), 10000);
                 window.showToast("Thank you for your feedback!", "success");
                 document.getElementById('rating-modal').classList.remove('active');
@@ -1016,7 +1044,10 @@
         window.switchAuthView = (view) => {
             document.getElementById('auth-view-login').style.display = view === 'login' ? 'block' : 'none';
             document.getElementById('auth-view-register').style.display = view === 'register' ? 'block' : 'none';
-            document.getElementById('auth-title').innerText = view === 'login' ? `${currentAuthRole} Login` : `Join as ${currentAuthRole}`;
+            
+            let displayRole = currentAuthRole === 'Partner' ? 'Restaurant / Rider' : currentAuthRole;
+            document.getElementById('auth-title').innerText = view === 'login' ? `${displayRole} Login` : `Join as ${displayRole}`;
+            
             document.getElementById('partner-fields').style.display = (view === 'register' && currentAuthRole === 'Partner') ? 'block' : 'none';
             document.getElementById('auth-msg').classList.add('hidden');
         };
@@ -1454,6 +1485,7 @@
                 container.innerHTML += createNavItem('User', 'fa-solid fa-house', 'Home', 'User');
                 container.innerHTML += createNavItem('Cart', 'fa-solid fa-basket-shopping', 'Cart', 'Cart');
                 container.innerHTML += createNavItem('Orders', 'fa-solid fa-receipt', 'History', 'Orders'); 
+                container.innerHTML += createNavItem('Reviews', 'fa-solid fa-star', 'Reviews', 'Reviews'); 
             } else if (role === 'Partner') {
                 container.innerHTML += createNavItem('Partner', 'fa-solid fa-utensils', 'Tasks', 'Partner');
                 container.innerHTML += createNavItem('Partner-Profile', 'fa-solid fa-store', 'Settings', 'Partner-Profile');
@@ -1551,7 +1583,10 @@
                 let statusColor = o.status === 'Placed' ? 'text-amber-500' : o.status === 'Preparing' || o.status === 'Out for Delivery' ? 'text-blue-500' : o.status === 'Rejected' ? 'text-red-500' : 'text-emerald-500';
                 html += `
                     <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="p-4 font-mono font-bold text-[10px] text-gray-500">#${o.id.slice(-5).toUpperCase()}</td>
+                        <td class="p-4 font-mono font-bold text-[10px] text-gray-500">
+                            #${o.id.slice(-5).toUpperCase()}
+                            <br/><span class="text-[8px] text-gray-400">${window.formatOrderTime(o.time)}</span>
+                        </td>
                         <td class="p-4 font-bold text-gray-900 text-xs">${o.customer || 'Unknown'}</td>
                         <td class="p-4 font-medium text-gray-500 text-xs">${o.restaurantName || '-'}</td>
                         <td class="p-4 font-black text-gray-900 text-xs">₹${o.total.toFixed(2)}</td>
@@ -1559,6 +1594,44 @@
                     </tr>`;
             });
             adminLog.innerHTML = html;
+        };
+
+        window.renderReviews = (allOrders) => {
+            const listEl = document.getElementById('user-reviews-list');
+            if(!listEl) return;
+            const reviewedOrders = allOrders.filter(o => o.rating).sort((a,b) => (b.reviewTime?.toMillis() || b.time?.toMillis() || 0) - (a.reviewTime?.toMillis() || a.time?.toMillis() || 0));
+
+            if(reviewedOrders.length === 0) {
+                listEl.innerHTML = '<div class="text-center py-10 bg-white rounded-3xl border border-gray-100"><i class="fa-solid fa-star text-4xl text-gray-200 mb-4"></i><p class="text-gray-400 font-medium text-sm">No reviews yet.</p></div>';
+                return;
+            }
+
+            listEl.innerHTML = reviewedOrders.map(o => {
+                let ratingColor = o.rating >= 4 ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : o.rating === 3 ? 'bg-yellow-50 text-yellow-600 border-yellow-100' : 'bg-red-50 text-red-600 border-red-100';
+                
+                return `
+                <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 mb-4 transition-all hover:shadow-md">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-black text-sm shadow-sm">${o.customer ? o.customer.charAt(0).toUpperCase() : 'U'}</div>
+                            <div>
+                                <h4 class="font-black text-gray-900 text-sm leading-none mb-1">${o.customer || 'Unknown'}</h4>
+                                <span class="text-[10px] text-gray-500 font-medium"><i class="fa-regular fa-clock mr-1"></i> ${window.formatOrderTime(o.reviewTime || o.time)}</span>
+                            </div>
+                        </div>
+                        <div class="${ratingColor} px-2 py-1 rounded-lg text-xs font-black border flex items-center gap-1 shadow-sm">
+                            ${o.rating} <i class="fa-solid fa-star text-[10px]"></i>
+                        </div>
+                    </div>
+                    <div class="mb-3 border-b border-gray-50 pb-3">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Ordered From</p>
+                        <p class="text-xs text-gray-900 font-bold"><i class="fa-solid fa-store text-red-500 mr-1"></i> ${o.restaurantName || 'Gramzo Partner'}</p>
+                        <p class="text-[10px] text-gray-500 line-clamp-1 mt-1">${o.items ? o.items.map(i => i.name).join(', ') : ''}</p>
+                    </div>
+                    ${o.review ? `<p class="text-sm text-gray-700 leading-relaxed italic">"${o.review}"</p>` : '<p class="text-sm text-gray-400 italic">No written review provided.</p>'}
+                </div>
+                `;
+            }).join('');
         };
 
         // --- PARTNER TABS LOGIC ---
@@ -1609,23 +1682,41 @@
                     if (o.status === 'Ready' && !o.riderId) {
                         actionButtons = `<button type="button" onclick="window.acceptDelivery('${o.id}')" class="w-full bg-gray-900 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-motorcycle mr-1"></i> Accept Delivery</button>`;
                     } else if (o.status === 'Out for Delivery' && o.riderId === currentUser.phone) {
-                        actionButtons = `<div class="flex gap-2"><a href="tel:${o.phone}" class="flex-1 bg-white border border-gray-200 text-gray-700 py-3 rounded-xl font-bold text-sm text-center flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone mr-1"></i> Customer</a><button type="button" onclick="window.markDelivered('${o.id}')" class="flex-1 bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md"><i class="fa-solid fa-check-double mr-1"></i> Done</button></div>`;
+                        actionButtons = `<div class="flex gap-2"><a href="tel:${o.phone}" class="flex-1 bg-white border border-gray-200 text-gray-700 py-3 rounded-xl font-bold text-sm text-center flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone mr-1"></i> Customer</a><button type="button" onclick="window.markDelivered('${o.id}')" class="flex-1 bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md"><i class="fa-solid fa-check-double mr-1"></i> Delivered</button></div>`;
                     }
                 } else {
                     if (o.status === 'Placed') actionButtons = `<div class="flex gap-2"><button type="button" onclick="window.acceptFoodOrder('${o.id}')" class="flex-1 bg-black text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-gray-800 transition-colors active:scale-95"><i class="fa-solid fa-check"></i> Accept</button><button type="button" onclick="window.openRejectModal('${o.id}')" class="flex-1 bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm hover:bg-red-100 transition-colors active:scale-95"><i class="fa-solid fa-xmark"></i> Reject</button></div>`;
                     else if (o.status === 'Accepted') { cardStyle = 'border-blue-200 bg-blue-50/30'; actionButtons = `<button type="button" onclick="window.markPreparing('${o.id}')" class="w-full bg-blue-600 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-blue-700 active:scale-95">Start Preparing</button>`; }
                     else if (o.status === 'Preparing') { cardStyle = 'border-orange-200 bg-orange-50/30'; actionButtons = `<button type="button" onclick="window.markReady('${o.id}')" class="w-full bg-orange-500 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-orange-600 active:scale-95">Mark Ready for Rider</button>`; }
                     else if (o.status === 'Ready') { cardStyle = 'border-yellow-200 bg-yellow-50/30'; actionButtons = `<p class="text-xs font-bold text-orange-600 text-center py-2 bg-orange-50 rounded-xl">Waiting for Delivery Partner...</p><button type="button" onclick="window.markOutForDelivery('${o.id}')" class="w-full mt-2 bg-yellow-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95 border border-yellow-600">Self Deliver (Skip Rider)</button>`; }
-                    else if (o.status === 'Out for Delivery') actionButtons = `<p class="text-xs font-bold text-yellow-600 text-center py-2 bg-yellow-50 rounded-xl">Out for Delivery via ${o.riderName || 'Self'}</p>`;
+                    else if (o.status === 'Out for Delivery') {
+                        if(!o.riderId) { // Self delivery by shop owner
+                            actionButtons = `<button type="button" onclick="window.markDelivered('${o.id}')" class="w-full bg-emerald-500 text-white py-3.5 rounded-xl font-bold text-sm shadow-md active:scale-95 border border-emerald-600">Mark as Delivered</button>`;
+                        } else {
+                            actionButtons = `<p class="text-xs font-bold text-yellow-600 text-center py-2 bg-yellow-50 rounded-xl">Out for Delivery via ${o.riderName}</p>`;
+                        }
+                    }
                     else if (o.status === 'Delivered') actionButtons = `<div class="w-full bg-emerald-50 text-emerald-600 py-3 rounded-xl font-bold text-sm text-center border border-emerald-100"><i class="fa-solid fa-circle-check mr-1"></i> Order Completed</div>`;
                     else if (o.status === 'Rejected') actionButtons = `<div class="w-full bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm text-center border border-red-100"><i class="fa-solid fa-circle-xmark mr-1"></i> Order Rejected</div>`;
                 }
 
+                let ratingHtml = o.rating ? `<div class="mt-2 text-center text-xs font-bold text-yellow-600 bg-yellow-50 rounded-lg py-1 border border-yellow-100"><i class="fa-solid fa-star"></i> Customer Rated: ${o.rating} Star</div>` : '';
+
                 html += `<div class="bg-white rounded-3xl p-5 shadow-sm border ${cardStyle}">
-                        <div class="flex justify-between items-start mb-3"><div><div class="flex items-center gap-2 mb-1"><span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Order #${o.id.slice(-4).toUpperCase()}</span>${paymentBadge}</div><h4 class="font-bold text-gray-900 text-sm"><i class="fa-solid fa-map-pin text-red-500 mr-1"></i> ${o.address}</h4></div><span class="text-xl font-black text-emerald-600">₹${o.total.toFixed(2)}</span></div>
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <div class="flex items-center gap-2 mb-1"><span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Order #${o.id.slice(-4).toUpperCase()}</span>${paymentBadge}</div>
+                                <h4 class="font-bold text-gray-900 text-sm flex items-start gap-1"><i class="fa-solid fa-map-pin text-red-500 mt-0.5 shrink-0"></i> ${o.address}</h4>
+                                <p class="text-[9px] text-gray-500 font-bold mt-1.5"><i class="fa-regular fa-clock mr-1"></i> Placed: ${window.formatOrderTime(o.time)}</p>
+                                ${o.deliveredAt ? `<p class="text-[9px] text-emerald-600 font-bold mt-0.5"><i class="fa-solid fa-check-double mr-1"></i> Delivered: ${window.formatOrderTime(o.deliveredAt)}</p>` : ''}
+                            </div>
+                            <span class="text-xl font-black text-emerald-600">₹${o.total.toFixed(2)}</span>
+                        </div>
                         ${customerInfo}
                         <div class="bg-gray-50 p-3 rounded-xl mb-4 border border-gray-100"><p class="text-xs text-gray-700 font-bold mb-1"><i class="fa-solid fa-clipboard-list text-gray-400 mr-1"></i> Items:</p><p class="text-sm text-gray-600 font-medium">${itemsStr}</p>${screenshotHtml}</div>
-                        ${actionButtons}</div>`;
+                        ${actionButtons}
+                        ${ratingHtml}
+                        </div>`;
             });
             listEl.innerHTML = html;
         };
@@ -1919,6 +2010,7 @@
                         newOrderIds[o.id] = o.status;
                         if (!firstLoad && !window.lastKnownOrders[o.id]) {
                             window.playAlertSound();
+                            window.speakAlert("A new order has been placed.");
                             window.sendAlert("New Order Alert", `Order #${o.id.slice(-5).toUpperCase()} placed for ₹${o.total}`);
                         }
                     });
@@ -1974,7 +2066,11 @@
                 const unsubUserOrders = onSnapshot(getCol('orders'), (snap) => {
                     const listEl = document.getElementById('user-orders-list');
                     if(!listEl) return;
-                    const myOrders = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(o => o.phone === currentUser.phone);
+                    
+                    const allOrders = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                    if(window.renderReviews) window.renderReviews(allOrders);
+
+                    const myOrders = allOrders.filter(o => o.phone === currentUser.phone);
                     myOrders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0));
                     window.userOrderHistory = myOrders;
 
@@ -1990,8 +2086,19 @@
                         newOrderIds[o.id] = o.status;
                         
                         if (!firstLoad && window.lastKnownOrders[o.id] && window.lastKnownOrders[o.id] !== o.status) {
+                            let msg = `Your order #${o.id.slice(-5).toUpperCase()} is now ${o.status}`;
+                            let voiceMsg = msg;
+                            
+                            if(o.status === 'Accepted') voiceMsg = 'Your order has been accepted by the restaurant.';
+                            if(o.status === 'Preparing') voiceMsg = 'Your food is now being prepared.';
+                            if(o.status === 'Ready') voiceMsg = 'Your order is ready and waiting for delivery.';
+                            if(o.status === 'Out for Delivery') voiceMsg = 'Your order is out for delivery.';
+                            if(o.status === 'Delivered') voiceMsg = 'Your order has been delivered successfully. Enjoy your meal!';
+                            if(o.status === 'Rejected') voiceMsg = 'Sorry, your order was rejected by the restaurant.';
+
                             window.playAlertSound();
-                            window.sendAlert("Order Update", `Your order #${o.id.slice(-5).toUpperCase()} is now ${o.status}`);
+                            window.speakAlert(voiceMsg);
+                            window.sendAlert("Order Update", msg);
                         }
 
                         let statusColor = 'text-orange-500', progressWidth = '15%', statusText = 'Pending Approval';
@@ -2056,6 +2163,8 @@
                                     <div>
                                         <div class="flex items-center gap-2 mb-1"><span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Order #${o.id.slice(-5).toUpperCase()}</span>${paymentBadge}</div>
                                         <h4 class="font-black text-gray-900 text-base leading-none">${o.restaurantName || 'Gramzo Partner'}</h4>
+                                        <p class="text-[9px] text-gray-500 font-bold mt-1.5"><i class="fa-regular fa-clock mr-1"></i> Placed: ${window.formatOrderTime(o.time)}</p>
+                                        ${o.deliveredAt ? `<p class="text-[9px] text-emerald-600 font-bold mt-0.5"><i class="fa-solid fa-check-double mr-1"></i> Delivered: ${window.formatOrderTime(o.deliveredAt)}</p>` : ''}
                                     </div>
                                     <span class="text-xl font-black text-gray-900">₹${o.total.toFixed(2)}</span>
                                 </div>
@@ -2107,6 +2216,7 @@
                         
                         if (!firstLoad && !window.lastKnownOrders[o.id]) {
                             window.playAlertSound();
+                            window.speakAlert("New task received. Please check your dashboard.");
                             window.sendAlert("New Task Received!", `Please check your dashboard.`);
                         }
 
@@ -2124,14 +2234,20 @@
                             if (o.status === 'Ready' && !o.riderId) {
                                 actionButtons = `<button type="button" onclick="window.acceptDelivery('${o.id}')" class="w-full bg-gray-900 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-motorcycle mr-1"></i> Accept Delivery</button>`;
                             } else if (o.status === 'Out for Delivery' && o.riderId === currentUser.phone) {
-                                actionButtons = `<div class="flex gap-2"><a href="tel:${o.phone}" class="flex-1 bg-white border border-gray-200 text-gray-700 py-3 rounded-xl font-bold text-sm text-center flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone mr-1"></i> Customer</a><button type="button" onclick="window.markDelivered('${o.id}')" class="flex-1 bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md"><i class="fa-solid fa-check-double mr-1"></i> Done</button></div>`;
+                                actionButtons = `<div class="flex gap-2"><a href="tel:${o.phone}" class="flex-1 bg-white border border-gray-200 text-gray-700 py-3 rounded-xl font-bold text-sm text-center flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone mr-1"></i> Customer</a><button type="button" onclick="window.markDelivered('${o.id}')" class="flex-1 bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md"><i class="fa-solid fa-check-double mr-1"></i> Delivered</button></div>`;
                             }
                         } else {
                             if (o.status === 'Placed') actionButtons = `<div class="flex gap-2"><button type="button" onclick="window.acceptFoodOrder('${o.id}')" class="flex-1 bg-black text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-gray-800 transition-colors active:scale-95"><i class="fa-solid fa-check"></i> Accept</button><button type="button" onclick="window.openRejectModal('${o.id}')" class="flex-1 bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm hover:bg-red-100 transition-colors active:scale-95"><i class="fa-solid fa-xmark"></i> Reject</button></div>`;
                             else if (o.status === 'Accepted') { cardStyle = 'border-blue-200 bg-blue-50/30'; actionButtons = `<button type="button" onclick="window.markPreparing('${o.id}')" class="w-full bg-blue-600 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-blue-700 active:scale-95">Start Preparing</button>`; }
                             else if (o.status === 'Preparing') { cardStyle = 'border-orange-200 bg-orange-50/30'; actionButtons = `<button type="button" onclick="window.markReady('${o.id}')" class="w-full bg-orange-500 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-orange-600 active:scale-95">Mark Ready for Rider</button>`; }
                             else if (o.status === 'Ready') { cardStyle = 'border-yellow-200 bg-yellow-50/30'; actionButtons = `<p class="text-xs font-bold text-orange-600 text-center py-2 bg-orange-50 rounded-xl">Waiting for Delivery Partner...</p><button type="button" onclick="window.markOutForDelivery('${o.id}')" class="w-full mt-2 bg-yellow-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95 border border-yellow-600">Self Deliver (Skip Rider)</button>`; }
-                            else if (o.status === 'Out for Delivery') actionButtons = `<p class="text-xs font-bold text-yellow-600 text-center py-2 bg-yellow-50 rounded-xl">Out for Delivery via ${o.riderName || 'Self'}</p>`;
+                            else if (o.status === 'Out for Delivery') {
+                                if(!o.riderId) { // Self delivery by shop owner
+                                    actionButtons = `<button type="button" onclick="window.markDelivered('${o.id}')" class="w-full bg-emerald-500 text-white py-3.5 rounded-xl font-bold text-sm shadow-md active:scale-95 border border-emerald-600">Mark as Delivered</button>`;
+                                } else {
+                                    actionButtons = `<p class="text-xs font-bold text-yellow-600 text-center py-2 bg-yellow-50 rounded-xl">Out for Delivery via ${o.riderName}</p>`;
+                                }
+                            }
                             else if (o.status === 'Delivered') actionButtons = `<div class="w-full bg-emerald-50 text-emerald-600 py-3 rounded-xl font-bold text-sm text-center border border-emerald-100"><i class="fa-solid fa-circle-check mr-1"></i> Order Completed</div>`;
                             else if (o.status === 'Rejected') actionButtons = `<div class="w-full bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm text-center border border-red-100"><i class="fa-solid fa-circle-xmark mr-1"></i> Order Rejected</div>`;
                         }
@@ -2139,7 +2255,15 @@
                         let ratingHtml = o.rating ? `<div class="mt-2 text-center text-xs font-bold text-yellow-600 bg-yellow-50 rounded-lg py-1 border border-yellow-100"><i class="fa-solid fa-star"></i> Customer Rated: ${o.rating} Star</div>` : '';
 
                         html += `<div class="bg-white rounded-3xl p-5 shadow-sm border ${cardStyle}">
-                                <div class="flex justify-between items-start mb-3"><div><div class="flex items-center gap-2 mb-1"><span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Order #${o.id.slice(-4).toUpperCase()}</span>${paymentBadge}</div><h4 class="font-bold text-gray-900 text-sm"><i class="fa-solid fa-map-pin text-red-500 mr-1"></i> ${o.address}</h4></div><span class="text-xl font-black text-emerald-600">₹${o.total.toFixed(2)}</span></div>
+                                <div class="flex justify-between items-start mb-3">
+                                    <div>
+                                        <div class="flex items-center gap-2 mb-1"><span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Order #${o.id.slice(-4).toUpperCase()}</span>${paymentBadge}</div>
+                                        <h4 class="font-bold text-gray-900 text-sm flex items-start gap-1"><i class="fa-solid fa-map-pin text-red-500 mt-0.5 shrink-0"></i> ${o.address}</h4>
+                                        <p class="text-[9px] text-gray-500 font-bold mt-1.5"><i class="fa-regular fa-clock mr-1"></i> Placed: ${window.formatOrderTime(o.time)}</p>
+                                        ${o.deliveredAt ? `<p class="text-[9px] text-emerald-600 font-bold mt-0.5"><i class="fa-solid fa-check-double mr-1"></i> Delivered: ${window.formatOrderTime(o.deliveredAt)}</p>` : ''}
+                                    </div>
+                                    <span class="text-xl font-black text-emerald-600">₹${o.total.toFixed(2)}</span>
+                                </div>
                                 ${customerInfo}
                                 <div class="bg-gray-50 p-3 rounded-xl mb-4 border border-gray-100"><p class="text-xs text-gray-700 font-bold mb-1"><i class="fa-solid fa-clipboard-list text-gray-400 mr-1"></i> Items:</p><p class="text-sm text-gray-600 font-medium">${itemsStr}</p>${screenshotHtml}</div>
                                 ${actionButtons}
@@ -2175,7 +2299,16 @@
         window.markPreparing = async (orderId) => { try { await window.dbCall(updateDoc(getDocRef('orders', orderId), {status: 'Preparing'}), 10000); window.showToast("Order is Preparing!", "success"); } catch(e) {} };
         window.markReady = async (orderId) => { try { await window.dbCall(updateDoc(getDocRef('orders', orderId), {status: 'Ready'}), 10000); window.showToast("Marked as Ready!", "success"); } catch(e) {} };
         window.markOutForDelivery = async (orderId) => { try { await window.dbCall(updateDoc(getDocRef('orders', orderId), {status: 'Out for Delivery'}), 10000); window.showToast("Order is out for delivery!", "success"); } catch(e) {} };
-        window.markDelivered = async (orderId) => { try { await window.dbCall(updateDoc(getDocRef('orders', orderId), {status: 'Delivered'}), 10000); window.showToast("Order Delivered Successfully!", "success"); } catch(e) {} };
+        
+        window.markDelivered = async (orderId) => { 
+            try { 
+                await window.dbCall(updateDoc(getDocRef('orders', orderId), {
+                    status: 'Delivered',
+                    deliveredAt: serverTimestamp()
+                }), 10000); 
+                window.showToast("Order Delivered Successfully!", "success"); 
+            } catch(e) {} 
+        };
 
         window.adminReviewPartner = async (partnerPhone, status) => {
             if(currentUser.role !== 'Admin') return;
