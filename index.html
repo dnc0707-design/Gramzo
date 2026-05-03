@@ -240,7 +240,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.4.0 - Tabs & Archiving Added</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.5.0 - Reviews & Fixes</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right">
                             <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
@@ -633,6 +633,26 @@
         </div>
     </div>
 
+    <!-- Rating Modal -->
+    <div id="rating-modal" class="modal-overlay z-[200]">
+        <div class="modal-content !max-w-xs text-center">
+            <h3 class="font-black text-xl text-gray-900 mb-2">Rate Your Order</h3>
+            <p class="text-xs text-gray-500 mb-4">How was your food from the restaurant?</p>
+            <div class="flex justify-center gap-2 mb-4" id="star-container">
+                <i class="fa-solid fa-star text-3xl text-gray-300 cursor-pointer" onclick="window.setRating(1)"></i>
+                <i class="fa-solid fa-star text-3xl text-gray-300 cursor-pointer" onclick="window.setRating(2)"></i>
+                <i class="fa-solid fa-star text-3xl text-gray-300 cursor-pointer" onclick="window.setRating(3)"></i>
+                <i class="fa-solid fa-star text-3xl text-gray-300 cursor-pointer" onclick="window.setRating(4)"></i>
+                <i class="fa-solid fa-star text-3xl text-gray-300 cursor-pointer" onclick="window.setRating(5)"></i>
+            </div>
+            <textarea id="rating-review-text" class="input-field mb-4 !py-2 resize-none text-xs" rows="2" placeholder="Write a review (optional)..."></textarea>
+            <div class="flex gap-2">
+                <button onclick="document.getElementById('rating-modal').classList.remove('active')" class="flex-1 bg-gray-100 text-gray-600 py-3 rounded-xl font-bold text-sm hover:bg-gray-200">Cancel</button>
+                <button onclick="window.submitRating()" class="flex-1 bg-yellow-400 text-gray-900 py-3 rounded-xl font-bold text-sm shadow-md hover:bg-yellow-500">Submit</button>
+            </div>
+        </div>
+    </div>
+
     <div id="toast-msg" class="fixed top-20 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full text-sm font-bold z-[300] shadow-2xl transition-all duration-300 transform -translate-y-10 opacity-0 pointer-events-none flex items-center gap-2">
         <i class="fa-solid fa-circle-info text-emerald-400"></i>
         <span id="toast-text">Message</span>
@@ -670,6 +690,11 @@
         window.lastKnownOrders = {}; 
         let unsubscribeListeners = []; 
         let currentAuthRole = 'User'; 
+
+        // RATING STATE
+        window.currentRatingOrderId = null;
+        window.currentRatingPartnerId = null;
+        window.selectedRating = 0;
 
         // ADMIN TABS STATE
         window.adminCurrentUserTab = 'All';
@@ -719,6 +744,53 @@
             }
         };
 
+        // --- Rating & Review System ---
+        window.openRatingModal = (orderId, partnerId) => {
+            window.currentRatingOrderId = orderId;
+            window.currentRatingPartnerId = partnerId;
+            window.selectedRating = 0;
+            document.getElementById('rating-review-text').value = '';
+            window.setRating(0);
+            document.getElementById('rating-modal').classList.add('active');
+        };
+
+        window.setRating = (stars) => {
+            window.selectedRating = stars;
+            const starEls = document.getElementById('star-container').children;
+            for(let i = 0; i < 5; i++) {
+                if(i < stars) {
+                    starEls[i].classList.remove('text-gray-300');
+                    starEls[i].classList.add('text-yellow-400');
+                } else {
+                    starEls[i].classList.add('text-gray-300');
+                    starEls[i].classList.remove('text-yellow-400');
+                }
+            }
+        };
+
+        window.submitRating = async () => {
+            if (window.selectedRating === 0) return window.showToast("Please select a star rating.", "error");
+            if (!window.currentRatingOrderId) return;
+            
+            const reviewText = document.getElementById('rating-review-text').value.trim();
+            const btn = document.querySelector('#rating-modal button:last-child');
+            const origTxt = btn.innerText;
+            btn.innerText = "Saving..."; btn.disabled = true;
+            
+            try {
+                await window.dbCall(updateDoc(getDocRef('orders', window.currentRatingOrderId), {
+                    rating: window.selectedRating,
+                    review: reviewText
+                }), 10000);
+                window.showToast("Thank you for your feedback!", "success");
+                document.getElementById('rating-modal').classList.remove('active');
+            } catch(e) {
+                window.showToast("Failed to submit rating.", "error");
+            } finally {
+                btn.innerText = origTxt; btn.disabled = false;
+            }
+        };
+
         window.resizeImage = (file, maxSize) => {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -761,7 +833,6 @@
             }, 3000);
         };
 
-        // --- NEW STATIC INFO MODAL HANDLER ---
         window.openStaticPage = (page) => {
             const titleEl = document.getElementById('info-modal-title');
             const bodyEl = document.getElementById('info-modal-body');
@@ -1210,11 +1281,15 @@
                     `;
                 }
 
+                // Dummy Zomato Style rating overlay
+                const dummyRating = `4.${Math.floor(Math.random() * 5) + 1}`;
+
                 return `
                     <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex flex-col transform transition hover:-translate-y-1 hover:shadow-md ${cardWidthClass} ${isClosed || isOutOfStock ? 'opacity-60 grayscale-[0.5]' : ''}">
                         <div class="h-32 bg-gray-100 relative">
                             <img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x300/f3f4f6/a1a1aa?text=Image'">
                             ${p.category ? `<span class="absolute top-2 left-2 bg-white/90 backdrop-blur text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded text-gray-800 shadow-sm">${p.category}</span>` : ''}
+                            <span class="absolute bottom-2 right-2 bg-white/95 backdrop-blur text-[10px] font-black px-1.5 py-0.5 rounded text-gray-800 shadow-sm flex items-center gap-1"><i class="fa-solid fa-star text-yellow-500 text-[8px]"></i> ${dummyRating}</span>
                         </div>
                         <div class="p-3 flex-1 flex flex-col justify-between">
                             <div>
@@ -1924,6 +1999,23 @@
                         } else if (o.status === 'Rejected' && o.rejectReason) {
                             trackingHtml = `<p class="text-xs font-bold text-red-500 mt-3 bg-red-50 p-2 rounded-lg border border-red-100"><i class="fa-solid fa-circle-info mr-1"></i> Reason: ${o.rejectReason}</p>`;
                         }
+                        
+                        let ratingHtml = '';
+                        if (o.status === 'Delivered') {
+                            if (o.rating) {
+                                ratingHtml = `
+                                    <div class="mt-3 bg-yellow-50 p-3 rounded-xl border border-yellow-100">
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-[10px] font-bold text-yellow-700">Your Rating</span>
+                                            <span class="text-sm font-black text-yellow-500">${o.rating} <i class="fa-solid fa-star"></i></span>
+                                        </div>
+                                        ${o.review ? `<p class="text-xs text-gray-600 mt-1 italic">"${o.review}"</p>` : ''}
+                                    </div>
+                                `;
+                            } else {
+                                ratingHtml = `<button onclick="window.openRatingModal('${o.id}', '${o.restaurantId}')" class="w-full mt-3 bg-yellow-400 text-gray-900 py-3 rounded-xl font-bold text-xs shadow-sm hover:bg-yellow-500 transition-colors"><i class="fa-solid fa-star mr-1"></i> Rate Your Order</button>`;
+                            }
+                        }
 
                         let resAddressHtml = o.restaurantAddress ? `<p class="text-[9px] text-gray-500 font-medium mb-1"><i class="fa-solid fa-location-dot"></i> ${o.restaurantAddress}</p>` : '';
 
@@ -1943,7 +2035,8 @@
                                     <div class="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden"><div class="bg-current h-1.5 rounded-full transition-all duration-1000 ${statusColor.replace('text-', 'bg-')}" style="width: ${progressWidth}"></div></div>
                                 </div>
                                 ${trackingHtml}
-                                <button onclick="window.downloadInvoice('${o.id}')" class="w-full mt-3 bg-white text-red-600 py-3 rounded-xl font-bold text-xs border border-red-100 hover:bg-red-50 transition-colors"><i class="fa-solid fa-file-pdf mr-1"></i> Download Invoice</button>
+                                ${ratingHtml}
+                                <button onclick="window.downloadInvoice('${o.id}')" class="w-full mt-2 bg-white text-red-600 py-3 rounded-xl font-bold text-xs border border-red-100 hover:bg-red-50 transition-colors"><i class="fa-solid fa-file-pdf mr-1"></i> Download Invoice</button>
                             </div>`;
                     }).join('');
                     
@@ -1970,6 +2063,11 @@
                     
                     relevantOrders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0));
 
+                    if (relevantOrders.length === 0) {
+                        listEl.innerHTML = '<p class="text-gray-400 font-medium text-sm text-center py-10 bg-white rounded-3xl shadow-sm border border-gray-100">No active requests right now.</p>';
+                        return;
+                    }
+
                     let newOrderIds = {};
                     let firstLoad = Object.keys(window.lastKnownOrders || {}).length === 0;
 
@@ -1980,6 +2078,42 @@
                             window.playAlertSound();
                             window.sendAlert("New Task Received!", `Please check your dashboard.`);
                         }
+
+                        const itemsStr = o.items.map(i => `${i.name}`).join(', ');
+                        let cardStyle = 'border-gray-100', actionButtons = '';
+                        let paymentBadge = o.paymentMode === 'Prepaid' ? `<span class="bg-blue-100 text-blue-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">Prepaid</span>` : `<span class="bg-gray-100 text-gray-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">COD</span>`;
+                        let screenshotHtml = o.paymentMode === 'Prepaid' && o.paymentScreenshot ? `<button type="button" onclick="window.viewImage('${o.paymentScreenshot}')" class="text-[10px] text-blue-600 bg-blue-50 px-2 py-1 rounded font-bold hover:bg-blue-100 transition mt-2 w-full text-left"><i class="fa-solid fa-image"></i> View Payment Screenshot</button>` : '';
+                        
+                        let customerInfo = `<div class="mb-3 bg-gray-50 p-2 rounded-xl border border-gray-100">
+                            <p class="text-xs font-black text-gray-800"><i class="fa-solid fa-user text-gray-400 mr-1"></i> ${o.customer}</p>
+                            <p class="text-xs font-bold text-blue-600 mt-1"><a href="tel:${o.phone}"><i class="fa-solid fa-phone mr-1"></i> ${o.phone}</a></p>
+                        </div>`;
+
+                        if (currentUser.category === 'Rider') {
+                            if (o.status === 'Ready' && !o.riderId) {
+                                actionButtons = `<button type="button" onclick="window.acceptDelivery('${o.id}')" class="w-full bg-gray-900 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-motorcycle mr-1"></i> Accept Delivery</button>`;
+                            } else if (o.status === 'Out for Delivery' && o.riderId === currentUser.phone) {
+                                actionButtons = `<div class="flex gap-2"><a href="tel:${o.phone}" class="flex-1 bg-white border border-gray-200 text-gray-700 py-3 rounded-xl font-bold text-sm text-center flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone mr-1"></i> Customer</a><button type="button" onclick="window.markDelivered('${o.id}')" class="flex-1 bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md"><i class="fa-solid fa-check-double mr-1"></i> Done</button></div>`;
+                            }
+                        } else {
+                            if (o.status === 'Placed') actionButtons = `<div class="flex gap-2"><button type="button" onclick="window.acceptFoodOrder('${o.id}')" class="flex-1 bg-black text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-gray-800 transition-colors active:scale-95"><i class="fa-solid fa-check"></i> Accept</button><button type="button" onclick="window.openRejectModal('${o.id}')" class="flex-1 bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm hover:bg-red-100 transition-colors active:scale-95"><i class="fa-solid fa-xmark"></i> Reject</button></div>`;
+                            else if (o.status === 'Accepted') { cardStyle = 'border-blue-200 bg-blue-50/30'; actionButtons = `<button type="button" onclick="window.markPreparing('${o.id}')" class="w-full bg-blue-600 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-blue-700 active:scale-95">Start Preparing</button>`; }
+                            else if (o.status === 'Preparing') { cardStyle = 'border-orange-200 bg-orange-50/30'; actionButtons = `<button type="button" onclick="window.markReady('${o.id}')" class="w-full bg-orange-500 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-orange-600 active:scale-95">Mark Ready for Rider</button>`; }
+                            else if (o.status === 'Ready') { cardStyle = 'border-yellow-200 bg-yellow-50/30'; actionButtons = `<p class="text-xs font-bold text-orange-600 text-center py-2 bg-orange-50 rounded-xl">Waiting for Delivery Partner...</p><button type="button" onclick="window.markOutForDelivery('${o.id}')" class="w-full mt-2 bg-yellow-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95 border border-yellow-600">Self Deliver (Skip Rider)</button>`; }
+                            else if (o.status === 'Out for Delivery') actionButtons = `<p class="text-xs font-bold text-yellow-600 text-center py-2 bg-yellow-50 rounded-xl">Out for Delivery via ${o.riderName || 'Self'}</p>`;
+                            else if (o.status === 'Delivered') actionButtons = `<div class="w-full bg-emerald-50 text-emerald-600 py-3 rounded-xl font-bold text-sm text-center border border-emerald-100"><i class="fa-solid fa-circle-check mr-1"></i> Order Completed</div>`;
+                            else if (o.status === 'Rejected') actionButtons = `<div class="w-full bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm text-center border border-red-100"><i class="fa-solid fa-circle-xmark mr-1"></i> Order Rejected</div>`;
+                        }
+
+                        let ratingHtml = o.rating ? `<div class="mt-2 text-center text-xs font-bold text-yellow-600 bg-yellow-50 rounded-lg py-1 border border-yellow-100"><i class="fa-solid fa-star"></i> Customer Rated: ${o.rating} Star</div>` : '';
+
+                        html += `<div class="bg-white rounded-3xl p-5 shadow-sm border ${cardStyle}">
+                                <div class="flex justify-between items-start mb-3"><div><div class="flex items-center gap-2 mb-1"><span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Order #${o.id.slice(-4).toUpperCase()}</span>${paymentBadge}</div><h4 class="font-bold text-gray-900 text-sm"><i class="fa-solid fa-map-pin text-red-500 mr-1"></i> ${o.address}</h4></div><span class="text-xl font-black text-emerald-600">₹${o.total.toFixed(2)}</span></div>
+                                ${customerInfo}
+                                <div class="bg-gray-50 p-3 rounded-xl mb-4 border border-gray-100"><p class="text-xs text-gray-700 font-bold mb-1"><i class="fa-solid fa-clipboard-list text-gray-400 mr-1"></i> Items:</p><p class="text-sm text-gray-600 font-medium">${itemsStr}</p>${screenshotHtml}</div>
+                                ${actionButtons}
+                                ${ratingHtml}
+                                </div>`;
                     });
                     
                     window.lastKnownOrders = newOrderIds;
@@ -2229,12 +2363,13 @@
             const shopAddressInput = document.getElementById('partner-shop-address');
             const openTimeInput = document.getElementById('partner-open-time');
             const closeTimeInput = document.getElementById('partner-close-time');
+            const fssaiEl = document.getElementById('partner-fssai-number'); 
             
             const shopName = shopNameInput ? shopNameInput.value.trim() : null;
             const shopAddress = shopAddressInput ? shopAddressInput.value.trim() : '';
             const openTime = openTimeInput ? openTimeInput.value : '';
             const closeTime = closeTimeInput ? closeTimeInput.value : '';
-            const fssaiNumber = document.getElementById('partner-fssai-number').value.trim();
+            const fssaiNumber = fssaiEl ? fssaiEl.value.trim() : null;
             const codEnabled = document.getElementById('partner-cod-toggle-setup').checked;
             const onlineEnabled = document.getElementById('partner-online-toggle-setup').checked;
             const qrInput = document.getElementById('partner-qr-upload');
@@ -2263,7 +2398,7 @@
                     openTime: openTime,
                     closeTime: closeTime,
                     approvalStatus: newStatus,
-                    fssaiNumber: fssaiNumber || null,
+                    fssaiNumber: fssaiNumber,
                     codEnabled: codEnabled,
                     onlineEnabled: onlineEnabled,
                     qrCode: qrBase64
