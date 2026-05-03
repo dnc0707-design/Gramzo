@@ -240,7 +240,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.1.0 - Reverted to Gramzo</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.2.0 - Platform Fee Update</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right">
                             <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
@@ -348,9 +348,20 @@
                             <input id="partner-shop-name" class="input-field" placeholder="Enter Name">
 
                             <label class="block text-xs font-bold text-gray-600 mb-1 ml-1 mt-3">Base Address</label>
-                            <input id="partner-shop-address" class="input-field" placeholder="Enter base location">
-                            
-                            <div id="partner-food-settings" class="mt-4 p-4 bg-red-50/30 border border-red-100 rounded-xl space-y-4">
+                        <input id="partner-shop-address" class="input-field" placeholder="Enter base location">
+
+                        <div class="flex gap-3 mt-3">
+                            <div class="flex-1">
+                                <label class="block text-xs font-bold text-gray-600 mb-1 ml-1">Opening Time</label>
+                                <input type="time" id="partner-open-time" class="input-field px-3">
+                            </div>
+                            <div class="flex-1">
+                                <label class="block text-xs font-bold text-gray-600 mb-1 ml-1">Closing Time</label>
+                                <input type="time" id="partner-close-time" class="input-field px-3">
+                            </div>
+                        </div>
+                        
+                        <div id="partner-food-settings" class="mt-4 p-4 bg-red-50/30 border border-red-100 rounded-xl space-y-4">
                                 <p class="text-[10px] font-black uppercase text-red-600 tracking-wider">Payment Options (Can enable both)</p>
                                 
                                 <div class="flex items-center justify-between pb-3 border-b border-red-100">
@@ -372,9 +383,22 @@
                             <button type="button" onclick="window.submitPartnerProfile()" id="btn-submit-profile" class="w-full bg-gray-900 text-white px-6 py-4 rounded-2xl font-bold mt-4">Save Config</button>
                         </div>
                     </div>
-                </div>
 
-                <div id="add-product-container" class="bg-white rounded-3xl p-6 border border-gray-200 shadow-sm relative hidden">
+                    <!-- Shop Status Toggle -->
+                    <div id="shop-status-container" class="mt-6 flex items-center justify-between p-5 bg-white rounded-2xl border-2 border-red-100 shadow-sm">
+                        <div>
+                            <p class="font-black text-base text-gray-900">Accepting Orders</p>
+                            <p class="text-xs text-gray-500" id="shop-status-text">Currently Open</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="partner-status-toggle" class="sr-only peer" onchange="window.toggleShopStatus()">
+                            <div class="w-14 h-7 bg-red-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-emerald-500"></div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div id="add-product-container" class="bg-white rounded-3xl p-6 border border-gray-200 shadow-sm relative hidden">
                     <h3 class="font-black text-gray-900 mb-4">Add Menu Item</h3>
                     <div class="space-y-4 relative z-10">
                         <div>
@@ -621,6 +645,15 @@
         let unsubscribeListeners = []; 
         let currentAuthRole = 'User'; 
         
+        window.formatTime12 = (time24) => {
+            if(!time24) return '';
+            let [h, m] = time24.split(':');
+            h = parseInt(h);
+            let ampm = h >= 12 ? 'PM' : 'AM';
+            h = h % 12 || 12;
+            return `${h}:${m} ${ampm}`;
+        };
+
         const getCol = (name) => IS_LIVE_WEBSITE ? collection(db, name) : collection(db, 'artifacts', appId, 'public', 'data', name);
         const getDocRef = (colName, docId) => IS_LIVE_WEBSITE ? doc(db, colName, docId) : doc(db, 'artifacts', appId, 'public', 'data', colName, docId);
 
@@ -1021,6 +1054,8 @@
                     document.getElementById('partner-shop-address').value = currentUser.shopAddress;
                 }
                 if(currentUser.shopName) document.getElementById('partner-shop-name').value = currentUser.shopName;
+                if(currentUser.openTime) document.getElementById('partner-open-time').value = currentUser.openTime;
+                if(currentUser.closeTime) document.getElementById('partner-close-time').value = currentUser.closeTime;
                 
                 const codToggle = document.getElementById('partner-cod-toggle-setup');
                 if (codToggle && currentUser.codEnabled !== undefined) codToggle.checked = currentUser.codEnabled;
@@ -1078,6 +1113,7 @@
                 let addressDisplay = `<div class="mb-2">
                     <p class="text-[10px] font-bold text-gray-800"><i class="fa-solid fa-store text-red-500 mr-1"></i> ${p.shopName || 'Gramzo Partner'}</p>
                     ${p.shopAddress ? `<p class="text-[9px] text-gray-500 font-medium mt-0.5 leading-tight"><i class="fa-solid fa-location-dot text-gray-400 mr-1"></i> ${p.shopAddress}</p>` : ''}
+                    ${(p.openTime && p.closeTime) ? `<p class="text-[9px] text-blue-600 font-bold mt-0.5 leading-tight"><i class="fa-regular fa-clock text-blue-500 mr-1"></i> ${window.formatTime12(p.openTime)} - ${window.formatTime12(p.closeTime)}</p>` : ''}
                 </div>`;
                 
                 let prepTimeDisplay = p.prepTime ? `<p class="text-[10px] text-orange-600 font-bold mb-2"><i class="fa-regular fa-clock mr-1"></i> Prep time: ${p.prepTime} mins</p>` : '';
@@ -1334,7 +1370,7 @@
             const summaryTotals = document.getElementById('cart-summary-totals');
             
             const sub = window.cart.reduce((s, i) => s + i.price, 0);
-            const handlingFee = window.cart.length > 0 ? (10 + (window.cart.length * 2 > 20 ? 20 : window.cart.length * 2)) : 0;
+            const handlingFee = window.cart.length > 0 ? 5 : 0;
             const discountAmt = (sub * (window.appliedPromo || 0)) / 100;
             const total = sub - discountAmt + handlingFee;
 
@@ -1458,7 +1494,7 @@
             }
 
             const sub = window.cart.reduce((s,i) => s + i.price, 0);
-            const handlingFee = window.cart.length > 0 ? (10 + (window.cart.length * 2 > 20 ? 20 : window.cart.length * 2)) : 0;
+            const handlingFee = window.cart.length > 0 ? 5 : 0;
             const discountAmt = (sub * (window.appliedPromo || 0)) / 100;
             const total = sub - discountAmt + handlingFee;
             
@@ -1545,9 +1581,13 @@
                     if(orders.length === 0 && adminLog) adminLog.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-gray-400 text-xs italic">No orders yet</td></tr>';
 
                     orders.forEach(o => {
-                        rev += o.total; count++;
+                        if (o.status !== 'Rejected') {
+                            rev += o.total; 
+                            count++;
+                        }
+                        
                         if(adminLog) {
-                            let statusColor = o.status === 'Placed' ? 'text-amber-500' : o.status === 'Preparing' || o.status === 'Out for Delivery' ? 'text-blue-500' : 'text-emerald-500';
+                            let statusColor = o.status === 'Placed' ? 'text-amber-500' : o.status === 'Preparing' || o.status === 'Out for Delivery' ? 'text-blue-500' : o.status === 'Rejected' ? 'text-red-500' : 'text-emerald-500';
                             adminLog.innerHTML += `
                                 <tr class="hover:bg-gray-50 transition-colors">
                                     <td class="p-4 font-mono font-bold text-[10px] text-gray-500">#${o.id.slice(-5).toUpperCase()}</td>
@@ -1958,6 +1998,8 @@
                     partnerId: currentUser.phone,
                     shopName: currentUser.shopName,
                     shopAddress: currentUser.shopAddress || '',
+                    openTime: currentUser.openTime || '',
+                    closeTime: currentUser.closeTime || '',
                     image: defaultImg,
                     inStock: true,
                     shopStatus: currentUser.shopStatus || 'Open',
@@ -1988,9 +2030,13 @@
             
             const shopNameInput = document.getElementById('partner-shop-name');
             const shopAddressInput = document.getElementById('partner-shop-address');
+            const openTimeInput = document.getElementById('partner-open-time');
+            const closeTimeInput = document.getElementById('partner-close-time');
             
             const shopName = shopNameInput ? shopNameInput.value.trim() : null;
             const shopAddress = shopAddressInput ? shopAddressInput.value.trim() : '';
+            const openTime = openTimeInput ? openTimeInput.value : '';
+            const closeTime = closeTimeInput ? closeTimeInput.value : '';
             const fssaiNumber = document.getElementById('partner-fssai-number').value.trim();
             const codEnabled = document.getElementById('partner-cod-toggle-setup').checked;
             const onlineEnabled = document.getElementById('partner-online-toggle-setup').checked;
@@ -2017,6 +2063,8 @@
                 const updateData = { 
                     shopName: shopName, 
                     shopAddress: shopAddress,
+                    openTime: openTime,
+                    closeTime: closeTime,
                     approvalStatus: newStatus,
                     fssaiNumber: fssaiNumber || null,
                     codEnabled: codEnabled,
@@ -2026,12 +2074,22 @@
 
                 try {
                     await window.dbCall(setDoc(getDocRef('users', currentUser.phone), updateData, { merge: true }), 10000);
+                    
+                    // Update timing and details on all products of this partner
+                    const snap = await window.dbCall(getDocs(getCol('products')), 10000);
+                    const myProducts = snap.docs.filter(d => d.data().partnerId === currentUser.phone);
+                    myProducts.forEach(d => {
+                        updateDoc(getDocRef('products', d.id), { shopName, shopAddress, openTime, closeTime });
+                    });
+
                 } catch(dbErr) {
                     console.warn("DB Write timeout/failed.", dbErr);
                 }
 
                 currentUser.shopName = shopName;
                 currentUser.shopAddress = shopAddress;
+                currentUser.openTime = openTime;
+                currentUser.closeTime = closeTime;
                 currentUser.approvalStatus = newStatus;
                 currentUser.fssaiNumber = fssaiNumber;
                 currentUser.codEnabled = codEnabled;
