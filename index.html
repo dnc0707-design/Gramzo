@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Gramzo | Instant Delivery Super App</title>
     
-    <!-- PWA Meta Tags & Manifest -->
+    <!-- PWA Meta Tags & Manifest (Added for PWABuilder) -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#E23744">
-    <link rel="apple-touch-icon" href=https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/Android%20Icon.png>
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/Android%20Icon.png">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -105,7 +105,7 @@
         <!-- Right Side Auth Controls -->
         <div id="auth-container" class="flex items-center gap-2 sm:gap-3 shrink-0 h-full">
             <button type="button" id="btn-partner-login-trigger" onclick="window.openAuthModal('Partner')" class="bg-gray-900 text-white px-3 sm:px-4 py-1.5 rounded-lg text-[10px] sm:text-xs font-black shadow-md hover:bg-gray-800 transition-colors active:scale-95 flex items-center gap-1.5 whitespace-nowrap">
-                <i class="fa-solid fa-store"></i> <span class="hidden sm:inline">Partner</span>
+                <i class="fa-solid fa-handshake"></i> <span class="hidden sm:inline">Partner Login</span>
             </button>
             <button type="button" id="btn-login-trigger" onclick="window.openAuthModal('User')" class="bg-red-600 text-white px-3 sm:px-4 py-1.5 rounded-lg text-[10px] sm:text-xs font-bold shadow-md hover:bg-red-700 transition-colors active:scale-95 flex items-center gap-1.5 whitespace-nowrap">
                 <i class="fa-solid fa-user"></i> Login
@@ -585,6 +585,9 @@
                         <input id="reg-shop-name" type="text" class="input-field" placeholder="Business Name">
                         <input id="reg-shop-address" type="text" class="input-field" placeholder="Full Address">
                     </div>
+                    <div id="reg-rider-fields" class="space-y-3 hidden">
+                        <input id="reg-vehicle-name" type="text" class="input-field" placeholder="Vehicle Name / Type (e.g. Bike)">
+                    </div>
                 </div>
 
                 <button type="button" id="submit-register" onclick="window.handleAuth('register')" class="w-full bg-red-600 text-white p-4 rounded-2xl font-bold mt-4">Sign Up</button>
@@ -664,7 +667,7 @@
         <span id="toast-text">Message</span>
     </div>
 
-    <!-- PWA Service Worker Registration -->
+    <!-- PWA Service Worker Registration (Added for Offline Support & APK) -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -1013,7 +1016,7 @@
         window.switchAuthView = (view) => {
             document.getElementById('auth-view-login').style.display = view === 'login' ? 'block' : 'none';
             document.getElementById('auth-view-register').style.display = view === 'register' ? 'block' : 'none';
-            document.getElementById('auth-title').innerText = view === 'login' ? `${currentAuthRole === 'Partner' ? 'Restaurant' : 'User'} Login` : `Join as ${currentAuthRole === 'Partner' ? 'Restaurant' : 'User'}`;
+            document.getElementById('auth-title').innerText = view === 'login' ? `${currentAuthRole} Login` : `Join as ${currentAuthRole}`;
             document.getElementById('partner-fields').style.display = (view === 'register' && currentAuthRole === 'Partner') ? 'block' : 'none';
             document.getElementById('auth-msg').classList.add('hidden');
         };
@@ -1021,10 +1024,14 @@
         window.togglePartnerRegFields = () => {
             const cat = document.getElementById('reg-partner-category').value;
             const restFields = document.getElementById('reg-restaurant-fields');
+            const riderFields = document.getElementById('reg-rider-fields');
+            
             if (cat === 'Food Owner') {
                 restFields.classList.remove('hidden');
+                if(riderFields) riderFields.classList.add('hidden');
             } else {
                 restFields.classList.add('hidden');
+                if(riderFields) riderFields.classList.remove('hidden');
             }
         };
 
@@ -1120,8 +1127,15 @@
                     if (currentAuthRole === 'Partner') {
                         const catEl = document.getElementById('reg-partner-category');
                         partnerCategory = catEl ? catEl.value : 'Food Owner';
-                        shopName = document.getElementById('reg-shop-name').value.trim();
-                        shopAddress = document.getElementById('reg-shop-address').value.trim();
+                        
+                        if (partnerCategory === 'Food Owner') {
+                            shopName = document.getElementById('reg-shop-name').value.trim();
+                            shopAddress = document.getElementById('reg-shop-address').value.trim();
+                        } else {
+                            const vehEl = document.getElementById('reg-vehicle-name');
+                            shopName = vehEl ? vehEl.value.trim() : 'Delivery Rider';
+                            shopAddress = '';
+                        }
                     }
 
                     const userData = { 
@@ -1130,7 +1144,7 @@
                         created: new Date().toISOString(),
                         ...(currentAuthRole === 'Partner' && { 
                             category: partnerCategory, 
-                            shopName: partnerCategory === 'Food Owner' ? (shopName || name + "'s Kitchen") : null,
+                            shopName: partnerCategory === 'Food Owner' ? (shopName || name + "'s Kitchen") : (shopName || 'Delivery Vehicle'),
                             shopAddress: partnerCategory === 'Food Owner' ? shopAddress : null,
                             fssaiNumber: null,
                             codEnabled: true, qrCode: null
