@@ -7,7 +7,7 @@
     
     <!-- ⚠️ FORCE CACHE CLEAR SCRIPT (Fixes stuck updates) ⚠️ -->
     <script>
-        const CURRENT_VERSION = '12.2.1';
+        const CURRENT_VERSION = '12.2.2';
         if (localStorage.getItem('gramzo_version') !== CURRENT_VERSION) {
             // Delete old caches
             if ('caches' in window) {
@@ -284,7 +284,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v12.2.1 - Unhandled Rejection Fixed</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v12.2.2 - Advanced Routing Fix</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right">
                             <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
@@ -1274,6 +1274,12 @@
                     const data = snap.data();
                     if (data.pin !== pass) throw new Error("Incorrect password.");
 
+                    // IMPORTANT FIX: Force correct role loading if previously registered differently but accessing partner portal
+                    if (currentAuthRole === 'Partner' && data.role !== 'Partner') {
+                        data.role = 'Partner';
+                        window.dbCall(updateDoc(userRef, { role: 'Partner' })).catch(e=>{});
+                    }
+
                     currentUser = { ...data, docId: phone };
                     if(auth.currentUser) window.dbCall(setDoc(getDocRef('sessions', auth.currentUser.uid), { phone }, { merge: true }), 3000).catch(e=>{});
                     window.finalizeLoginSequence();
@@ -1285,96 +1291,102 @@
         };
 
         window.finalizeLoginSequence = () => {
-            window.closeAuthModal();
+            try { window.closeAuthModal(); } catch(e){}
             
             // Request Notification Permission on Login (Safely wrapped to prevent routing crashes)
             try {
                 if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
                     const permPromise = Notification.requestPermission();
-                    if (permPromise) permPromise.catch(e => console.warn(e));
+                    if (permPromise) permPromise.catch(() => {});
+                }
+            } catch (err) {}
+
+            try {
+                // Safely normalize user role
+                if (currentUser && currentUser.role) {
+                    const r = String(currentUser.role).trim().toLowerCase();
+                    if (r === 'admin') currentUser.role = 'Admin';
+                    else if (r === 'partner') currentUser.role = 'Partner';
+                    else currentUser.role = 'User';
+                } else if (currentUser) {
+                    currentUser.role = 'User';
+                }
+
+                let displayName = (currentUser && currentUser.name) ? currentUser.name : 'User';
+                if (currentUser && currentUser.role === 'Partner' && currentUser.shopName) {
+                    displayName = currentUser.shopName;
+                }
+
+                try { window.showToast(`Welcome back, ${displayName.split(' ')[0]}!`, "success"); } catch(e){}
+
+                // Safe DOM manipulation helper
+                const safeEl = (id, fn) => { const el = document.getElementById(id); if(el) fn(el); };
+
+                safeEl('btn-partner-login-trigger', el => el.classList.add('hidden'));
+                safeEl('btn-login-trigger', el => el.classList.add('hidden'));
+                safeEl('profile-trigger', el => el.classList.remove('hidden'));
+                
+                safeEl('nav-initial', el => el.innerText = displayName.charAt(0).toUpperCase());
+                safeEl('nav-name', el => el.innerText = displayName.split(' ')[0]);
+                safeEl('nav-role', el => {
+                    el.innerText = currentUser.role;
+                    el.className = `text-[8px] font-bold uppercase ${currentUser.role === 'Admin' ? 'text-purple-500' : currentUser.role === 'Partner' ? 'text-orange-500' : 'text-blue-500'}`;
+                });
+                safeEl('menu-name', el => el.innerText = displayName);
+                safeEl('menu-phone', el => el.innerText = currentUser.phone || '');
+
+                safeEl('partner-welcome', el => {
+                    if (currentUser.role === 'Partner') el.innerText = `Welcome, ${displayName.split(' ')[0]}!`;
+                });
+
+                try { window.setupBottomNav(currentUser.role); } catch(e){}
+                try { window.switchMainView(currentUser.role === 'Admin' ? 'Admin' : currentUser.role === 'Partner' ? 'Partner' : 'User'); } catch(e){}
+
+                if (currentUser.role === 'Partner') {
+                    const isFoodOwner = currentUser.category === 'Food Owner';
+                    const toggleVis = (id, show) => safeEl(id, el => show ? el.classList.remove('hidden') : el.classList.add('hidden'));
+
+                    toggleVis('partner-food-settings', isFoodOwner);
+                    toggleVis('add-product-container', isFoodOwner);
+                    toggleVis('partner-catalog-list-container', isFoodOwner);
+
+                    safeEl('hub-name-val', el => el.innerText = currentUser.shopName || '');
+                    
+                    if (currentUser.shopAddress) {
+                        toggleVis('hub-address-row', true);
+                        safeEl('hub-address-val', el => el.innerText = currentUser.shopAddress);
+                        safeEl('partner-shop-address', el => el.value = currentUser.shopAddress);
+                    }
+                    
+                    safeEl('partner-shop-name', el => el.value = currentUser.shopName || '');
+                    safeEl('partner-open-time', el => el.value = currentUser.openTime || '');
+                    safeEl('partner-close-time', el => el.value = currentUser.closeTime || '');
+                    
+                    safeEl('partner-cod-toggle-setup', el => {
+                        if (currentUser.codEnabled !== undefined) el.checked = currentUser.codEnabled;
+                    });
+                    
+                    safeEl('partner-online-toggle-setup', el => {
+                        if (currentUser.onlineEnabled !== undefined) {
+                            el.checked = currentUser.onlineEnabled;
+                            toggleVis('qr-upload-section', currentUser.onlineEnabled);
+                        }
+                    });
+
+                    safeEl('partner-qr-preview', el => {
+                        if (currentUser.qrCode) {
+                            el.src = currentUser.qrCode;
+                            el.classList.remove('hidden');
+                        }
+                    });
                 }
             } catch (err) {
-                console.warn("Notification API blocked by browser sandbox:", err);
+                console.error("Critical error in UI rendering:", err);
+                try { window.switchMainView(currentUser.role); } catch(e){}
             }
 
-            // Safely normalize user role
-            if (currentUser && currentUser.role) {
-                currentUser.role = currentUser.role.trim();
-            } else if (currentUser) {
-                currentUser.role = 'User';
-            }
-
-            let displayName = (currentUser && currentUser.name) ? currentUser.name : 'User';
-            if (currentUser && currentUser.role === 'Partner' && currentUser.shopName) {
-                displayName = currentUser.shopName;
-            }
-
-            window.showToast(`Welcome back, ${displayName.split(' ')[0]}!`, "success");
-
-            // Safe DOM manipulation helper (prevents crashing if an element is missing)
-            const safeEl = (id, fn) => { const el = document.getElementById(id); if(el) fn(el); };
-
-            safeEl('btn-partner-login-trigger', el => el.classList.add('hidden'));
-            safeEl('btn-login-trigger', el => el.classList.add('hidden'));
-            safeEl('profile-trigger', el => el.classList.remove('hidden'));
-            
-            safeEl('nav-initial', el => el.innerText = displayName.charAt(0).toUpperCase());
-            safeEl('nav-name', el => el.innerText = displayName.split(' ')[0]);
-            safeEl('nav-role', el => {
-                el.innerText = currentUser.role;
-                el.className = `text-[8px] font-bold uppercase ${currentUser.role === 'Admin' ? 'text-purple-500' : currentUser.role === 'Partner' ? 'text-orange-500' : 'text-blue-500'}`;
-            });
-            safeEl('menu-name', el => el.innerText = displayName);
-            safeEl('menu-phone', el => el.innerText = currentUser.phone || '');
-
-            safeEl('partner-welcome', el => {
-                if (currentUser.role === 'Partner') el.innerText = `Welcome, ${displayName.split(' ')[0]}!`;
-            });
-
-            window.setupBottomNav(currentUser.role);
-            window.switchMainView(currentUser.role === 'Admin' ? 'Admin' : currentUser.role === 'Partner' ? 'Partner' : 'User');
-
-            if (currentUser.role === 'Partner') {
-                const isFoodOwner = currentUser.category === 'Food Owner';
-                const toggleVis = (id, show) => safeEl(id, el => show ? el.classList.remove('hidden') : el.classList.add('hidden'));
-
-                toggleVis('partner-food-settings', isFoodOwner);
-                toggleVis('add-product-container', isFoodOwner);
-                toggleVis('partner-catalog-list-container', isFoodOwner);
-
-                safeEl('hub-name-val', el => el.innerText = currentUser.shopName || '');
-                
-                if (currentUser.shopAddress) {
-                    toggleVis('hub-address-row', true);
-                    safeEl('hub-address-val', el => el.innerText = currentUser.shopAddress);
-                    safeEl('partner-shop-address', el => el.value = currentUser.shopAddress);
-                }
-                
-                safeEl('partner-shop-name', el => el.value = currentUser.shopName || '');
-                safeEl('partner-open-time', el => el.value = currentUser.openTime || '');
-                safeEl('partner-close-time', el => el.value = currentUser.closeTime || '');
-                
-                safeEl('partner-cod-toggle-setup', el => {
-                    if (currentUser.codEnabled !== undefined) el.checked = currentUser.codEnabled;
-                });
-                
-                safeEl('partner-online-toggle-setup', el => {
-                    if (currentUser.onlineEnabled !== undefined) {
-                        el.checked = currentUser.onlineEnabled;
-                        toggleVis('qr-upload-section', currentUser.onlineEnabled);
-                    }
-                });
-
-                safeEl('partner-qr-preview', el => {
-                    if (currentUser.qrCode) {
-                        el.src = currentUser.qrCode;
-                        el.classList.remove('hidden');
-                    }
-                });
-            }
-
-            window.initRoleListeners();
-            window.loadMarketplaceData();
+            try { window.initRoleListeners(); } catch(e){}
+            try { window.loadMarketplaceData(); } catch(e){}
         };
 
         window.renderReviews = (allOrders) => {
