@@ -7,7 +7,7 @@
     
     <!-- ⚠️ FORCE CACHE CLEAR SCRIPT (Fixes stuck updates) ⚠️ -->
     <script>
-        const CURRENT_VERSION = '12.4.1';
+        const CURRENT_VERSION = '12.5.0';
         if (localStorage.getItem('gramzo_version') !== CURRENT_VERSION) {
             // Delete old caches
             if ('caches' in window) {
@@ -284,7 +284,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v12.4.1 - Stability Patch</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v12.5.0 - Cache Buster Added</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right">
                             <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
@@ -743,14 +743,19 @@
         <span id="toast-text">Message</span>
     </div>
 
-    <!-- PWA Service Worker Registration with Update Detection -->
+    <!-- PWA Service Worker Registration with Force Update Option -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 try {
-                    navigator.serviceWorker.register('./sw.js')
+                    // Added a version query to immediately prompt a new SW load
+                    navigator.serviceWorker.register('./sw.js?v=12.5.0')
                         .then((reg) => {
                             console.log('ServiceWorker successfully registered');
+                            
+                            // Force check for updates on every page load
+                            reg.update();
+
                             reg.addEventListener('updatefound', () => {
                                 const newWorker = reg.installing;
                                 newWorker.addEventListener('statechange', () => {
