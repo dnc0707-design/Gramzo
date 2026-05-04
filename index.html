@@ -7,7 +7,7 @@
     
     <!-- ⚠️ FORCE CACHE CLEAR SCRIPT (Fixes stuck updates) ⚠️ -->
     <script>
-        const CURRENT_VERSION = '12.2.2';
+        const CURRENT_VERSION = '12.3.0';
         if (localStorage.getItem('gramzo_version') !== CURRENT_VERSION) {
             // Delete old caches
             if ('caches' in window) {
@@ -284,7 +284,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v12.2.2 - Advanced Routing Fix</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v12.3.0 - Partner Features & Cache Sync</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right">
                             <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
@@ -1343,7 +1343,7 @@
                 try { window.switchMainView(currentUser.role === 'Admin' ? 'Admin' : currentUser.role === 'Partner' ? 'Partner' : 'User'); } catch(e){}
 
                 if (currentUser.role === 'Partner') {
-                    const isFoodOwner = currentUser.category === 'Food Owner';
+                    const isFoodOwner = currentUser.category !== 'Rider'; // Fixed Fallback
                     const toggleVis = (id, show) => safeEl(id, el => show ? el.classList.remove('hidden') : el.classList.add('hidden'));
 
                     toggleVis('partner-food-settings', isFoodOwner);
@@ -2327,14 +2327,14 @@
                     const orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
                     
                     let relevantOrders = [];
-                    if (currentUser.category === 'Food Owner') {
-                        relevantOrders = orders.filter(o => o.restaurantId === currentUser.phone);
-                    } else if (currentUser.category === 'Rider') {
+                    if (currentUser.category === 'Rider') {
                         relevantOrders = orders.filter(o => 
                             (o.status === 'Ready' && !o.riderId) || 
                             (o.status === 'Placed' && !o.restaurantId) || 
                             (o.riderId === currentUser.phone && ['Out for Delivery'].includes(o.status))
                         );
+                    } else {
+                        relevantOrders = orders.filter(o => o.restaurantId === currentUser.phone);
                     }
                     
                     relevantOrders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0));
@@ -2358,7 +2358,7 @@
                 });
                 unsubscribeListeners.push(orderUnsub);
 
-                if (currentUser.category === 'Food Owner') {
+                if (currentUser.category !== 'Rider') {
                     const catalogUnsub = onSnapshot(getCol('products'), (snap) => {
                         const list = document.getElementById('partner-catalog-list');
                         if (!list) return;
@@ -2510,7 +2510,7 @@
             const text = document.getElementById('admin-marquee-text').value.trim();
             if(!text) return window.showToast("Please enter marquee text.", "error");
 
-            const btn = document.getElementById('btn-update-marquee');
+            const btn = document.getElementById('admin-marquee-text').nextElementSibling;
             const orig = btn.innerText;
             btn.innerText = "Updating...";
             btn.disabled = true;
