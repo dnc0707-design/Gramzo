@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Gramzo | Instant Delivery Super App</title>
     
-    <!-- PWA Meta Tags & Manifest (Added for PWABuilder) -->
+    <!-- PWA Meta Tags & Manifest -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#E23744">
     <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/Android%20Icon.png">
@@ -214,6 +214,14 @@
                     <i class="fa-solid fa-motorcycle text-6xl text-gray-800 absolute right-[10px] bottom-[-10px] rotate-[15deg]"></i>
                 </div>
                 
+                <!-- COMMUNITY REVIEWS SECTION (GLOBAL) -->
+                <div class="mt-10 border-t border-gray-200/60 pt-8">
+                    <h3 class="font-black text-xl text-gray-900 mb-6 tracking-tight text-center"><i class="fa-solid fa-star text-yellow-400 mr-2"></i>Community Reviews</h3>
+                    <div id="global-reviews-list" class="space-y-4">
+                        <p class="text-xs text-gray-400 text-center py-6">Loading fresh reviews...</p>
+                    </div>
+                </div>
+
                 <footer class="mt-8 pt-8 border-t border-gray-200/60 pb-4">
                     <div class="w-full mb-8 flex justify-center sm:justify-start">
                         <img src="https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/ChatGPT%20Image%20May%202%2C%202026%2C%2001_16_21%20PM.png" alt="Gramzo" class="h-16 object-contain opacity-50 drop-shadow-sm rounded-xl">
@@ -248,7 +256,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.6.0 - Voice Alerts & Delivery Times</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.8.0 - Master Edition Update</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right">
                             <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
@@ -319,14 +327,6 @@
             </div>
 
             <!-- ========================================== -->
-            <!-- VIEW: REVIEWS                              -->
-            <!-- ========================================== -->
-            <div id="view-Reviews" class="view-section space-y-6">
-                <h2 class="text-2xl font-black text-gray-900">User Reviews</h2>
-                <div id="user-reviews-list" class="space-y-4"></div>
-            </div>
-
-            <!-- ========================================== -->
             <!-- VIEW: PARTNER DASHBOARD                    -->
             <!-- ========================================== -->
             <div id="view-Partner" class="view-section space-y-6">
@@ -336,6 +336,18 @@
                         <h2 class="text-2xl font-black mb-4" id="partner-welcome">Welcome, Partner!</h2>
                     </div>
                     <i class="fa-solid fa-motorcycle absolute right-[-20px] bottom-[-20px] text-8xl text-gray-800"></i>
+                </div>
+
+                <!-- Partner Metrics Grid -->
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-100 text-center shadow-sm">
+                        <p class="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">Total Earnings</p>
+                        <h4 id="partner-total-sales" class="text-xl font-black text-emerald-700">₹0</h4>
+                    </div>
+                    <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100 text-center shadow-sm">
+                        <p class="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-1">Completed</p>
+                        <h4 id="partner-completed-orders" class="text-xl font-black text-blue-700">0</h4>
+                    </div>
                 </div>
                 
                 <!-- Partner Tasks Tabs -->
@@ -546,130 +558,13 @@
         </main>
     </div> <!-- End Scrollable Area -->
 
-    <!-- Bottom Navigation -->
-    <div id="bottom-nav" class="fixed bottom-0 w-full bg-white border-t border-gray-200 pb-safe pt-2 px-2 pb-2 shadow-[0_-10px_20px_rgba(0,0,0,0.03)] z-40 hidden">
-        <div class="max-w-md mx-auto flex justify-between items-center sm:max-w-4xl px-4"></div>
-    </div>
-
-    <!-- Static Info Modal (About, T&C, Contact) -->
-    <div id="info-modal" class="modal-overlay z-[200]">
-        <div class="modal-content !max-w-2xl">
-            <div class="flex justify-between items-center mb-4 border-b pb-2">
-                <h3 class="font-black text-2xl text-gray-900" id="info-modal-title">Title</h3>
-                <button type="button" onclick="document.getElementById('info-modal').classList.remove('active')" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div id="info-modal-body" class="text-sm text-gray-600 space-y-4 max-h-[60vh] overflow-y-auto pr-2">
-                <!-- Content injected via JS -->
-            </div>
+    <!-- Update Prompt Banner -->
+    <div id="update-prompt" class="hidden fixed bottom-24 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-full text-sm font-bold z-[400] shadow-2xl flex items-center gap-4 w-11/12 max-w-sm justify-between transition-all">
+        <div class="flex items-center gap-2">
+            <i class="fa-solid fa-cloud-arrow-down text-blue-200"></i>
+            <span class="text-xs">New Update Available!</span>
         </div>
-    </div>
-
-    <!-- Auth Modal -->
-    <div id="auth-overlay" class="modal-overlay z-[150]">
-        <div class="modal-content">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="font-black text-2xl text-gray-900" id="auth-title">Login</h3>
-                <button type="button" onclick="window.closeAuthModal()" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div id="auth-msg" class="text-xs text-center font-bold mb-4 px-4 py-2 hidden"></div>
-            
-            <div id="auth-view-login" class="space-y-4">
-                <input id="login-phone" type="tel" class="input-field" placeholder="10-Digit Mobile Number" maxlength="10">
-                <input id="login-pass" type="password" class="input-field" placeholder="Password">
-                <button type="button" id="submit-login" onclick="window.handleAuth('login')" class="w-full bg-red-600 text-white p-4 rounded-2xl font-bold">Secure Login</button>
-                <p class="text-center text-xs font-medium text-gray-500 mt-4">New to Gramzo? <button type="button" onclick="window.switchAuthView('register')" class="text-red-600 font-bold">Create Account</button></p>
-            </div>
-
-            <div id="auth-view-register" class="hidden space-y-3 max-h-[60vh] overflow-y-auto px-1 pb-2">
-                <input id="reg-name" type="text" class="input-field" placeholder="Full Name">
-                <input id="reg-phone" type="tel" class="input-field" placeholder="10-Digit Mobile Number" maxlength="10">
-                <input id="reg-pass" type="password" class="input-field" placeholder="Create Password">
-                
-                <div id="partner-fields" class="hidden bg-gray-50 p-4 rounded-2xl space-y-3 mt-2">
-                    <p class="text-xs font-bold text-center border-b pb-2">Partner Registration</p>
-                    <select id="reg-partner-category" class="input-field bg-white" onchange="window.togglePartnerRegFields()">
-                        <option value="Food Owner">Restaurant Owner</option>
-                        <option value="Rider">Delivery Rider</option>
-                    </select>
-                    <div id="reg-restaurant-fields" class="space-y-3">
-                        <input id="reg-shop-name" type="text" class="input-field" placeholder="Business Name">
-                        <input id="reg-shop-address" type="text" class="input-field" placeholder="Full Address">
-                    </div>
-                    <div id="reg-rider-fields" class="space-y-3 hidden">
-                        <input id="reg-vehicle-name" type="text" class="input-field" placeholder="Vehicle Name / Type (e.g. Bike)">
-                    </div>
-                </div>
-
-                <button type="button" id="submit-register" onclick="window.handleAuth('register')" class="w-full bg-red-600 text-white p-4 rounded-2xl font-bold mt-4">Sign Up</button>
-                <p class="text-center text-xs font-medium text-gray-500 mt-4">Already have an account? <button type="button" onclick="window.switchAuthView('login')" class="text-red-600 font-bold">Login</button></p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Admin Modal -->
-    <div id="admin-auth-overlay" class="modal-overlay z-[150]">
-        <div class="modal-content !bg-gray-900 border border-gray-800">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="font-black text-2xl text-white"><i class="fa-solid fa-shield-halved text-emerald-400"></i> Portal</h3>
-                <button type="button" onclick="window.closeAdminModal()" class="w-8 h-8 bg-gray-800 text-white rounded-full"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="space-y-4">
-                <input id="admin-id-input" type="text" class="input-field !bg-gray-800 !text-white" placeholder="Admin ID">
-                <input id="admin-pass-input" type="password" class="input-field !bg-gray-800 !text-white" placeholder="Admin Password">
-                <button type="button" onclick="window.handleAdminLogin()" class="w-full bg-emerald-500 text-white p-4 rounded-2xl font-bold">Access Database</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Image View Modal -->
-    <div id="image-view-modal" class="modal-overlay z-[200]">
-        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-md bg-white p-2 rounded-2xl shadow-2xl">
-            <div class="flex justify-between items-center px-2 py-1 mb-2 border-b">
-                <h3 class="font-bold text-sm">Payment Screenshot</h3>
-                <button type="button" onclick="document.getElementById('image-view-modal').classList.remove('active')" class="w-8 h-8 bg-gray-100 rounded-full"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <img id="modal-full-img" src="" class="w-full h-auto rounded-xl max-h-[70vh] object-contain">
-        </div>
-    </div>
-
-    <!-- Reject Reason Modal -->
-    <div id="reject-modal" class="modal-overlay z-[200]">
-        <div class="modal-content !max-w-xs">
-            <h3 class="font-black text-xl text-gray-900 mb-2">Reject Order</h3>
-            <p class="text-xs text-gray-500 mb-4">Please provide a reason for rejecting this order.</p>
-            <select id="reject-reason" class="input-field mb-4 bg-white">
-                <option value="">Select a reason</option>
-                <option value="Items out of stock">Items out of stock</option>
-                <option value="Store is closing">Store is closing</option>
-                <option value="Too busy/High volume">Too busy/High volume</option>
-                <option value="Delivery unavailable">Delivery unavailable</option>
-                <option value="Other">Other</option>
-            </select>
-            <div class="flex gap-2">
-                <button onclick="document.getElementById('reject-modal').classList.remove('active')" class="flex-1 bg-gray-100 text-gray-600 py-3 rounded-xl font-bold text-sm hover:bg-gray-200">Cancel</button>
-                <button onclick="window.confirmRejectOrder()" class="flex-1 bg-red-600 text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-red-700">Reject</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Rating Modal -->
-    <div id="rating-modal" class="modal-overlay z-[200]">
-        <div class="modal-content !max-w-xs text-center">
-            <h3 class="font-black text-xl text-gray-900 mb-2">Rate Your Order</h3>
-            <p class="text-xs text-gray-500 mb-4">How was your food from the restaurant?</p>
-            <div class="flex justify-center gap-2 mb-4" id="star-container">
-                <i class="fa-solid fa-star text-3xl text-gray-300 cursor-pointer" onclick="window.setRating(1)"></i>
-                <i class="fa-solid fa-star text-3xl text-gray-300 cursor-pointer" onclick="window.setRating(2)"></i>
-                <i class="fa-solid fa-star text-3xl text-gray-300 cursor-pointer" onclick="window.setRating(3)"></i>
-                <i class="fa-solid fa-star text-3xl text-gray-300 cursor-pointer" onclick="window.setRating(4)"></i>
-                <i class="fa-solid fa-star text-3xl text-gray-300 cursor-pointer" onclick="window.setRating(5)"></i>
-            </div>
-            <textarea id="rating-review-text" class="input-field mb-4 !py-2 resize-none text-xs" rows="2" placeholder="Write a review (optional)..."></textarea>
-            <div class="flex gap-2">
-                <button onclick="document.getElementById('rating-modal').classList.remove('active')" class="flex-1 bg-gray-100 text-gray-600 py-3 rounded-xl font-bold text-sm hover:bg-gray-200">Cancel</button>
-                <button onclick="window.submitRating()" class="flex-1 bg-yellow-400 text-gray-900 py-3 rounded-xl font-bold text-sm shadow-md hover:bg-yellow-500">Submit</button>
-            </div>
-        </div>
+        <button onclick="window.location.reload(true)" class="bg-white text-blue-600 px-4 py-1.5 rounded-lg text-xs font-black shadow-sm active:scale-95 transition">Refresh</button>
     </div>
 
     <div id="toast-msg" class="fixed top-20 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full text-sm font-bold z-[300] shadow-2xl transition-all duration-300 transform -translate-y-10 opacity-0 pointer-events-none flex items-center gap-2">
@@ -677,12 +572,24 @@
         <span id="toast-text">Message</span>
     </div>
 
-    <!-- PWA Service Worker Registration -->
+    <!-- PWA Service Worker Registration with Update Detection -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
-                    .then((reg) => console.log('ServiceWorker successfully registered with scope: ', reg.scope))
+                    .then((reg) => {
+                        console.log('ServiceWorker successfully registered');
+                        reg.addEventListener('updatefound', () => {
+                            const newWorker = reg.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // Detects new version pushed from Github
+                                    const promptEl = document.getElementById('update-prompt');
+                                    if(promptEl) promptEl.classList.remove('hidden');
+                                }
+                            });
+                        });
+                    })
                     .catch((err) => console.log('ServiceWorker registration failed: ', err));
             });
         }
@@ -772,7 +679,7 @@
 
         window.speakAlert = (text) => {
             if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel(); // Stop any ongoing speech
+                window.speechSynthesis.cancel(); 
                 const utterance = new SpeechSynthesisUtterance(text);
                 utterance.lang = 'en-IN';
                 utterance.rate = 0.95;
@@ -1276,6 +1183,44 @@
             window.loadMarketplaceData();
         };
 
+        window.renderReviews = (allOrders) => {
+            const listEl = document.getElementById('global-reviews-list');
+            if(!listEl) return;
+            const reviewedOrders = allOrders.filter(o => o.rating).sort((a,b) => (b.reviewTime?.toMillis() || b.time?.toMillis() || 0) - (a.reviewTime?.toMillis() || a.time?.toMillis() || 0));
+
+            if(reviewedOrders.length === 0) {
+                listEl.innerHTML = '<div class="text-center py-10 bg-white rounded-3xl border border-gray-100"><i class="fa-solid fa-star text-4xl text-gray-200 mb-4"></i><p class="text-gray-400 font-medium text-sm">No reviews yet.</p></div>';
+                return;
+            }
+
+            listEl.innerHTML = reviewedOrders.map(o => {
+                let ratingColor = o.rating >= 4 ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : o.rating === 3 ? 'bg-yellow-50 text-yellow-600 border-yellow-100' : 'bg-red-50 text-red-600 border-red-100';
+                
+                return `
+                <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 mb-4 transition-all hover:shadow-md text-left">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-black text-sm shadow-sm">${o.customer ? o.customer.charAt(0).toUpperCase() : 'U'}</div>
+                            <div>
+                                <h4 class="font-black text-gray-900 text-sm leading-none mb-1">${o.customer || 'Unknown'}</h4>
+                                <span class="text-[10px] text-gray-500 font-medium"><i class="fa-regular fa-clock mr-1"></i> ${window.formatOrderTime(o.reviewTime || o.time)}</span>
+                            </div>
+                        </div>
+                        <div class="${ratingColor} px-2 py-1 rounded-lg text-xs font-black border flex items-center gap-1 shadow-sm">
+                            ${o.rating} <i class="fa-solid fa-star text-[10px]"></i>
+                        </div>
+                    </div>
+                    <div class="mb-3 border-b border-gray-50 pb-3">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Ordered From</p>
+                        <p class="text-xs text-gray-900 font-bold"><i class="fa-solid fa-store text-red-500 mr-1"></i> ${o.restaurantName || 'Gramzo Partner'}</p>
+                        <p class="text-[10px] text-gray-500 line-clamp-1 mt-1">${o.items ? o.items.map(i => i.name).join(', ') : ''}</p>
+                    </div>
+                    ${o.review ? `<p class="text-sm text-gray-700 leading-relaxed italic">"${o.review}"</p>` : '<p class="text-sm text-gray-400 italic">No written review provided.</p>'}
+                </div>
+                `;
+            }).join('');
+        };
+
         const renderProducts = (items) => {
             const listEl = document.getElementById('market-list');
             if (!listEl) return;
@@ -1429,8 +1374,14 @@
                 }
             }, (err) => console.error(err));
 
+            onSnapshot(getCol('orders'), (snap) => {
+                const allOrders = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                if(window.renderReviews) window.renderReviews(allOrders);
+            });
+
             onSnapshot(getCol('products'), (snap) => {
                 let items = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
+                window.allProductsData = items; 
                 
                 // Add dummy products if empty for preview
                 if(items.length === 0) {
@@ -1474,10 +1425,10 @@
             container.innerHTML = ''; 
 
             const createNavItem = (id, icon, label, targetView) => `
-                <button type="button" id="nav-btn-${id}" onclick="window.switchMainView('${targetView}')" class="b-nav-item flex flex-col items-center gap-1 w-16 text-gray-400 font-medium transition-colors relative">
+                <button type="button" id="nav-btn-${id}" onclick="window.switchMainView('${targetView}')" class="b-nav-item flex flex-col items-center gap-1 flex-1 text-gray-400 font-medium transition-colors relative">
                     <i class="${icon} text-xl mb-0.5"></i>
                     <span class="text-[10px] tracking-wide">${label}</span>
-                    ${id === 'Cart' && window.cart.length > 0 ? `<span class="absolute -top-1 right-2 bg-red-600 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-sm">${window.cart.length}</span>` : ''}
+                    ${id === 'Cart' && window.cart.length > 0 ? `<span class="absolute top-0 right-1/4 bg-red-600 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-sm">${window.cart.length}</span>` : ''}
                 </button>
             `;
 
@@ -1485,9 +1436,8 @@
                 container.innerHTML += createNavItem('User', 'fa-solid fa-house', 'Home', 'User');
                 container.innerHTML += createNavItem('Cart', 'fa-solid fa-basket-shopping', 'Cart', 'Cart');
                 container.innerHTML += createNavItem('Orders', 'fa-solid fa-receipt', 'History', 'Orders'); 
-                container.innerHTML += createNavItem('Reviews', 'fa-solid fa-star', 'Reviews', 'Reviews'); 
             } else if (role === 'Partner') {
-                container.innerHTML += createNavItem('Partner', 'fa-solid fa-utensils', 'Tasks', 'Partner');
+                container.innerHTML += createNavItem('Partner', 'fa-solid fa-utensils', 'Dashboard', 'Partner');
                 container.innerHTML += createNavItem('Partner-Profile', 'fa-solid fa-store', 'Settings', 'Partner-Profile');
             } else if (role === 'Admin') {
                 container.innerHTML += createNavItem('Admin', 'fa-solid fa-chart-line', 'Dashboard', 'Admin');
@@ -1596,44 +1546,6 @@
             adminLog.innerHTML = html;
         };
 
-        window.renderReviews = (allOrders) => {
-            const listEl = document.getElementById('user-reviews-list');
-            if(!listEl) return;
-            const reviewedOrders = allOrders.filter(o => o.rating).sort((a,b) => (b.reviewTime?.toMillis() || b.time?.toMillis() || 0) - (a.reviewTime?.toMillis() || a.time?.toMillis() || 0));
-
-            if(reviewedOrders.length === 0) {
-                listEl.innerHTML = '<div class="text-center py-10 bg-white rounded-3xl border border-gray-100"><i class="fa-solid fa-star text-4xl text-gray-200 mb-4"></i><p class="text-gray-400 font-medium text-sm">No reviews yet.</p></div>';
-                return;
-            }
-
-            listEl.innerHTML = reviewedOrders.map(o => {
-                let ratingColor = o.rating >= 4 ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : o.rating === 3 ? 'bg-yellow-50 text-yellow-600 border-yellow-100' : 'bg-red-50 text-red-600 border-red-100';
-                
-                return `
-                <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 mb-4 transition-all hover:shadow-md">
-                    <div class="flex justify-between items-start mb-3">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-black text-sm shadow-sm">${o.customer ? o.customer.charAt(0).toUpperCase() : 'U'}</div>
-                            <div>
-                                <h4 class="font-black text-gray-900 text-sm leading-none mb-1">${o.customer || 'Unknown'}</h4>
-                                <span class="text-[10px] text-gray-500 font-medium"><i class="fa-regular fa-clock mr-1"></i> ${window.formatOrderTime(o.reviewTime || o.time)}</span>
-                            </div>
-                        </div>
-                        <div class="${ratingColor} px-2 py-1 rounded-lg text-xs font-black border flex items-center gap-1 shadow-sm">
-                            ${o.rating} <i class="fa-solid fa-star text-[10px]"></i>
-                        </div>
-                    </div>
-                    <div class="mb-3 border-b border-gray-50 pb-3">
-                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Ordered From</p>
-                        <p class="text-xs text-gray-900 font-bold"><i class="fa-solid fa-store text-red-500 mr-1"></i> ${o.restaurantName || 'Gramzo Partner'}</p>
-                        <p class="text-[10px] text-gray-500 line-clamp-1 mt-1">${o.items ? o.items.map(i => i.name).join(', ') : ''}</p>
-                    </div>
-                    ${o.review ? `<p class="text-sm text-gray-700 leading-relaxed italic">"${o.review}"</p>` : '<p class="text-sm text-gray-400 italic">No written review provided.</p>'}
-                </div>
-                `;
-            }).join('');
-        };
-
         // --- PARTNER TABS LOGIC ---
         window.switchPartnerOrderTab = (tab) => {
             window.partnerCurrentOrderTab = tab;
@@ -1660,6 +1572,21 @@
                     return ['Delivered', 'Rejected'].includes(o.status);
                 }
             });
+
+            let totalSales = 0;
+            let completedOrders = 0;
+
+            window.partnerOrdersData.forEach(o => {
+                if(o.status === 'Delivered') {
+                    totalSales += (o.subtotal - (o.discount || 0));
+                    completedOrders++;
+                }
+            });
+
+            const salesEl = document.getElementById('partner-total-sales');
+            const compEl = document.getElementById('partner-completed-orders');
+            if(salesEl) salesEl.innerText = `₹${totalSales.toFixed(2)}`;
+            if(compEl) compEl.innerText = completedOrders;
 
             if (filteredOrders.length === 0) {
                 listEl.innerHTML = `<p class="text-gray-400 font-medium text-sm text-center py-10 bg-white rounded-3xl shadow-sm border border-gray-100">No ${window.partnerCurrentOrderTab.toLowerCase()} tasks right now.</p>`;
@@ -1710,7 +1637,10 @@
                                 <p class="text-[9px] text-gray-500 font-bold mt-1.5"><i class="fa-regular fa-clock mr-1"></i> Placed: ${window.formatOrderTime(o.time)}</p>
                                 ${o.deliveredAt ? `<p class="text-[9px] text-emerald-600 font-bold mt-0.5"><i class="fa-solid fa-check-double mr-1"></i> Delivered: ${window.formatOrderTime(o.deliveredAt)}</p>` : ''}
                             </div>
-                            <span class="text-xl font-black text-emerald-600">₹${o.total.toFixed(2)}</span>
+                            <div class="text-right shrink-0">
+                                <span class="text-xl font-black text-gray-900">₹${o.total.toFixed(2)}</span>
+                                ${o.status === 'Delivered' ? `<p class="text-[10px] text-emerald-600 font-black mt-1.5 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-100">Earn: ₹${(o.subtotal - (o.discount || 0)).toFixed(2)}</p>` : ''}
+                            </div>
                         </div>
                         ${customerInfo}
                         <div class="bg-gray-50 p-3 rounded-xl mb-4 border border-gray-100"><p class="text-xs text-gray-700 font-bold mb-1"><i class="fa-solid fa-clipboard-list text-gray-400 mr-1"></i> Items:</p><p class="text-sm text-gray-600 font-medium">${itemsStr}</p>${screenshotHtml}</div>
@@ -2068,7 +1998,6 @@
                     if(!listEl) return;
                     
                     const allOrders = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                    if(window.renderReviews) window.renderReviews(allOrders);
 
                     const myOrders = allOrders.filter(o => o.phone === currentUser.phone);
                     myOrders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0));
@@ -2203,11 +2132,6 @@
                     
                     relevantOrders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0));
 
-                    if (relevantOrders.length === 0) {
-                        listEl.innerHTML = '<p class="text-gray-400 font-medium text-sm text-center py-10 bg-white rounded-3xl shadow-sm border border-gray-100">No active requests right now.</p>';
-                        return;
-                    }
-
                     let newOrderIds = {};
                     let firstLoad = Object.keys(window.lastKnownOrders || {}).length === 0;
 
@@ -2219,56 +2143,6 @@
                             window.speakAlert("New task received. Please check your dashboard.");
                             window.sendAlert("New Task Received!", `Please check your dashboard.`);
                         }
-
-                        const itemsStr = o.items.map(i => `${i.name}`).join(', ');
-                        let cardStyle = 'border-gray-100', actionButtons = '';
-                        let paymentBadge = o.paymentMode === 'Prepaid' ? `<span class="bg-blue-100 text-blue-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">Prepaid</span>` : `<span class="bg-gray-100 text-gray-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">COD</span>`;
-                        let screenshotHtml = o.paymentMode === 'Prepaid' && o.paymentScreenshot ? `<button type="button" onclick="window.viewImage('${o.paymentScreenshot}')" class="text-[10px] text-blue-600 bg-blue-50 px-2 py-1 rounded font-bold hover:bg-blue-100 transition mt-2 w-full text-left"><i class="fa-solid fa-image"></i> View Payment Screenshot</button>` : '';
-                        
-                        let customerInfo = `<div class="mb-3 bg-gray-50 p-2 rounded-xl border border-gray-100">
-                            <p class="text-xs font-black text-gray-800"><i class="fa-solid fa-user text-gray-400 mr-1"></i> ${o.customer}</p>
-                            <p class="text-xs font-bold text-blue-600 mt-1"><a href="tel:${o.phone}"><i class="fa-solid fa-phone mr-1"></i> ${o.phone}</a></p>
-                        </div>`;
-
-                        if (currentUser.category === 'Rider') {
-                            if (o.status === 'Ready' && !o.riderId) {
-                                actionButtons = `<button type="button" onclick="window.acceptDelivery('${o.id}')" class="w-full bg-gray-900 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-motorcycle mr-1"></i> Accept Delivery</button>`;
-                            } else if (o.status === 'Out for Delivery' && o.riderId === currentUser.phone) {
-                                actionButtons = `<div class="flex gap-2"><a href="tel:${o.phone}" class="flex-1 bg-white border border-gray-200 text-gray-700 py-3 rounded-xl font-bold text-sm text-center flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone mr-1"></i> Customer</a><button type="button" onclick="window.markDelivered('${o.id}')" class="flex-1 bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md"><i class="fa-solid fa-check-double mr-1"></i> Delivered</button></div>`;
-                            }
-                        } else {
-                            if (o.status === 'Placed') actionButtons = `<div class="flex gap-2"><button type="button" onclick="window.acceptFoodOrder('${o.id}')" class="flex-1 bg-black text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-gray-800 transition-colors active:scale-95"><i class="fa-solid fa-check"></i> Accept</button><button type="button" onclick="window.openRejectModal('${o.id}')" class="flex-1 bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm hover:bg-red-100 transition-colors active:scale-95"><i class="fa-solid fa-xmark"></i> Reject</button></div>`;
-                            else if (o.status === 'Accepted') { cardStyle = 'border-blue-200 bg-blue-50/30'; actionButtons = `<button type="button" onclick="window.markPreparing('${o.id}')" class="w-full bg-blue-600 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-blue-700 active:scale-95">Start Preparing</button>`; }
-                            else if (o.status === 'Preparing') { cardStyle = 'border-orange-200 bg-orange-50/30'; actionButtons = `<button type="button" onclick="window.markReady('${o.id}')" class="w-full bg-orange-500 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-orange-600 active:scale-95">Mark Ready for Rider</button>`; }
-                            else if (o.status === 'Ready') { cardStyle = 'border-yellow-200 bg-yellow-50/30'; actionButtons = `<p class="text-xs font-bold text-orange-600 text-center py-2 bg-orange-50 rounded-xl">Waiting for Delivery Partner...</p><button type="button" onclick="window.markOutForDelivery('${o.id}')" class="w-full mt-2 bg-yellow-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95 border border-yellow-600">Self Deliver (Skip Rider)</button>`; }
-                            else if (o.status === 'Out for Delivery') {
-                                if(!o.riderId) { // Self delivery by shop owner
-                                    actionButtons = `<button type="button" onclick="window.markDelivered('${o.id}')" class="w-full bg-emerald-500 text-white py-3.5 rounded-xl font-bold text-sm shadow-md active:scale-95 border border-emerald-600">Mark as Delivered</button>`;
-                                } else {
-                                    actionButtons = `<p class="text-xs font-bold text-yellow-600 text-center py-2 bg-yellow-50 rounded-xl">Out for Delivery via ${o.riderName}</p>`;
-                                }
-                            }
-                            else if (o.status === 'Delivered') actionButtons = `<div class="w-full bg-emerald-50 text-emerald-600 py-3 rounded-xl font-bold text-sm text-center border border-emerald-100"><i class="fa-solid fa-circle-check mr-1"></i> Order Completed</div>`;
-                            else if (o.status === 'Rejected') actionButtons = `<div class="w-full bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm text-center border border-red-100"><i class="fa-solid fa-circle-xmark mr-1"></i> Order Rejected</div>`;
-                        }
-
-                        let ratingHtml = o.rating ? `<div class="mt-2 text-center text-xs font-bold text-yellow-600 bg-yellow-50 rounded-lg py-1 border border-yellow-100"><i class="fa-solid fa-star"></i> Customer Rated: ${o.rating} Star</div>` : '';
-
-                        html += `<div class="bg-white rounded-3xl p-5 shadow-sm border ${cardStyle}">
-                                <div class="flex justify-between items-start mb-3">
-                                    <div>
-                                        <div class="flex items-center gap-2 mb-1"><span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Order #${o.id.slice(-4).toUpperCase()}</span>${paymentBadge}</div>
-                                        <h4 class="font-bold text-gray-900 text-sm flex items-start gap-1"><i class="fa-solid fa-map-pin text-red-500 mt-0.5 shrink-0"></i> ${o.address}</h4>
-                                        <p class="text-[9px] text-gray-500 font-bold mt-1.5"><i class="fa-regular fa-clock mr-1"></i> Placed: ${window.formatOrderTime(o.time)}</p>
-                                        ${o.deliveredAt ? `<p class="text-[9px] text-emerald-600 font-bold mt-0.5"><i class="fa-solid fa-check-double mr-1"></i> Delivered: ${window.formatOrderTime(o.deliveredAt)}</p>` : ''}
-                                    </div>
-                                    <span class="text-xl font-black text-emerald-600">₹${o.total.toFixed(2)}</span>
-                                </div>
-                                ${customerInfo}
-                                <div class="bg-gray-50 p-3 rounded-xl mb-4 border border-gray-100"><p class="text-xs text-gray-700 font-bold mb-1"><i class="fa-solid fa-clipboard-list text-gray-400 mr-1"></i> Items:</p><p class="text-sm text-gray-600 font-medium">${itemsStr}</p>${screenshotHtml}</div>
-                                ${actionButtons}
-                                ${ratingHtml}
-                                </div>`;
                     });
                     
                     window.lastKnownOrders = newOrderIds;
@@ -2287,11 +2161,60 @@
                             const variantsDisplay = p.variants ? p.variants.map(v => `${v.qty}: ₹${v.price}`).join(', ') : `${p.qty || ''}: ₹${p.price}`;
                             const stockColor = p.inStock !== false ? 'text-emerald-600 border-emerald-200 bg-emerald-50' : 'text-red-500 border-red-200 bg-red-50';
                             const stockText = p.inStock !== false ? 'In Stock' : 'Out of Stock';
-                            return `<div class="flex justify-between items-center bg-white border border-gray-100 p-4 rounded-2xl shadow-sm"><div class="flex-1 mr-4"><p class="font-black text-sm text-gray-900">${p.name}</p><p class="text-[10px] text-gray-500">${p.subCategory || p.category}</p><p class="text-xs text-gray-700 font-bold mt-1">${variantsDisplay}</p></div><div class="flex items-center gap-3 shrink-0"><button type="button" onclick="window.togglePartnerStock('${p.id}', ${p.inStock !== false})" class="text-[10px] font-black uppercase tracking-wider ${stockColor} border px-2 py-1 rounded transition whitespace-nowrap">${stockText}</button><button type="button" onclick="window.deletePartnerProduct('${p.id}')" class="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors shrink-0"><i class="fa-solid fa-trash text-xs"></i></button></div></div>`;
+                            
+                            const defaultQty = p.qty || (p.variants && p.variants[0] ? p.variants[0].qty : '');
+                            const defaultPrice = p.price || (p.variants && p.variants[0] ? p.variants[0].price : '');
+
+                            return `<div class="bg-white border border-gray-100 p-4 rounded-2xl shadow-sm mb-3">
+                                <div class="flex justify-between items-start mb-3 border-b border-gray-50 pb-3">
+                                    <div class="flex-1 mr-4">
+                                        <p class="font-black text-sm text-gray-900">${p.name}</p>
+                                        <p class="text-[10px] text-gray-500">${p.subCategory || p.category}</p>
+                                        <p class="text-[10px] text-gray-400 mt-1">Current: ${variantsDisplay}</p>
+                                    </div>
+                                    <div class="flex flex-col gap-2 shrink-0 items-end">
+                                        <button type="button" onclick="window.togglePartnerStock('${p.id}', ${p.inStock !== false})" class="text-[9px] font-black uppercase tracking-wider ${stockColor} border px-2 py-1 rounded transition whitespace-nowrap">${stockText}</button>
+                                        <button type="button" onclick="window.deletePartnerProduct('${p.id}')" class="text-[10px] font-bold text-red-500 hover:text-red-700 transition-colors"><i class="fa-solid fa-trash mr-1"></i> Delete</button>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2 items-center bg-gray-50 p-2 rounded-xl border border-gray-200">
+                                    <input type="text" id="edit-qty-${p.id}" value="${defaultQty}" class="border border-gray-300 rounded p-1.5 text-xs w-full font-bold text-gray-700" placeholder="Qty (e.g. Full)" />
+                                    <input type="number" id="edit-price-${p.id}" value="${defaultPrice}" class="border border-gray-300 rounded p-1.5 text-xs w-full font-bold text-gray-700" placeholder="Price (₹)" />
+                                    <button type="button" onclick="window.saveProductEdit('${p.id}', this)" class="bg-gray-900 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider shadow-sm hover:bg-gray-800 transition active:scale-95 shrink-0"><i class="fa-solid fa-save"></i> Save</button>
+                                </div>
+                            </div>`;
                         }).join('');
                     });
                     unsubscribeListeners.push(catalogUnsub);
                 }
+            }
+        };
+
+        window.saveProductEdit = async (id, btnEl) => {
+            const qty = document.getElementById(`edit-qty-${id}`).value.trim();
+            const price = Number(document.getElementById(`edit-price-${id}`).value);
+            
+            if(!qty || isNaN(price)) return window.showToast("Enter valid quantity and price", "error");
+
+            const originalText = btnEl.innerHTML;
+            btnEl.innerHTML = "..."; btnEl.disabled = true;
+
+            const prod = (window.allProductsData || []).find(x => x.id === id);
+            let payload = { qty, price };
+            
+            if(prod && prod.variants && prod.variants.length > 0) {
+                 let newVars = [...prod.variants];
+                 newVars[0] = { qty, price };
+                 payload.variants = newVars;
+            }
+
+            try {
+                await window.dbCall(updateDoc(getDocRef('products', id), payload), 10000);
+                window.showToast("Menu updated successfully!", "success");
+            } catch(e) {
+                window.showToast("Update failed", "error");
+            } finally {
+                btnEl.innerHTML = originalText; btnEl.disabled = false;
             }
         };
 
