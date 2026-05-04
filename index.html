@@ -152,7 +152,7 @@
         <!-- Marquee below banner -->
         <div id="marquee-container" class="w-full bg-gray-900 border-b border-gray-800 z-30 overflow-hidden h-10 flex items-center shadow-lg relative">
             <div id="dynamic-marquee" class="animate-marquee inline-block whitespace-nowrap text-sm sm:text-base font-black font-bengali text-yellow-300 tracking-wide drop-shadow-md">
-                🚀 খাবার অর্ডার করুন ঘরে বসেই - Order From- কোটালডি, কিনাইডি, লালগড়, কৃষ্ণপুর, রামচন্দ্রপুর, মুরাডি, গাংপুর, যশপুর এবং বড়ন্তি এলাকা 🚀 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 🚀 খাবার অর্ডার করুন ঘরে বসেই - সার্ভিস অ্যাভেইলেবল অ্যাট কোটালডিহ, কিনাইডিহ, লালগড়, কৃষ্ণপুর, রামচন্দ্রপুর, মুরাডি, গাংপুর, যশপুর এবং বড়ন্তি এলাকা 🚀
+                🚀 খাবার অর্ডার করুন ঘরে বসেই - সার্ভিস অ্যাভেইলেবল অ্যাট কোটালডিহ, কিনাইডিহ, লালগড়, কৃষ্ণপুর, রামচন্দ্রপুর, মুরাডি, গাংপুর, যশপুর এবং বড়ন্তি এলাকা 🚀 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 🚀 খাবার অর্ডার করুন ঘরে বসেই - সার্ভিস অ্যাভেইলেবল অ্যাট কোটালডিহ, কিনাইডিহ, লালগড়, কৃষ্ণপুর, রামচন্দ্রপুর, মুরাডি, গাংপুর, যশপুর এবং বড়ন্তি এলাকা 🚀
             </div>
         </div>
 
@@ -1871,7 +1871,7 @@
             
             const restaurantId = window.cart[0].partnerId || null;
             const restaurantName = window.cart[0].shopName || null;
-            const restaurantAddress = window.currentCartPartner ? window.currentCartPartner.shopAddress : null;
+            const restaurantAddress = (window.currentCartPartner && window.currentCartPartner.shopAddress) ? window.currentCartPartner.shopAddress : null;
 
             const btn = document.getElementById('btn-place-order');
             const originalText = btn.innerText;
@@ -1879,13 +1879,27 @@
 
             try {
                 await window.dbCall(addDoc(getCol('orders'), { 
-                    customer: currentUser.name, phone: currentUser.phone, 
-                    items: window.cart, subtotal: sub, discount: discountAmt, promoCode: window.promoCode || null,
-                    total: total, address: addr, status: 'Placed', 
-                    restaurantId: restaurantId, restaurantName: restaurantName, restaurantAddress: restaurantAddress,
-                    paymentMode: paymentMode, paymentScreenshot: paymentScreenshot,
+                    customer: currentUser.name || 'Unknown', 
+                    phone: currentUser.phone || '', 
+                    items: window.cart.map(item => ({
+                        name: item.name || '',
+                        price: item.price || 0,
+                        partnerId: item.partnerId || null,
+                        shopName: item.shopName || null
+                    })), 
+                    subtotal: sub || 0, 
+                    discount: discountAmt || 0, 
+                    promoCode: window.promoCode || null,
+                    total: total || 0, 
+                    address: addr || '', 
+                    status: 'Placed', 
+                    restaurantId: restaurantId, 
+                    restaurantName: restaurantName, 
+                    restaurantAddress: restaurantAddress,
+                    paymentMode: paymentMode, 
+                    paymentScreenshot: paymentScreenshot,
                     time: serverTimestamp() 
-                }), 10000);
+                }), 15000);
                 
                 window.cart = []; window.appliedPromo = 0; window.promoCode = '';
                 document.getElementById('cart-address').value = '';
@@ -1896,7 +1910,8 @@
                 window.showToast("Order Placed Successfully!", "success");
                 window.switchMainView('Orders'); 
             } catch(e) {
-                window.showToast("Network Error. Try Again.", "error");
+                console.error("Order Placement Error:", e);
+                window.showToast(e.message || "Network Error. Try Again.", "error");
             } finally {
                 btn.innerText = originalText; btn.disabled = false;
             }
