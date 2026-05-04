@@ -5,6 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Gramzo | Instant Delivery Super App</title>
     
+    <!-- ⚠️ FORCE CACHE CLEAR SCRIPT (Fixes stuck updates) ⚠️ -->
+    <script>
+        const CURRENT_VERSION = '12.2.1';
+        if (localStorage.getItem('gramzo_version') !== CURRENT_VERSION) {
+            // Delete old caches
+            if ('caches' in window) {
+                caches.keys().then((names) => {
+                    names.forEach(name => caches.delete(name));
+                }).catch(e => console.warn("Cache clean error:", e));
+            }
+            // Unregister old Service Workers safely
+            try {
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                        for(let registration of registrations) {
+                            registration.unregister();
+                        }
+                    }).catch(e => console.warn("SW unregister error:", e));
+                }
+            } catch (err) {
+                console.warn("SW state error:", err);
+            }
+            // Save new version and reload from server
+            localStorage.setItem('gramzo_version', CURRENT_VERSION);
+            setTimeout(() => window.location.reload(true), 100);
+        }
+    </script>
+
     <!-- PWA Meta Tags & Manifest -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#E23744">
@@ -256,7 +284,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v12.0.0 - Clean & Finalized</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v12.2.1 - Unhandled Rejection Fixed</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right">
                             <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
@@ -324,6 +352,14 @@
             <div id="view-Orders" class="view-section space-y-6">
                 <h2 class="text-2xl font-black text-gray-900">My Orders</h2>
                 <div id="user-orders-list" class="space-y-4"></div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- VIEW: REVIEWS                              -->
+            <!-- ========================================== -->
+            <div id="view-Reviews" class="view-section space-y-6">
+                <h2 class="text-2xl font-black text-gray-900">Community Reviews</h2>
+                <div id="user-reviews-list" class="space-y-4"></div>
             </div>
 
             <!-- ========================================== -->
@@ -633,7 +669,7 @@
             <div class="space-y-4">
                 <input id="admin-id-input" type="text" class="input-field !bg-gray-800 !text-white" placeholder="Admin ID">
                 <input id="admin-pass-input" type="password" class="input-field !bg-gray-800 !text-white" placeholder="Admin Password">
-                <button type="button" onclick="window.handleAdminLogin()" class="w-full bg-emerald-500 text-white p-4 rounded-2xl font-bold">Access Database</button>
+                <button type="button" onclick="window.handleAdminLogin()" class="w-full bg-emerald-50 text-white p-4 rounded-2xl font-bold">Access Database</button>
             </div>
         </div>
     </div>
@@ -698,21 +734,25 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then((reg) => {
-                        console.log('ServiceWorker successfully registered');
-                        reg.addEventListener('updatefound', () => {
-                            const newWorker = reg.installing;
-                            newWorker.addEventListener('statechange', () => {
-                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                    // Detects new version pushed from Github
-                                    const promptEl = document.getElementById('update-prompt');
-                                    if(promptEl) promptEl.classList.remove('hidden');
-                                }
+                try {
+                    navigator.serviceWorker.register('./sw.js')
+                        .then((reg) => {
+                            console.log('ServiceWorker successfully registered');
+                            reg.addEventListener('updatefound', () => {
+                                const newWorker = reg.installing;
+                                newWorker.addEventListener('statechange', () => {
+                                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                        // Detects new version pushed from Github
+                                        const promptEl = document.getElementById('update-prompt');
+                                        if(promptEl) promptEl.classList.remove('hidden');
+                                    }
+                                });
                             });
-                        });
-                    })
-                    .catch((err) => console.log('ServiceWorker registration failed: ', err));
+                        })
+                        .catch((err) => console.log('ServiceWorker registration failed: ', err));
+                } catch (err) {
+                    console.log('ServiceWorker blocked by environment: ', err);
+                }
             });
         }
     </script>
@@ -1119,7 +1159,7 @@
                 activeNav.classList.add('text-red-600', 'font-black');
             }
 
-            if (viewName === 'Cart') window.renderCartUI();
+            if (viewName === 'Cart' && typeof window.renderCartUI === 'function') window.renderCartUI();
         };
         
         window.logout = async () => {
@@ -1248,68 +1288,80 @@
                 Notification.requestPermission();
             }
 
-            let displayName = currentUser.name;
-            if (currentUser.role === 'Partner' && currentUser.shopName) {
+            // Safely normalize user role
+            if (currentUser && currentUser.role) {
+                currentUser.role = currentUser.role.trim();
+            } else if (currentUser) {
+                currentUser.role = 'User';
+            }
+
+            let displayName = (currentUser && currentUser.name) ? currentUser.name : 'User';
+            if (currentUser && currentUser.role === 'Partner' && currentUser.shopName) {
                 displayName = currentUser.shopName;
             }
 
             window.showToast(`Welcome back, ${displayName.split(' ')[0]}!`, "success");
 
-            document.getElementById('btn-partner-login-trigger').classList.add('hidden');
-            document.getElementById('btn-login-trigger').classList.add('hidden');
-            document.getElementById('profile-trigger').classList.remove('hidden');
-            
-            document.getElementById('nav-initial').innerText = displayName.charAt(0).toUpperCase();
-            document.getElementById('nav-name').innerText = displayName.split(' ')[0];
-            document.getElementById('nav-role').innerText = currentUser.role;
-            document.getElementById('nav-role').className = `text-[8px] font-bold uppercase ${currentUser.role === 'Admin' ? 'text-purple-500' : currentUser.role === 'Partner' ? 'text-orange-500' : 'text-blue-500'}`;
-            document.getElementById('menu-name').innerText = displayName;
-            document.getElementById('menu-phone').innerText = currentUser.phone;
+            // Safe DOM manipulation helper (prevents crashing if an element is missing)
+            const safeEl = (id, fn) => { const el = document.getElementById(id); if(el) fn(el); };
 
-            const welcomeEl = document.getElementById('partner-welcome');
-            if (welcomeEl && currentUser.role === 'Partner') {
-                welcomeEl.innerText = `Welcome, ${displayName.split(' ')[0]}!`;
-            }
+            safeEl('btn-partner-login-trigger', el => el.classList.add('hidden'));
+            safeEl('btn-login-trigger', el => el.classList.add('hidden'));
+            safeEl('profile-trigger', el => el.classList.remove('hidden'));
+            
+            safeEl('nav-initial', el => el.innerText = displayName.charAt(0).toUpperCase());
+            safeEl('nav-name', el => el.innerText = displayName.split(' ')[0]);
+            safeEl('nav-role', el => {
+                el.innerText = currentUser.role;
+                el.className = `text-[8px] font-bold uppercase ${currentUser.role === 'Admin' ? 'text-purple-500' : currentUser.role === 'Partner' ? 'text-orange-500' : 'text-blue-500'}`;
+            });
+            safeEl('menu-name', el => el.innerText = displayName);
+            safeEl('menu-phone', el => el.innerText = currentUser.phone || '');
+
+            safeEl('partner-welcome', el => {
+                if (currentUser.role === 'Partner') el.innerText = `Welcome, ${displayName.split(' ')[0]}!`;
+            });
 
             window.setupBottomNav(currentUser.role);
             window.switchMainView(currentUser.role === 'Admin' ? 'Admin' : currentUser.role === 'Partner' ? 'Partner' : 'User');
 
             if (currentUser.role === 'Partner') {
-                if(currentUser.category === 'Food Owner') {
-                    document.getElementById('partner-food-settings').classList.remove('hidden');
-                    document.getElementById('add-product-container').classList.remove('hidden');
-                    document.getElementById('partner-catalog-list-container').classList.remove('hidden');
-                } else {
-                    document.getElementById('partner-food-settings').classList.add('hidden');
-                    document.getElementById('add-product-container').classList.add('hidden');
-                    document.getElementById('partner-catalog-list-container').classList.add('hidden');
-                }
+                const isFoodOwner = currentUser.category === 'Food Owner';
+                const toggleVis = (id, show) => safeEl(id, el => show ? el.classList.remove('hidden') : el.classList.add('hidden'));
 
-                if(currentUser.shopName) document.getElementById('hub-name-val').innerText = currentUser.shopName;
-                if(currentUser.shopAddress) {
-                    document.getElementById('hub-address-row').classList.remove('hidden');
-                    document.getElementById('hub-address-val').innerText = currentUser.shopAddress;
-                    document.getElementById('partner-shop-address').value = currentUser.shopAddress;
-                }
-                if(currentUser.shopName) document.getElementById('partner-shop-name').value = currentUser.shopName;
-                if(currentUser.openTime) document.getElementById('partner-open-time').value = currentUser.openTime;
-                if(currentUser.closeTime) document.getElementById('partner-close-time').value = currentUser.closeTime;
-                
-                const codToggle = document.getElementById('partner-cod-toggle-setup');
-                if (codToggle && currentUser.codEnabled !== undefined) codToggle.checked = currentUser.codEnabled;
-                
-                const onlineToggle = document.getElementById('partner-online-toggle-setup');
-                const qrSection = document.getElementById('qr-upload-section');
-                if (onlineToggle && currentUser.onlineEnabled !== undefined) {
-                    onlineToggle.checked = currentUser.onlineEnabled;
-                    if (qrSection) qrSection.classList.toggle('hidden', !currentUser.onlineEnabled);
-                }
+                toggleVis('partner-food-settings', isFoodOwner);
+                toggleVis('add-product-container', isFoodOwner);
+                toggleVis('partner-catalog-list-container', isFoodOwner);
 
-                const qrPreview = document.getElementById('partner-qr-preview');
-                if(currentUser.qrCode && qrPreview) {
-                    qrPreview.src = currentUser.qrCode;
-                    qrPreview.classList.remove('hidden');
+                safeEl('hub-name-val', el => el.innerText = currentUser.shopName || '');
+                
+                if (currentUser.shopAddress) {
+                    toggleVis('hub-address-row', true);
+                    safeEl('hub-address-val', el => el.innerText = currentUser.shopAddress);
+                    safeEl('partner-shop-address', el => el.value = currentUser.shopAddress);
                 }
+                
+                safeEl('partner-shop-name', el => el.value = currentUser.shopName || '');
+                safeEl('partner-open-time', el => el.value = currentUser.openTime || '');
+                safeEl('partner-close-time', el => el.value = currentUser.closeTime || '');
+                
+                safeEl('partner-cod-toggle-setup', el => {
+                    if (currentUser.codEnabled !== undefined) el.checked = currentUser.codEnabled;
+                });
+                
+                safeEl('partner-online-toggle-setup', el => {
+                    if (currentUser.onlineEnabled !== undefined) {
+                        el.checked = currentUser.onlineEnabled;
+                        toggleVis('qr-upload-section', currentUser.onlineEnabled);
+                    }
+                });
+
+                safeEl('partner-qr-preview', el => {
+                    if (currentUser.qrCode) {
+                        el.src = currentUser.qrCode;
+                        el.classList.remove('hidden');
+                    }
+                });
             }
 
             window.initRoleListeners();
@@ -2131,6 +2183,7 @@
                     if(!listEl) return;
                     
                     const allOrders = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                    if(window.renderReviews) window.renderReviews(allOrders);
 
                     const myOrders = allOrders.filter(o => o.phone === currentUser.phone);
                     myOrders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0));
