@@ -10,6 +10,42 @@
     <meta http-equiv="Expires" content="0">
 
     <title>Gramzo | Instant Delivery Super App</title>
+
+    <!-- AGGRESSIVE AUTO CACHE BUSTER SCRIPT -->
+    <script>
+        (function() {
+            const APP_VERSION = "11.8.0"; // Update this string on every deployment to force cache clear
+            const storedVersion = localStorage.getItem("gramzo_app_version");
+            
+            if (storedVersion !== APP_VERSION) {
+                console.log("New version detected. Clearing caches and reloading...");
+                localStorage.setItem("gramzo_app_version", APP_VERSION);
+                
+                // 1. Unregister any lingering Service Workers
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                        for(let registration of registrations) {
+                            registration.unregister();
+                        }
+                    }).catch(function(err) {
+                        console.log('SW unregister failed: ', err);
+                    });
+                }
+                
+                // 2. Clear all PWA Cache Storage
+                if ('caches' in window) {
+                    caches.keys().then((names) => {
+                        names.forEach(name => {
+                            caches.delete(name);
+                        });
+                    });
+                }
+
+                // 3. Force a hard reload from the server using a unique timestamp query parameter
+                window.location.replace(window.location.pathname + '?v=' + new Date().getTime());
+            }
+        })();
+    </script>
     
     <!-- PWA Meta Tags & Manifest -->
     <link rel="manifest" href="manifest.json">
@@ -252,7 +288,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.7.0 - TTS & Cache Fix</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.8.0 - Auto Cache Buster</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right">
                             <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
@@ -673,19 +709,6 @@
         <i class="fa-solid fa-circle-info text-emerald-400"></i>
         <span id="toast-text">Message</span>
     </div>
-
-    <!-- Active Service Worker Unregistration to Fix Caching Issues -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                for(let registration of registrations) {
-                    registration.unregister();
-                }
-            }).catch(function(err) {
-                console.log('Service Worker unregistration failed: ', err);
-            });
-        }
-    </script>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
