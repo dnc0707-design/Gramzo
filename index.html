@@ -256,7 +256,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.8.0 - Master Edition Update</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.9.0 - Last Updated: May 4, 2026, 08:00 AM</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right">
                             <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
@@ -1125,18 +1125,28 @@
                 Notification.requestPermission();
             }
 
-            window.showToast(`Welcome back, ${currentUser.name.split(' ')[0]}!`, "success");
+            let displayName = currentUser.name;
+            if (currentUser.role === 'Partner' && currentUser.shopName) {
+                displayName = currentUser.shopName;
+            }
+
+            window.showToast(`Welcome back, ${displayName.split(' ')[0]}!`, "success");
 
             document.getElementById('btn-partner-login-trigger').classList.add('hidden');
             document.getElementById('btn-login-trigger').classList.add('hidden');
             document.getElementById('profile-trigger').classList.remove('hidden');
             
-            document.getElementById('nav-initial').innerText = currentUser.name.charAt(0).toUpperCase();
-            document.getElementById('nav-name').innerText = currentUser.name;
+            document.getElementById('nav-initial').innerText = displayName.charAt(0).toUpperCase();
+            document.getElementById('nav-name').innerText = displayName.split(' ')[0];
             document.getElementById('nav-role').innerText = currentUser.role;
             document.getElementById('nav-role').className = `text-[8px] font-bold uppercase ${currentUser.role === 'Admin' ? 'text-purple-500' : currentUser.role === 'Partner' ? 'text-orange-500' : 'text-blue-500'}`;
-            document.getElementById('menu-name').innerText = currentUser.name;
+            document.getElementById('menu-name').innerText = displayName;
             document.getElementById('menu-phone').innerText = currentUser.phone;
+
+            const welcomeEl = document.getElementById('partner-welcome');
+            if (welcomeEl && currentUser.role === 'Partner') {
+                welcomeEl.innerText = `Welcome, ${displayName.split(' ')[0]}!`;
+            }
 
             window.setupBottomNav(currentUser.role);
             window.switchMainView(currentUser.role === 'Admin' ? 'Admin' : currentUser.role === 'Partner' ? 'Partner' : 'User');
