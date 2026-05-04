@@ -5,35 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Gramzo | Instant Delivery Super App</title>
     
-    <!-- ⚠️ FORCE CACHE CLEAR SCRIPT (Fixes stuck updates) ⚠️ -->
-    <script>
-        const CURRENT_VERSION = '12.5.0';
-        if (localStorage.getItem('gramzo_version') !== CURRENT_VERSION) {
-            // Delete old caches
-            if ('caches' in window) {
-                caches.keys().then((names) => {
-                    names.forEach(name => caches.delete(name));
-                }).catch(e => console.warn("Cache clean error:", e));
-            }
-            // Unregister old Service Workers safely
-            try {
-                if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                        for(let registration of registrations) {
-                            registration.unregister();
-                        }
-                    }).catch(e => console.warn("SW unregister error:", e));
-                }
-            } catch (err) {
-                console.warn("SW state error:", err);
-            }
-            // Save new version and reload from server
-            localStorage.setItem('gramzo_version', CURRENT_VERSION);
-            setTimeout(() => window.location.reload(true), 100);
-        }
-    </script>
-
-    <!-- PWA Meta Tags & Manifest -->
+    <!-- PWA Meta Tags & Manifest (Added for PWABuilder) -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#E23744">
     <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/Android%20Icon.png">
@@ -125,18 +97,16 @@
 
     <!-- Thin Top Bar for Auth (Just above the banner) -->
     <div class="fixed top-0 w-full z-50 bg-white/95 backdrop-blur shadow-sm h-[50px] flex justify-between items-center px-4">
-        <!-- Left Side: Logo & Partner Login -->
-        <div class="flex items-center gap-2 sm:gap-3">
-            <div class="font-logo text-red-600 font-black text-xl italic cursor-pointer" onclick="location.reload()">
-                Gramzo
-            </div>
-            <button type="button" id="btn-partner-login-trigger" onclick="window.openAuthModal('Partner')" class="bg-gray-900 text-white px-2 py-1.5 sm:px-3 sm:py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black shadow-md hover:bg-gray-800 transition-colors active:scale-95 flex items-center gap-1 whitespace-nowrap">
-                <i class="fa-solid fa-motorcycle"></i> <span>Restaurant / Rider Login</span>
-            </button>
+        <!-- Small Logo for context -->
+        <div class="font-logo text-red-600 font-black text-xl italic cursor-pointer" onclick="location.reload()">
+            Gramzo
         </div>
 
         <!-- Right Side Auth Controls -->
         <div id="auth-container" class="flex items-center gap-2 sm:gap-3 shrink-0 h-full">
+            <button type="button" id="btn-partner-login-trigger" onclick="window.openAuthModal('Partner')" class="bg-gray-900 text-white px-3 sm:px-4 py-1.5 rounded-lg text-[10px] sm:text-xs font-black shadow-md hover:bg-gray-800 transition-colors active:scale-95 flex items-center gap-1.5 whitespace-nowrap">
+                <i class="fa-solid fa-handshake"></i> <span class="hidden sm:inline">Partner Login</span>
+            </button>
             <button type="button" id="btn-login-trigger" onclick="window.openAuthModal('User')" class="bg-red-600 text-white px-3 sm:px-4 py-1.5 rounded-lg text-[10px] sm:text-xs font-bold shadow-md hover:bg-red-700 transition-colors active:scale-95 flex items-center gap-1.5 whitespace-nowrap">
                 <i class="fa-solid fa-user"></i> Login
             </button>
@@ -242,14 +212,6 @@
                     <i class="fa-solid fa-motorcycle text-6xl text-gray-800 absolute right-[10px] bottom-[-10px] rotate-[15deg]"></i>
                 </div>
                 
-                <!-- COMMUNITY REVIEWS SECTION (GLOBAL - PUBLICLY VISIBLE) -->
-                <div class="mt-10 border-t border-gray-200/60 pt-8">
-                    <h3 class="font-black text-xl text-gray-900 mb-6 tracking-tight text-center"><i class="fa-solid fa-star text-yellow-400 mr-2"></i>Community Reviews</h3>
-                    <div id="global-reviews-list" class="space-y-4">
-                        <p class="text-xs text-gray-400 text-center py-6">Loading fresh reviews...</p>
-                    </div>
-                </div>
-
                 <footer class="mt-8 pt-8 border-t border-gray-200/60 pb-4">
                     <div class="w-full mb-8 flex justify-center sm:justify-start">
                         <img src="https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/ChatGPT%20Image%20May%202%2C%202026%2C%2001_16_21%20PM.png" alt="Gramzo" class="h-16 object-contain opacity-50 drop-shadow-sm rounded-xl">
@@ -284,7 +246,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v12.5.0 - Cache Buster Added</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.5.0 - Reviews & Fixes</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right">
                             <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
@@ -355,14 +317,6 @@
             </div>
 
             <!-- ========================================== -->
-            <!-- VIEW: REVIEWS                              -->
-            <!-- ========================================== -->
-            <div id="view-Reviews" class="view-section space-y-6">
-                <h2 class="text-2xl font-black text-gray-900">Community Reviews</h2>
-                <div id="user-reviews-list" class="space-y-4"></div>
-            </div>
-
-            <!-- ========================================== -->
             <!-- VIEW: PARTNER DASHBOARD                    -->
             <!-- ========================================== -->
             <div id="view-Partner" class="view-section space-y-6">
@@ -373,38 +327,13 @@
                     </div>
                     <i class="fa-solid fa-motorcycle absolute right-[-20px] bottom-[-20px] text-8xl text-gray-800"></i>
                 </div>
-
-                <!-- Partner Metrics Grid -->
-                <div class="grid grid-cols-2 gap-3 mb-4">
-                    <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-100 text-center shadow-sm flex flex-col justify-center">
-                        <p class="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">Total Earnings</p>
-                        <h4 id="partner-total-sales" class="text-xl font-black text-emerald-700">₹0</h4>
-                    </div>
-                    <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100 text-center shadow-sm flex flex-col justify-center">
-                        <p class="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-1">Completed</p>
-                        <h4 id="partner-completed-orders" class="text-xl font-black text-blue-700">0</h4>
-                    </div>
-                    <div class="bg-purple-50 p-4 rounded-2xl border border-purple-100 text-center shadow-sm col-span-2">
-                        <p class="text-[10px] font-black text-purple-600 uppercase tracking-widest mb-1">Avg. Order Value</p>
-                        <h4 id="partner-avg-value" class="text-xl font-black text-purple-700">₹0</h4>
-                    </div>
-                    <div class="bg-orange-50 p-3 rounded-2xl border border-orange-100 text-center shadow-sm">
-                        <p class="text-[9px] font-black text-orange-600 uppercase tracking-widest mb-1">Top Item</p>
-                        <h4 id="partner-top-item" class="text-[10px] font-bold text-orange-700 line-clamp-2">N/A</h4>
-                    </div>
-                    <div class="bg-gray-50 p-3 rounded-2xl border border-gray-200 text-center shadow-sm">
-                        <p class="text-[9px] font-black text-gray-600 uppercase tracking-widest mb-1">Lowest Item</p>
-                        <h4 id="partner-lowest-item" class="text-[10px] font-bold text-gray-700 line-clamp-2">N/A</h4>
-                    </div>
-                </div>
                 
                 <!-- Partner Tasks Tabs -->
                 <div class="flex justify-between items-center border-b border-gray-200 pb-2">
-                    <h3 class="font-black text-xl text-gray-800">Order Management</h3>
-                    <div class="flex bg-gray-100 rounded-lg p-1 overflow-x-auto no-scrollbar">
-                        <button id="tab-partner-order-Live" onclick="window.switchPartnerOrderTab('Live')" class="partner-order-tab bg-gray-200 text-gray-900 px-3 py-1 rounded-md text-[10px] font-bold transition whitespace-nowrap">Live Orders</button>
-                        <button id="tab-partner-order-Completed" onclick="window.switchPartnerOrderTab('Completed')" class="partner-order-tab text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold transition whitespace-nowrap">Completed</button>
-                        <button id="tab-partner-order-Rejected" onclick="window.switchPartnerOrderTab('Rejected')" class="partner-order-tab text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold transition whitespace-nowrap">Rejected</button>
+                    <h3 class="font-black text-xl text-gray-800">Task Management</h3>
+                    <div class="flex bg-gray-100 rounded-lg p-1">
+                        <button id="tab-partner-order-Live" onclick="window.switchPartnerOrderTab('Live')" class="partner-order-tab bg-gray-200 text-gray-900 px-3 py-1 rounded-md text-[10px] font-bold transition">Live</button>
+                        <button id="tab-partner-order-Archived" onclick="window.switchPartnerOrderTab('Archived')" class="partner-order-tab text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold transition">Archived</button>
                     </div>
                 </div>
 
@@ -607,16 +536,11 @@
         </main>
     </div> <!-- End Scrollable Area -->
 
-    <!-- Update Prompt Banner for PWA App -->
-    <div id="update-prompt" class="hidden fixed bottom-24 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-full text-sm font-bold z-[400] shadow-2xl flex items-center gap-4 w-11/12 max-w-sm justify-between transition-all">
-        <div class="flex items-center gap-2">
-            <i class="fa-solid fa-cloud-arrow-down text-blue-200"></i>
-            <span class="text-xs">New Update Available!</span>
-        </div>
-        <button onclick="window.location.reload(true)" class="bg-white text-blue-600 px-4 py-1.5 rounded-lg text-xs font-black shadow-sm active:scale-95 transition">Refresh App</button>
+    <!-- Bottom Navigation -->
+    <div id="bottom-nav" class="fixed bottom-0 w-full bg-white border-t border-gray-200 pb-safe pt-2 px-2 pb-2 shadow-[0_-10px_20px_rgba(0,0,0,0.03)] z-40 hidden">
+        <div class="max-w-md mx-auto flex justify-between items-center sm:max-w-4xl px-4"></div>
     </div>
 
-    <!-- Modals -->
     <!-- Static Info Modal (About, T&C, Contact) -->
     <div id="info-modal" class="modal-overlay z-[200]">
         <div class="modal-content !max-w-2xl">
@@ -682,7 +606,7 @@
             <div class="space-y-4">
                 <input id="admin-id-input" type="text" class="input-field !bg-gray-800 !text-white" placeholder="Admin ID">
                 <input id="admin-pass-input" type="password" class="input-field !bg-gray-800 !text-white" placeholder="Admin Password">
-                <button type="button" onclick="window.handleAdminLogin()" class="w-full bg-emerald-50 text-white p-4 rounded-2xl font-bold">Access Database</button>
+                <button type="button" onclick="window.handleAdminLogin()" class="w-full bg-emerald-500 text-white p-4 rounded-2xl font-bold">Access Database</button>
             </div>
         </div>
     </div>
@@ -743,39 +667,17 @@
         <span id="toast-text">Message</span>
     </div>
 
-    <!-- PWA Service Worker Registration with Force Update Option -->
+    <!-- PWA Service Worker Registration (Added for Offline Support & APK) -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                try {
-                    // Added a version query to immediately prompt a new SW load
-                    navigator.serviceWorker.register('./sw.js?v=12.5.0')
-                        .then((reg) => {
-                            console.log('ServiceWorker successfully registered');
-                            
-                            // Force check for updates on every page load
-                            reg.update();
-
-                            reg.addEventListener('updatefound', () => {
-                                const newWorker = reg.installing;
-                                newWorker.addEventListener('statechange', () => {
-                                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                        // Detects new version pushed from Github
-                                        const promptEl = document.getElementById('update-prompt');
-                                        if(promptEl) promptEl.classList.remove('hidden');
-                                    }
-                                });
-                            });
-                        })
-                        .catch((err) => console.log('ServiceWorker registration failed: ', err));
-                } catch (err) {
-                    console.log('ServiceWorker blocked by environment: ', err);
-                }
+                navigator.serviceWorker.register('./sw.js')
+                    .then((reg) => console.log('ServiceWorker successfully registered with scope: ', reg.scope))
+                    .catch((err) => console.log('ServiceWorker registration failed: ', err));
             });
         }
     </script>
 
-    <!-- FIREBASE AND APP LOGIC -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -833,13 +735,6 @@
             return `${h}:${m} ${ampm}`;
         };
 
-        window.formatOrderTime = (timestamp) => {
-            if (!timestamp) return 'Just now';
-            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-            if (isNaN(date)) return 'Just now';
-            return date.toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
-        };
-
         const getCol = (name) => IS_LIVE_WEBSITE ? collection(db, name) : collection(db, 'artifacts', appId, 'public', 'data', name);
         const getDocRef = (colName, docId) => IS_LIVE_WEBSITE ? doc(db, colName, docId) : doc(db, 'artifacts', appId, 'public', 'data', colName, docId);
 
@@ -854,31 +749,17 @@
         window.playAlertSound = () => {
             try {
                 const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-                audio.play().catch(e => console.log("Audio blocked by browser."));
+                audio.play().catch(e => console.log("Audio blocked by browser. Interaction required."));
             } catch(e) {}
         };
 
-        window.speakAlert = (text) => {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel(); 
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'en-IN';
-                utterance.rate = 0.95;
-                window.speechSynthesis.speak(utterance);
-            }
-        };
-
         window.sendAlert = (title, body) => {
-            try {
-                if ("Notification" in window && Notification.permission === "granted") {
-                    new Notification(title, { 
-                        body: body, 
-                        icon: 'https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/ChatGPT%20Image%20May%202%2C%202026%2C%2001_16_21%20PM.png' 
-                    });
-                } else {
-                    window.showToast(title + " - " + body, "info");
-                }
-            } catch (err) {
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification(title, { 
+                    body: body, 
+                    icon: 'https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/ChatGPT%20Image%20May%202%2C%202026%2C%2001_16_21%20PM.png' 
+                });
+            } else {
                 window.showToast(title + " - " + body, "info");
             }
         };
@@ -919,8 +800,7 @@
             try {
                 await window.dbCall(updateDoc(getDocRef('orders', window.currentRatingOrderId), {
                     rating: window.selectedRating,
-                    review: reviewText,
-                    reviewTime: serverTimestamp()
+                    review: reviewText
                 }), 10000);
                 window.showToast("Thank you for your feedback!", "success");
                 document.getElementById('rating-modal').classList.remove('active');
@@ -1136,10 +1016,7 @@
         window.switchAuthView = (view) => {
             document.getElementById('auth-view-login').style.display = view === 'login' ? 'block' : 'none';
             document.getElementById('auth-view-register').style.display = view === 'register' ? 'block' : 'none';
-            
-            let displayRole = currentAuthRole === 'Partner' ? 'Restaurant / Rider' : currentAuthRole;
-            document.getElementById('auth-title').innerText = view === 'login' ? `${displayRole} Login` : `Join as ${displayRole}`;
-            
+            document.getElementById('auth-title').innerText = view === 'login' ? `${currentAuthRole} Login` : `Join as ${currentAuthRole}`;
             document.getElementById('partner-fields').style.display = (view === 'register' && currentAuthRole === 'Partner') ? 'block' : 'none';
             document.getElementById('auth-msg').classList.add('hidden');
         };
@@ -1181,7 +1058,7 @@
                 activeNav.classList.add('text-red-600', 'font-black');
             }
 
-            if (viewName === 'Cart' && typeof window.renderCartUI === 'function') window.renderCartUI();
+            if (viewName === 'Cart') window.renderCartUI();
         };
         
         window.logout = async () => {
@@ -1292,12 +1169,6 @@
                     const data = snap.data();
                     if (data.pin !== pass) throw new Error("Incorrect password.");
 
-                    // IMPORTANT FIX: Force correct role loading if previously registered differently but accessing partner portal
-                    if (currentAuthRole === 'Partner' && data.role !== 'Partner') {
-                        data.role = 'Partner';
-                        window.dbCall(updateDoc(userRef, { role: 'Partner' })).catch(e=>{});
-                    }
-
                     currentUser = { ...data, docId: phone };
                     if(auth.currentUser) window.dbCall(setDoc(getDocRef('sessions', auth.currentUser.uid), { phone }, { merge: true }), 3000).catch(e=>{});
                     window.finalizeLoginSequence();
@@ -1309,140 +1180,69 @@
         };
 
         window.finalizeLoginSequence = () => {
-            try { window.closeAuthModal(); } catch(e){}
+            window.closeAuthModal();
             
-            // Request Notification Permission on Login (Safely wrapped to prevent routing crashes)
-            try {
-                if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
-                    const permPromise = Notification.requestPermission();
-                    if (permPromise) permPromise.catch(() => {});
-                }
-            } catch (err) {}
-
-            try {
-                // Safely normalize user role
-                if (currentUser && currentUser.role) {
-                    const r = String(currentUser.role).trim().toLowerCase();
-                    if (r === 'admin') currentUser.role = 'Admin';
-                    else if (r === 'partner') currentUser.role = 'Partner';
-                    else currentUser.role = 'User';
-                } else if (currentUser) {
-                    currentUser.role = 'User';
-                }
-
-                let displayName = (currentUser && currentUser.name) ? currentUser.name : 'User';
-                if (currentUser && currentUser.role === 'Partner' && currentUser.shopName) {
-                    displayName = currentUser.shopName;
-                }
-
-                try { window.showToast(`Welcome back, ${displayName.split(' ')[0]}!`, "success"); } catch(e){}
-
-                // Safe DOM manipulation helper
-                const safeEl = (id, fn) => { const el = document.getElementById(id); if(el) fn(el); };
-
-                safeEl('btn-partner-login-trigger', el => el.classList.add('hidden'));
-                safeEl('btn-login-trigger', el => el.classList.add('hidden'));
-                safeEl('profile-trigger', el => el.classList.remove('hidden'));
-                
-                safeEl('nav-initial', el => el.innerText = displayName.charAt(0).toUpperCase());
-                safeEl('nav-name', el => el.innerText = displayName.split(' ')[0]);
-                safeEl('nav-role', el => {
-                    el.innerText = currentUser.role;
-                    el.className = `text-[8px] font-bold uppercase ${currentUser.role === 'Admin' ? 'text-purple-500' : currentUser.role === 'Partner' ? 'text-orange-500' : 'text-blue-500'}`;
-                });
-                safeEl('menu-name', el => el.innerText = displayName);
-                safeEl('menu-phone', el => el.innerText = currentUser.phone || '');
-
-                safeEl('partner-welcome', el => {
-                    if (currentUser.role === 'Partner') el.innerText = `Welcome, ${displayName.split(' ')[0]}!`;
-                });
-
-                try { window.setupBottomNav(currentUser.role); } catch(e){}
-                try { window.switchMainView(currentUser.role === 'Admin' ? 'Admin' : currentUser.role === 'Partner' ? 'Partner' : 'User'); } catch(e){}
-
-                if (currentUser.role === 'Partner') {
-                    const isFoodOwner = currentUser.category !== 'Rider'; // Fixed Fallback
-                    const toggleVis = (id, show) => safeEl(id, el => show ? el.classList.remove('hidden') : el.classList.add('hidden'));
-
-                    toggleVis('partner-food-settings', isFoodOwner);
-                    toggleVis('add-product-container', isFoodOwner);
-                    toggleVis('partner-catalog-list-container', isFoodOwner);
-
-                    safeEl('hub-name-val', el => el.innerText = currentUser.shopName || '');
-                    
-                    if (currentUser.shopAddress) {
-                        toggleVis('hub-address-row', true);
-                        safeEl('hub-address-val', el => el.innerText = currentUser.shopAddress);
-                        safeEl('partner-shop-address', el => el.value = currentUser.shopAddress);
-                    }
-                    
-                    safeEl('partner-shop-name', el => el.value = currentUser.shopName || '');
-                    safeEl('partner-open-time', el => el.value = currentUser.openTime || '');
-                    safeEl('partner-close-time', el => el.value = currentUser.closeTime || '');
-                    
-                    safeEl('partner-cod-toggle-setup', el => {
-                        if (currentUser.codEnabled !== undefined) el.checked = currentUser.codEnabled;
-                    });
-                    
-                    safeEl('partner-online-toggle-setup', el => {
-                        if (currentUser.onlineEnabled !== undefined) {
-                            el.checked = currentUser.onlineEnabled;
-                            toggleVis('qr-upload-section', currentUser.onlineEnabled);
-                        }
-                    });
-
-                    safeEl('partner-qr-preview', el => {
-                        if (currentUser.qrCode) {
-                            el.src = currentUser.qrCode;
-                            el.classList.remove('hidden');
-                        }
-                    });
-                }
-            } catch (err) {
-                console.error("Critical error in UI rendering:", err);
-                try { window.switchMainView(currentUser.role); } catch(e){}
+            // Request Notification Permission on Login
+            if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
+                Notification.requestPermission();
             }
 
-            try { window.initRoleListeners(); } catch(e){}
-            try { window.loadMarketplaceData(); } catch(e){}
-        };
+            window.showToast(`Welcome back, ${currentUser.name.split(' ')[0]}!`, "success");
 
-        window.renderReviews = (allOrders) => {
-            const listEl = document.getElementById('global-reviews-list');
-            if(!listEl) return;
-            const reviewedOrders = allOrders.filter(o => o.rating).sort((a,b) => (b.reviewTime?.toMillis() || b.time?.toMillis() || 0) - (a.reviewTime?.toMillis() || a.time?.toMillis() || 0));
+            document.getElementById('btn-partner-login-trigger').classList.add('hidden');
+            document.getElementById('btn-login-trigger').classList.add('hidden');
+            document.getElementById('profile-trigger').classList.remove('hidden');
+            
+            document.getElementById('nav-initial').innerText = currentUser.name.charAt(0).toUpperCase();
+            document.getElementById('nav-name').innerText = currentUser.name;
+            document.getElementById('nav-role').innerText = currentUser.role;
+            document.getElementById('nav-role').className = `text-[8px] font-bold uppercase ${currentUser.role === 'Admin' ? 'text-purple-500' : currentUser.role === 'Partner' ? 'text-orange-500' : 'text-blue-500'}`;
+            document.getElementById('menu-name').innerText = currentUser.name;
+            document.getElementById('menu-phone').innerText = currentUser.phone;
 
-            if(reviewedOrders.length === 0) {
-                listEl.innerHTML = '<div class="text-center py-10 bg-white rounded-3xl border border-gray-100"><i class="fa-solid fa-star text-4xl text-gray-200 mb-4"></i><p class="text-gray-400 font-medium text-sm">No reviews yet.</p></div>';
-                return;
+            window.setupBottomNav(currentUser.role);
+            window.switchMainView(currentUser.role === 'Admin' ? 'Admin' : currentUser.role === 'Partner' ? 'Partner' : 'User');
+
+            if (currentUser.role === 'Partner') {
+                if(currentUser.category === 'Food Owner') {
+                    document.getElementById('partner-food-settings').classList.remove('hidden');
+                    document.getElementById('add-product-container').classList.remove('hidden');
+                    document.getElementById('partner-catalog-list-container').classList.remove('hidden');
+                } else {
+                    document.getElementById('partner-food-settings').classList.add('hidden');
+                    document.getElementById('add-product-container').classList.add('hidden');
+                    document.getElementById('partner-catalog-list-container').classList.add('hidden');
+                }
+
+                if(currentUser.shopName) document.getElementById('hub-name-val').innerText = currentUser.shopName;
+                if(currentUser.shopAddress) {
+                    document.getElementById('hub-address-row').classList.remove('hidden');
+                    document.getElementById('hub-address-val').innerText = currentUser.shopAddress;
+                    document.getElementById('partner-shop-address').value = currentUser.shopAddress;
+                }
+                if(currentUser.shopName) document.getElementById('partner-shop-name').value = currentUser.shopName;
+                if(currentUser.openTime) document.getElementById('partner-open-time').value = currentUser.openTime;
+                if(currentUser.closeTime) document.getElementById('partner-close-time').value = currentUser.closeTime;
+                
+                const codToggle = document.getElementById('partner-cod-toggle-setup');
+                if (codToggle && currentUser.codEnabled !== undefined) codToggle.checked = currentUser.codEnabled;
+                
+                const onlineToggle = document.getElementById('partner-online-toggle-setup');
+                const qrSection = document.getElementById('qr-upload-section');
+                if (onlineToggle && currentUser.onlineEnabled !== undefined) {
+                    onlineToggle.checked = currentUser.onlineEnabled;
+                    if (qrSection) qrSection.classList.toggle('hidden', !currentUser.onlineEnabled);
+                }
+
+                const qrPreview = document.getElementById('partner-qr-preview');
+                if(currentUser.qrCode && qrPreview) {
+                    qrPreview.src = currentUser.qrCode;
+                    qrPreview.classList.remove('hidden');
+                }
             }
 
-            listEl.innerHTML = reviewedOrders.map(o => {
-                let ratingColor = o.rating >= 4 ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : o.rating === 3 ? 'bg-yellow-50 text-yellow-600 border-yellow-100' : 'bg-red-50 text-red-600 border-red-100';
-                
-                return `
-                <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 mb-4 transition-all hover:shadow-md text-left">
-                    <div class="flex justify-between items-start mb-3">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-black text-sm shadow-sm">${o.customer ? o.customer.charAt(0).toUpperCase() : 'U'}</div>
-                            <div>
-                                <h4 class="font-black text-gray-900 text-sm leading-none mb-1">${o.customer || 'Unknown'}</h4>
-                                <span class="text-[10px] text-gray-500 font-medium"><i class="fa-regular fa-clock mr-1"></i> ${window.formatOrderTime(o.reviewTime || o.time)}</span>
-                            </div>
-                        </div>
-                        <div class="${ratingColor} px-2 py-1 rounded-lg text-xs font-black border flex items-center gap-1 shadow-sm">
-                            ${o.rating} <i class="fa-solid fa-star text-[10px]"></i>
-                        </div>
-                    </div>
-                    <div class="mb-3 border-b border-gray-50 pb-3">
-                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Ordered From</p>
-                        <p class="text-xs text-gray-900 font-bold"><i class="fa-solid fa-store text-red-500 mr-1"></i> ${o.restaurantName || 'Gramzo Partner'}</p>
-                        <p class="text-[10px] text-gray-500 line-clamp-1 mt-1">${o.items ? o.items.map(i => i.name).join(', ') : ''}</p>
-                    </div>
-                    ${o.review ? `<p class="text-sm text-gray-700 leading-relaxed italic">"${o.review}"</p>` : '<p class="text-sm text-gray-400 italic">No written review provided.</p>'}
-                </div>
-                `;
-            }).join('');
+            window.initRoleListeners();
+            window.loadMarketplaceData();
         };
 
         const renderProducts = (items) => {
@@ -1598,14 +1398,8 @@
                 }
             }, (err) => console.error(err));
 
-            onSnapshot(getCol('orders'), (snap) => {
-                const allOrders = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                if(window.renderReviews) window.renderReviews(allOrders);
-            });
-
             onSnapshot(getCol('products'), (snap) => {
                 let items = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
-                window.allProductsData = items; 
                 
                 // Add dummy products if empty for preview
                 if(items.length === 0) {
@@ -1649,10 +1443,10 @@
             container.innerHTML = ''; 
 
             const createNavItem = (id, icon, label, targetView) => `
-                <button type="button" id="nav-btn-${id}" onclick="window.switchMainView('${targetView}')" class="b-nav-item flex flex-col items-center gap-1 flex-1 text-gray-400 font-medium transition-colors relative">
+                <button type="button" id="nav-btn-${id}" onclick="window.switchMainView('${targetView}')" class="b-nav-item flex flex-col items-center gap-1 w-16 text-gray-400 font-medium transition-colors relative">
                     <i class="${icon} text-xl mb-0.5"></i>
                     <span class="text-[10px] tracking-wide">${label}</span>
-                    ${id === 'Cart' && window.cart.length > 0 ? `<span class="absolute top-0 right-1/4 bg-red-600 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-sm">${window.cart.length}</span>` : ''}
+                    ${id === 'Cart' && window.cart.length > 0 ? `<span class="absolute -top-1 right-2 bg-red-600 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-sm">${window.cart.length}</span>` : ''}
                 </button>
             `;
 
@@ -1660,9 +1454,8 @@
                 container.innerHTML += createNavItem('User', 'fa-solid fa-house', 'Home', 'User');
                 container.innerHTML += createNavItem('Cart', 'fa-solid fa-basket-shopping', 'Cart', 'Cart');
                 container.innerHTML += createNavItem('Orders', 'fa-solid fa-receipt', 'History', 'Orders'); 
-                container.innerHTML += createNavItem('Reviews', 'fa-solid fa-star', 'Reviews', 'Reviews'); 
             } else if (role === 'Partner') {
-                container.innerHTML += createNavItem('Partner', 'fa-solid fa-utensils', 'Dashboard', 'Partner');
+                container.innerHTML += createNavItem('Partner', 'fa-solid fa-utensils', 'Tasks', 'Partner');
                 container.innerHTML += createNavItem('Partner-Profile', 'fa-solid fa-store', 'Settings', 'Partner-Profile');
             } else if (role === 'Admin') {
                 container.innerHTML += createNavItem('Admin', 'fa-solid fa-chart-line', 'Dashboard', 'Admin');
@@ -1758,10 +1551,7 @@
                 let statusColor = o.status === 'Placed' ? 'text-amber-500' : o.status === 'Preparing' || o.status === 'Out for Delivery' ? 'text-blue-500' : o.status === 'Rejected' ? 'text-red-500' : 'text-emerald-500';
                 html += `
                     <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="p-4 font-mono font-bold text-[10px] text-gray-500">
-                            #${o.id.slice(-5).toUpperCase()}
-                            <br/><span class="text-[8px] text-gray-400">${window.formatOrderTime(o.time)}</span>
-                        </td>
+                        <td class="p-4 font-mono font-bold text-[10px] text-gray-500">#${o.id.slice(-5).toUpperCase()}</td>
                         <td class="p-4 font-bold text-gray-900 text-xs">${o.customer || 'Unknown'}</td>
                         <td class="p-4 font-medium text-gray-500 text-xs">${o.restaurantName || '-'}</td>
                         <td class="p-4 font-black text-gray-900 text-xs">₹${o.total.toFixed(2)}</td>
@@ -1793,48 +1583,13 @@
             let filteredOrders = window.partnerOrdersData.filter(o => {
                 if (window.partnerCurrentOrderTab === 'Live') {
                     return !['Delivered', 'Rejected'].includes(o.status);
-                } else if (window.partnerCurrentOrderTab === 'Completed') {
-                    return o.status === 'Delivered';
-                } else if (window.partnerCurrentOrderTab === 'Rejected') {
-                    return o.status === 'Rejected';
-                }
-                return false;
-            });
-
-            let totalSales = 0;
-            let completedOrders = 0;
-            let itemCounts = {};
-
-            window.partnerOrdersData.forEach(o => {
-                if(o.status === 'Delivered') {
-                    totalSales += (o.subtotal - (o.discount || 0));
-                    completedOrders++;
-                    
-                    // Count items for Top/Lowest metrics
-                    if(o.items && Array.isArray(o.items)) {
-                        o.items.forEach(item => {
-                            if(item.name) {
-                                itemCounts[item.name] = (itemCounts[item.name] || 0) + 1;
-                            }
-                        });
-                    }
+                } else {
+                    return ['Delivered', 'Rejected'].includes(o.status);
                 }
             });
-
-            let avgOrderValue = completedOrders > 0 ? (totalSales / completedOrders).toFixed(2) : 0;
-            let sortedItems = Object.entries(itemCounts).sort((a, b) => b[1] - a[1]);
-            let topItem = sortedItems.length > 0 ? sortedItems[0][0] : 'N/A';
-            let lowestItem = sortedItems.length > 0 ? sortedItems[sortedItems.length - 1][0] : 'N/A';
-
-            const safeEl = (id, fn) => { const el = document.getElementById(id); if(el) fn(el); };
-            safeEl('partner-total-sales', el => el.innerText = `₹${totalSales.toFixed(2)}`);
-            safeEl('partner-completed-orders', el => el.innerText = completedOrders);
-            safeEl('partner-avg-value', el => el.innerText = `₹${avgOrderValue}`);
-            safeEl('partner-top-item', el => el.innerText = topItem);
-            safeEl('partner-lowest-item', el => el.innerText = lowestItem);
 
             if (filteredOrders.length === 0) {
-                listEl.innerHTML = `<p class="text-gray-400 font-medium text-sm text-center py-10 bg-white rounded-3xl shadow-sm border border-gray-100">No ${window.partnerCurrentOrderTab.toLowerCase()} orders found.</p>`;
+                listEl.innerHTML = `<p class="text-gray-400 font-medium text-sm text-center py-10 bg-white rounded-3xl shadow-sm border border-gray-100">No ${window.partnerCurrentOrderTab.toLowerCase()} tasks right now.</p>`;
                 return;
             }
 
@@ -1854,44 +1609,23 @@
                     if (o.status === 'Ready' && !o.riderId) {
                         actionButtons = `<button type="button" onclick="window.acceptDelivery('${o.id}')" class="w-full bg-gray-900 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-motorcycle mr-1"></i> Accept Delivery</button>`;
                     } else if (o.status === 'Out for Delivery' && o.riderId === currentUser.phone) {
-                        actionButtons = `<div class="flex gap-2"><a href="tel:${o.phone}" class="flex-1 bg-white border border-gray-200 text-gray-700 py-3 rounded-xl font-bold text-sm text-center flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone mr-1"></i> Customer</a><button type="button" onclick="window.markDelivered('${o.id}')" class="flex-1 bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md"><i class="fa-solid fa-check-double mr-1"></i> Delivered Successfully</button></div>`;
+                        actionButtons = `<div class="flex gap-2"><a href="tel:${o.phone}" class="flex-1 bg-white border border-gray-200 text-gray-700 py-3 rounded-xl font-bold text-sm text-center flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone mr-1"></i> Customer</a><button type="button" onclick="window.markDelivered('${o.id}')" class="flex-1 bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md"><i class="fa-solid fa-check-double mr-1"></i> Done</button></div>`;
                     }
                 } else {
                     if (o.status === 'Placed') actionButtons = `<div class="flex gap-2"><button type="button" onclick="window.acceptFoodOrder('${o.id}')" class="flex-1 bg-black text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-gray-800 transition-colors active:scale-95"><i class="fa-solid fa-check"></i> Accept</button><button type="button" onclick="window.openRejectModal('${o.id}')" class="flex-1 bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm hover:bg-red-100 transition-colors active:scale-95"><i class="fa-solid fa-xmark"></i> Reject</button></div>`;
                     else if (o.status === 'Accepted') { cardStyle = 'border-blue-200 bg-blue-50/30'; actionButtons = `<button type="button" onclick="window.markPreparing('${o.id}')" class="w-full bg-blue-600 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-blue-700 active:scale-95">Start Preparing</button>`; }
                     else if (o.status === 'Preparing') { cardStyle = 'border-orange-200 bg-orange-50/30'; actionButtons = `<button type="button" onclick="window.markReady('${o.id}')" class="w-full bg-orange-500 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-orange-600 active:scale-95">Mark Ready for Rider</button>`; }
                     else if (o.status === 'Ready') { cardStyle = 'border-yellow-200 bg-yellow-50/30'; actionButtons = `<p class="text-xs font-bold text-orange-600 text-center py-2 bg-orange-50 rounded-xl">Waiting for Delivery Partner...</p><button type="button" onclick="window.markOutForDelivery('${o.id}')" class="w-full mt-2 bg-yellow-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95 border border-yellow-600">Self Deliver (Skip Rider)</button>`; }
-                    else if (o.status === 'Out for Delivery') {
-                        if(!o.riderId) { // Self delivery by shop owner
-                            actionButtons = `<button type="button" onclick="window.markDelivered('${o.id}')" class="w-full bg-emerald-500 text-white py-3.5 rounded-xl font-bold text-sm shadow-md active:scale-95 border border-emerald-600"><i class="fa-solid fa-check-double mr-1"></i> Delivered Successfully</button>`;
-                        } else {
-                            actionButtons = `<p class="text-xs font-bold text-yellow-600 text-center py-2 bg-yellow-50 rounded-xl">Out for Delivery via ${o.riderName}</p>`;
-                        }
-                    }
+                    else if (o.status === 'Out for Delivery') actionButtons = `<p class="text-xs font-bold text-yellow-600 text-center py-2 bg-yellow-50 rounded-xl">Out for Delivery via ${o.riderName || 'Self'}</p>`;
                     else if (o.status === 'Delivered') actionButtons = `<div class="w-full bg-emerald-50 text-emerald-600 py-3 rounded-xl font-bold text-sm text-center border border-emerald-100"><i class="fa-solid fa-circle-check mr-1"></i> Order Completed</div>`;
                     else if (o.status === 'Rejected') actionButtons = `<div class="w-full bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm text-center border border-red-100"><i class="fa-solid fa-circle-xmark mr-1"></i> Order Rejected</div>`;
                 }
 
-                let ratingHtml = o.rating ? `<div class="mt-2 text-center text-xs font-bold text-yellow-600 bg-yellow-50 rounded-lg py-1 border border-yellow-100"><i class="fa-solid fa-star"></i> Customer Rated: ${o.rating} Star</div>` : '';
-
                 html += `<div class="bg-white rounded-3xl p-5 shadow-sm border ${cardStyle}">
-                        <div class="flex justify-between items-start mb-3">
-                            <div>
-                                <div class="flex items-center gap-2 mb-1"><span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Order #${o.id.slice(-4).toUpperCase()}</span>${paymentBadge}</div>
-                                <h4 class="font-bold text-gray-900 text-sm flex items-start gap-1"><i class="fa-solid fa-map-pin text-red-500 mt-0.5 shrink-0"></i> ${o.address}</h4>
-                                <p class="text-[9px] text-gray-500 font-bold mt-1.5"><i class="fa-regular fa-clock mr-1"></i> Placed: ${window.formatOrderTime(o.time)}</p>
-                                ${o.deliveredAt ? `<p class="text-[9px] text-emerald-600 font-bold mt-0.5"><i class="fa-solid fa-check-double mr-1"></i> Delivered: ${window.formatOrderTime(o.deliveredAt)}</p>` : ''}
-                            </div>
-                            <div class="text-right shrink-0">
-                                <span class="text-xl font-black text-gray-900">₹${o.total.toFixed(2)}</span>
-                                ${o.status === 'Delivered' ? `<p class="text-[10px] text-emerald-600 font-black mt-1.5 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-100">Earn: ₹${(o.subtotal - (o.discount || 0)).toFixed(2)}</p>` : ''}
-                            </div>
-                        </div>
+                        <div class="flex justify-between items-start mb-3"><div><div class="flex items-center gap-2 mb-1"><span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Order #${o.id.slice(-4).toUpperCase()}</span>${paymentBadge}</div><h4 class="font-bold text-gray-900 text-sm"><i class="fa-solid fa-map-pin text-red-500 mr-1"></i> ${o.address}</h4></div><span class="text-xl font-black text-emerald-600">₹${o.total.toFixed(2)}</span></div>
                         ${customerInfo}
                         <div class="bg-gray-50 p-3 rounded-xl mb-4 border border-gray-100"><p class="text-xs text-gray-700 font-bold mb-1"><i class="fa-solid fa-clipboard-list text-gray-400 mr-1"></i> Items:</p><p class="text-sm text-gray-600 font-medium">${itemsStr}</p>${screenshotHtml}</div>
-                        ${actionButtons}
-                        ${ratingHtml}
-                        </div>`;
+                        ${actionButtons}</div>`;
             });
             listEl.innerHTML = html;
         };
@@ -2185,7 +1919,6 @@
                         newOrderIds[o.id] = o.status;
                         if (!firstLoad && !window.lastKnownOrders[o.id]) {
                             window.playAlertSound();
-                            window.speakAlert("A new order has been placed.");
                             window.sendAlert("New Order Alert", `Order #${o.id.slice(-5).toUpperCase()} placed for ₹${o.total}`);
                         }
                     });
@@ -2241,11 +1974,7 @@
                 const unsubUserOrders = onSnapshot(getCol('orders'), (snap) => {
                     const listEl = document.getElementById('user-orders-list');
                     if(!listEl) return;
-                    
-                    const allOrders = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                    if(window.renderReviews) window.renderReviews(allOrders);
-
-                    const myOrders = allOrders.filter(o => o.phone === currentUser.phone);
+                    const myOrders = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(o => o.phone === currentUser.phone);
                     myOrders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0));
                     window.userOrderHistory = myOrders;
 
@@ -2261,19 +1990,8 @@
                         newOrderIds[o.id] = o.status;
                         
                         if (!firstLoad && window.lastKnownOrders[o.id] && window.lastKnownOrders[o.id] !== o.status) {
-                            let msg = `Your order #${o.id.slice(-5).toUpperCase()} is now ${o.status}`;
-                            let voiceMsg = msg;
-                            
-                            if(o.status === 'Accepted') voiceMsg = 'Your order has been accepted by the restaurant.';
-                            if(o.status === 'Preparing') voiceMsg = 'Your food is now being prepared.';
-                            if(o.status === 'Ready') voiceMsg = 'Your order is ready and waiting for delivery.';
-                            if(o.status === 'Out for Delivery') voiceMsg = 'Your order is out for delivery.';
-                            if(o.status === 'Delivered') voiceMsg = 'Your order has been delivered successfully. Enjoy your meal!';
-                            if(o.status === 'Rejected') voiceMsg = 'Sorry, your order was rejected by the restaurant.';
-
                             window.playAlertSound();
-                            window.speakAlert(voiceMsg);
-                            window.sendAlert("Order Update", msg);
+                            window.sendAlert("Order Update", `Your order #${o.id.slice(-5).toUpperCase()} is now ${o.status}`);
                         }
 
                         let statusColor = 'text-orange-500', progressWidth = '15%', statusText = 'Pending Approval';
@@ -2338,8 +2056,6 @@
                                     <div>
                                         <div class="flex items-center gap-2 mb-1"><span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Order #${o.id.slice(-5).toUpperCase()}</span>${paymentBadge}</div>
                                         <h4 class="font-black text-gray-900 text-base leading-none">${o.restaurantName || 'Gramzo Partner'}</h4>
-                                        <p class="text-[9px] text-gray-500 font-bold mt-1.5"><i class="fa-regular fa-clock mr-1"></i> Placed: ${window.formatOrderTime(o.time)}</p>
-                                        ${o.deliveredAt ? `<p class="text-[9px] text-emerald-600 font-bold mt-0.5"><i class="fa-solid fa-check-double mr-1"></i> Delivered: ${window.formatOrderTime(o.deliveredAt)}</p>` : ''}
                                     </div>
                                     <span class="text-xl font-black text-gray-900">₹${o.total.toFixed(2)}</span>
                                 </div>
@@ -2378,6 +2094,11 @@
                     
                     relevantOrders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0));
 
+                    if (relevantOrders.length === 0) {
+                        listEl.innerHTML = '<p class="text-gray-400 font-medium text-sm text-center py-10 bg-white rounded-3xl shadow-sm border border-gray-100">No active requests right now.</p>';
+                        return;
+                    }
+
                     let newOrderIds = {};
                     let firstLoad = Object.keys(window.lastKnownOrders || {}).length === 0;
 
@@ -2386,9 +2107,44 @@
                         
                         if (!firstLoad && !window.lastKnownOrders[o.id]) {
                             window.playAlertSound();
-                            window.speakAlert("New task received. Please check your dashboard.");
                             window.sendAlert("New Task Received!", `Please check your dashboard.`);
                         }
+
+                        const itemsStr = o.items.map(i => `${i.name}`).join(', ');
+                        let cardStyle = 'border-gray-100', actionButtons = '';
+                        let paymentBadge = o.paymentMode === 'Prepaid' ? `<span class="bg-blue-100 text-blue-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">Prepaid</span>` : `<span class="bg-gray-100 text-gray-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">COD</span>`;
+                        let screenshotHtml = o.paymentMode === 'Prepaid' && o.paymentScreenshot ? `<button type="button" onclick="window.viewImage('${o.paymentScreenshot}')" class="text-[10px] text-blue-600 bg-blue-50 px-2 py-1 rounded font-bold hover:bg-blue-100 transition mt-2 w-full text-left"><i class="fa-solid fa-image"></i> View Payment Screenshot</button>` : '';
+                        
+                        let customerInfo = `<div class="mb-3 bg-gray-50 p-2 rounded-xl border border-gray-100">
+                            <p class="text-xs font-black text-gray-800"><i class="fa-solid fa-user text-gray-400 mr-1"></i> ${o.customer}</p>
+                            <p class="text-xs font-bold text-blue-600 mt-1"><a href="tel:${o.phone}"><i class="fa-solid fa-phone mr-1"></i> ${o.phone}</a></p>
+                        </div>`;
+
+                        if (currentUser.category === 'Rider') {
+                            if (o.status === 'Ready' && !o.riderId) {
+                                actionButtons = `<button type="button" onclick="window.acceptDelivery('${o.id}')" class="w-full bg-gray-900 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-motorcycle mr-1"></i> Accept Delivery</button>`;
+                            } else if (o.status === 'Out for Delivery' && o.riderId === currentUser.phone) {
+                                actionButtons = `<div class="flex gap-2"><a href="tel:${o.phone}" class="flex-1 bg-white border border-gray-200 text-gray-700 py-3 rounded-xl font-bold text-sm text-center flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone mr-1"></i> Customer</a><button type="button" onclick="window.markDelivered('${o.id}')" class="flex-1 bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md"><i class="fa-solid fa-check-double mr-1"></i> Done</button></div>`;
+                            }
+                        } else {
+                            if (o.status === 'Placed') actionButtons = `<div class="flex gap-2"><button type="button" onclick="window.acceptFoodOrder('${o.id}')" class="flex-1 bg-black text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-gray-800 transition-colors active:scale-95"><i class="fa-solid fa-check"></i> Accept</button><button type="button" onclick="window.openRejectModal('${o.id}')" class="flex-1 bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm hover:bg-red-100 transition-colors active:scale-95"><i class="fa-solid fa-xmark"></i> Reject</button></div>`;
+                            else if (o.status === 'Accepted') { cardStyle = 'border-blue-200 bg-blue-50/30'; actionButtons = `<button type="button" onclick="window.markPreparing('${o.id}')" class="w-full bg-blue-600 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-blue-700 active:scale-95">Start Preparing</button>`; }
+                            else if (o.status === 'Preparing') { cardStyle = 'border-orange-200 bg-orange-50/30'; actionButtons = `<button type="button" onclick="window.markReady('${o.id}')" class="w-full bg-orange-500 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-orange-600 active:scale-95">Mark Ready for Rider</button>`; }
+                            else if (o.status === 'Ready') { cardStyle = 'border-yellow-200 bg-yellow-50/30'; actionButtons = `<p class="text-xs font-bold text-orange-600 text-center py-2 bg-orange-50 rounded-xl">Waiting for Delivery Partner...</p><button type="button" onclick="window.markOutForDelivery('${o.id}')" class="w-full mt-2 bg-yellow-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95 border border-yellow-600">Self Deliver (Skip Rider)</button>`; }
+                            else if (o.status === 'Out for Delivery') actionButtons = `<p class="text-xs font-bold text-yellow-600 text-center py-2 bg-yellow-50 rounded-xl">Out for Delivery via ${o.riderName || 'Self'}</p>`;
+                            else if (o.status === 'Delivered') actionButtons = `<div class="w-full bg-emerald-50 text-emerald-600 py-3 rounded-xl font-bold text-sm text-center border border-emerald-100"><i class="fa-solid fa-circle-check mr-1"></i> Order Completed</div>`;
+                            else if (o.status === 'Rejected') actionButtons = `<div class="w-full bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm text-center border border-red-100"><i class="fa-solid fa-circle-xmark mr-1"></i> Order Rejected</div>`;
+                        }
+
+                        let ratingHtml = o.rating ? `<div class="mt-2 text-center text-xs font-bold text-yellow-600 bg-yellow-50 rounded-lg py-1 border border-yellow-100"><i class="fa-solid fa-star"></i> Customer Rated: ${o.rating} Star</div>` : '';
+
+                        html += `<div class="bg-white rounded-3xl p-5 shadow-sm border ${cardStyle}">
+                                <div class="flex justify-between items-start mb-3"><div><div class="flex items-center gap-2 mb-1"><span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Order #${o.id.slice(-4).toUpperCase()}</span>${paymentBadge}</div><h4 class="font-bold text-gray-900 text-sm"><i class="fa-solid fa-map-pin text-red-500 mr-1"></i> ${o.address}</h4></div><span class="text-xl font-black text-emerald-600">₹${o.total.toFixed(2)}</span></div>
+                                ${customerInfo}
+                                <div class="bg-gray-50 p-3 rounded-xl mb-4 border border-gray-100"><p class="text-xs text-gray-700 font-bold mb-1"><i class="fa-solid fa-clipboard-list text-gray-400 mr-1"></i> Items:</p><p class="text-sm text-gray-600 font-medium">${itemsStr}</p>${screenshotHtml}</div>
+                                ${actionButtons}
+                                ${ratingHtml}
+                                </div>`;
                     });
                     
                     window.lastKnownOrders = newOrderIds;
@@ -2407,28 +2163,7 @@
                             const variantsDisplay = p.variants ? p.variants.map(v => `${v.qty}: ₹${v.price}`).join(', ') : `${p.qty || ''}: ₹${p.price}`;
                             const stockColor = p.inStock !== false ? 'text-emerald-600 border-emerald-200 bg-emerald-50' : 'text-red-500 border-red-200 bg-red-50';
                             const stockText = p.inStock !== false ? 'In Stock' : 'Out of Stock';
-                            
-                            const defaultQty = p.qty || (p.variants && p.variants[0] ? p.variants[0].qty : '');
-                            const defaultPrice = p.price || (p.variants && p.variants[0] ? p.variants[0].price : '');
-
-                            return `<div class="bg-white border border-gray-100 p-4 rounded-2xl shadow-sm mb-3">
-                                <div class="flex justify-between items-start mb-3 border-b border-gray-50 pb-3">
-                                    <div class="flex-1 mr-4">
-                                        <p class="font-black text-sm text-gray-900">${p.name}</p>
-                                        <p class="text-[10px] text-gray-500">${p.subCategory || p.category}</p>
-                                        <p class="text-[10px] text-gray-400 mt-1">Current: ${variantsDisplay}</p>
-                                    </div>
-                                    <div class="flex flex-col gap-2 shrink-0 items-end">
-                                        <button type="button" onclick="window.togglePartnerStock('${p.id}', ${p.inStock !== false})" class="text-[9px] font-black uppercase tracking-wider ${stockColor} border px-2 py-1 rounded transition whitespace-nowrap">${stockText}</button>
-                                        <button type="button" onclick="window.deletePartnerProduct('${p.id}')" class="text-[10px] font-bold text-red-500 hover:text-red-700 transition-colors"><i class="fa-solid fa-trash mr-1"></i> Delete</button>
-                                    </div>
-                                </div>
-                                <div class="flex gap-2 items-center bg-gray-50 p-2 rounded-xl border border-gray-200">
-                                    <input type="text" id="edit-qty-${p.id}" value="${defaultQty}" class="border border-gray-300 rounded p-1.5 text-xs w-full font-bold text-gray-700" placeholder="Qty (e.g. Full)" />
-                                    <input type="number" id="edit-price-${p.id}" value="${defaultPrice}" class="border border-gray-300 rounded p-1.5 text-xs w-full font-bold text-gray-700" placeholder="Price (₹)" />
-                                    <button type="button" onclick="window.saveProductEdit('${p.id}', this)" class="bg-gray-900 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider shadow-sm hover:bg-gray-800 transition active:scale-95 shrink-0"><i class="fa-solid fa-save"></i> Save</button>
-                                </div>
-                            </div>`;
+                            return `<div class="flex justify-between items-center bg-white border border-gray-100 p-4 rounded-2xl shadow-sm"><div class="flex-1 mr-4"><p class="font-black text-sm text-gray-900">${p.name}</p><p class="text-[10px] text-gray-500">${p.subCategory || p.category}</p><p class="text-xs text-gray-700 font-bold mt-1">${variantsDisplay}</p></div><div class="flex items-center gap-3 shrink-0"><button type="button" onclick="window.togglePartnerStock('${p.id}', ${p.inStock !== false})" class="text-[10px] font-black uppercase tracking-wider ${stockColor} border px-2 py-1 rounded transition whitespace-nowrap">${stockText}</button><button type="button" onclick="window.deletePartnerProduct('${p.id}')" class="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors shrink-0"><i class="fa-solid fa-trash text-xs"></i></button></div></div>`;
                         }).join('');
                     });
                     unsubscribeListeners.push(catalogUnsub);
@@ -2436,48 +2171,11 @@
             }
         };
 
-        window.saveProductEdit = async (id, btnEl) => {
-            const qty = document.getElementById(`edit-qty-${id}`).value.trim();
-            const price = Number(document.getElementById(`edit-price-${id}`).value);
-            
-            if(!qty || isNaN(price)) return window.showToast("Enter valid quantity and price", "error");
-
-            const originalText = btnEl.innerHTML;
-            btnEl.innerHTML = "..."; btnEl.disabled = true;
-
-            const prod = (window.allProductsData || []).find(x => x.id === id);
-            let payload = { qty, price };
-            
-            if(prod && prod.variants && prod.variants.length > 0) {
-                 let newVars = [...prod.variants];
-                 newVars[0] = { qty, price };
-                 payload.variants = newVars;
-            }
-
-            try {
-                await window.dbCall(updateDoc(getDocRef('products', id), payload), 10000);
-                window.showToast("Menu updated successfully!", "success");
-            } catch(e) {
-                window.showToast("Update failed", "error");
-            } finally {
-                btnEl.innerHTML = originalText; btnEl.disabled = false;
-            }
-        };
-
         window.acceptFoodOrder = async (orderId) => { try { await window.dbCall(updateDoc(getDocRef('orders', orderId), {status: 'Accepted'}), 10000); window.showToast("Order Accepted!", "success"); } catch(e) {} };
         window.markPreparing = async (orderId) => { try { await window.dbCall(updateDoc(getDocRef('orders', orderId), {status: 'Preparing'}), 10000); window.showToast("Order is Preparing!", "success"); } catch(e) {} };
         window.markReady = async (orderId) => { try { await window.dbCall(updateDoc(getDocRef('orders', orderId), {status: 'Ready'}), 10000); window.showToast("Marked as Ready!", "success"); } catch(e) {} };
         window.markOutForDelivery = async (orderId) => { try { await window.dbCall(updateDoc(getDocRef('orders', orderId), {status: 'Out for Delivery'}), 10000); window.showToast("Order is out for delivery!", "success"); } catch(e) {} };
-        
-        window.markDelivered = async (orderId) => { 
-            try { 
-                await window.dbCall(updateDoc(getDocRef('orders', orderId), {
-                    status: 'Delivered',
-                    deliveredAt: serverTimestamp()
-                }), 10000); 
-                window.showToast("Order Delivered Successfully!", "success"); 
-            } catch(e) {} 
-        };
+        window.markDelivered = async (orderId) => { try { await window.dbCall(updateDoc(getDocRef('orders', orderId), {status: 'Delivered'}), 10000); window.showToast("Order Delivered Successfully!", "success"); } catch(e) {} };
 
         window.adminReviewPartner = async (partnerPhone, status) => {
             if(currentUser.role !== 'Admin') return;
