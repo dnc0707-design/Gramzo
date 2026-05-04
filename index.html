@@ -214,7 +214,7 @@
                     <i class="fa-solid fa-motorcycle text-6xl text-gray-800 absolute right-[10px] bottom-[-10px] rotate-[15deg]"></i>
                 </div>
                 
-                <!-- COMMUNITY REVIEWS SECTION (GLOBAL) -->
+                <!-- COMMUNITY REVIEWS SECTION (GLOBAL - PUBLICLY VISIBLE) -->
                 <div class="mt-10 border-t border-gray-200/60 pt-8">
                     <h3 class="font-black text-xl text-gray-900 mb-6 tracking-tight text-center"><i class="fa-solid fa-star text-yellow-400 mr-2"></i>Community Reviews</h3>
                     <div id="global-reviews-list" class="space-y-4">
@@ -256,7 +256,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.9.0 - Last Updated: May 4, 2026, 08:00 AM</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v12.0.0 - Clean & Finalized</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right">
                             <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
@@ -352,7 +352,7 @@
                 
                 <!-- Partner Tasks Tabs -->
                 <div class="flex justify-between items-center border-b border-gray-200 pb-2">
-                    <h3 class="font-black text-xl text-gray-800">Task Management</h3>
+                    <h3 class="font-black text-xl text-gray-800">Order Management</h3>
                     <div class="flex bg-gray-100 rounded-lg p-1">
                         <button id="tab-partner-order-Live" onclick="window.switchPartnerOrderTab('Live')" class="partner-order-tab bg-gray-200 text-gray-900 px-3 py-1 rounded-md text-[10px] font-bold transition">Live</button>
                         <button id="tab-partner-order-Archived" onclick="window.switchPartnerOrderTab('Archived')" class="partner-order-tab text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold transition">Archived</button>
@@ -558,13 +558,135 @@
         </main>
     </div> <!-- End Scrollable Area -->
 
-    <!-- Update Prompt Banner -->
+    <!-- Update Prompt Banner for PWA App -->
     <div id="update-prompt" class="hidden fixed bottom-24 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-full text-sm font-bold z-[400] shadow-2xl flex items-center gap-4 w-11/12 max-w-sm justify-between transition-all">
         <div class="flex items-center gap-2">
             <i class="fa-solid fa-cloud-arrow-down text-blue-200"></i>
             <span class="text-xs">New Update Available!</span>
         </div>
-        <button onclick="window.location.reload(true)" class="bg-white text-blue-600 px-4 py-1.5 rounded-lg text-xs font-black shadow-sm active:scale-95 transition">Refresh</button>
+        <button onclick="window.location.reload(true)" class="bg-white text-blue-600 px-4 py-1.5 rounded-lg text-xs font-black shadow-sm active:scale-95 transition">Refresh App</button>
+    </div>
+
+    <!-- Modals -->
+    <!-- Static Info Modal (About, T&C, Contact) -->
+    <div id="info-modal" class="modal-overlay z-[200]">
+        <div class="modal-content !max-w-2xl">
+            <div class="flex justify-between items-center mb-4 border-b pb-2">
+                <h3 class="font-black text-2xl text-gray-900" id="info-modal-title">Title</h3>
+                <button type="button" onclick="document.getElementById('info-modal').classList.remove('active')" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="info-modal-body" class="text-sm text-gray-600 space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+                <!-- Content injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div id="auth-overlay" class="modal-overlay z-[150]">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="font-black text-2xl text-gray-900" id="auth-title">Login</h3>
+                <button type="button" onclick="window.closeAuthModal()" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="auth-msg" class="text-xs text-center font-bold mb-4 px-4 py-2 hidden"></div>
+            
+            <div id="auth-view-login" class="space-y-4">
+                <input id="login-phone" type="tel" class="input-field" placeholder="10-Digit Mobile Number" maxlength="10">
+                <input id="login-pass" type="password" class="input-field" placeholder="Password">
+                <button type="button" id="submit-login" onclick="window.handleAuth('login')" class="w-full bg-red-600 text-white p-4 rounded-2xl font-bold">Secure Login</button>
+                <p class="text-center text-xs font-medium text-gray-500 mt-4">New to Gramzo? <button type="button" onclick="window.switchAuthView('register')" class="text-red-600 font-bold">Create Account</button></p>
+            </div>
+
+            <div id="auth-view-register" class="hidden space-y-3 max-h-[60vh] overflow-y-auto px-1 pb-2">
+                <input id="reg-name" type="text" class="input-field" placeholder="Full Name">
+                <input id="reg-phone" type="tel" class="input-field" placeholder="10-Digit Mobile Number" maxlength="10">
+                <input id="reg-pass" type="password" class="input-field" placeholder="Create Password">
+                
+                <div id="partner-fields" class="hidden bg-gray-50 p-4 rounded-2xl space-y-3 mt-2">
+                    <p class="text-xs font-bold text-center border-b pb-2">Partner Registration</p>
+                    <select id="reg-partner-category" class="input-field bg-white" onchange="window.togglePartnerRegFields()">
+                        <option value="Food Owner">Restaurant Owner</option>
+                        <option value="Rider">Delivery Rider</option>
+                    </select>
+                    <div id="reg-restaurant-fields" class="space-y-3">
+                        <input id="reg-shop-name" type="text" class="input-field" placeholder="Business Name">
+                        <input id="reg-shop-address" type="text" class="input-field" placeholder="Full Address">
+                    </div>
+                    <div id="reg-rider-fields" class="space-y-3 hidden">
+                        <input id="reg-vehicle-name" type="text" class="input-field" placeholder="Vehicle Name / Type (e.g. Bike)">
+                    </div>
+                </div>
+
+                <button type="button" id="submit-register" onclick="window.handleAuth('register')" class="w-full bg-red-600 text-white p-4 rounded-2xl font-bold mt-4">Sign Up</button>
+                <p class="text-center text-xs font-medium text-gray-500 mt-4">Already have an account? <button type="button" onclick="window.switchAuthView('login')" class="text-red-600 font-bold">Login</button></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Modal -->
+    <div id="admin-auth-overlay" class="modal-overlay z-[150]">
+        <div class="modal-content !bg-gray-900 border border-gray-800">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-black text-2xl text-white"><i class="fa-solid fa-shield-halved text-emerald-400"></i> Portal</h3>
+                <button type="button" onclick="window.closeAdminModal()" class="w-8 h-8 bg-gray-800 text-white rounded-full"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-4">
+                <input id="admin-id-input" type="text" class="input-field !bg-gray-800 !text-white" placeholder="Admin ID">
+                <input id="admin-pass-input" type="password" class="input-field !bg-gray-800 !text-white" placeholder="Admin Password">
+                <button type="button" onclick="window.handleAdminLogin()" class="w-full bg-emerald-500 text-white p-4 rounded-2xl font-bold">Access Database</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image View Modal -->
+    <div id="image-view-modal" class="modal-overlay z-[200]">
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-md bg-white p-2 rounded-2xl shadow-2xl">
+            <div class="flex justify-between items-center px-2 py-1 mb-2 border-b">
+                <h3 class="font-bold text-sm">Payment Screenshot</h3>
+                <button type="button" onclick="document.getElementById('image-view-modal').classList.remove('active')" class="w-8 h-8 bg-gray-100 rounded-full"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <img id="modal-full-img" src="" class="w-full h-auto rounded-xl max-h-[70vh] object-contain">
+        </div>
+    </div>
+
+    <!-- Reject Reason Modal -->
+    <div id="reject-modal" class="modal-overlay z-[200]">
+        <div class="modal-content !max-w-xs">
+            <h3 class="font-black text-xl text-gray-900 mb-2">Reject Order</h3>
+            <p class="text-xs text-gray-500 mb-4">Please provide a reason for rejecting this order.</p>
+            <select id="reject-reason" class="input-field mb-4 bg-white">
+                <option value="">Select a reason</option>
+                <option value="Items out of stock">Items out of stock</option>
+                <option value="Store is closing">Store is closing</option>
+                <option value="Too busy/High volume">Too busy/High volume</option>
+                <option value="Delivery unavailable">Delivery unavailable</option>
+                <option value="Other">Other</option>
+            </select>
+            <div class="flex gap-2">
+                <button onclick="document.getElementById('reject-modal').classList.remove('active')" class="flex-1 bg-gray-100 text-gray-600 py-3 rounded-xl font-bold text-sm hover:bg-gray-200">Cancel</button>
+                <button onclick="window.confirmRejectOrder()" class="flex-1 bg-red-600 text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-red-700">Reject</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rating Modal -->
+    <div id="rating-modal" class="modal-overlay z-[200]">
+        <div class="modal-content !max-w-xs text-center">
+            <h3 class="font-black text-xl text-gray-900 mb-2">Rate Your Order</h3>
+            <p class="text-xs text-gray-500 mb-4">How was your food from the restaurant?</p>
+            <div class="flex justify-center gap-2 mb-4" id="star-container">
+                <i class="fa-solid fa-star text-3xl text-gray-300 cursor-pointer" onclick="window.setRating(1)"></i>
+                <i class="fa-solid fa-star text-3xl text-gray-300 cursor-pointer" onclick="window.setRating(2)"></i>
+                <i class="fa-solid fa-star text-3xl text-gray-300 cursor-pointer" onclick="window.setRating(3)"></i>
+                <i class="fa-solid fa-star text-3xl text-gray-300 cursor-pointer" onclick="window.setRating(4)"></i>
+                <i class="fa-solid fa-star text-3xl text-gray-300 cursor-pointer" onclick="window.setRating(5)"></i>
+            </div>
+            <textarea id="rating-review-text" class="input-field mb-4 !py-2 resize-none text-xs" rows="2" placeholder="Write a review (optional)..."></textarea>
+            <div class="flex gap-2">
+                <button onclick="document.getElementById('rating-modal').classList.remove('active')" class="flex-1 bg-gray-100 text-gray-600 py-3 rounded-xl font-bold text-sm hover:bg-gray-200">Cancel</button>
+                <button onclick="window.submitRating()" class="flex-1 bg-yellow-400 text-gray-900 py-3 rounded-xl font-bold text-sm shadow-md hover:bg-yellow-500">Submit</button>
+            </div>
+        </div>
     </div>
 
     <div id="toast-msg" class="fixed top-20 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full text-sm font-bold z-[300] shadow-2xl transition-all duration-300 transform -translate-y-10 opacity-0 pointer-events-none flex items-center gap-2">
@@ -595,6 +717,7 @@
         }
     </script>
 
+    <!-- FIREBASE AND APP LOGIC -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
