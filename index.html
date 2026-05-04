@@ -146,7 +146,7 @@
         <!-- Marquee below banner -->
         <div id="marquee-container" class="w-full bg-gray-900 border-b border-gray-800 z-30 overflow-hidden h-10 flex items-center shadow-lg relative">
             <div id="dynamic-marquee" class="animate-marquee inline-block whitespace-nowrap text-sm sm:text-base font-black font-bengali text-yellow-300 tracking-wide drop-shadow-md">
-                🚀 খাবার অর্ডার করুন ঘরে বসেই - সার্ভিস অ্যাভেইলেবল অ্যাট কোটালডিহ, কিনাইডিহ, লালগড়, কৃষ্ণপুর, রামচন্দ্রপুর, মুরাডি, গাংপুর, যশপুর এবং বড়ন্তি এলাকা 🚀 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 🚀 খাবার অর্ডার করুন ঘরে বসেই - সার্ভিস অ্যাভেইলেবল অ্যাট কোটালডিহ, কিনাইডিহ, লালগড়, কৃষ্ণপুর, রামচন্দ্রপুর, মুরাডি, গাংপুর, যশপুর এবং বড়ন্তি এলাকা 🚀
+                🚀 খাবার অর্ডার করুন ঘরে বসেই - সার্ভিস অ্যাভেইলেবল অ্যাট কোটালডিহ, কিনাইডিহ, লালগড়, কৃষ্ণপুর, রামচন্দ্রপুর, মুরাডি, গাংপুর, যশপুর এবং বড়ন্তি এলাকা 🚀 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 🚀 খাবার অর্ডার করুন ঘরে বসেই - সার্ভিস অ্যাভেইলেবল অ্যাট কোটালডিহ, কিনাইডিহ, লালগড়, কৃষ্ণপুর, রামচন্দ্রপুর, মুরাডি, গাংপুর, যশপুর এবং বড়ন্তি এলাকা 🚀
             </div>
         </div>
 
@@ -627,14 +627,15 @@
         <div class="modal-content !max-w-xs">
             <h3 class="font-black text-xl text-gray-900 mb-2">Reject Order</h3>
             <p class="text-xs text-gray-500 mb-4">Please provide a reason for rejecting this order.</p>
-            <select id="reject-reason" class="input-field mb-4 bg-white">
+            <select id="reject-reason" class="input-field mb-4 bg-white" onchange="document.getElementById('reject-reason-custom').classList.toggle('hidden', this.value !== 'Other')">
                 <option value="">Select a reason</option>
                 <option value="Items out of stock">Items out of stock</option>
                 <option value="Store is closing">Store is closing</option>
                 <option value="Too busy/High volume">Too busy/High volume</option>
                 <option value="Delivery unavailable">Delivery unavailable</option>
-                <option value="Other">Other</option>
+                <option value="Other">Other (Type below)</option>
             </select>
+            <textarea id="reject-reason-custom" class="input-field mb-4 hidden !py-2 resize-none text-xs" rows="2" placeholder="Type the exact reason..."></textarea>
             <div class="flex gap-2">
                 <button onclick="document.getElementById('reject-modal').classList.remove('active')" class="flex-1 bg-gray-100 text-gray-600 py-3 rounded-xl font-bold text-sm hover:bg-gray-200">Cancel</button>
                 <button onclick="window.confirmRejectOrder()" class="flex-1 bg-red-600 text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-red-700">Reject</button>
@@ -733,6 +734,12 @@
             let ampm = h >= 12 ? 'PM' : 'AM';
             h = h % 12 || 12;
             return `${h}:${m} ${ampm}`;
+        };
+
+        window.formatOrderTime = (timestamp) => {
+            if (!timestamp) return 'Just now';
+            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+            return date.toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
         };
 
         const getCol = (name) => IS_LIVE_WEBSITE ? collection(db, name) : collection(db, 'artifacts', appId, 'public', 'data', name);
@@ -1114,7 +1121,8 @@
                     const phone = document.getElementById('reg-phone').value.trim();
                     const pass = document.getElementById('reg-pass').value.trim();
 
-                    if (!name || phone.length < 4 || pass.length < 3) throw new Error("Please enter valid details.");
+                    if (!/^\d{10}$/.test(phone)) throw new Error("Please enter a valid 10-digit mobile number.");
+                    if (!name || pass.length < 3) throw new Error("Please enter valid name and password.");
 
                     const userRef = getDocRef('users', phone);
                     let snap = null;
@@ -1160,7 +1168,8 @@
                     const phone = document.getElementById('login-phone').value.trim();
                     const pass = document.getElementById('login-pass').value.trim();
 
-                    if (phone.length < 4 || !pass) throw new Error("Please enter valid Phone and Password.");
+                    if (!/^\d{10}$/.test(phone)) throw new Error("Please enter a valid 10-digit mobile number.");
+                    if (!pass) throw new Error("Please enter your password.");
 
                     const userRef = getDocRef('users', phone);
                     const snap = await window.dbCall(getDoc(userRef), 6000);
@@ -1373,7 +1382,7 @@
         };
 
         window.loadMarketplaceData = () => {
-            const defaultMarqueeText = "🚀 খাবার অর্ডার করুন ঘরে বসেই - সার্ভিস অ্যাভেইলেবল অ্যাট কোটালডিহ, কিনাইডিহ, লালগড়, কৃষ্ণপুর, রামচন্দ্রপুর, মুরাডি, গাংপুর, যশপুর এবং বড়ন্তি এলাকা 🚀";
+            const defaultMarqueeText = "🚀 খাবার অর্ডার করুন ঘরে বসেই - সার্ভিস অ্যাভেইলেবল অ্যাট কোটালডিহ, কিনাইডিহ, লালগড়, কৃষ্ণপুর, রামচন্দ্রপুর, মুরাডি, গাংপুর, যশপুর এবং বড়ন্তি এলাকা 🚀";
 
             onSnapshot(getDocRef('settings', 'app_config'), (snap) => {
                 const bannerEl = document.getElementById('user-offer-banner');
@@ -1548,10 +1557,11 @@
 
             let html = '';
             filteredOrders.forEach(o => {
+                const timeStr = window.formatOrderTime(o.time);
                 let statusColor = o.status === 'Placed' ? 'text-amber-500' : o.status === 'Preparing' || o.status === 'Out for Delivery' ? 'text-blue-500' : o.status === 'Rejected' ? 'text-red-500' : 'text-emerald-500';
                 html += `
                     <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="p-4 font-mono font-bold text-[10px] text-gray-500">#${o.id.slice(-5).toUpperCase()}</td>
+                        <td class="p-4 font-mono font-bold text-[10px] text-gray-500">#${o.id.slice(-5).toUpperCase()}<br/><span class="font-sans font-medium text-[9px] text-gray-400">${timeStr}</span></td>
                         <td class="p-4 font-bold text-gray-900 text-xs">${o.customer || 'Unknown'}</td>
                         <td class="p-4 font-medium text-gray-500 text-xs">${o.restaurantName || '-'}</td>
                         <td class="p-4 font-black text-gray-900 text-xs">₹${o.total.toFixed(2)}</td>
@@ -1596,6 +1606,7 @@
             let html = '';
             filteredOrders.forEach(o => {
                 const itemsStr = o.items.map(i => `${i.name}`).join(', ');
+                const timeStr = window.formatOrderTime(o.time);
                 let cardStyle = 'border-gray-100', actionButtons = '';
                 let paymentBadge = o.paymentMode === 'Prepaid' ? `<span class="bg-blue-100 text-blue-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">Prepaid</span>` : `<span class="bg-gray-100 text-gray-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">COD</span>`;
                 let screenshotHtml = o.paymentMode === 'Prepaid' && o.paymentScreenshot ? `<button type="button" onclick="window.viewImage('${o.paymentScreenshot}')" class="text-[10px] text-blue-600 bg-blue-50 px-2 py-1 rounded font-bold hover:bg-blue-100 transition mt-2 w-full text-left"><i class="fa-solid fa-image"></i> View Payment Screenshot</button>` : '';
@@ -1622,7 +1633,7 @@
                 }
 
                 html += `<div class="bg-white rounded-3xl p-5 shadow-sm border ${cardStyle}">
-                        <div class="flex justify-between items-start mb-3"><div><div class="flex items-center gap-2 mb-1"><span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Order #${o.id.slice(-4).toUpperCase()}</span>${paymentBadge}</div><h4 class="font-bold text-gray-900 text-sm"><i class="fa-solid fa-map-pin text-red-500 mr-1"></i> ${o.address}</h4></div><span class="text-xl font-black text-emerald-600">₹${o.total.toFixed(2)}</span></div>
+                        <div class="flex justify-between items-start mb-3"><div><div class="flex items-center gap-2 mb-1"><span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Order #${o.id.slice(-5).toUpperCase()}</span><span class="text-[9px] font-medium text-gray-400"><i class="fa-regular fa-clock"></i> ${timeStr}</span>${paymentBadge}</div><h4 class="font-bold text-gray-900 text-sm"><i class="fa-solid fa-map-pin text-red-500 mr-1"></i> ${o.address}</h4></div><span class="text-xl font-black text-emerald-600">₹${o.total.toFixed(2)}</span></div>
                         ${customerInfo}
                         <div class="bg-gray-50 p-3 rounded-xl mb-4 border border-gray-100"><p class="text-xs text-gray-700 font-bold mb-1"><i class="fa-solid fa-clipboard-list text-gray-400 mr-1"></i> Items:</p><p class="text-sm text-gray-600 font-medium">${itemsStr}</p>${screenshotHtml}</div>
                         ${actionButtons}</div>`;
@@ -1864,12 +1875,22 @@
 
         window.openRejectModal = (id) => {
             window.currentRejectOrderId = id;
+            document.getElementById('reject-reason').value = '';
+            document.getElementById('reject-reason-custom').value = '';
+            document.getElementById('reject-reason-custom').classList.add('hidden');
             document.getElementById('reject-modal').classList.add('active');
         };
 
         window.confirmRejectOrder = async () => {
-            const reason = document.getElementById('reject-reason').value;
-            if (!reason) return window.showToast("Please select a reason.", "error");
+            let reason = document.getElementById('reject-reason').value;
+            
+            if (reason === 'Other') {
+                reason = document.getElementById('reject-reason-custom').value.trim();
+                if (!reason) return window.showToast("Please type the exact reason.", "error");
+            } else if (!reason) {
+                return window.showToast("Please select a reason.", "error");
+            }
+
             if (!window.currentRejectOrderId) return;
 
             try {
@@ -1994,6 +2015,7 @@
                             window.sendAlert("Order Update", `Your order #${o.id.slice(-5).toUpperCase()} is now ${o.status}`);
                         }
 
+                        const timeStr = window.formatOrderTime(o.time);
                         let statusColor = 'text-orange-500', progressWidth = '15%', statusText = 'Pending Approval';
                         if(o.status === 'Accepted') { statusColor = 'text-blue-500'; progressWidth = '30%'; statusText = 'Order Confirmed'; }
                         if(o.status === 'Preparing') { statusColor = 'text-blue-500'; progressWidth = '50%'; statusText = 'Food is Preparing'; }
@@ -2054,7 +2076,7 @@
                             <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 relative overflow-hidden transition-all hover:shadow-md">
                                 <div class="flex justify-between items-start mb-2">
                                     <div>
-                                        <div class="flex items-center gap-2 mb-1"><span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Order #${o.id.slice(-5).toUpperCase()}</span>${paymentBadge}</div>
+                                        <div class="flex items-center gap-2 mb-1"><span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Order #${o.id.slice(-5).toUpperCase()}</span><span class="text-[9px] font-medium text-gray-400"><i class="fa-regular fa-clock"></i> ${timeStr}</span>${paymentBadge}</div>
                                         <h4 class="font-black text-gray-900 text-base leading-none">${o.restaurantName || 'Gramzo Partner'}</h4>
                                     </div>
                                     <span class="text-xl font-black text-gray-900">₹${o.total.toFixed(2)}</span>
@@ -2111,6 +2133,7 @@
                         }
 
                         const itemsStr = o.items.map(i => `${i.name}`).join(', ');
+                        const timeStr = window.formatOrderTime(o.time);
                         let cardStyle = 'border-gray-100', actionButtons = '';
                         let paymentBadge = o.paymentMode === 'Prepaid' ? `<span class="bg-blue-100 text-blue-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">Prepaid</span>` : `<span class="bg-gray-100 text-gray-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">COD</span>`;
                         let screenshotHtml = o.paymentMode === 'Prepaid' && o.paymentScreenshot ? `<button type="button" onclick="window.viewImage('${o.paymentScreenshot}')" class="text-[10px] text-blue-600 bg-blue-50 px-2 py-1 rounded font-bold hover:bg-blue-100 transition mt-2 w-full text-left"><i class="fa-solid fa-image"></i> View Payment Screenshot</button>` : '';
@@ -2139,7 +2162,7 @@
                         let ratingHtml = o.rating ? `<div class="mt-2 text-center text-xs font-bold text-yellow-600 bg-yellow-50 rounded-lg py-1 border border-yellow-100"><i class="fa-solid fa-star"></i> Customer Rated: ${o.rating} Star</div>` : '';
 
                         html += `<div class="bg-white rounded-3xl p-5 shadow-sm border ${cardStyle}">
-                                <div class="flex justify-between items-start mb-3"><div><div class="flex items-center gap-2 mb-1"><span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Order #${o.id.slice(-4).toUpperCase()}</span>${paymentBadge}</div><h4 class="font-bold text-gray-900 text-sm"><i class="fa-solid fa-map-pin text-red-500 mr-1"></i> ${o.address}</h4></div><span class="text-xl font-black text-emerald-600">₹${o.total.toFixed(2)}</span></div>
+                                <div class="flex justify-between items-start mb-3"><div><div class="flex items-center gap-2 mb-1"><span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Order #${o.id.slice(-5).toUpperCase()}</span><span class="text-[9px] font-medium text-gray-400"><i class="fa-regular fa-clock"></i> ${timeStr}</span>${paymentBadge}</div><h4 class="font-bold text-gray-900 text-sm"><i class="fa-solid fa-map-pin text-red-500 mr-1"></i> ${o.address}</h4></div><span class="text-xl font-black text-emerald-600">₹${o.total.toFixed(2)}</span></div>
                                 ${customerInfo}
                                 <div class="bg-gray-50 p-3 rounded-xl mb-4 border border-gray-100"><p class="text-xs text-gray-700 font-bold mb-1"><i class="fa-solid fa-clipboard-list text-gray-400 mr-1"></i> Items:</p><p class="text-sm text-gray-600 font-medium">${itemsStr}</p>${screenshotHtml}</div>
                                 ${actionButtons}
