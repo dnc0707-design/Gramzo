@@ -851,12 +851,16 @@
         };
 
         window.sendAlert = (title, body) => {
-            if ("Notification" in window && Notification.permission === "granted") {
-                new Notification(title, { 
-                    body: body, 
-                    icon: 'https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/ChatGPT%20Image%20May%202%2C%202026%2C%2001_16_21%20PM.png' 
-                });
-            } else {
+            try {
+                if ("Notification" in window && Notification.permission === "granted") {
+                    new Notification(title, { 
+                        body: body, 
+                        icon: 'https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/ChatGPT%20Image%20May%202%2C%202026%2C%2001_16_21%20PM.png' 
+                    });
+                } else {
+                    window.showToast(title + " - " + body, "info");
+                }
+            } catch (err) {
                 window.showToast(title + " - " + body, "info");
             }
         };
@@ -1283,9 +1287,14 @@
         window.finalizeLoginSequence = () => {
             window.closeAuthModal();
             
-            // Request Notification Permission on Login
-            if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
-                Notification.requestPermission();
+            // Request Notification Permission on Login (Safely wrapped to prevent routing crashes)
+            try {
+                if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
+                    const permPromise = Notification.requestPermission();
+                    if (permPromise) permPromise.catch(e => console.warn(e));
+                }
+            } catch (err) {
+                console.warn("Notification API blocked by browser sandbox:", err);
             }
 
             // Safely normalize user role
