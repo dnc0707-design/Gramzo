@@ -14,7 +14,7 @@
     <!-- AGGRESSIVE AUTO CACHE BUSTER SCRIPT -->
     <script>
         (function() {
-            const APP_VERSION = "11.12.0"; // Update this string on every deployment to force cache clear
+            const APP_VERSION = "11.13.0"; // Update this string on every deployment to force cache clear
             const storedVersion = localStorage.getItem("gramzo_app_version");
             
             if (storedVersion !== APP_VERSION) {
@@ -221,7 +221,7 @@
                     <button type="button" id="tab-cat-Grocery" onclick="window.switchMainCategory('Grocery Shop')" class="flex-1 text-gray-500 font-bold py-2.5 rounded-lg text-sm hover:text-gray-900 transition-all">
                         🛒 Grocery & more
                     </button>
-                    <button type="button" id="tab-cat-Ride" onclick="window.switchMainCategory('Ride Partner')" class="flex-1 text-gray-500 font-bold py-2.5 rounded-lg text-sm hover:text-gray-900 transition-all">
+                    <button type="button" id="tab-cat-Ride" onclick="window.switchMainCategory('Rider')" class="flex-1 text-gray-500 font-bold py-2.5 rounded-lg text-sm hover:text-gray-900 transition-all">
                         🚕 Ride
                     </button>
                 </div>
@@ -604,7 +604,7 @@
                             <button id="tab-user-User" onclick="window.switchUserTab('User')" class="admin-user-tab text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold transition">Users</button>
                             <button id="tab-user-FoodOwner" onclick="window.switchUserTab('Food Owner')" class="admin-user-tab text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold transition">Shops</button>
                             <button id="tab-user-GroceryShop" onclick="window.switchUserTab('Grocery Shop')" class="admin-user-tab text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold transition">Grocery</button>
-                            <button id="tab-user-RidePartner" onclick="window.switchUserTab('Ride Partner')" class="admin-user-tab text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold transition">Riders</button>
+                            <button id="tab-user-Rider" onclick="window.switchUserTab('Rider')" class="admin-user-tab text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold transition">Delivery & Rides</button>
                         </div>
                     </div>
                     <div class="overflow-x-auto"><table class="w-full text-left text-xs"><tbody id="admin-users-body"></tbody></table></div>
@@ -711,7 +711,7 @@
                     <select id="reg-partner-category" class="input-field bg-white" onchange="window.togglePartnerRegFields()">
                         <option value="Food Owner">Restaurant Owner</option>
                         <option value="Grocery Shop">Grocery Shop Owner</option>
-                        <option value="Ride Partner">Ride Partner (Cab/Auto)</option>
+                        <option value="Rider">Delivery Rider & Cab Partner</option>
                     </select>
                     <div id="reg-restaurant-fields" class="space-y-3">
                         <input id="reg-shop-name" type="text" class="input-field" placeholder="Business Name">
@@ -885,10 +885,10 @@
             // Toggle Styles
             document.getElementById('tab-cat-Food').className = cat === 'Food Owner' ? activeClass : inactiveClass;
             document.getElementById('tab-cat-Grocery').className = cat === 'Grocery Shop' ? activeClass : inactiveClass;
-            document.getElementById('tab-cat-Ride').className = cat === 'Ride Partner' ? activeClass : inactiveClass;
+            document.getElementById('tab-cat-Ride').className = cat === 'Rider' ? activeClass : inactiveClass;
             
             // Switch Views
-            if (cat === 'Ride Partner') {
+            if (cat === 'Rider') {
                 document.getElementById('food-grocery-section').classList.add('hidden');
                 document.getElementById('ride-section').classList.remove('hidden');
                 document.getElementById('partner-cta').classList.add('hidden');
@@ -1237,7 +1237,7 @@
             try {
                 const snap = await window.dbCall(getDocs(getCol('users')), 8000);
                 const availableDrivers = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(u => 
-                    u.category === 'Ride Partner' && 
+                    ['Rider', 'Ride Partner'].includes(u.category) && 
                     u.shopStatus === 'Online' && 
                     (u.walletPoints >= 20) &&
                     (u.vehicleType === searchType || (!u.vehicleType && searchType === 'Car'))
@@ -1435,7 +1435,7 @@
 
             if (['Food Owner', 'Grocery Shop'].includes(cat)) {
                 restFields.classList.remove('hidden');
-            } else if (cat === 'Ride Partner') {
+            } else if (cat === 'Rider' || cat === 'Ride Partner') {
                 if(rideFields) rideFields.classList.remove('hidden');
             } else {
                 if(riderFields) riderFields.classList.remove('hidden');
@@ -1540,7 +1540,7 @@
                         if (['Food Owner', 'Grocery Shop'].includes(partnerCategory)) {
                             shopName = document.getElementById('reg-shop-name').value.trim();
                             shopAddress = document.getElementById('reg-shop-address').value.trim();
-                        } else if (partnerCategory === 'Ride Partner') {
+                        } else if (partnerCategory === 'Rider' || partnerCategory === 'Ride Partner') {
                             carNum = document.getElementById('reg-car-num').value.trim();
                             carModel = document.getElementById('reg-car-model').value.trim();
                             vehicleType = document.getElementById('reg-vehicle-type').value;
@@ -1556,7 +1556,7 @@
                     }
 
                     const userData = { 
-                        name, phone, pin: pass, role: currentAuthRole, shopStatus: partnerCategory === 'Ride Partner' ? 'Offline' : 'Open',
+                        name, phone, pin: pass, role: currentAuthRole, shopStatus: ['Rider', 'Ride Partner'].includes(partnerCategory) ? 'Offline' : 'Open',
                         approvalStatus: 'Approved', uid: auth?.currentUser?.uid || 'unknown',
                         created: new Date().toISOString(),
                         ...(currentAuthRole === 'Partner' && { 
@@ -1565,7 +1565,7 @@
                             shopAddress: ['Food Owner', 'Grocery Shop'].includes(partnerCategory) ? shopAddress : null,
                             fssaiNumber: null,
                             codEnabled: true, qrCode: null,
-                            ...(partnerCategory === 'Ride Partner' && {
+                            ...(['Rider', 'Ride Partner'].includes(partnerCategory) && {
                                 vehicleType: vehicleType,
                                 carNum: carNum,
                                 carModel: carModel,
@@ -1631,7 +1631,7 @@
 
             if (currentUser.role === 'Partner') {
                 const isShop = ['Food Owner', 'Grocery Shop'].includes(currentUser.category);
-                const isRide = currentUser.category === 'Ride Partner';
+                const isRide = ['Rider', 'Ride Partner'].includes(currentUser.category);
 
                 document.getElementById('partner-food-settings').classList.add('hidden');
                 document.getElementById('add-product-container').classList.add('hidden');
@@ -1965,7 +1965,7 @@
                 if (window.adminCurrentUserTab === 'User') return u.role === 'User';
                 if (window.adminCurrentUserTab === 'Food Owner') return u.role === 'Partner' && u.category === 'Food Owner';
                 if (window.adminCurrentUserTab === 'Grocery Shop') return u.role === 'Partner' && u.category === 'Grocery Shop';
-                if (window.adminCurrentUserTab === 'Rider') return u.role === 'Partner' && (u.category === 'Rider' || u.category === 'Ride Partner');
+                if (window.adminCurrentUserTab === 'Rider') return u.role === 'Partner' && ['Rider', 'Ride Partner'].includes(u.category);
                 return true;
             });
 
@@ -1980,10 +1980,8 @@
                 
                 let detailsHtml = '';
                 if(u.role === 'Partner') {
-                    if(u.category === 'Ride Partner') {
+                    if(['Rider', 'Ride Partner'].includes(u.category)) {
                         detailsHtml = `<span class="font-bold text-gray-700">Vehicle:</span> ${u.carModel || 'N/A'} (${u.carNum || 'N/A'})<br/><span class="font-bold text-gray-700">Wallet:</span> ${u.walletPoints || 0} pts`;
-                    } else if (u.category === 'Rider') {
-                        detailsHtml = `<span class="font-bold text-gray-700">Details:</span> ${u.shopName || 'N/A'}`;
                     } else {
                         detailsHtml = `<span class="font-bold text-gray-700">Shop:</span> ${u.shopName || 'N/A'}<br/><span class="font-bold text-gray-700">Status:</span> <span class="${u.approvalStatus === 'Approved' ? 'text-emerald-500' : 'text-orange-500'} font-bold">${u.approvalStatus}</span>`;
                     }
@@ -1992,7 +1990,7 @@
                 }
 
                 let actionsHtml = u.pin || '-';
-                if (u.category === 'Ride Partner') {
+                if (['Rider', 'Ride Partner'].includes(u.category)) {
                     actionsHtml = `<button onclick="window.adminAddPoints('${u.phone}', ${u.walletPoints || 0})" class="bg-blue-50 text-blue-600 px-2 py-1 rounded border border-blue-100">+ Points</button>`;
                 }
 
@@ -2087,19 +2085,22 @@
                     <p class="text-xs font-bold text-blue-600 mt-1"><a href="tel:${o.phone}"><i class="fa-solid fa-phone mr-1"></i> ${o.phone}</a></p>
                 </div>`;
 
-                if (currentUser.category === 'Rider') {
-                    if (o.status === 'Ready' && !o.riderId) {
-                        actionButtons = `<button type="button" onclick="window.acceptDelivery('${o.id}')" class="w-full bg-gray-900 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-motorcycle mr-1"></i> Accept Delivery</button>`;
-                    } else if (o.status === 'Out for Delivery' && o.riderId === currentUser.phone) {
-                        actionButtons = `<div class="flex gap-2"><a href="tel:${o.phone}" class="flex-1 bg-white border border-gray-200 text-gray-700 py-3 rounded-xl font-bold text-sm text-center flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone mr-1"></i> Customer</a><button type="button" onclick="window.markDelivered('${o.id}')" class="flex-1 bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md"><i class="fa-solid fa-check-double mr-1"></i> Done</button></div>`;
-                    }
-                } else if (currentUser.category === 'Ride Partner') {
-                    if (o.status === 'Requested') {
-                        actionButtons = `<button type="button" onclick="window.startRide('${o.id}')" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-play mr-1"></i> Start Ride (Enter Amount)</button>`;
-                    } else if (o.status === 'Started') {
-                        actionButtons = `<button type="button" onclick="window.completeRide('${o.id}')" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-check-double mr-1"></i> Complete Ride & Collect ₹${o.amount}</button>`;
-                    } else if (o.status === 'Completed') {
-                        actionButtons = `<div class="w-full bg-gray-100 text-gray-500 py-3 rounded-xl font-bold text-sm text-center border border-gray-200"><i class="fa-solid fa-check mr-1"></i> Completed (₹${o.amount})</div>`;
+                if (['Rider', 'Ride Partner'].includes(currentUser.category)) {
+                    if (o.type === 'Ride') {
+                        if (o.status === 'Requested') {
+                            actionButtons = `<button type="button" onclick="window.startRide('${o.id}')" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-play mr-1"></i> Start Ride (Enter Amount)</button>`;
+                        } else if (o.status === 'Started') {
+                            actionButtons = `<button type="button" onclick="window.completeRide('${o.id}')" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-check-double mr-1"></i> Complete Ride & Collect ₹${o.amount}</button>`;
+                        } else if (o.status === 'Completed') {
+                            actionButtons = `<div class="w-full bg-gray-100 text-gray-500 py-3 rounded-xl font-bold text-sm text-center border border-gray-200"><i class="fa-solid fa-check mr-1"></i> Completed (₹${o.amount})</div>`;
+                        }
+                    } else {
+                        // Food/Grocery Delivery Logic
+                        if (o.status === 'Ready' && !o.riderId) {
+                            actionButtons = `<button type="button" onclick="window.acceptDelivery('${o.id}')" class="w-full bg-gray-900 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-motorcycle mr-1"></i> Accept Delivery</button>`;
+                        } else if (o.status === 'Out for Delivery' && o.riderId === currentUser.phone) {
+                            actionButtons = `<div class="flex gap-2"><a href="tel:${o.phone}" class="flex-1 bg-white border border-gray-200 text-gray-700 py-3 rounded-xl font-bold text-sm text-center flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone mr-1"></i> Customer</a><button type="button" onclick="window.markDelivered('${o.id}')" class="flex-1 bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md"><i class="fa-solid fa-check-double mr-1"></i> Done</button></div>`;
+                        }
                     }
                 } else {
                     if (o.status === 'Placed') actionButtons = `<div class="flex gap-2"><button type="button" onclick="window.acceptFoodOrder('${o.id}')" class="flex-1 bg-black text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-gray-800 transition-colors active:scale-95"><i class="fa-solid fa-check"></i> Accept</button><button type="button" onclick="window.openRejectModal('${o.id}')" class="flex-1 bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm hover:bg-red-100 transition-colors active:scale-95"><i class="fa-solid fa-xmark"></i> Reject</button></div>`;
@@ -2895,9 +2896,9 @@
         window.toggleShopStatus = async () => {
             const toggle = document.getElementById('partner-status-toggle');
             const isOpen = toggle.checked;
-            const newStatus = isOpen ? (currentUser.category === 'Ride Partner' ? 'Online' : 'Open') : (currentUser.category === 'Ride Partner' ? 'Offline' : 'Closed');
+            const newStatus = isOpen ? (['Rider', 'Ride Partner'].includes(currentUser.category) ? 'Online' : 'Open') : (['Rider', 'Ride Partner'].includes(currentUser.category) ? 'Offline' : 'Closed');
             
-            document.getElementById('shop-status-text').innerText = currentUser.category === 'Ride Partner' 
+            document.getElementById('shop-status-text').innerText = ['Rider', 'Ride Partner'].includes(currentUser.category) 
                 ? (isOpen ? 'Online & Available' : 'Currently Offline')
                 : `Currently ${newStatus}`;
             
@@ -3080,7 +3081,7 @@
         };
 
         window.submitRideProfile = async () => {
-            if(!currentUser || currentUser.category !== 'Ride Partner') return;
+            if(!currentUser || !['Rider', 'Ride Partner'].includes(currentUser.category)) return;
 
             const carNum = document.getElementById('partner-ride-num').value.trim();
             const carModel = document.getElementById('partner-ride-model').value.trim();
