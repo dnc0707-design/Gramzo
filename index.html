@@ -14,7 +14,7 @@
     <!-- AGGRESSIVE AUTO CACHE BUSTER SCRIPT -->
     <script>
         (function() {
-            const APP_VERSION = "11.13.0"; // Update this string on every deployment to force cache clear
+            const APP_VERSION = "11.15.0"; // Status Toggle Fix
             const storedVersion = localStorage.getItem("gramzo_app_version");
             
             if (storedVersion !== APP_VERSION) {
@@ -259,41 +259,81 @@
                     </div>
                 </div>
 
-                <!-- RIDE SECTION -->
-                <div id="ride-section" class="hidden mt-4 space-y-4">
-                    <div class="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm">
-                        <div class="relative">
-                            <div class="absolute top-5 left-3.5 w-2 h-2 rounded-full bg-emerald-500 z-10"></div>
-                            <div class="absolute top-8 left-4 w-0.5 h-8 bg-gray-200 z-10"></div>
-                            <div class="absolute top-16 left-3.5 w-2 h-2 rounded-full bg-red-500 z-10"></div>
-                            
-                            <input type="text" id="ride-pickup" class="w-full bg-gray-50 border border-gray-100 rounded-xl py-3 pl-10 pr-4 text-sm outline-none focus:ring-1 focus:ring-red-400 mb-3" placeholder="Enter Pickup Location">
-                            <input type="text" id="ride-drop" class="w-full bg-gray-50 border border-gray-100 rounded-xl py-3 pl-10 pr-4 text-sm outline-none focus:ring-1 focus:ring-red-400" placeholder="Where are you going?">
-                        </div>
-                        <select id="ride-search-type" class="w-full bg-gray-50 border border-gray-100 rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-red-400 mt-3 font-bold text-gray-700" onchange="document.getElementById('round-trip-container').style.display = this.value === 'Toto' ? 'flex' : 'none'">
-                            <option value="Car">🚕 Car / Cab (Multi-person)</option>
-                            <option value="Bike">🏍️ Bike (Max 1 Person)</option>
-                            <option value="Toto">🛺 Toto / Auto</option>
-                        </select>
-
-                        <!-- Round Trip (Toto Only) -->
-                        <label class="items-center gap-2 text-xs font-bold text-gray-700 mt-3 hidden" id="round-trip-container" style="display: none;">
-                            <input type="checkbox" id="ride-round-trip" class="w-4 h-4 text-red-600 focus:ring-red-500 rounded border-gray-300">
-                            <span>Round Trip (Double Distance)</span>
-                        </label>
-
-                        <!-- T&C Checkbox -->
-                        <label class="flex items-start gap-2 text-[9px] text-gray-500 mt-4 leading-tight bg-gray-50 p-2.5 rounded-lg border border-gray-200">
-                            <input type="checkbox" id="ride-tnc" class="mt-0.5 shrink-0 w-3 h-3 text-red-600 focus:ring-red-500 rounded border-gray-300">
-                            <span><b>Terms & Conditions:</b> Gramzo operates strictly as a technology aggregator. Any liability regarding driving, licensing, accidents, or service quality rests entirely with the service provider and the user. Gramzo assumes no corporate or legal liability.</span>
-                        </label>
-
-                        <button type="button" onclick="window.searchRides()" class="w-full bg-gray-900 text-white font-bold py-3.5 rounded-xl mt-4 text-sm hover:bg-gray-800 transition active:scale-95 shadow-md">Find Rides</button>
+                <!-- RAPIDO-STYLE RIDE SECTION -->
+                <div id="ride-section" class="hidden space-y-4">
+                    
+                    <!-- Map Mockup Background -->
+                    <div class="h-48 w-full bg-gray-200 rounded-3xl overflow-hidden relative border border-gray-100 shadow-inner">
+                        <iframe id="ride-map-iframe" width="100%" height="100%" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://maps.google.com/maps?q=Purulia,India&t=&z=13&ie=UTF8&iwloc=&output=embed"></iframe>
+                        <div class="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent pointer-events-none"></div>
                     </div>
 
-                    <div id="ride-distance-display" class="hidden text-center py-2 px-4 bg-blue-50 text-blue-700 font-bold rounded-xl text-xs border border-blue-100"></div>
+                    <!-- Location Selection -->
+                    <div class="bg-white rounded-3xl p-5 border border-gray-100 shadow-xl relative -mt-12 z-10 mx-2">
+                        <div class="relative">
+                            <div class="absolute top-5 left-3.5 w-2 h-2 rounded-full bg-emerald-500 z-10"></div>
+                            <div class="absolute top-8 left-4 w-0.5 h-8 bg-gray-200 z-10 border-l border-dashed border-gray-400"></div>
+                            <div class="absolute top-16 left-3.5 w-2 h-2 rounded-full bg-red-500 z-10"></div>
+                            
+                            <input type="text" id="ride-pickup" class="w-full bg-gray-50 border-none rounded-xl py-3 pl-10 pr-4 text-sm outline-none font-bold text-gray-900 mb-2 focus:bg-gray-100 transition" placeholder="Pickup Location (e.g. Current Location)">
+                            <div class="h-px w-full bg-gray-100 my-1 ml-10"></div>
+                            <input type="text" id="ride-drop" class="w-full bg-gray-50 border-none rounded-xl py-3 pl-10 pr-4 text-sm outline-none font-bold text-gray-900 mt-2 focus:bg-gray-100 transition" placeholder="Where are you going?">
+                        </div>
+                        <button type="button" onclick="window.calculateRideFares()" class="w-full mt-3 bg-gray-100 text-gray-800 font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-2 hover:bg-gray-200"><i class="fa-solid fa-calculator"></i> Calculate Fares</button>
+                    </div>
 
-                    <div id="ride-results-list" class="space-y-4 pt-2"></div>
+                    <!-- Dynamic Vehicle Selection (Rapido Style) -->
+                    <div id="ride-vehicle-selection" class="hidden px-2 space-y-3 mt-4">
+                        <h3 class="font-black text-lg text-gray-900 px-2">Available Rides</h3>
+                        <p id="ride-distance-text" class="text-xs font-bold text-gray-500 px-2 -mt-2 mb-2"></p>
+                        
+                        <!-- Cards -->
+                        <div class="grid grid-cols-3 gap-2">
+                            <!-- Bike -->
+                            <div onclick="window.selectVehicleType('Bike')" id="veh-card-Bike" class="veh-card cursor-pointer border-2 border-gray-100 bg-white rounded-2xl p-3 flex flex-col items-center justify-center gap-2 transition-all hover:border-yellow-400 hover:shadow-md">
+                                <img src="https://cdn-icons-png.flaticon.com/512/3721/3721619.png" class="w-10 h-10 object-contain drop-shadow-sm">
+                                <div class="text-center">
+                                    <p class="text-[10px] font-black text-gray-800 uppercase tracking-wide">Bike</p>
+                                    <p class="text-xs font-black text-gray-900" id="fare-Bike">₹--</p>
+                                    <p class="text-[8px] text-gray-400 font-medium">1 Person Max</p>
+                                </div>
+                            </div>
+                            <!-- Toto -->
+                            <div onclick="window.selectVehicleType('Toto')" id="veh-card-Toto" class="veh-card cursor-pointer border-2 border-gray-100 bg-white rounded-2xl p-3 flex flex-col items-center justify-center gap-2 transition-all hover:border-yellow-400 hover:shadow-md">
+                                <img src="https://cdn-icons-png.flaticon.com/512/3094/3094380.png" class="w-10 h-10 object-contain drop-shadow-sm">
+                                <div class="text-center">
+                                    <p class="text-[10px] font-black text-gray-800 uppercase tracking-wide">Auto</p>
+                                    <p class="text-xs font-black text-gray-900" id="fare-Toto">₹--</p>
+                                    <p class="text-[8px] text-gray-400 font-medium">Toto</p>
+                                </div>
+                            </div>
+                            <!-- Car -->
+                            <div onclick="window.selectVehicleType('Car')" id="veh-card-Car" class="veh-card cursor-pointer border-2 border-gray-100 bg-white rounded-2xl p-3 flex flex-col items-center justify-center gap-2 transition-all hover:border-yellow-400 hover:shadow-md">
+                                <img src="https://cdn-icons-png.flaticon.com/512/3204/3204933.png" class="w-10 h-10 object-contain drop-shadow-sm">
+                                <div class="text-center">
+                                    <p class="text-[10px] font-black text-gray-800 uppercase tracking-wide">Cab</p>
+                                    <p class="text-xs font-black text-gray-900" id="fare-Car">₹--</p>
+                                    <p class="text-[8px] text-gray-400 font-medium">Multi-seater</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- T&C and Find Button -->
+                        <div id="ride-action-area" class="hidden flex-col gap-3 mt-4">
+                            <label class="items-center gap-2 text-xs font-bold text-gray-700 hidden bg-yellow-50 p-2 rounded-xl border border-yellow-100" id="round-trip-container">
+                                <input type="checkbox" id="ride-round-trip" onchange="window.calculateRideFares()" class="w-4 h-4 text-yellow-500 rounded border-gray-300">
+                                <span>Round Trip (Double Distance)</span>
+                            </label>
+                            
+                            <p class="text-[10px] text-gray-500 text-center leading-tight mt-1 px-4 bg-gray-50 py-2 rounded-xl border border-gray-100">Gramzo operates strictly as a technology aggregator. By booking, you acknowledge that liability regarding driving, licensing, or service quality rests entirely with the service provider.</p>
+
+                            <button type="button" onclick="window.searchRides()" class="w-full bg-yellow-400 text-gray-900 font-black py-4 rounded-xl text-lg hover:bg-yellow-500 transition active:scale-95 shadow-md flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-magnifying-glass"></i> Find <span id="selected-veh-text">Ride</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="ride-results-list" class="space-y-4 pt-4 px-2"></div>
                 </div>
 
                 <div id="partner-cta" class="mt-8 bg-gray-900 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden flex items-center justify-between">
@@ -341,7 +381,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.12.0 - Tab Highlights</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.15.0 - Status Toggle Fix</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right">
                             <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
@@ -876,6 +916,10 @@
         window.partnerCurrentOrderTab = 'Live';
         window.partnerOrdersData = [];
 
+        window.currentSelectedRideType = null;
+        window.currentRideDistanceKm = null;
+        window.currentRideFares = { Bike: 0, Toto: 0, Car: 0 };
+
         window.switchMainCategory = (cat) => {
             window.currentUserMainCategory = cat;
             
@@ -1185,78 +1229,122 @@
             });
         };
 
+        window.calculateRideFares = async () => {
+            const pickup = document.getElementById('ride-pickup').value.trim();
+            const drop = document.getElementById('ride-drop').value.trim();
+            if(!pickup || !drop) return; // Do nothing if both aren't filled
+
+            // Update map iframe
+            document.getElementById('ride-map-iframe').src = `https://maps.google.com/maps?q=${encodeURIComponent(pickup)}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
+
+            const btn = document.querySelector('#ride-section button[onclick="window.calculateRideFares()"]');
+            if(btn) { btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Calculating...'; btn.disabled = true; }
+
+            let distanceData = await window.calculateDistance(pickup, drop);
+            
+            if(btn) { btn.innerHTML = '<i class="fa-solid fa-calculator"></i> Calculate Fares'; btn.disabled = false; }
+
+            if (distanceData) {
+                let distKm = (distanceData.value / 1000);
+                window.currentRideDistanceKm = distKm;
+                
+                const isRoundTrip = document.getElementById('ride-round-trip').checked;
+                if (isRoundTrip) distKm *= 2;
+
+                document.getElementById('ride-distance-text').innerText = `Estimated Distance: ${distKm.toFixed(1)} km`;
+
+                // Calculate Fares
+                // Bike: upto 5km = 20, next 1km = 5
+                let bikeFare = distKm <= 5 ? 20 : 20 + ((distKm - 5) * 5);
+                // Toto: upto 5km = 60, next 1km = 10
+                let totoFare = distKm <= 5 ? 60 : 60 + ((distKm - 5) * 10);
+                // Car: Base 20 + 12/km
+                let carFare = 20 + (distKm * 12);
+
+                window.currentRideFares = {
+                    Bike: Math.max(20, Math.round(bikeFare)),
+                    Toto: Math.max(20, Math.round(totoFare)),
+                    Car: Math.max(20, Math.round(carFare))
+                };
+
+                document.getElementById('fare-Bike').innerText = `₹${window.currentRideFares.Bike}`;
+                document.getElementById('fare-Toto').innerText = `₹${window.currentRideFares.Toto}`;
+                document.getElementById('fare-Car').innerText = `₹${window.currentRideFares.Car}`;
+
+                document.getElementById('ride-vehicle-selection').classList.remove('hidden');
+            } else {
+                window.showToast("Could not calculate distance. Check locations.", "error");
+            }
+        };
+
+        window.selectVehicleType = (type) => {
+            window.currentSelectedRideType = type;
+            
+            // Reset styles
+            document.querySelectorAll('.veh-card').forEach(el => {
+                el.classList.remove('border-yellow-400', 'bg-yellow-50');
+                el.classList.add('border-gray-100', 'bg-white');
+            });
+            
+            // Active style
+            const activeCard = document.getElementById(`veh-card-${type}`);
+            activeCard.classList.remove('border-gray-100', 'bg-white');
+            activeCard.classList.add('border-yellow-400', 'bg-yellow-50');
+
+            // Show action area
+            document.getElementById('ride-action-area').classList.remove('hidden');
+            document.getElementById('selected-veh-text').innerText = type;
+
+            // Round trip toggle
+            const rtContainer = document.getElementById('round-trip-container');
+            if (type === 'Toto') {
+                rtContainer.classList.remove('hidden');
+                rtContainer.style.display = 'flex';
+            } else {
+                rtContainer.classList.add('hidden');
+                rtContainer.style.display = 'none';
+                // Uncheck if switching away from Toto to prevent hidden fare calculation errors
+                document.getElementById('ride-round-trip').checked = false;
+                window.calculateRideFares(); 
+            }
+
+            // Clear previous results
+            document.getElementById('ride-results-list').innerHTML = '';
+        };
+
         window.searchRides = async () => {
             if(!currentUser) { window.openAuthModal('User'); return; }
+            if(!window.currentSelectedRideType) return window.showToast("Select a vehicle type first.", "error");
             if(currentUser.role !== 'User') return window.showToast("Log in as User to book rides.", "error");
 
             const pickup = document.getElementById('ride-pickup').value.trim();
             const drop = document.getElementById('ride-drop').value.trim();
-            const searchType = document.getElementById('ride-search-type').value;
-            const isRoundTrip = searchType === 'Toto' && document.getElementById('ride-round-trip').checked;
-            const tncChecked = document.getElementById('ride-tnc').checked;
 
             if(!pickup || !drop) return window.showToast("Please enter Pickup and Drop locations.", "error");
-            if(!tncChecked) return window.showToast("Please accept the Terms & Conditions.", "error");
 
-            const distDisplay = document.getElementById('ride-distance-display');
-            distDisplay.classList.remove('hidden');
-            distDisplay.innerText = "Calculating distance and finding rides...";
-
-            let distanceData = await window.calculateDistance(pickup, drop);
-            if (distanceData) {
-                // Convert meters to kilometers
-                let distanceInKm = (distanceData.value / 1000);
-                if (isRoundTrip) distanceInKm *= 2; // Double the distance for round trip
-
-                let estFare = 0;
-                
-                // Specific Fare Logistics
-                if (searchType === 'Bike') {
-                    // Bike - upto 5 km flat 20 Rs, next 1 km 5Rs
-                    estFare = distanceInKm <= 5 ? 20 : 20 + ((distanceInKm - 5) * 5);
-                } else if (searchType === 'Toto') {
-                    // Toto - Fix 60 Rs for upto 5 km, increase 10 rs per km
-                    estFare = distanceInKm <= 5 ? 60 : 60 + ((distanceInKm - 5) * 10);
-                } else { 
-                    // Car - Base ₹20 + ₹12/km
-                    estFare = 20 + (distanceInKm * 12);
-                }
-                
-                estFare = Math.max(20, Math.round(estFare)); // Enforce absolute minimum fare
-                const displayKm = distanceInKm.toFixed(1);
-
-                distDisplay.innerHTML = `
-                    <div class="flex flex-col gap-1.5 py-1">
-                        <div><i class="fa-solid fa-route"></i> Distance: <b>${displayKm} km</b> <span class="mx-2 text-blue-300">|</span> Est. Fare: <b>₹${estFare}</b></div>
-                        <div class="text-[10px] text-blue-600 font-medium opacity-90">*Waiting period charges: ₹1 per minute applies separately.</div>
-                    </div>`;
-            } else {
-                distDisplay.innerHTML = `<i class="fa-solid fa-route"></i> Searching for Cabs...`;
-            }
+            const listEl = document.getElementById('ride-results-list');
+            listEl.innerHTML = `<div class="text-center py-6"><i class="fa-solid fa-spinner fa-spin text-yellow-500 text-2xl mb-2"></i><p class="text-xs font-bold text-gray-600">Finding nearby ${window.currentSelectedRideType}s...</p></div>`;
 
             try {
                 const snap = await window.dbCall(getDocs(getCol('users')), 8000);
                 const availableDrivers = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(u => 
                     ['Rider', 'Ride Partner'].includes(u.category) && 
                     u.shopStatus === 'Online' && 
-                    (u.walletPoints >= 20) &&
-                    (u.vehicleType === searchType || (!u.vehicleType && searchType === 'Car'))
+                    (u.vehicleType === window.currentSelectedRideType || (!u.vehicleType && window.currentSelectedRideType === 'Car'))
                 );
 
-                const resultsList = document.getElementById('ride-results-list');
-
                 if(availableDrivers.length === 0) {
-                    resultsList.innerHTML = `<div class="bg-red-50 p-4 rounded-xl border border-red-100 text-center"><i class="fa-solid fa-car-side text-red-400 text-2xl mb-2"></i><p class="text-sm font-bold text-red-600">No Cabs Available Right Now</p><p class="text-xs text-red-500 mt-1">Please try again after some time.</p></div>`;
+                    listEl.innerHTML = `<div class="bg-red-50 p-4 rounded-xl border border-red-100 text-center"><i class="fa-solid fa-car-side text-red-400 text-2xl mb-2"></i><p class="text-sm font-bold text-red-600">No ${window.currentSelectedRideType}s Available Right Now</p><p class="text-xs text-red-500 mt-1">Please try again after some time.</p></div>`;
                     return;
                 }
 
-                resultsList.innerHTML = availableDrivers.map(d => `
-                    <div class="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm relative overflow-hidden group">
+                listEl.innerHTML = availableDrivers.map(d => `
+                    <div class="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm relative overflow-hidden group hover:border-yellow-400 transition-colors">
                         <div class="flex justify-between items-start mb-2">
                             <div>
                                 <h4 class="font-black text-gray-900 text-lg">${d.shopName || 'Cab'} <span class="text-xs font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded">${d.vehicleType === 'Bike' ? '1 Person Max' : (d.seater || 4) + ' Seater'}</span></h4>
                                 <p class="text-[10px] font-bold text-gray-500 tracking-wider uppercase mt-1"><i class="fa-solid fa-id-card text-gray-400"></i> ${d.carNum || 'N/A'}</p>
-                                <p class="text-xs font-bold text-gray-700 mt-2"><i class="fa-solid fa-user-tie text-blue-500 w-4"></i> ${d.name}</p>
+                                <p class="text-xs font-bold text-gray-700 mt-2"><i class="fa-solid fa-user-tie text-yellow-500 w-4"></i> ${d.name}</p>
                             </div>
                             <div class="w-12 h-12 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center text-xl shrink-0">
                                 <i class="fa-solid fa-${d.vehicleType === 'Bike' ? 'motorcycle' : 'taxi'}"></i>
@@ -1266,22 +1354,23 @@
                         ${d.currentLocation ? `<p class="text-[10px] font-medium text-gray-500 mt-1 mb-3"><i class="fa-solid fa-location-dot text-red-400"></i> Driver currently at: <b>${d.currentLocation}</b></p>` : '<div class="mb-3"></div>'}
                         
                         <div class="flex gap-2 mt-4 pt-4 border-t border-gray-100">
-                            <a href="tel:${d.phone}" class="flex-1 bg-gray-100 text-gray-800 font-bold py-2.5 rounded-xl text-xs text-center border border-gray-200 hover:bg-gray-200 transition"><i class="fa-solid fa-phone mr-1"></i> Call to Negotiate</a>
-                            <button onclick="window.confirmRide('${d.phone}', '${d.name.replace(/'/g, "\\'")}')" class="flex-1 bg-yellow-400 text-gray-900 font-bold py-2.5 rounded-xl text-xs shadow-sm hover:bg-yellow-500 transition active:scale-95"><i class="fa-solid fa-check mr-1"></i> Confirm Ride</button>
+                            <a href="tel:${d.phone}" class="flex-1 bg-gray-100 text-gray-800 font-bold py-2.5 rounded-xl text-xs text-center border border-gray-200 hover:bg-gray-200 transition"><i class="fa-solid fa-phone mr-1"></i> Call</a>
+                            <button onclick="window.confirmRide('${d.phone}', '${d.name.replace(/'/g, "\\'")}')" class="flex-[2] bg-yellow-400 text-gray-900 font-bold py-2.5 rounded-xl text-xs shadow-sm hover:bg-yellow-500 transition active:scale-95"><i class="fa-solid fa-check mr-1"></i> Confirm Booking</button>
                         </div>
                     </div>
                 `).join('');
 
             } catch(e) {
-                distDisplay.innerHTML = `<span class="text-red-600"><i class="fa-solid fa-triangle-exclamation"></i> Error finding cabs. Try again.</span>`;
+                listEl.innerHTML = `<span class="text-red-600"><i class="fa-solid fa-triangle-exclamation"></i> Error finding rides. Try again.</span>`;
             }
         };
 
         window.confirmRide = async (driverPhone, driverName) => {
-            if(!confirm(`Have you confirmed the ride amount with ${driverName} via call?`)) return;
+            if(!confirm(`Have you confirmed the ride details with ${driverName}?`)) return;
 
             const pickup = document.getElementById('ride-pickup').value.trim();
             const drop = document.getElementById('ride-drop').value.trim();
+            const fare = window.currentRideFares[window.currentSelectedRideType];
 
             const btn = event.currentTarget;
             const origTxt = btn.innerHTML;
@@ -1297,7 +1386,8 @@
                     pickup: pickup,
                     address: drop, // Map to address for consistency in history
                     status: 'Requested', 
-                    amount: 0,
+                    amount: fare,
+                    total: fare,
                     time: serverTimestamp() 
                 }), 15000);
 
@@ -1540,7 +1630,7 @@
                         if (['Food Owner', 'Grocery Shop'].includes(partnerCategory)) {
                             shopName = document.getElementById('reg-shop-name').value.trim();
                             shopAddress = document.getElementById('reg-shop-address').value.trim();
-                        } else if (partnerCategory === 'Rider' || partnerCategory === 'Ride Partner') {
+                        } else if (['Rider', 'Ride Partner'].includes(partnerCategory)) {
                             carNum = document.getElementById('reg-car-num').value.trim();
                             carModel = document.getElementById('reg-car-model').value.trim();
                             vehicleType = document.getElementById('reg-vehicle-type').value;
@@ -1672,6 +1762,15 @@
                     if(currentUser.carModel) document.getElementById('partner-ride-model').value = currentUser.carModel;
                     if(currentUser.seater) document.getElementById('partner-ride-seater').value = currentUser.seater;
                     if(currentUser.currentLocation) document.getElementById('partner-ride-location').value = currentUser.currentLocation;
+                }
+
+                const statusToggle = document.getElementById('partner-status-toggle');
+                if (statusToggle) {
+                    const isCurrentlyOpen = ['Open', 'Online'].includes(currentUser.shopStatus);
+                    statusToggle.checked = isCurrentlyOpen;
+                    document.getElementById('shop-status-text').innerText = isRide 
+                        ? (isCurrentlyOpen ? 'Online & Available' : 'Currently Offline')
+                        : `Currently ${isCurrentlyOpen ? 'Open' : 'Closed'}`;
                 }
 
                 const codToggle = document.getElementById('partner-cod-toggle-setup');
@@ -2668,14 +2767,15 @@
                     let relevantOrders = [];
                     if (['Food Owner', 'Grocery Shop'].includes(currentUser.category)) {
                         relevantOrders = orders.filter(o => o.restaurantId === currentUser.phone && o.type !== 'Ride');
-                    } else if (currentUser.category === 'Rider') {
+                    } else if (['Rider', 'Ride Partner'].includes(currentUser.category)) {
                         relevantOrders = orders.filter(o => 
+                            // Matches Food Deliveries pending a rider OR currently held by this rider
                             (o.status === 'Ready' && !o.riderId && o.type !== 'Ride') || 
                             (o.status === 'Placed' && !o.restaurantId && o.type !== 'Ride') || 
-                            (o.riderId === currentUser.phone && ['Out for Delivery'].includes(o.status) && o.type !== 'Ride')
+                            (o.riderId === currentUser.phone && ['Out for Delivery'].includes(o.status) && o.type !== 'Ride') ||
+                            // Matches Rides specifically requested to this rider
+                            (o.riderId === currentUser.phone && o.type === 'Ride')
                         );
-                    } else if (currentUser.category === 'Ride Partner') {
-                        relevantOrders = orders.filter(o => o.riderId === currentUser.phone && o.type === 'Ride');
                     }
                     
                     relevantOrders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0));
@@ -2707,19 +2807,22 @@
                             <p class="text-xs font-bold text-blue-600 mt-1"><a href="tel:${o.phone}"><i class="fa-solid fa-phone mr-1"></i> ${o.phone}</a></p>
                         </div>`;
 
-                        if (currentUser.category === 'Rider') {
-                            if (o.status === 'Ready' && !o.riderId) {
-                                actionButtons = `<button type="button" onclick="window.acceptDelivery('${o.id}')" class="w-full bg-gray-900 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-motorcycle mr-1"></i> Accept Delivery</button>`;
-                            } else if (o.status === 'Out for Delivery' && o.riderId === currentUser.phone) {
-                                actionButtons = `<div class="flex gap-2"><a href="tel:${o.phone}" class="flex-1 bg-white border border-gray-200 text-gray-700 py-3 rounded-xl font-bold text-sm text-center flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone mr-1"></i> Customer</a><button type="button" onclick="window.markDelivered('${o.id}')" class="flex-1 bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md"><i class="fa-solid fa-check-double mr-1"></i> Done</button></div>`;
-                            }
-                        } else if (currentUser.category === 'Ride Partner') {
-                            if (o.status === 'Requested') {
-                                actionButtons = `<button type="button" onclick="window.startRide('${o.id}')" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-play mr-1"></i> Start Ride (Enter Amount)</button>`;
-                            } else if (o.status === 'Started') {
-                                actionButtons = `<button type="button" onclick="window.completeRide('${o.id}')" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-check-double mr-1"></i> Complete Ride & Collect ₹${o.amount}</button>`;
-                            } else if (o.status === 'Completed') {
-                                actionButtons = `<div class="w-full bg-gray-100 text-gray-500 py-3 rounded-xl font-bold text-sm text-center border border-gray-200"><i class="fa-solid fa-check mr-1"></i> Completed (₹${o.amount})</div>`;
+                        if (['Rider', 'Ride Partner'].includes(currentUser.category)) {
+                            if (o.type === 'Ride') {
+                                if (o.status === 'Requested') {
+                                    actionButtons = `<button type="button" onclick="window.startRide('${o.id}')" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-play mr-1"></i> Start Ride (Enter Amount)</button>`;
+                                } else if (o.status === 'Started') {
+                                    actionButtons = `<button type="button" onclick="window.completeRide('${o.id}')" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-check-double mr-1"></i> Complete Ride & Collect ₹${o.amount}</button>`;
+                                } else if (o.status === 'Completed') {
+                                    actionButtons = `<div class="w-full bg-gray-100 text-gray-500 py-3 rounded-xl font-bold text-sm text-center border border-gray-200"><i class="fa-solid fa-check mr-1"></i> Completed (₹${o.amount})</div>`;
+                                }
+                            } else {
+                                // Food/Grocery Delivery Logic
+                                if (o.status === 'Ready' && !o.riderId) {
+                                    actionButtons = `<button type="button" onclick="window.acceptDelivery('${o.id}')" class="w-full bg-gray-900 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-motorcycle mr-1"></i> Accept Delivery</button>`;
+                                } else if (o.status === 'Out for Delivery' && o.riderId === currentUser.phone) {
+                                    actionButtons = `<div class="flex gap-2"><a href="tel:${o.phone}" class="flex-1 bg-white border border-gray-200 text-gray-700 py-3 rounded-xl font-bold text-sm text-center flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone mr-1"></i> Customer</a><button type="button" onclick="window.markDelivered('${o.id}')" class="flex-1 bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md"><i class="fa-solid fa-check-double mr-1"></i> Done</button></div>`;
+                                }
                             }
                         } else {
                             if (o.status === 'Placed') actionButtons = `<div class="flex gap-2"><button type="button" onclick="window.acceptFoodOrder('${o.id}')" class="flex-1 bg-black text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-gray-800 transition-colors active:scale-95"><i class="fa-solid fa-check"></i> Accept</button><button type="button" onclick="window.openRejectModal('${o.id}')" class="flex-1 bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm hover:bg-red-100 transition-colors active:scale-95"><i class="fa-solid fa-xmark"></i> Reject</button></div>`;
