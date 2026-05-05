@@ -14,7 +14,7 @@
     <!-- AGGRESSIVE AUTO CACHE BUSTER SCRIPT -->
     <script>
         (function() {
-            const APP_VERSION = "11.11.0"; // Update this string on every deployment to force cache clear
+            const APP_VERSION = "11.12.0"; // Update this string on every deployment to force cache clear
             const storedVersion = localStorage.getItem("gramzo_app_version");
             
             if (storedVersion !== APP_VERSION) {
@@ -215,7 +215,7 @@
 
                 <!-- Service Toggles (Food vs Grocery vs Ride) -->
                 <div class="flex gap-2 bg-gray-100 p-1.5 rounded-xl w-full mt-4 border border-gray-200 shadow-inner">
-                    <button type="button" id="tab-cat-Food" onclick="window.switchMainCategory('Food Owner')" class="flex-1 bg-white text-gray-900 font-black py-2.5 rounded-lg text-sm shadow-sm transition-all border border-gray-100">
+                    <button type="button" id="tab-cat-Food" onclick="window.switchMainCategory('Food Owner')" class="flex-1 bg-red-600 text-white font-black py-2.5 rounded-lg text-sm shadow-md transition-all">
                         🍔 Food
                     </button>
                     <button type="button" id="tab-cat-Grocery" onclick="window.switchMainCategory('Grocery Shop')" class="flex-1 text-gray-500 font-bold py-2.5 rounded-lg text-sm hover:text-gray-900 transition-all">
@@ -270,12 +270,25 @@
                             <input type="text" id="ride-pickup" class="w-full bg-gray-50 border border-gray-100 rounded-xl py-3 pl-10 pr-4 text-sm outline-none focus:ring-1 focus:ring-red-400 mb-3" placeholder="Enter Pickup Location">
                             <input type="text" id="ride-drop" class="w-full bg-gray-50 border border-gray-100 rounded-xl py-3 pl-10 pr-4 text-sm outline-none focus:ring-1 focus:ring-red-400" placeholder="Where are you going?">
                         </div>
-                        <select id="ride-search-type" class="w-full bg-gray-50 border border-gray-100 rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-red-400 mt-3 font-bold text-gray-700">
+                        <select id="ride-search-type" class="w-full bg-gray-50 border border-gray-100 rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-red-400 mt-3 font-bold text-gray-700" onchange="document.getElementById('round-trip-container').style.display = this.value === 'Toto' ? 'flex' : 'none'">
                             <option value="Car">🚕 Car / Cab (Multi-person)</option>
                             <option value="Bike">🏍️ Bike (Max 1 Person)</option>
                             <option value="Toto">🛺 Toto / Auto</option>
                         </select>
-                        <button type="button" onclick="window.searchRides()" class="w-full bg-gray-900 text-white font-bold py-3.5 rounded-xl mt-4 text-sm hover:bg-gray-800 transition active:scale-95 shadow-md">Find Cabs</button>
+
+                        <!-- Round Trip (Toto Only) -->
+                        <label class="items-center gap-2 text-xs font-bold text-gray-700 mt-3 hidden" id="round-trip-container" style="display: none;">
+                            <input type="checkbox" id="ride-round-trip" class="w-4 h-4 text-red-600 focus:ring-red-500 rounded border-gray-300">
+                            <span>Round Trip (Double Distance)</span>
+                        </label>
+
+                        <!-- T&C Checkbox -->
+                        <label class="flex items-start gap-2 text-[9px] text-gray-500 mt-4 leading-tight bg-gray-50 p-2.5 rounded-lg border border-gray-200">
+                            <input type="checkbox" id="ride-tnc" class="mt-0.5 shrink-0 w-3 h-3 text-red-600 focus:ring-red-500 rounded border-gray-300">
+                            <span><b>Terms & Conditions:</b> Gramzo operates strictly as a technology aggregator. Any liability regarding driving, licensing, accidents, or service quality rests entirely with the service provider and the user. Gramzo assumes no corporate or legal liability.</span>
+                        </label>
+
+                        <button type="button" onclick="window.searchRides()" class="w-full bg-gray-900 text-white font-bold py-3.5 rounded-xl mt-4 text-sm hover:bg-gray-800 transition active:scale-95 shadow-md">Find Rides</button>
                     </div>
 
                     <div id="ride-distance-display" class="hidden text-center py-2 px-4 bg-blue-50 text-blue-700 font-bold rounded-xl text-xs border border-blue-100"></div>
@@ -328,7 +341,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.11.0 - Vehicle Types & Dropdowns</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.12.0 - Tab Highlights</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right">
                             <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
@@ -866,10 +879,13 @@
         window.switchMainCategory = (cat) => {
             window.currentUserMainCategory = cat;
             
+            const activeClass = 'flex-1 bg-red-600 text-white font-black py-2.5 rounded-lg text-sm shadow-md transition-all';
+            const inactiveClass = 'flex-1 text-gray-500 font-bold py-2.5 rounded-lg text-sm hover:text-gray-900 transition-all';
+
             // Toggle Styles
-            document.getElementById('tab-cat-Food').className = cat === 'Food Owner' ? 'flex-1 bg-white text-gray-900 font-black py-2.5 rounded-lg text-sm shadow-sm transition-all border border-gray-100' : 'flex-1 text-gray-500 font-bold py-2.5 rounded-lg text-sm hover:text-gray-900 transition-all';
-            document.getElementById('tab-cat-Grocery').className = cat === 'Grocery Shop' ? 'flex-1 bg-white text-gray-900 font-black py-2.5 rounded-lg text-sm shadow-sm transition-all border border-gray-100' : 'flex-1 text-gray-500 font-bold py-2.5 rounded-lg text-sm hover:text-gray-900 transition-all';
-            document.getElementById('tab-cat-Ride').className = cat === 'Ride Partner' ? 'flex-1 bg-white text-gray-900 font-black py-2.5 rounded-lg text-sm shadow-sm transition-all border border-gray-100' : 'flex-1 text-gray-500 font-bold py-2.5 rounded-lg text-sm hover:text-gray-900 transition-all';
+            document.getElementById('tab-cat-Food').className = cat === 'Food Owner' ? activeClass : inactiveClass;
+            document.getElementById('tab-cat-Grocery').className = cat === 'Grocery Shop' ? activeClass : inactiveClass;
+            document.getElementById('tab-cat-Ride').className = cat === 'Ride Partner' ? activeClass : inactiveClass;
             
             // Switch Views
             if (cat === 'Ride Partner') {
@@ -1156,10 +1172,14 @@
                 service.getDistanceMatrix({
                     origins: [origin],
                     destinations: [dest],
-                    travelMode: 'DRIVING'
+                    travelMode: 'DRIVING',
+                    unitSystem: google.maps.UnitSystem.METRIC
                 }, (res, status) => {
                     if(status === 'OK' && res.rows[0].elements[0].status === 'OK') {
-                        resolve(res.rows[0].elements[0].distance.text);
+                        resolve({
+                            text: res.rows[0].elements[0].distance.text,
+                            value: res.rows[0].elements[0].distance.value // value is always in meters
+                        });
                     } else resolve(null);
                 });
             });
@@ -1172,16 +1192,44 @@
             const pickup = document.getElementById('ride-pickup').value.trim();
             const drop = document.getElementById('ride-drop').value.trim();
             const searchType = document.getElementById('ride-search-type').value;
+            const isRoundTrip = searchType === 'Toto' && document.getElementById('ride-round-trip').checked;
+            const tncChecked = document.getElementById('ride-tnc').checked;
 
             if(!pickup || !drop) return window.showToast("Please enter Pickup and Drop locations.", "error");
+            if(!tncChecked) return window.showToast("Please accept the Terms & Conditions.", "error");
 
             const distDisplay = document.getElementById('ride-distance-display');
             distDisplay.classList.remove('hidden');
-            distDisplay.innerText = "Calculating distance and finding cabs...";
+            distDisplay.innerText = "Calculating distance and finding rides...";
 
-            let distanceTxt = await window.calculateDistance(pickup, drop);
-            if (distanceTxt) {
-                distDisplay.innerHTML = `<i class="fa-solid fa-route"></i> Estimated Distance: ${distanceTxt}`;
+            let distanceData = await window.calculateDistance(pickup, drop);
+            if (distanceData) {
+                // Convert meters to kilometers
+                let distanceInKm = (distanceData.value / 1000);
+                if (isRoundTrip) distanceInKm *= 2; // Double the distance for round trip
+
+                let estFare = 0;
+                
+                // Specific Fare Logistics
+                if (searchType === 'Bike') {
+                    // Bike - upto 5 km flat 20 Rs, next 1 km 5Rs
+                    estFare = distanceInKm <= 5 ? 20 : 20 + ((distanceInKm - 5) * 5);
+                } else if (searchType === 'Toto') {
+                    // Toto - Fix 60 Rs for upto 5 km, increase 10 rs per km
+                    estFare = distanceInKm <= 5 ? 60 : 60 + ((distanceInKm - 5) * 10);
+                } else { 
+                    // Car - Base ₹20 + ₹12/km
+                    estFare = 20 + (distanceInKm * 12);
+                }
+                
+                estFare = Math.max(20, Math.round(estFare)); // Enforce absolute minimum fare
+                const displayKm = distanceInKm.toFixed(1);
+
+                distDisplay.innerHTML = `
+                    <div class="flex flex-col gap-1.5 py-1">
+                        <div><i class="fa-solid fa-route"></i> Distance: <b>${displayKm} km</b> <span class="mx-2 text-blue-300">|</span> Est. Fare: <b>₹${estFare}</b></div>
+                        <div class="text-[10px] text-blue-600 font-medium opacity-90">*Waiting period charges: ₹1 per minute applies separately.</div>
+                    </div>`;
             } else {
                 distDisplay.innerHTML = `<i class="fa-solid fa-route"></i> Searching for Cabs...`;
             }
@@ -2028,11 +2076,24 @@
 
             let html = '';
             filteredOrders.forEach(o => {
+                const itemsStr = o.items ? o.items.map(i => `${i.name}`).join(', ') : '';
                 const timeStr = window.formatOrderTime(o.time);
+                let cardStyle = 'border-gray-100', actionButtons = '';
+                let paymentBadge = o.paymentMode === 'Prepaid' ? `<span class="bg-blue-100 text-blue-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">Prepaid</span>` : `<span class="bg-gray-100 text-gray-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">COD</span>`;
+                let screenshotHtml = o.paymentMode === 'Prepaid' && o.paymentScreenshot ? `<button type="button" onclick="window.viewImage('${o.paymentScreenshot}')" class="text-[10px] text-blue-600 bg-blue-50 px-2 py-1 rounded font-bold hover:bg-blue-100 transition mt-2 w-full text-left"><i class="fa-solid fa-image"></i> View Payment Screenshot</button>` : '';
                 
-                if (o.type === 'Ride') {
-                    // RIDE CARD RENDERING
-                    let actionButtons = '';
+                let customerInfo = `<div class="mb-3 bg-gray-50 p-2 rounded-xl border border-gray-100">
+                    <p class="text-xs font-black text-gray-800"><i class="fa-solid fa-user text-gray-400 mr-1"></i> ${o.customer}</p>
+                    <p class="text-xs font-bold text-blue-600 mt-1"><a href="tel:${o.phone}"><i class="fa-solid fa-phone mr-1"></i> ${o.phone}</a></p>
+                </div>`;
+
+                if (currentUser.category === 'Rider') {
+                    if (o.status === 'Ready' && !o.riderId) {
+                        actionButtons = `<button type="button" onclick="window.acceptDelivery('${o.id}')" class="w-full bg-gray-900 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-motorcycle mr-1"></i> Accept Delivery</button>`;
+                    } else if (o.status === 'Out for Delivery' && o.riderId === currentUser.phone) {
+                        actionButtons = `<div class="flex gap-2"><a href="tel:${o.phone}" class="flex-1 bg-white border border-gray-200 text-gray-700 py-3 rounded-xl font-bold text-sm text-center flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone mr-1"></i> Customer</a><button type="button" onclick="window.markDelivered('${o.id}')" class="flex-1 bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md"><i class="fa-solid fa-check-double mr-1"></i> Done</button></div>`;
+                    }
+                } else if (currentUser.category === 'Ride Partner') {
                     if (o.status === 'Requested') {
                         actionButtons = `<button type="button" onclick="window.startRide('${o.id}')" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-play mr-1"></i> Start Ride (Enter Amount)</button>`;
                     } else if (o.status === 'Started') {
@@ -2040,7 +2101,25 @@
                     } else if (o.status === 'Completed') {
                         actionButtons = `<div class="w-full bg-gray-100 text-gray-500 py-3 rounded-xl font-bold text-sm text-center border border-gray-200"><i class="fa-solid fa-check mr-1"></i> Completed (₹${o.amount})</div>`;
                     }
+                } else {
+                    if (o.status === 'Placed') actionButtons = `<div class="flex gap-2"><button type="button" onclick="window.acceptFoodOrder('${o.id}')" class="flex-1 bg-black text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-gray-800 transition-colors active:scale-95"><i class="fa-solid fa-check"></i> Accept</button><button type="button" onclick="window.openRejectModal('${o.id}')" class="flex-1 bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm hover:bg-red-100 transition-colors active:scale-95"><i class="fa-solid fa-xmark"></i> Reject</button></div>`;
+                    else if (o.status === 'Accepted') { cardStyle = 'border-blue-200 bg-blue-50/30'; actionButtons = `<button type="button" onclick="window.markPreparing('${o.id}')" class="w-full bg-blue-600 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-blue-700 active:scale-95">Start Preparing</button>`; }
+                    else if (o.status === 'Preparing') { cardStyle = 'border-orange-200 bg-orange-50/30'; actionButtons = `<button type="button" onclick="window.markReady('${o.id}')" class="w-full bg-orange-500 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-orange-600 active:scale-95">Mark Ready for Rider</button>`; }
+                    else if (o.status === 'Ready') { cardStyle = 'border-yellow-200 bg-yellow-50/30'; actionButtons = `<p class="text-xs font-bold text-orange-600 text-center py-2 bg-orange-50 rounded-xl">Waiting for Delivery Partner...</p><button type="button" onclick="window.markOutForDelivery('${o.id}')" class="w-full mt-2 bg-yellow-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95 border border-yellow-600">Self Deliver (Skip Rider)</button>`; }
+                    else if (o.status === 'Out for Delivery') {
+                        if (!o.riderId) { // Self delivery by Food Owner
+                            actionButtons = `<button type="button" onclick="window.markDelivered('${o.id}')" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-check-double mr-1"></i> Mark as Delivered</button>`;
+                        } else {
+                            actionButtons = `<p class="text-xs font-bold text-yellow-600 text-center py-2 bg-yellow-50 rounded-xl">OUT FOR DELIVERY.. Reaching soon (via ${o.riderName})</p>`;
+                        }
+                    }
+                    else if (o.status === 'Delivered') actionButtons = `<div class="w-full bg-emerald-50 text-emerald-600 py-3 rounded-xl font-bold text-sm text-center border border-emerald-100"><i class="fa-solid fa-circle-check mr-1"></i> Order Completed</div>`;
+                    else if (o.status === 'Rejected') actionButtons = `<div class="w-full bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm text-center border border-red-100"><i class="fa-solid fa-circle-xmark mr-1"></i> Order Rejected</div>`;
+                }
 
+                let ratingHtml = o.rating ? `<div class="mt-2 text-center text-xs font-bold text-yellow-600 bg-yellow-50 rounded-lg py-1 border border-yellow-100"><i class="fa-solid fa-star"></i> Customer Rated: ${o.rating} Star</div>` : '';
+
+                if (o.type === 'Ride') {
                     html += `
                         <div class="bg-white rounded-3xl p-5 shadow-sm border border-blue-100 relative overflow-hidden">
                             <div class="flex justify-between items-start mb-3">
@@ -2067,41 +2146,6 @@
                         </div>
                     `;
                 } else {
-                    // FOOD / GROCERY CARD RENDERING
-                    const itemsStr = o.items ? o.items.map(i => `${i.name}`).join(', ') : '';
-                    let cardStyle = 'border-gray-100', actionButtons = '';
-                    let paymentBadge = o.paymentMode === 'Prepaid' ? `<span class="bg-blue-100 text-blue-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">Prepaid</span>` : `<span class="bg-gray-100 text-gray-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">COD</span>`;
-                    let screenshotHtml = o.paymentMode === 'Prepaid' && o.paymentScreenshot ? `<button type="button" onclick="window.viewImage('${o.paymentScreenshot}')" class="text-[10px] text-blue-600 bg-blue-50 px-2 py-1 rounded font-bold hover:bg-blue-100 transition mt-2 w-full text-left"><i class="fa-solid fa-image"></i> View Payment Screenshot</button>` : '';
-                    
-                    let customerInfo = `<div class="mb-3 bg-gray-50 p-2 rounded-xl border border-gray-100">
-                        <p class="text-xs font-black text-gray-800"><i class="fa-solid fa-user text-gray-400 mr-1"></i> ${o.customer}</p>
-                        <p class="text-xs font-bold text-blue-600 mt-1"><a href="tel:${o.phone}"><i class="fa-solid fa-phone mr-1"></i> ${o.phone}</a></p>
-                    </div>`;
-
-                    if (currentUser.category === 'Rider') {
-                        if (o.status === 'Ready' && !o.riderId) {
-                            actionButtons = `<button type="button" onclick="window.acceptDelivery('${o.id}')" class="w-full bg-gray-900 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-motorcycle mr-1"></i> Accept Delivery</button>`;
-                        } else if (o.status === 'Out for Delivery' && o.riderId === currentUser.phone) {
-                            actionButtons = `<div class="flex gap-2"><a href="tel:${o.phone}" class="flex-1 bg-white border border-gray-200 text-gray-700 py-3 rounded-xl font-bold text-sm text-center flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone mr-1"></i> Customer</a><button type="button" onclick="window.markDelivered('${o.id}')" class="flex-1 bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md"><i class="fa-solid fa-check-double mr-1"></i> Done</button></div>`;
-                        }
-                    } else {
-                        if (o.status === 'Placed') actionButtons = `<div class="flex gap-2"><button type="button" onclick="window.acceptFoodOrder('${o.id}')" class="flex-1 bg-black text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-gray-800 transition-colors active:scale-95"><i class="fa-solid fa-check"></i> Accept</button><button type="button" onclick="window.openRejectModal('${o.id}')" class="flex-1 bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm hover:bg-red-100 transition-colors active:scale-95"><i class="fa-solid fa-xmark"></i> Reject</button></div>`;
-                        else if (o.status === 'Accepted') { cardStyle = 'border-blue-200 bg-blue-50/30'; actionButtons = `<button type="button" onclick="window.markPreparing('${o.id}')" class="w-full bg-blue-600 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-blue-700 active:scale-95">Start Preparing</button>`; }
-                        else if (o.status === 'Preparing') { cardStyle = 'border-orange-200 bg-orange-50/30'; actionButtons = `<button type="button" onclick="window.markReady('${o.id}')" class="w-full bg-orange-500 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-orange-600 active:scale-95">Mark Ready for Rider</button>`; }
-                        else if (o.status === 'Ready') { cardStyle = 'border-yellow-200 bg-yellow-50/30'; actionButtons = `<p class="text-xs font-bold text-orange-600 text-center py-2 bg-orange-50 rounded-xl">Waiting for Delivery Partner...</p><button type="button" onclick="window.markOutForDelivery('${o.id}')" class="w-full mt-2 bg-yellow-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95 border border-yellow-600">Self Deliver (Skip Rider)</button>`; }
-                        else if (o.status === 'Out for Delivery') {
-                            if (!o.riderId) { // Self delivery by Food Owner
-                                actionButtons = `<button type="button" onclick="window.markDelivered('${o.id}')" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-check-double mr-1"></i> Mark as Delivered</button>`;
-                            } else {
-                                actionButtons = `<p class="text-xs font-bold text-yellow-600 text-center py-2 bg-yellow-50 rounded-xl">OUT FOR DELIVERY.. Reaching soon (via ${o.riderName})</p>`;
-                            }
-                        }
-                        else if (o.status === 'Delivered') actionButtons = `<div class="w-full bg-emerald-50 text-emerald-600 py-3 rounded-xl font-bold text-sm text-center border border-emerald-100"><i class="fa-solid fa-circle-check mr-1"></i> Order Completed</div>`;
-                        else if (o.status === 'Rejected') actionButtons = `<div class="w-full bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm text-center border border-red-100"><i class="fa-solid fa-circle-xmark mr-1"></i> Order Rejected</div>`;
-                    }
-
-                    let ratingHtml = o.rating ? `<div class="mt-2 text-center text-xs font-bold text-yellow-600 bg-yellow-50 rounded-lg py-1 border border-yellow-100"><i class="fa-solid fa-star"></i> Customer Rated: ${o.rating} Star</div>` : '';
-
                     html += `<div class="bg-white rounded-3xl p-5 shadow-sm border ${cardStyle}">
                             <div class="flex justify-between items-start mb-3"><div><div class="flex items-center gap-2 mb-1"><span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Order #${o.id.slice(-4).toUpperCase()}</span><span class="text-[9px] font-medium text-gray-400"><i class="fa-regular fa-clock"></i> ${timeStr}</span>${paymentBadge}</div><h4 class="font-bold text-gray-900 text-sm"><i class="fa-solid fa-map-pin text-red-500 mr-1"></i> ${o.address}</h4></div><span class="text-xl font-black text-emerald-600">₹${o.total.toFixed(2)}</span></div>
                             ${customerInfo}
