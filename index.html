@@ -14,7 +14,7 @@
     <!-- AGGRESSIVE AUTO CACHE BUSTER SCRIPT -->
     <script>
         (function() {
-            const APP_VERSION = "11.8.0"; // Update this string on every deployment to force cache clear
+            const APP_VERSION = "11.9.0"; // Update this string on every deployment to force cache clear
             const storedVersion = localStorage.getItem("gramzo_app_version");
             
             if (storedVersion !== APP_VERSION) {
@@ -208,7 +208,7 @@
                             <i class="fa-solid fa-pen text-[10px]"></i>
                         </button>
                     </div>
-                    <button type="button" onclick="window.getCurrentLocation('user-location-input')" class="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-100 transition shrink-0 border border-red-100">
+                    <button type="button" onclick="window.getCurrentLocation('user-location-input')" class="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-100 transition shrink-0 border border-red-100 shadow-sm">
                         <i class="fa-solid fa-location-crosshairs"></i>
                     </button>
                 </div>
@@ -216,13 +216,23 @@
                 <div class="relative w-full search-shadow rounded-2xl bg-white border border-gray-100 flex items-center px-4 py-3.5 focus-within:ring-2 focus-within:ring-red-500/20 transition-all mt-4">
                     <i class="fa-solid fa-magnifying-glass text-red-500 text-lg"></i>
                     <div class="w-px h-5 bg-gray-200 mx-3"></div>
-                    <input type="text" id="global-search" onkeyup="window.handleSearchInput()" placeholder="Restaurant name or dish..." class="w-full bg-transparent outline-none text-sm font-medium text-gray-800 placeholder-gray-400">
+                    <input type="text" id="global-search" onkeyup="window.handleSearchInput()" placeholder="Search items or shops..." class="w-full bg-transparent outline-none text-sm font-medium text-gray-800 placeholder-gray-400">
+                </div>
+                
+                <!-- NEW: Service Toggles (Food vs Grocery) -->
+                <div class="flex gap-2 bg-gray-100 p-1.5 rounded-xl w-full mt-4 border border-gray-200 shadow-inner">
+                    <button type="button" id="tab-cat-Food" onclick="window.switchMainCategory('Food Owner')" class="flex-1 bg-white text-gray-900 font-black py-2.5 rounded-lg text-sm shadow-sm transition-all border border-gray-100">
+                        🍔 Food
+                    </button>
+                    <button type="button" id="tab-cat-Grocery" onclick="window.switchMainCategory('Grocery Shop')" class="flex-1 text-gray-500 font-bold py-2.5 rounded-lg text-sm hover:text-gray-900 transition-all">
+                        🛒 Grocery & more
+                    </button>
                 </div>
 
                 <div>
-                    <div class="flex justify-between items-end mb-3">
+                    <div class="flex justify-between items-end mb-3 mt-4">
                         <h3 class="font-black text-lg text-gray-900 tracking-tight" id="marketplace-title">Restaurants Near You</h3>
-                        <button type="button" id="btn-clear-filter" onclick="window.filterRestaurant(null, '')" class="hidden text-xs font-bold text-red-600 bg-red-50 px-3 py-1 rounded-full border border-red-100">Clear</button>
+                        <button type="button" id="btn-clear-filter" onclick="window.filterRestaurant(null, '')" class="hidden text-xs font-bold text-red-600 bg-red-50 px-3 py-1 rounded-full border border-red-100 shadow-sm">Clear Filter</button>
                     </div>
                     <div id="restaurant-list-carousel" class="flex gap-4 overflow-x-auto pb-4 no-scrollbar px-1 snap-x"></div>
                 </div>
@@ -239,14 +249,14 @@
                 <div>
                     <h3 class="font-black text-xl text-gray-900 mb-4 tracking-tight">Top rated near you</h3>
                     <div id="market-list" class="flex gap-5 overflow-x-auto pb-6 no-scrollbar snap-x">
-                        <div class="w-full py-10 text-center text-gray-400 font-medium text-sm animate-pulse border border-gray-200 rounded-3xl bg-white">Loading delicious food...</div>
+                        <div class="w-full py-10 text-center text-gray-400 font-medium text-sm animate-pulse border border-gray-200 rounded-3xl bg-white">Loading catalogue...</div>
                     </div>
                 </div>
 
                 <div id="partner-cta" class="mt-8 bg-gray-900 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden flex items-center justify-between">
                     <div class="relative z-10">
                         <h3 class="text-xl font-black mb-1">Partner with us</h3>
-                        <p class="text-gray-300 text-xs mb-3 font-medium">List your restaurant or ride with Gramzo.</p>
+                        <p class="text-gray-300 text-xs mb-3 font-medium">List your restaurant, grocery shop, or ride with us.</p>
                         <button type="button" onclick="window.openAuthModal('Partner')" class="bg-red-600 text-white px-5 py-2.5 rounded-xl text-xs font-black shadow-sm active:scale-95 uppercase tracking-widest hover:bg-red-500">
                             Register Partner
                         </button>
@@ -288,7 +298,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.8.0 - Auto Cache Buster</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.9.0 - Grocery & Editing Update</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right">
                             <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
@@ -401,7 +411,7 @@
                         </div>
 
                         <div id="partner-setup-form" class="space-y-3 mt-4 border-t border-gray-200 pt-4">
-                            <label class="block text-xs font-bold text-gray-600 mb-1 ml-1">Business/Vehicle Name</label>
+                            <label class="block text-xs font-bold text-gray-600 mb-1 ml-1">Business Name</label>
                             <input id="partner-shop-name" class="input-field" placeholder="Enter Name">
 
                             <label class="block text-xs font-bold text-gray-600 mb-1 ml-1 mt-3">Base Address</label>
@@ -455,11 +465,11 @@
                 </div>
 
                 <div id="add-product-container" class="bg-white rounded-3xl p-6 border border-gray-200 shadow-sm relative hidden mt-6">
-                    <h3 class="font-black text-gray-900 mb-4">Add Menu Item</h3>
+                    <h3 class="font-black text-gray-900 mb-4" id="add-product-title">Add Menu Item</h3>
                     <div class="space-y-4 relative z-10">
                         <div>
-                            <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Dish Name</label>
-                            <input id="prod-name" class="input-field mt-1" placeholder="E.g. Chicken Biryani">
+                            <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Item Name</label>
+                            <input id="prod-name" class="input-field mt-1" placeholder="E.g. Item Name">
                         </div>
                         <div class="flex gap-3">
                             <div class="flex-1">
@@ -467,19 +477,19 @@
                                 <input type="number" id="prod-prep-time" class="input-field mt-1" placeholder="E.g. 15">
                             </div>
                             <div class="flex-1">
-                                <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Dish Image</label>
+                                <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Item Image</label>
                                 <input type="file" id="prod-image-upload" accept="image/*" class="w-full text-[10px] text-gray-500 border border-gray-200 rounded-xl p-1.5 bg-gray-50 mt-1">
                             </div>
                         </div>
                         <div id="variant-container" class="space-y-2">
                             <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Portion & Price</label>
                             <div class="flex gap-2 variant-row">
-                                <input class="input-field w-1/2 var-qty" placeholder="Size (e.g. Full)">
+                                <input class="input-field w-1/2 var-qty" placeholder="Size (e.g. Full or 1Kg)">
                                 <input type="number" class="input-field w-1/2 var-price" placeholder="Price (₹)">
                             </div>
                         </div>
                         <button type="button" onclick="window.addVariantRow()" class="text-xs text-red-600 font-bold hover:underline">+ Add size</button>
-                        <button type="button" onclick="window.addPartnerProduct()" id="btn-add-prod" class="w-full bg-red-600 hover:bg-red-700 text-white py-3.5 rounded-xl font-bold mt-4">Save to Menu</button>
+                        <button type="button" onclick="window.addPartnerProduct()" id="btn-add-prod" class="w-full bg-red-600 hover:bg-red-700 text-white py-3.5 rounded-xl font-bold mt-4 shadow-sm">Save to Menu</button>
                     </div>
                 </div>
 
@@ -515,6 +525,7 @@
                             <button id="tab-user-All" onclick="window.switchUserTab('All')" class="admin-user-tab bg-gray-200 text-gray-900 px-3 py-1 rounded-md text-[10px] font-bold transition">All</button>
                             <button id="tab-user-User" onclick="window.switchUserTab('User')" class="admin-user-tab text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold transition">Users</button>
                             <button id="tab-user-FoodOwner" onclick="window.switchUserTab('Food Owner')" class="admin-user-tab text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold transition">Shops</button>
+                            <button id="tab-user-GroceryShop" onclick="window.switchUserTab('Grocery Shop')" class="admin-user-tab text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold transition">Grocery</button>
                             <button id="tab-user-Rider" onclick="window.switchUserTab('Rider')" class="admin-user-tab text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold transition">Riders</button>
                         </div>
                     </div>
@@ -621,6 +632,7 @@
                     <p class="text-xs font-bold text-center border-b pb-2">Partner Registration</p>
                     <select id="reg-partner-category" class="input-field bg-white" onchange="window.togglePartnerRegFields()">
                         <option value="Food Owner">Restaurant Owner</option>
+                        <option value="Grocery Shop">Grocery Shop Owner</option>
                         <option value="Rider">Delivery Rider</option>
                     </select>
                     <div id="reg-restaurant-fields" class="space-y-3">
@@ -689,7 +701,7 @@
     <div id="rating-modal" class="modal-overlay z-[200]">
         <div class="modal-content !max-w-xs text-center">
             <h3 class="font-black text-xl text-gray-900 mb-2">Rate Your Order</h3>
-            <p class="text-xs text-gray-500 mb-4">How was your food from the restaurant?</p>
+            <p class="text-xs text-gray-500 mb-4">How was your experience?</p>
             <div class="flex justify-center gap-2 mb-4" id="star-container">
                 <i class="fa-solid fa-star text-3xl text-gray-300 cursor-pointer" onclick="window.setRating(1)"></i>
                 <i class="fa-solid fa-star text-3xl text-gray-300 cursor-pointer" onclick="window.setRating(2)"></i>
@@ -709,6 +721,19 @@
         <i class="fa-solid fa-circle-info text-emerald-400"></i>
         <span id="toast-text">Message</span>
     </div>
+
+    <!-- Active Service Worker Unregistration to Fix Caching Issues -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for(let registration of registrations) {
+                    registration.unregister();
+                }
+            }).catch(function(err) {
+                console.log('Service Worker unregistration failed: ', err);
+            });
+        }
+    </script>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -742,6 +767,7 @@
         window.lastKnownOrders = {}; 
         let unsubscribeListeners = []; 
         let currentAuthRole = 'User'; 
+        window.currentUserMainCategory = 'Food Owner'; // Default to Food
 
         // RATING STATE
         window.currentRatingOrderId = null;
@@ -758,6 +784,18 @@
         // PARTNER TABS STATE
         window.partnerCurrentOrderTab = 'Live';
         window.partnerOrdersData = [];
+
+        window.switchMainCategory = (cat) => {
+            window.currentUserMainCategory = cat;
+            document.getElementById('tab-cat-Food').className = cat === 'Food Owner' ? 'flex-1 bg-white text-gray-900 font-black py-2.5 rounded-lg text-sm shadow-sm transition-all border border-gray-100' : 'flex-1 text-gray-500 font-bold py-2.5 rounded-lg text-sm hover:text-gray-900 transition-all';
+            document.getElementById('tab-cat-Grocery').className = cat === 'Grocery Shop' ? 'flex-1 bg-white text-gray-900 font-black py-2.5 rounded-lg text-sm shadow-sm transition-all border border-gray-100' : 'flex-1 text-gray-500 font-bold py-2.5 rounded-lg text-sm hover:text-gray-900 transition-all';
+            
+            window.currentRestaurantFilter = null; 
+            document.getElementById('marketplace-title').innerText = cat === 'Food Owner' ? 'Restaurants Near You' : 'Grocery Stores Near You';
+            document.getElementById('btn-clear-filter').classList.add('hidden');
+            
+            window.loadMarketplaceData();
+        };
         
         window.formatTime12 = (time24) => {
             if(!time24) return '';
@@ -1024,7 +1062,7 @@
             const fallbackTimer = setTimeout(() => {
                 if (locationFound) return;
                 inputEl.value = "";
-                window.showToast("Please type your address manually.", "error");
+                window.showToast("Could not access Maps API. Please type your address.", "error");
             }, 6000);
             
             if (navigator.geolocation) {
@@ -1039,17 +1077,25 @@
                                 window.showToast("Location detected successfully!", "success");
                             } else {
                                 inputEl.value = "";
+                                window.showToast("Location text unreadable. Please type it.", "error");
                             }
                         });
-                    } catch(e) { inputEl.value = ""; }
-                }, () => {
+                    } catch(e) { 
+                        inputEl.value = ""; 
+                        window.showToast("Google Maps failed to load. Please type address.", "error");
+                    }
+                }, (error) => {
                     locationFound = true;
                     clearTimeout(fallbackTimer);
                     inputEl.value = "";
+                    let msg = "Failed to get location.";
+                    if (error.code == error.PERMISSION_DENIED) msg = "Location permission denied by user.";
+                    window.showToast(msg, "error");
                 }, { timeout: 10000, enableHighAccuracy: true });
             } else {
                 clearTimeout(fallbackTimer);
                 inputEl.value = "";
+                window.showToast("Geolocation not supported by browser.", "error");
             }
         };
 
@@ -1076,7 +1122,7 @@
             const restFields = document.getElementById('reg-restaurant-fields');
             const riderFields = document.getElementById('reg-rider-fields');
             
-            if (cat === 'Food Owner') {
+            if (['Food Owner', 'Grocery Shop'].includes(cat)) {
                 restFields.classList.remove('hidden');
                 if(riderFields) riderFields.classList.add('hidden');
             } else {
@@ -1179,7 +1225,7 @@
                         const catEl = document.getElementById('reg-partner-category');
                         partnerCategory = catEl ? catEl.value : 'Food Owner';
                         
-                        if (partnerCategory === 'Food Owner') {
+                        if (['Food Owner', 'Grocery Shop'].includes(partnerCategory)) {
                             shopName = document.getElementById('reg-shop-name').value.trim();
                             shopAddress = document.getElementById('reg-shop-address').value.trim();
                         } else {
@@ -1195,8 +1241,8 @@
                         created: new Date().toISOString(),
                         ...(currentAuthRole === 'Partner' && { 
                             category: partnerCategory, 
-                            shopName: partnerCategory === 'Food Owner' ? (shopName || name + "'s Kitchen") : (shopName || 'Delivery Vehicle'),
-                            shopAddress: partnerCategory === 'Food Owner' ? shopAddress : null,
+                            shopName: ['Food Owner', 'Grocery Shop'].includes(partnerCategory) ? (shopName || name + "'s Shop") : (shopName || 'Delivery Vehicle'),
+                            shopAddress: ['Food Owner', 'Grocery Shop'].includes(partnerCategory) ? shopAddress : null,
                             fssaiNumber: null,
                             codEnabled: true, qrCode: null
                         })
@@ -1256,10 +1302,12 @@
             window.switchMainView(currentUser.role === 'Admin' ? 'Admin' : currentUser.role === 'Partner' ? 'Partner' : 'User');
 
             if (currentUser.role === 'Partner') {
-                if(currentUser.category === 'Food Owner') {
+                const isShop = ['Food Owner', 'Grocery Shop'].includes(currentUser.category);
+                if(isShop) {
                     document.getElementById('partner-food-settings').classList.remove('hidden');
                     document.getElementById('add-product-container').classList.remove('hidden');
                     document.getElementById('partner-catalog-list-container').classList.remove('hidden');
+                    document.getElementById('add-product-title').innerText = currentUser.category === 'Grocery Shop' ? 'Add Grocery Item' : 'Add Menu Item';
                 } else {
                     document.getElementById('partner-food-settings').classList.add('hidden');
                     document.getElementById('add-product-container').classList.add('hidden');
@@ -1302,6 +1350,10 @@
             if (!listEl) return;
             
             const filtered = items.filter(i => {
+                // Ensure only showing items belonging to the active Category (Food vs Grocery)
+                const pShopCat = i.shopCategory || 'Food Owner'; // default for older data
+                if (pShopCat !== window.currentUserMainCategory) return false;
+
                 if (currentRestaurantFilter && i.partnerId !== currentRestaurantFilter) return false;
                 if (window.currentSearchQuery) {
                     const q = window.currentSearchQuery.toLowerCase();
@@ -1394,7 +1446,7 @@
             const carousel = document.getElementById('restaurant-list-carousel');
             if (!carousel) return;
             if(restaurants.length === 0) {
-                carousel.innerHTML = '<p class="text-xs text-gray-400">No restaurants available.</p>';
+                carousel.innerHTML = '<p class="text-xs text-gray-400">No stores available.</p>';
                 return;
             }
             carousel.innerHTML = restaurants.map(r => {
@@ -1413,7 +1465,8 @@
             const uniqueRestaurants = [];
             const map = new Map();
             items.forEach(p => {
-                if(p.shopName && !map.has(p.partnerId)) {
+                const pShopCat = p.shopCategory || 'Food Owner'; // default to food for older items
+                if(pShopCat === window.currentUserMainCategory && p.shopName && !map.has(p.partnerId)) {
                     map.set(p.partnerId, true);
                     uniqueRestaurants.push({
                         partnerId: p.partnerId, shopName: p.shopName, shopAddress: p.shopAddress || '',
@@ -1456,10 +1509,12 @@
                 // Add dummy products if empty for preview
                 if(items.length === 0) {
                     items = [
-                        { id: "dummy1", name: "Chicken Dum Biryani", variants: [{qty: "Half", price: 90}, {qty: "Full", price: 150}], prepTime: 20, category: "Food", image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&q=80", shopName: "Local Kitchen", shopAddress: "Kotaldi, Purulia", partnerId: "111", inStock: true, shopStatus: 'Open' },
-                        { id: "dummy2", name: "Paneer Butter Masala", price: 120, qty: "Full", prepTime: 15, category: "Food", image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80", shopName: "Desi Dhaba", shopAddress: "Lalgarh Bazaar", partnerId: "222", inStock: true, shopStatus: 'Open' },
-                        { id: "dummy3", name: "Veg Chowmein", price: 60, qty: "Full", prepTime: 10, category: "Food", image: "https://images.unsplash.com/photo-1585032226651-759b368d7246?w=400&q=80", shopName: "Fast Food Corner", shopAddress: "Krishnapur More", partnerId: "333", inStock: true, shopStatus: 'Open' },
-                        { id: "dummy4", name: "Rasgulla (2 Pcs)", price: 30, qty: "2 Pcs", prepTime: 5, category: "Food", image: "https://images.unsplash.com/photo-1588195538326-c5b1e9f80a1b?w=400&q=80", shopName: "Mishti Mukh", shopAddress: "Ramchandrapur Market", partnerId: "444", inStock: true, shopStatus: 'Open' }
+                        { id: "dummy1", name: "Chicken Dum Biryani", variants: [{qty: "Half", price: 90}, {qty: "Full", price: 150}], prepTime: 20, category: "Food", image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&q=80", shopName: "Local Kitchen", shopAddress: "Kotaldi, Purulia", partnerId: "111", inStock: true, shopStatus: 'Open', shopCategory: 'Food Owner' },
+                        { id: "dummy2", name: "Paneer Butter Masala", price: 120, qty: "Full", prepTime: 15, category: "Food", image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80", shopName: "Desi Dhaba", shopAddress: "Lalgarh Bazaar", partnerId: "222", inStock: true, shopStatus: 'Open', shopCategory: 'Food Owner' },
+                        { id: "dummy3", name: "Veg Chowmein", price: 60, qty: "Full", prepTime: 10, category: "Food", image: "https://images.unsplash.com/photo-1585032226651-759b368d7246?w=400&q=80", shopName: "Fast Food Corner", shopAddress: "Krishnapur More", partnerId: "333", inStock: true, shopStatus: 'Open', shopCategory: 'Food Owner' },
+                        { id: "dummy4", name: "Rasgulla (2 Pcs)", price: 30, qty: "2 Pcs", prepTime: 5, category: "Food", image: "https://images.unsplash.com/photo-1588195538326-c5b1e9f80a1b?w=400&q=80", shopName: "Mishti Mukh", shopAddress: "Ramchandrapur Market", partnerId: "444", inStock: true, shopStatus: 'Open', shopCategory: 'Food Owner' },
+                        { id: "dummy5", name: "Aashirvaad Atta", price: 250, qty: "5 kg", prepTime: 5, category: "Grocery", image: "https://images.unsplash.com/photo-1627483262112-039e9a0a0916?w=400&q=80", shopName: "Gupta General Store", shopAddress: "Lalgarh Market", partnerId: "555", inStock: true, shopStatus: 'Open', shopCategory: 'Grocery Shop' },
+                        { id: "dummy6", name: "Tata Salt", price: 60, qty: "1 kg", prepTime: 5, category: "Grocery", image: "https://images.unsplash.com/photo-1596647909386-8a506d1cceaa?w=400&q=80", shopName: "Roy Grocery", shopAddress: "Kotaldi Square", partnerId: "666", inStock: true, shopStatus: 'Open', shopCategory: 'Grocery Shop' }
                     ];
                 }
                 
@@ -1473,11 +1528,11 @@
         window.filterRestaurant = (partnerId, shopName) => {
             if (currentRestaurantFilter === partnerId) {
                 currentRestaurantFilter = null;
-                document.getElementById('marketplace-title').innerText = 'Restaurants Near You';
+                document.getElementById('marketplace-title').innerText = window.currentUserMainCategory === 'Food Owner' ? 'Restaurants Near You' : 'Grocery Stores Near You';
                 document.getElementById('btn-clear-filter').classList.add('hidden');
             } else {
                 currentRestaurantFilter = partnerId;
-                document.getElementById('marketplace-title').innerText = `${shopName} Menu`;
+                document.getElementById('marketplace-title').innerText = `${shopName} Items`;
                 document.getElementById('btn-clear-filter').classList.remove('hidden');
             }
             window.loadMarketplaceData();
@@ -1559,6 +1614,7 @@
                 if (window.adminCurrentUserTab === 'All') return true;
                 if (window.adminCurrentUserTab === 'User') return u.role === 'User';
                 if (window.adminCurrentUserTab === 'Food Owner') return u.role === 'Partner' && u.category === 'Food Owner';
+                if (window.adminCurrentUserTab === 'Grocery Shop') return u.role === 'Partner' && u.category === 'Grocery Shop';
                 if (window.adminCurrentUserTab === 'Rider') return u.role === 'Partner' && u.category === 'Rider';
                 return true;
             });
@@ -2177,7 +2233,7 @@
                     const orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
                     
                     let relevantOrders = [];
-                    if (currentUser.category === 'Food Owner') {
+                    if (['Food Owner', 'Grocery Shop'].includes(currentUser.category)) {
                         relevantOrders = orders.filter(o => o.restaurantId === currentUser.phone);
                     } else if (currentUser.category === 'Rider') {
                         relevantOrders = orders.filter(o => 
@@ -2255,17 +2311,17 @@
                 });
                 unsubscribeListeners.push(orderUnsub);
 
-                if (currentUser.category === 'Food Owner') {
+                if (['Food Owner', 'Grocery Shop'].includes(currentUser.category)) {
                     const catalogUnsub = onSnapshot(getCol('products'), (snap) => {
                         const list = document.getElementById('partner-catalog-list');
                         if (!list) return;
                         const items = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(p => p.partnerId === currentUser.phone); 
-                        if (items.length === 0) { list.innerHTML = '<p class="text-sm text-gray-400 text-center py-4 bg-white rounded-2xl border border-gray-100">No products added to menu yet.</p>'; return; }
+                        if (items.length === 0) { list.innerHTML = '<p class="text-sm text-gray-400 text-center py-4 bg-white rounded-2xl border border-gray-100">No items added to catalogue yet.</p>'; return; }
                         list.innerHTML = items.map(p => {
                             const variantsDisplay = p.variants ? p.variants.map(v => `${v.qty}: ₹${v.price}`).join(', ') : `${p.qty || ''}: ₹${p.price}`;
                             const stockColor = p.inStock !== false ? 'text-emerald-600 border-emerald-200 bg-emerald-50' : 'text-red-500 border-red-200 bg-red-50';
                             const stockText = p.inStock !== false ? 'In Stock' : 'Out of Stock';
-                            return `<div class="flex justify-between items-center bg-white border border-gray-100 p-4 rounded-2xl shadow-sm"><div class="flex-1 mr-4"><p class="font-black text-sm text-gray-900">${p.name}</p><p class="text-[10px] text-gray-500">${p.subCategory || p.category}</p><p class="text-xs text-gray-700 font-bold mt-1">${variantsDisplay}</p></div><div class="flex items-center gap-2 shrink-0"><button type="button" onclick="window.editPartnerProduct('${p.id}')" class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-colors shrink-0" title="Edit Item"><i class="fa-solid fa-pen text-xs"></i></button><button type="button" onclick="window.togglePartnerStock('${p.id}', ${p.inStock !== false})" class="text-[10px] font-black uppercase tracking-wider ${stockColor} border px-2 py-1 rounded transition whitespace-nowrap">${stockText}</button><button type="button" onclick="window.deletePartnerProduct('${p.id}')" class="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors shrink-0"><i class="fa-solid fa-trash text-xs"></i></button></div></div>`;
+                            return `<div class="flex justify-between items-center bg-white border border-gray-100 p-4 rounded-2xl shadow-sm"><div class="flex-1 mr-4"><p class="font-black text-sm text-gray-900">${p.name}</p><p class="text-[10px] text-gray-500">${p.shopCategory || p.category}</p><p class="text-xs text-gray-700 font-bold mt-1">${variantsDisplay}</p></div><div class="flex items-center gap-2 shrink-0"><button type="button" onclick="window.editPartnerProduct('${p.id}')" class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-colors shrink-0" title="Edit Item"><i class="fa-solid fa-pen text-xs"></i></button><button type="button" onclick="window.togglePartnerStock('${p.id}', ${p.inStock !== false})" class="text-[10px] font-black uppercase tracking-wider ${stockColor} border px-2 py-1 rounded transition whitespace-nowrap">${stockText}</button><button type="button" onclick="window.deletePartnerProduct('${p.id}')" class="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors shrink-0"><i class="fa-solid fa-trash text-xs"></i></button></div></div>`;
                         }).join('');
                     });
                     unsubscribeListeners.push(catalogUnsub);
@@ -2447,7 +2503,7 @@
                     container.appendChild(row);
                 });
                 
-                document.getElementById('btn-add-prod').innerText = "Update Menu Item";
+                document.getElementById('btn-add-prod').innerText = "Update Item";
                 window.scrollTo({ top: document.getElementById('add-product-container').offsetTop - 60, behavior: 'smooth' });
                 window.showToast("Edit mode enabled. Make your changes and click update.", "info");
             } catch(e) { window.showToast("Failed to load product details.", "error"); }
@@ -2455,12 +2511,12 @@
 
         window.addPartnerProduct = async () => {
             if(!currentUser) return;
-            if(currentUser.approvalStatus !== 'Approved') return window.showToast("Restaurant not approved yet.", "error");
+            if(currentUser.approvalStatus !== 'Approved') return window.showToast("Store not approved yet.", "error");
 
             const name = document.getElementById('prod-name').value.trim();
             const prepTime = document.getElementById('prod-prep-time').value.trim() || '15';
             
-            if(!name) return window.showToast("Enter dish name.", "error");
+            if(!name) return window.showToast("Enter item name.", "error");
 
             const rows = document.querySelectorAll('.variant-row');
             let variants = [];
@@ -2473,7 +2529,7 @@
             if(variants.length === 0) return window.showToast("Add at least one size and price.", "error");
 
             if(!currentUser.shopName) {
-                window.showToast("Please setup and Save your Restaurant Profile first.", "error");
+                window.showToast("Please setup and Save your Business Profile first.", "error");
                 document.getElementById('partner-shop-name').focus();
                 return;
             }
@@ -2508,11 +2564,12 @@
                     price: variants[0].price, 
                     qty: variants[0].qty,     
                     prepTime: prepTime,
-                    category: 'Food',
+                    category: currentUser.category === 'Grocery Shop' ? 'Grocery' : 'Food',
                     subCategory: null,
                     partnerId: currentUser.phone,
                     shopName: currentUser.shopName,
                     shopAddress: currentUser.shopAddress || '',
+                    shopCategory: currentUser.category || 'Food Owner',
                     openTime: currentUser.openTime || '',
                     closeTime: currentUser.closeTime || '',
                     image: imgUrl,
@@ -2555,19 +2612,17 @@
             const shopAddressInput = document.getElementById('partner-shop-address');
             const openTimeInput = document.getElementById('partner-open-time');
             const closeTimeInput = document.getElementById('partner-close-time');
-            const fssaiEl = document.getElementById('partner-fssai-number'); 
             
             const shopName = shopNameInput ? shopNameInput.value.trim() : null;
             const shopAddress = shopAddressInput ? shopAddressInput.value.trim() : '';
             const openTime = openTimeInput ? openTimeInput.value : '';
             const closeTime = closeTimeInput ? closeTimeInput.value : '';
-            const fssaiNumber = fssaiEl ? fssaiEl.value.trim() : null;
             const codEnabled = document.getElementById('partner-cod-toggle-setup').checked;
             const onlineEnabled = document.getElementById('partner-online-toggle-setup').checked;
             const qrInput = document.getElementById('partner-qr-upload');
 
-            if (!shopName) return window.showToast("Enter a restaurant name.", "error");
-            if (!shopAddress) return window.showToast("Enter restaurant address.", "error");
+            if (!shopName) return window.showToast("Enter a business name.", "error");
+            if (!shopAddress) return window.showToast("Enter business address.", "error");
             
             const btn = document.getElementById('btn-submit-profile');
             const orig = btn.innerText;
@@ -2590,7 +2645,6 @@
                     openTime: openTime,
                     closeTime: closeTime,
                     approvalStatus: newStatus,
-                    fssaiNumber: fssaiNumber,
                     codEnabled: codEnabled,
                     onlineEnabled: onlineEnabled,
                     qrCode: qrBase64
@@ -2615,7 +2669,6 @@
                 currentUser.openTime = openTime;
                 currentUser.closeTime = closeTime;
                 currentUser.approvalStatus = newStatus;
-                currentUser.fssaiNumber = fssaiNumber;
                 currentUser.codEnabled = codEnabled;
                 currentUser.onlineEnabled = onlineEnabled;
                 currentUser.qrCode = qrBase64;
