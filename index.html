@@ -21,19 +21,23 @@
                 console.log("New version detected. Clearing all caches...");
                 localStorage.setItem("gramzo_app_version", APP_VERSION);
                 
-                if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                        for(let registration of registrations) {
-                            registration.unregister().catch(e => console.log(e));
-                        }
-                    }).catch(e => console.log(e));
-                }
+                try {
+                    if ('serviceWorker' in navigator) {
+                        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                            for(let registration of registrations) {
+                                registration.unregister().catch(e => console.log(e));
+                            }
+                        }).catch(e => console.log(e));
+                    }
+                } catch(e) {}
                 
-                if ('caches' in window) {
-                    caches.keys().then((names) => {
-                        names.forEach(name => caches.delete(name).catch(e => console.log(e)));
-                    }).catch(e => console.log(e));
-                }
+                try {
+                    if ('caches' in window) {
+                        caches.keys().then((names) => {
+                            names.forEach(name => caches.delete(name).catch(e => console.log(e)));
+                        }).catch(e => console.log(e));
+                    }
+                } catch(e) {}
 
                 // Force hard reload using timestamp
                 window.location.replace(window.location.pathname + '?v=' + new Date().getTime());
@@ -241,7 +245,7 @@
                             <h3 class="font-black text-lg text-gray-900 tracking-tight" id="marketplace-title">Restaurants Near You</h3>
                             <button type="button" id="btn-clear-filter" onclick="window.filterRestaurant(null, '')" class="hidden text-xs font-bold text-red-600 bg-red-50 px-3 py-1 rounded-full border border-red-100 shadow-sm">Clear Filter</button>
                         </div>
-                        <!-- Live Live Restaruants display here -->
+                        <!-- Live Restaruants display here -->
                         <div id="restaurant-list-carousel" class="flex gap-4 overflow-x-auto pb-4 no-scrollbar px-1 snap-x"></div>
                     </div>
 
@@ -356,7 +360,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.20.0 - Full TWA Sync</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.20.0 - Full System Sync</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right">
                             <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
@@ -993,33 +997,39 @@
         window.currentRideDistanceKm = null;
         window.currentRideFares = { Bike: 0, Toto: 0, Car: 0 };
 
-        // --- Custom Modals (Replaces alert, prompt, confirm) ---
-        window.customConfirm = (title, msg, onYes) => {
-            document.getElementById('confirm-title').innerText = title;
-            document.getElementById('confirm-msg').innerText = msg;
-            document.getElementById('custom-confirm-modal').classList.add('active');
-            
-            document.getElementById('confirm-yes-btn').onclick = () => {
-                document.getElementById('custom-confirm-modal').classList.remove('active');
-                if(onYes) onYes();
-            };
-            document.getElementById('confirm-no-btn').onclick = () => document.getElementById('custom-confirm-modal').classList.remove('active');
+        window.addToCartStandard = (id, name, price, partnerId, shopName) => {
+            window.addToCartActual(name, parseFloat(price) || 0, partnerId, shopName);
         };
 
-        window.customPrompt = (title, msg, placeholder, onSubmit) => {
-            document.getElementById('prompt-title').innerText = title;
-            document.getElementById('prompt-msg').innerText = msg;
-            const input = document.getElementById('prompt-input');
-            input.value = '';
-            input.placeholder = placeholder;
-            document.getElementById('custom-prompt-modal').classList.add('active');
+        window.addToCartVariant = (id, name, partnerId, shopName) => {
+            const selectEl = document.getElementById(`sel-${id}`);
+            if(!selectEl) return;
+            const selectedOpt = selectEl.options[selectEl.selectedIndex];
+            const price = parseFloat(selectedOpt.dataset.price) || 0;
+            const qty = selectedOpt.text;
+            window.addToCartActual(`${name} (${qty})`, price, partnerId, shopName);
+        };
+
+        window.addToCartActual = (name, price, partnerId, shopName) => {
+            if(!currentUser) { 
+                window.openAuthModal('User'); 
+                window.showToast("Please log in to add items to cart.", "info");
+                return; 
+            }
+            if(currentUser.role !== 'User') { 
+                window.showToast("Log in as User to order.", "error"); 
+                return; 
+            }
             
-            document.getElementById('prompt-submit-btn').onclick = () => {
-                const val = input.value.trim();
-                document.getElementById('custom-prompt-modal').classList.remove('active');
-                if(onSubmit) onSubmit(val);
-            };
-            document.getElementById('prompt-cancel-btn').onclick = () => document.getElementById('custom-prompt-modal').classList.remove('active');
+            if (window.cart.length > 0 && window.cart[0].partnerId !== partnerId && partnerId !== '') {
+                window.showToast("You can only order from one restaurant at a time. Clear cart first.", "error");
+                return;
+            }
+
+            window.cart.push({name, price, partnerId, shopName});
+            window.renderCartUI();
+            window.showToast(`${name} added!`, "success");
+            window.setupBottomNav(currentUser.role);
         };
 
         window.handleVillageChange = () => {
@@ -1132,6 +1142,33 @@
             } else {
                 window.showToast(title + " - " + body, "info");
             }
+        };
+
+        // --- Custom Dialogs ---
+        window.customConfirm = (title, message, onYes) => {
+            document.getElementById('confirm-title').innerText = title;
+            document.getElementById('confirm-msg').innerText = message;
+            const modal = document.getElementById('custom-confirm-modal');
+            modal.classList.add('active');
+            
+            document.getElementById('confirm-no-btn').onclick = () => { modal.classList.remove('active'); };
+            document.getElementById('confirm-yes-btn').onclick = () => { modal.classList.remove('active'); onYes(); };
+        };
+
+        window.customPrompt = (title, message, placeholder, onSubmit) => {
+            document.getElementById('prompt-title').innerText = title;
+            document.getElementById('prompt-msg').innerText = message;
+            const input = document.getElementById('prompt-input');
+            input.placeholder = placeholder;
+            input.value = '';
+            const modal = document.getElementById('custom-prompt-modal');
+            modal.classList.add('active');
+            
+            document.getElementById('prompt-cancel-btn').onclick = () => { modal.classList.remove('active'); };
+            document.getElementById('prompt-submit-btn').onclick = () => { 
+                modal.classList.remove('active'); 
+                if(input.value.trim() !== '') onSubmit(input.value.trim()); 
+            };
         };
 
         // --- Rating & Review System ---
@@ -1586,7 +1623,6 @@
             }
         };
 
-        // --- AUTH UI ---
         window.openAuthModal = (role = 'User') => {
             currentAuthRole = role;
             document.getElementById('auth-overlay').classList.add('active');
@@ -1923,6 +1959,10 @@
                 const textAddress = currentRestaurantFilter || window.currentUserMainCategory === 'Grocery Shop' ? 'hidden sm:block' : 'block';
                 const imgHeight = currentRestaurantFilter || window.currentUserMainCategory === 'Grocery Shop' ? 'h-24' : 'h-32';
                 
+                // CRITICAL FIX: Escape special characters to prevent HTML breaking
+                const safeName = String(p.name || 'Item').replace(/[\r\n]+/g, " ").replace(/'/g, "\\'").replace(/"/g, "&quot;");
+                const safeShop = String(p.shopName || 'Gramzo').replace(/[\r\n]+/g, " ").replace(/'/g, "\\'").replace(/"/g, "&quot;");
+                
                 let addressDisplay = `<div class="mb-2 ${textAddress}">
                     <p class="text-[10px] font-bold text-gray-800 truncate"><i class="fa-solid fa-store text-red-500 mr-1"></i> ${p.shopName || 'Gramzo Partner'}</p>
                     ${p.shopAddress ? `<p class="text-[9px] text-gray-500 font-medium mt-0.5 leading-tight truncate"><i class="fa-solid fa-location-dot text-gray-400 mr-1"></i> ${p.shopAddress}</p>` : ''}
@@ -1949,9 +1989,13 @@
                 } else if (isOutOfStock) {
                     actionHtml = `<span class="text-[9px] font-black text-orange-500 uppercase tracking-widest bg-orange-50 px-1.5 py-1 rounded">No Stock</span>`;
                 } else {
+                    const clickFn = hasVariants 
+                        ? `window.addToCartVariant('${p.id}', '${safeName}', '${p.partnerId || ''}', '${safeShop}')` 
+                        : `window.addToCartStandard('${p.id}', '${safeName}', ${p.price || 0}, '${p.partnerId || ''}', '${safeShop}')`;
+                        
                     actionHtml = `
                         <span id="price-${p.id}" class="text-sm sm:text-lg font-black text-red-600 tracking-tight">₹${displayPrice}</span>
-                        <button type="button" onclick="${hasVariants ? `window.addToCartVariant('${p.id}', '${p.name.replace(/'/g, "\\'")}', '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')` : `window.addToCartStandard('${p.id}', '${p.name.replace(/'/g, "\\'")}', ${p.price}, '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')`}" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition-colors active:scale-90 shrink-0 border border-red-100">
+                        <button type="button" onclick="${clickFn}" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition-colors active:scale-90 shrink-0 border border-red-100">
                             <i class="fa-solid fa-plus text-[10px] sm:text-xs"></i>
                         </button>
                     `;
@@ -2027,7 +2071,6 @@
                 }
             }, (err) => console.error(err));
 
-            // Pull Live Users to get Live Restaurants (No more dummy data)
             try {
                 const usersSnap = await window.dbCall(getDocs(getCol('users')), 10000);
                 const approvedPartners = usersSnap.docs.map(d => ({id: d.id, ...d.data()})).filter(u => u.role === 'Partner' && u.approvalStatus === 'Approved');
@@ -2035,7 +2078,6 @@
                 const productsSnap = await window.dbCall(getDocs(getCol('products')), 10000);
                 const items = productsSnap.docs.map(d => ({id: d.id, ...d.data()}));
 
-                // Build Unique Restaurants List mapped with their first product image
                 const uniqueRestaurants = [];
                 approvedPartners.forEach(p => {
                     if (p.category === window.currentUserMainCategory) {
@@ -2215,7 +2257,6 @@
 
         window.adminToggleUserVisibility = async (phone, isCurrentlyOnline) => {
             const newStatus = isCurrentlyOnline ? 'Offline' : 'Online'; 
-            // Normalize to match shopStatus values (Open/Closed for shops, Online/Offline for rides)
             try {
                 await window.dbCall(setDoc(getDocRef('users', phone), { shopStatus: newStatus }, { merge: true }), 10000);
                 window.showToast(`User forced ${newStatus}.`, "success");
