@@ -24,8 +24,8 @@ messaging.onBackgroundMessage(function(payload) {
   const notificationTitle = payload.notification.title || 'Gramzo Update';
   const notificationOptions = {
     body: payload.notification.body,
-    icon: 'https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/Android%20Icon.png',
-    badge: 'https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/Android%20Icon.png',
+    icon: 'https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/New%20logo%20-Gramzo%20-%206%20may.png',
+    badge: 'https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/New%20logo%20-Gramzo%20-%206%20may.png',
     vibrate: [200, 100, 200]
   };
 
