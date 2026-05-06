@@ -708,7 +708,8 @@
                     <div class="p-4 bg-gray-50 border-b border-gray-100 flex justify-between items-center overflow-x-auto no-scrollbar">
                         <span class="font-bold text-sm shrink-0 mr-4">Directory</span>
                         <div class="flex bg-gray-200 rounded-lg p-1 shrink-0">
-                            <button id="tab-user-All" onclick="window.switchUserTab('All')" class="admin-user-tab bg-white text-gray-900 shadow-sm px-3 py-1 rounded-md text-[10px] font-bold transition">All</button>
+                            <!-- Removed the default active white styling from the 'All' tab -->
+                            <button id="tab-user-All" onclick="window.switchUserTab('All')" class="admin-user-tab text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold transition">All</button>
                             <button id="tab-user-User" onclick="window.switchUserTab('User')" class="admin-user-tab text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold transition">Users</button>
                             <button id="tab-user-FoodOwner" onclick="window.switchUserTab('Food Owner')" class="admin-user-tab text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold transition">Shops</button>
                             <button id="tab-user-GroceryShop" onclick="window.switchUserTab('Grocery Shop')" class="admin-user-tab text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold transition">Grocery</button>
@@ -1020,6 +1021,7 @@
 
         // ADMIN TABS STATE
         window.adminCurrentUserTab = 'All';
+        window.adminUsersLoaded = false;
         window.adminCurrentOrderTab = 'Live';
         window.adminUsersData = [];
         window.adminOrdersData = [];
@@ -2919,6 +2921,7 @@
         // --- ADMIN TABS LOGIC ---
         window.switchUserTab = (tab) => {
             window.adminCurrentUserTab = tab;
+            window.adminUsersLoaded = true; // Mark as explicitly loaded
             document.querySelectorAll('.admin-user-tab').forEach(el => {
                 el.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
                 el.classList.add('text-gray-500');
@@ -2993,6 +2996,12 @@
         window.renderAdminUsers = () => {
             const usersBody = document.getElementById('admin-users-body');
             if(!usersBody) return;
+
+            // Block rendering until a tab is specifically clicked
+            if (!window.adminUsersLoaded) {
+                usersBody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-gray-400 font-bold text-xs"><i class="fa-solid fa-hand-pointer mb-2 text-2xl block opacity-30"></i>Click a tab above to load directory data.</td></tr>';
+                return;
+            }
 
             let filteredUsers = window.adminUsersData.filter(u => {
                 if (window.adminCurrentUserTab === 'All') return true;
