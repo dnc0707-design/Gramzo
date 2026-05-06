@@ -11,29 +11,56 @@
 
     <title>Gramzo | Instant Delivery Super App</title>
 
-    <!-- AGGRESSIVE AUTO CACHE BUSTER SCRIPT -->
+    <!-- 🛡️ ULTIMATE SELF-HEALING CACHE BUSTER SCRIPT 🛡️ -->
     <script>
-        (function() {
-            const APP_VERSION = "11.20.0"; // Complete code, fully integrated
-            const storedVersion = localStorage.getItem("gramzo_app_version");
+        const APP_VERSION = "11.21.0"; // Increment this number on EVERY future update
+
+        function nukeCacheAndReload() {
+            console.log("Nuking cache and reloading to fetch new version...");
+            localStorage.setItem("gramzo_app_version", APP_VERSION);
             
-            if (storedVersion !== APP_VERSION) {
-                console.log("New version detected. Clearing caches and reloading...");
-                localStorage.setItem("gramzo_app_version", APP_VERSION);
-                
+            // 1. Kill all Service Workers
+            try {
                 if ('serviceWorker' in navigator) {
                     navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                        for(let registration of registrations) registration.unregister();
-                    }).catch(function(err) { console.log('SW unregister failed: ', err); });
+                        for(let r of registrations) r.unregister();
+                    }).catch(e => console.warn("SW getRegistrations failed", e));
                 }
-                
+            } catch(e) { console.warn("SW environment restricted", e); }
+            
+            // 2. Obliterate all PWA Caches
+            try {
                 if ('caches' in window) {
                     caches.keys().then((names) => {
-                        names.forEach(name => caches.delete(name));
-                    });
+                        for (let name of names) caches.delete(name);
+                    }).catch(e => console.warn("Caches clear failed", e));
                 }
-
+            } catch(e) { console.warn("Caches environment restricted", e); }
+            
+            // 3. Force a hard server reload
+            setTimeout(() => {
                 window.location.replace(window.location.pathname + '?v=' + new Date().getTime());
+            }, 800);
+        }
+
+        (function() {
+            // Phase 1: Local Storage Version Check
+            const storedVersion = localStorage.getItem("gramzo_app_version");
+            if (storedVersion !== APP_VERSION) {
+                nukeCacheAndReload();
+            } else {
+                // Phase 2: Silent Background Server Ping (Fixes cache-first traps)
+                setTimeout(() => {
+                    fetch(window.location.pathname + '?nocache=' + new Date().getTime(), { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } })
+                    .then(res => res.text())
+                    .then(html => {
+                        const match = html.match(/const APP_VERSION\s*=\s*"([^"]+)"/);
+                        if (match && match[1] && match[1] !== APP_VERSION) {
+                            console.log("Server has newer version: " + match[1] + " | Local is: " + APP_VERSION);
+                            nukeCacheAndReload();
+                        }
+                    }).catch(e => console.log("Background version check bypassed (offline)."));
+                }, 2000);
             }
         })();
     </script>
@@ -122,14 +149,11 @@
 </head>
 <body>
 
-    <!-- Top Bar for Auth - Made Taller and Buttons Larger -->
     <div class="fixed top-0 w-full z-50 bg-white/95 backdrop-blur shadow-sm h-[60px] flex justify-between items-center px-4">
-        <!-- Small Logo -->
         <div class="font-logo text-red-600 font-black text-2xl italic cursor-pointer" onclick="location.reload()">
             Gramzo
         </div>
 
-        <!-- Right Side Auth Controls -->
         <div id="auth-container" class="flex items-center gap-3 shrink-0 h-full">
             <button type="button" id="btn-partner-login-trigger" onclick="window.openAuthModal('Partner')" class="bg-gray-900 text-white px-4 sm:px-5 py-2.5 rounded-xl text-xs font-black shadow-md hover:bg-gray-800 transition-colors active:scale-95 flex items-center gap-1.5 whitespace-nowrap">
                 <i class="fa-solid fa-handshake"></i> <span class="hidden sm:inline">Partner</span>
@@ -163,14 +187,11 @@
         </div>
     </div>
 
-    <!-- Scrollable Content Starts Here - Adjusted padding for 60px nav -->
     <div class="pt-[60px]">
-        <!-- Full-Width Banner Image -->
         <div class="w-full bg-gray-100">
             <img src="https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/ChatGPT%20Image%20May%202%2C%202026%2C%2001_32_51%20PM.png" alt="Gramzo Top Banner" class="w-full h-[120px] sm:h-[200px] md:h-[280px] lg:h-[350px] object-cover object-center block">
         </div>
 
-        <!-- Marquee below banner -->
         <div id="marquee-container" class="w-full bg-gray-900 border-b border-gray-800 z-30 overflow-hidden h-10 flex items-center shadow-lg relative">
             <div id="dynamic-marquee" class="animate-marquee inline-block whitespace-nowrap text-sm sm:text-base font-black font-bengali text-yellow-300 tracking-wide drop-shadow-md">
                 🚀 খাবার অর্ডার করুন ঘরে বসেই - সার্ভিস অ্যাভেইলেবল অ্যাট কোটালডিহ, কিনাইডিহ, লালগড়, কৃষ্ণপুর, রামচন্দ্রপুর, মুরাডি, গাংপুর, যশপুর এবং বড়ন্তি এলাকা 🚀
@@ -197,7 +218,6 @@
                     </button>
                 </div>
 
-                <!-- Service Toggles (Food vs Grocery vs Ride) -->
                 <div class="flex gap-2 bg-gray-100 p-1.5 rounded-xl w-full mt-4 border border-gray-200 shadow-inner">
                     <button type="button" id="tab-cat-Food" onclick="window.switchMainCategory('Food Owner')" class="flex-1 bg-red-600 text-white font-black py-2.5 rounded-lg text-sm shadow-md transition-all">
                         🍔 Food
@@ -210,7 +230,6 @@
                     </button>
                 </div>
 
-                <!-- FOOD & GROCERY SECTION -->
                 <div id="food-grocery-section">
                     <div class="relative w-full search-shadow rounded-2xl bg-white border border-gray-100 flex items-center px-4 py-3.5 focus-within:ring-2 focus-within:ring-red-500/20 transition-all mt-4">
                         <i class="fa-solid fa-magnifying-glass text-red-500 text-lg"></i>
@@ -226,7 +245,6 @@
                         <div id="restaurant-list-carousel" class="flex gap-4 overflow-x-auto pb-4 no-scrollbar px-1 snap-x"></div>
                     </div>
 
-                    <!-- Banner Ad in Middle -->
                     <div class="w-full relative rounded-3xl overflow-hidden shadow-sm border border-gray-100 h-32 sm:h-40 group bg-red-50 mt-2 mb-4 flex items-center justify-center">
                         <span class="absolute top-2 left-2 z-10 inline-flex items-center gap-1.5 py-1 px-2.5 rounded-full bg-black/70 backdrop-blur text-[10px] font-black text-white uppercase tracking-widest">
                             <i class="fa-solid fa-bolt text-yellow-400"></i> PROMO
@@ -240,7 +258,6 @@
                             <h3 class="font-black text-xl text-gray-900 tracking-tight">Top rated near you</h3>
                         </div>
                         
-                        <!-- Subcategory Filters (Shown only when a specific restaurant is selected) -->
                         <div id="menu-category-filters" class="flex gap-2 overflow-x-auto no-scrollbar pb-3 mb-2 hidden snap-x"></div>
 
                         <div id="market-list" class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 pb-6">
@@ -249,7 +266,6 @@
                     </div>
                 </div>
 
-                <!-- SIMPLE RIDE SECTION -->
                 <div id="ride-section" class="hidden mt-4 space-y-4">
                     <div class="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm">
                         <div class="relative">
@@ -267,13 +283,11 @@
                             <option value="Toto">🛺 Toto / Auto</option>
                         </select>
 
-                        <!-- Round Trip (Toto Only) -->
                         <label class="items-center gap-2 text-xs font-bold text-gray-700 mt-3 hidden" id="round-trip-container" style="display: none;">
                             <input type="checkbox" id="ride-round-trip" class="w-4 h-4 text-red-600 focus:ring-red-500 rounded border-gray-300">
                             <span>Round Trip (Double Distance)</span>
                         </label>
 
-                        <!-- T&C Checkbox -->
                         <label class="flex items-start gap-2 text-[9px] text-gray-500 mt-4 leading-tight bg-gray-50 p-2.5 rounded-lg border border-gray-200">
                             <input type="checkbox" id="ride-tnc" class="mt-0.5 shrink-0 w-3 h-3 text-red-600 focus:ring-red-500 rounded border-gray-300">
                             <span><b>Terms & Conditions:</b> Gramzo operates strictly as a technology aggregator. Any liability regarding driving, licensing, accidents, or service quality rests entirely with the service provider and the user. Gramzo assumes no corporate or legal liability.</span>
@@ -334,7 +348,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.20.0 - Full Integrated System</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.21.0 - Auto-Healing System</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right">
                             <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
@@ -359,7 +373,6 @@
                     
                     <div class="space-y-5 pt-6 border-t border-gray-100" id="checkout-details-section" style="display:none;">
                         
-                        <!-- VILLAGE SELECTION AREA -->
                         <div>
                             <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2 ml-2">Select Village *</label>
                             <select id="cart-village" class="input-field !py-3 !rounded-xl mb-3 bg-white" onchange="window.handleVillageChange()">
@@ -441,7 +454,6 @@
                     <i class="fa-solid fa-motorcycle absolute right-[-20px] bottom-[-20px] text-8xl text-gray-800" id="dashboard-bg-icon"></i>
                 </div>
                 
-                <!-- Partner Tasks Tabs -->
                 <div class="flex justify-between items-center border-b border-gray-200 pb-2">
                     <h3 class="font-black text-xl text-gray-800">Task Management</h3>
                     <div class="flex bg-gray-100 rounded-lg p-1">
@@ -541,7 +553,6 @@
                         </div>
                     </div>
 
-                    <!-- Shop/Ride Status Toggle -->
                     <div id="shop-status-container" class="mt-6 flex items-center justify-between p-5 bg-white rounded-2xl border-2 border-red-100 shadow-sm">
                         <div>
                             <p class="font-black text-base text-gray-900" id="status-toggle-title">Accepting Orders</p>
@@ -623,7 +634,6 @@
                     <div class="bg-white p-4 rounded-2xl border border-gray-100 text-center"><p class="text-[9px] font-bold text-gray-400">Users</p><h4 id="stat-users" class="text-lg font-black text-purple-600">0</h4></div>
                 </div>
 
-                <!-- ADMIN USERS TABS -->
                 <div class="bg-white rounded-3xl border border-gray-100 overflow-hidden mt-6">
                     <div class="p-4 bg-gray-50 border-b border-gray-100 flex justify-between items-center overflow-x-auto no-scrollbar">
                         <span class="font-bold text-sm shrink-0 mr-4">Directory</span>
@@ -641,7 +651,6 @@
                     <div id="admin-users-table-container" class="overflow-x-auto hidden"><table class="w-full text-left text-xs"><tbody id="admin-users-body"></tbody></table></div>
                 </div>
 
-                <!-- ADMIN ORDERS TABS -->
                 <div class="bg-white rounded-3xl border border-gray-100 overflow-hidden mt-6">
                     <div class="p-4 bg-gray-50 border-b border-gray-100 flex justify-between items-center overflow-x-auto no-scrollbar">
                         <span class="font-bold text-sm shrink-0 mr-4">Transaction Control</span>
@@ -653,7 +662,6 @@
                     <div class="overflow-x-auto"><table class="w-full text-left text-xs"><tbody id="admin-log-body"></tbody></table></div>
                 </div>
 
-                <!-- ADMIN PROMO MANAGEMENT -->
                 <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden mt-6 p-5">
                     <h3 class="font-bold text-gray-900 mb-2 border-b border-gray-100 pb-2">Manage Promo Codes</h3>
                     <div class="space-y-3 mt-3">
@@ -906,6 +914,21 @@
         <span id="toast-text">Message</span>
     </div>
 
+    <!-- Active Service Worker Unregistration to Fix Caching Issues -->
+    <script>
+        try {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                    for(let registration of registrations) {
+                        registration.unregister();
+                    }
+                }).catch(function(err) {
+                    console.log('Service Worker unregistration failed: ', err);
+                });
+            }
+        } catch(e) { console.log('SW access blocked: ', e); }
+    </script>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -939,7 +962,6 @@
         let unsubscribeListeners = []; 
         let currentAuthRole = 'User'; 
         window.currentUserMainCategory = 'Food Owner'; 
-        window.currentSubCategoryFilter = 'All';
 
         // RATING STATE
         window.currentRatingOrderId = null;
@@ -989,7 +1011,6 @@
                 window.customConfirmResolve = resolve;
             });
         };
-
 
         window.handleVillageChange = () => {
             const village = document.getElementById('cart-village').value;
@@ -1053,7 +1074,6 @@
             });
         };
 
-        // --- Notification & Voice Alert Logic ---
         window.alertAudio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
         window.alertAudio.loop = true; 
 
@@ -1085,14 +1105,13 @@
             if ("Notification" in window && Notification.permission === "granted") {
                 new Notification(title, { 
                     body: body, 
-                    icon: 'https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/ChatGPT%20Image%20May%202%2C%202026%2C%2001_16_21%20PM.png' 
+                    icon: 'https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/Android%20Icon.png' 
                 });
             } else {
                 window.showToast(title + " - " + body, "info");
             }
         };
 
-        // --- Rating & Review System ---
         window.openRatingModal = (orderId, partnerId) => {
             window.currentRatingOrderId = orderId;
             window.currentRatingPartnerId = partnerId;
@@ -1311,7 +1330,7 @@
                     if(status === 'OK' && res.rows[0].elements[0].status === 'OK') {
                         resolve({
                             text: res.rows[0].elements[0].distance.text,
-                            value: res.rows[0].elements[0].distance.value // value is always in meters
+                            value: res.rows[0].elements[0].distance.value 
                         });
                     } else resolve(null);
                 });
@@ -1335,13 +1354,12 @@
 
             let distanceData = await window.calculateDistance(pickup, drop);
             
-            // --- Custom Prompt Fallback for Distance Calculation ---
             if (!distanceData) {
                 const fallbackDistStr = await window.customPrompt("Google Maps could not automatically calculate the route. Please manually enter the estimated distance in kilometers:");
                 if (!fallbackDistStr) {
                     btnCalc.innerText = origText;
                     btnCalc.disabled = false;
-                    return; // User canceled
+                    return; 
                 }
                 const dist = parseFloat(fallbackDistStr);
                 if (isNaN(dist) || dist <= 0) {
@@ -1370,10 +1388,8 @@
                 if (searchType === 'Bike') {
                     estFare = distKm <= 5 ? 20 : 20 + ((distKm - 5) * 5);
                 } else if (searchType === 'Toto') {
-                    // Toto: Flat 100 for 5km, then 10/km
                     estFare = distKm <= 5 ? 100 : 100 + ((distKm - 5) * 10);
                 } else { 
-                    // Car: 20 base + 12/km
                     estFare = 20 + (distKm * 12);
                 }
                 
@@ -1743,7 +1759,7 @@
                                 carNum: carNum,
                                 carModel: carModel,
                                 seater: seater,
-                                walletPoints: 20, // Initial free 20 points
+                                walletPoints: 20, 
                                 currentLocation: ''
                             })
                         })
@@ -2048,17 +2064,15 @@
                 }
             }, (err) => console.error(err));
 
-            // Fetch Real Partners for horizontal list
             onSnapshot(getCol('users'), (snap) => {
                 window.allPartners = snap.docs.map(doc => ({id: doc.id, ...doc.data()}))
                                         .filter(u => u.role === 'Partner' && u.approvalStatus === 'Approved');
                 window.renderRestaurants();
             }, (err) => console.error("Partners fetch error:", err));
 
-            // Fetch Real Products for grid
             onSnapshot(getCol('products'), (snap) => {
                 window.allProducts = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
-                window.renderRestaurants(); // Update images if new products were added
+                window.renderRestaurants(); 
                 window.renderProducts(window.allProducts);
             }, (err) => {
                 if (err.code === 'permission-denied') window.showToast("Firebase Permissions Denied! Check rules.", "error");
@@ -2133,7 +2147,6 @@
             }, 100);
         };
 
-        // --- ADMIN TABS LOGIC ---
         window.switchUserTab = (tab) => {
             window.adminCurrentUserTab = tab;
             document.querySelectorAll('.admin-user-tab').forEach(el => {
