@@ -3136,6 +3136,15 @@
         };
 
         // --- PARTNER TABS LOGIC ---
+        window.switchPartnerOrderTab = (tab) => {
+            window.partnerCurrentOrderTab = tab;
+            document.querySelectorAll('.partner-order-tab').forEach(el => {
+                el.classList.remove('bg-gray-200', 'text-gray-900');
+                el.classList.add('text-gray-500');
+            });
+            const activeEl = document.getElementById(`tab-partner-order-${tab}`);
+            if(activeEl) {
+                activeEl.classList.add('bg-gray-200', 'text-gray-900');
                 activeEl.classList.remove('text-gray-500');
             }
             window.renderPartnerOrders();
