@@ -14,38 +14,43 @@
     <!-- AGGRESSIVE AUTO CACHE BUSTER SCRIPT -->
     <script>
         (function() {
-            const APP_VERSION = "11.23.0"; // New Logo & Clean Code Update
-            const storedVersion = localStorage.getItem("gramzo_app_version");
+            const APP_VERSION = "11.24.0"; // Live Network Sync Update
             
-            if (storedVersion !== APP_VERSION) {
-                console.log("New version detected. Clearing caches and reloading...");
-                localStorage.setItem("gramzo_app_version", APP_VERSION);
-                
-                // 1. Unregister any lingering Service Workers securely
-                if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                        for(let registration of registrations) {
-                            registration.unregister().catch(e => console.log(e));
-                        }
-                    }).catch(function(err) {
-                        console.log('SW unregister failed: ', err);
-                    });
-                }
-                
-                // 2. Clear all PWA Cache Storage securely
-                if ('caches' in window) {
-                    try {
-                        caches.keys().then((names) => {
-                            names.forEach(name => {
-                                caches.delete(name).catch(e => console.log(e));
-                            });
-                        }).catch(e => console.log(e));
-                    } catch(e) {}
-                }
+            // 1. Always kill service workers to prevent HTML caching
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                    for(let registration of registrations) {
+                        registration.unregister();
+                    }
+                }).catch(e => console.log(e));
+            }
 
-                // 3. Force a hard reload from the server
+            // 2. Standard Local Check
+            const storedVersion = localStorage.getItem("gramzo_app_version");
+            if (storedVersion !== APP_VERSION) {
+                localStorage.setItem("gramzo_app_version", APP_VERSION);
+                if ('caches' in window) {
+                    caches.keys().then(names => { names.forEach(name => caches.delete(name)) });
+                }
                 window.location.replace(window.location.pathname + '?v=' + new Date().getTime());
             }
+
+            // 3. LIVE SERVER PING (The Ultimate Fallback)
+            // Silently checks GitHub 2 seconds after opening to see if you pushed a new update
+            setTimeout(() => {
+                fetch(window.location.pathname + '?nocache=' + new Date().getTime(), { cache: "no-store" })
+                    .then(res => res.text())
+                    .then(html => {
+                        // If the live GitHub code has a different APP_VERSION, it forces a reload
+                        if (!html.includes('const APP_VERSION = "' + APP_VERSION + '"')) {
+                            console.log("Newer version found on GitHub. Force reloading...");
+                            if ('caches' in window) {
+                                caches.keys().then(names => { names.forEach(name => caches.delete(name)) });
+                            }
+                            window.location.replace(window.location.pathname + '?v=' + new Date().getTime());
+                        }
+                    }).catch(e => console.log("Offline mode active."));
+            }, 2000);
         })();
     </script>
     
@@ -358,7 +363,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.23.0 - New UI Features</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.24.0 - Live Network Sync</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right">
                             <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
