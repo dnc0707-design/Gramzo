@@ -3114,28 +3114,28 @@
                 let statusColor = o.status === 'Placed' || o.status === 'Requested' ? 'text-amber-500' : o.status === 'Preparing' || o.status === 'Started' || o.status === 'Out for Delivery' ? 'text-blue-500' : o.status === 'Rejected' ? 'text-red-500' : 'text-emerald-500';
                 
                 const displayType = o.type === 'Ride' ? '🚕 Ride' : '🍔 Order';
+                
+                const addressDisplay = o.type === 'Ride' 
+                    ? `<span class="text-blue-500 font-medium">From:</span> ${o.pickup || 'N/A'}<br/><span class="text-emerald-500 font-medium">To:</span> ${o.address || 'N/A'}` 
+                    : o.address || 'N/A';
 
                 html += `
-                    <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="p-4 font-mono font-bold text-[10px] text-gray-500">#${o.id.slice(-5).toUpperCase()}<br/><span class="font-sans font-medium text-[9px] text-gray-400">${timeStr}</span></td>
-                        <td class="p-4 font-bold text-gray-900 text-xs">${o.customer || 'Unknown'}<br/><span class="font-normal text-[10px] text-gray-500">${displayType}</span></td>
-                        <td class="p-4 font-medium text-gray-500 text-xs">${o.type === 'Ride' ? o.riderName : (o.restaurantName || '-')}</td>
-                        <td class="p-4 font-black text-gray-900 text-xs">₹${o.total ? o.total.toFixed(2) : (o.amount || 0)}</td>
-                        <td class="p-4 text-right uppercase text-[9px] font-black ${statusColor} tracking-wider">${o.status}</td>
+                    <tr class="hover:bg-gray-50 transition-colors border-b border-gray-50">
+                        <td class="p-3 font-mono font-bold text-[10px] text-gray-500 align-top pt-4">#${o.id.slice(-5).toUpperCase()}<br/><span class="font-sans font-medium text-[9px] text-gray-400">${timeStr}</span></td>
+                        <td class="p-3 font-bold text-gray-900 text-xs align-top pt-4">
+                            ${o.customer || 'Unknown'} <span class="font-normal text-[9px] text-gray-500 bg-gray-100 px-1 rounded ml-1">${displayType}</span><br/>
+                            <a href="tel:${o.phone}" class="font-mono font-normal text-[10px] text-blue-600 hover:underline inline-block mt-0.5"><i class="fa-solid fa-phone text-[8px]"></i> ${o.phone || 'N/A'}</a><br/>
+                            <span class="font-normal text-[10px] text-gray-500 leading-snug mt-1 inline-block"><i class="fa-solid fa-location-dot text-[8px] text-red-400"></i> ${addressDisplay}</span>
+                        </td>
+                        <td class="p-3 font-medium text-gray-600 text-xs align-top pt-4">${o.type === 'Ride' ? (o.riderName || 'Pending') : (o.restaurantName || '-')}</td>
+                        <td class="p-3 font-black text-gray-900 text-xs align-top pt-4">₹${o.total ? o.total.toFixed(2) : (o.amount || 0)}</td>
+                        <td class="p-3 text-right uppercase text-[9px] font-black ${statusColor} tracking-wider align-top pt-4">${o.status}</td>
                     </tr>`;
             });
             adminLog.innerHTML = html;
         };
 
-        window.switchPartnerOrderTab = (tab) => {
-            window.partnerCurrentOrderTab = tab;
-            document.querySelectorAll('.partner-order-tab').forEach(el => {
-                el.classList.remove('bg-gray-200', 'text-gray-900');
-                el.classList.add('text-gray-500');
-            });
-            const activeEl = document.getElementById(`tab-partner-order-${tab}`);
-            if(activeEl) {
-                activeEl.classList.add('bg-gray-200', 'text-gray-900');
+        // --- PARTNER TABS LOGIC ---
                 activeEl.classList.remove('text-gray-500');
             }
             window.renderPartnerOrders();
