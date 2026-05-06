@@ -11,76 +11,53 @@
 
     <title>Gramzo | Instant Delivery Super App</title>
 
-    <!-- AGGRESSIVE AUTO CACHE BUSTER SCRIPT (Self-Healing) -->
+    <!-- AGGRESSIVE AUTO CACHE BUSTER SCRIPT -->
     <script>
         (function() {
-            const APP_VERSION = "11.21.0"; // Admin Controls & Approval Update
+            const APP_VERSION = "11.23.0"; // New Logo & Clean Code Update
             const storedVersion = localStorage.getItem("gramzo_app_version");
-            const isForcedUpdate = window.location.search.includes('update=now');
             
-            if (storedVersion !== APP_VERSION || isForcedUpdate) {
-                console.log("New version detected or forced. Clearing caches and reloading...");
+            if (storedVersion !== APP_VERSION) {
+                console.log("New version detected. Clearing caches and reloading...");
                 localStorage.setItem("gramzo_app_version", APP_VERSION);
                 
-                // 1. Unregister any lingering Service Workers safely
+                // 1. Unregister any lingering Service Workers securely
                 if ('serviceWorker' in navigator) {
                     navigator.serviceWorker.getRegistrations().then(function(registrations) {
                         for(let registration of registrations) {
-                            registration.unregister().catch(e => console.warn("SW Unregister non-fatal error:", e));
+                            registration.unregister().catch(e => console.log(e));
                         }
                     }).catch(function(err) {
-                        console.log('SW unregister scan failed (safe to ignore): ', err);
+                        console.log('SW unregister failed: ', err);
                     });
                 }
                 
-                // 2. Clear all PWA Cache Storage
+                // 2. Clear all PWA Cache Storage securely
                 if ('caches' in window) {
-                    caches.keys().then((names) => {
-                        names.forEach(name => {
-                            caches.delete(name).catch(e => console.warn("Cache delete error:", e));
-                        });
-                    }).catch(e => console.warn("Cache fetch error:", e));
+                    try {
+                        caches.keys().then((names) => {
+                            names.forEach(name => {
+                                caches.delete(name).catch(e => console.log(e));
+                            });
+                        }).catch(e => console.log(e));
+                    } catch(e) {}
                 }
 
-                // 3. Force a hard reload from the server using a unique timestamp query parameter
-                if(!isForcedUpdate) {
-                    window.location.replace(window.location.pathname + '?update=now&v=' + new Date().getTime());
-                }
+                // 3. Force a hard reload from the server
+                window.location.replace(window.location.pathname + '?v=' + new Date().getTime());
             }
         })();
     </script>
     
-    <<<<
     <!-- PWA Meta Tags & Manifest -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#E23744">
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/Android%20Icon.png">
-
-    <script src="https://cdn.tailwindcss.com"></script>
-====
-    <!-- PWA Meta Tags & Manifest -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#E23744">
+    <!-- NEW LOGO -->
     <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/New%20logo%20-Gramzo%20-%206%20may.png">
 
     <script src="https://cdn.tailwindcss.com"></script>
->>>>
-<<<<
-        window.sendAlert = (title, body) => {
-            if ("Notification" in window && Notification.permission === "granted") {
-                new Notification(title, { body: body, icon: 'https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/Android%20Icon.png' });
-            } else {
-                window.showToast(title + " - " + body, "info");
-            }
-        };
-====
-        window.sendAlert = (title, body) => {
-            if ("Notification" in window && Notification.permission === "granted") {
-                new Notification(title, { body: body, icon: 'https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/New%20logo%20-Gramzo%20-%206%20may.png' });
-            } else {
-                window.showToast(title + " - " + body, "info");
-            }
-        };
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
     <!-- Google Maps API Setup -->
     <script>
         window.initGoogleMap = function() {
@@ -159,38 +136,37 @@
         .pac-item { padding: 12px; font-size: 14px; font-weight: 500; color: #374151; border-bottom: 1px solid #f3f4f6; cursor: pointer; }
         .pac-item:hover { background-color: #f0fdf4; color: #E23744; }
         select { -webkit-appearance: none; -moz-appearance: none; appearance: none; }
+        
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body>
 
     <!-- Tall Top Bar for Auth -->
-    <div class="fixed top-0 w-full z-50 bg-white/95 backdrop-blur shadow-sm h-[60px] flex justify-between items-center px-2 sm:px-4 gap-1">
+    <div class="fixed top-0 w-full z-50 bg-white/95 backdrop-blur shadow-sm h-[60px] flex justify-between items-center px-2 sm:px-4">
         
-        <!-- Left: Partner Login -->
-        <div class="flex items-center h-full py-2 shrink-0">
-            <button type="button" id="btn-partner-login-trigger" onclick="window.openAuthModal('Partner')" class="h-full bg-gray-900 text-white px-2.5 sm:px-4 rounded-xl text-[9px] min-[375px]:text-[10px] sm:text-sm font-black shadow-md hover:bg-gray-800 transition-colors active:scale-95 flex items-center gap-1 sm:gap-1.5 whitespace-nowrap">
-                <i class="fa-solid fa-handshake text-sm sm:text-xl"></i> <span>Partner Login</span>
-            </button>
-        </div>
+        <!-- Left Side: Partner Login -->
+        <button type="button" id="btn-partner-login-trigger" onclick="window.openAuthModal('Partner')" class="bg-gray-900 text-white px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl text-[10px] sm:text-xs font-black shadow-md hover:bg-gray-800 transition-colors active:scale-95 flex items-center gap-2 whitespace-nowrap">
+            <i class="fa-solid fa-handshake text-sm sm:text-base"></i> <span class="tracking-wide">Partner Login</span>
+        </button>
 
         <!-- Center: Logo -->
-        <div class="flex-1 flex justify-center shrink-0">
-            <div class="font-logo text-red-600 font-black text-lg min-[375px]:text-xl sm:text-2xl italic cursor-pointer drop-shadow-sm text-center" onclick="location.reload()">
-                Gramzo
-            </div>
+        <div class="font-logo text-red-600 font-black text-2xl italic cursor-pointer absolute left-1/2 transform -translate-x-1/2" onclick="location.reload()">
+            Gramzo
         </div>
 
-        <!-- Right Side Auth / Profile -->
-        <div id="auth-container" class="flex items-center justify-end shrink-0 h-full py-2">
-            <button type="button" id="btn-login-trigger" onclick="window.openAuthModal('User')" class="h-full bg-red-600 text-white px-2.5 sm:px-4 rounded-xl text-[9px] min-[375px]:text-[10px] sm:text-sm font-bold shadow-md hover:bg-red-700 transition-colors active:scale-95 flex items-center gap-1 sm:gap-1.5 whitespace-nowrap">
-                <i class="fa-solid fa-user text-sm sm:text-xl"></i> <span>USER LOGIN</span>
+        <!-- Right Side: User Login / Profile -->
+        <div id="auth-container" class="flex items-center shrink-0 h-full">
+            <button type="button" id="btn-login-trigger" onclick="window.openAuthModal('User')" class="bg-red-600 text-white px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl text-[10px] sm:text-xs font-bold shadow-md hover:bg-red-700 transition-colors active:scale-95 flex items-center gap-2 whitespace-nowrap">
+                <i class="fa-solid fa-user text-sm sm:text-base"></i> <span class="tracking-wide uppercase">USER LOGIN</span>
             </button>
             
-            <div id="profile-trigger" class="hidden h-full flex items-center gap-1.5 bg-gray-50 border border-gray-200 py-1 pl-1 pr-2 sm:pr-3 rounded-full shadow-sm cursor-pointer hover:bg-gray-100" onclick="window.toggleProfileMenu()">
+            <div id="profile-trigger" class="hidden flex items-center gap-2 bg-gray-50 border border-gray-200 py-1.5 pl-1.5 pr-4 rounded-full shadow-sm cursor-pointer hover:bg-gray-100" onclick="window.toggleProfileMenu()">
                 <div class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-black text-sm">
                     <span id="nav-initial">U</span>
                 </div>
-                <div class="hidden sm:block text-left mr-1">
+                <div class="hidden sm:block text-left">
                     <p id="nav-name" class="text-xs font-bold text-gray-900 leading-none">User</p>
                     <span id="nav-role" class="text-[9px] font-bold text-gray-500 uppercase">Role</span>
                 </div>
@@ -265,6 +241,11 @@
                         <i class="fa-solid fa-magnifying-glass text-red-500 text-lg"></i>
                         <div class="w-px h-5 bg-gray-200 mx-3"></div>
                         <input type="text" id="global-search" onkeyup="window.handleSearchInput()" placeholder="Search items or shops..." class="w-full bg-transparent outline-none text-sm font-medium text-gray-800 placeholder-gray-400">
+                    </div>
+
+                    <!-- Category Chips for Filtering -->
+                    <div id="food-category-chips" class="hidden mt-4 flex gap-2 overflow-x-auto hide-scroll pb-2">
+                        <!-- Filled by JS when viewing a specific restaurant -->
                     </div>
 
                     <div>
@@ -377,7 +358,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.21.0 - Admin System Update</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.23.0 - New UI Features</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right">
                             <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
@@ -470,50 +451,63 @@
             <!-- VIEW: PARTNER DASHBOARD                    -->
             <!-- ========================================== -->
             <div id="view-Partner" class="view-section space-y-6">
-                <div class="bg-gray-900 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden">
+                <!-- Specialized Dashboard for Riders -->
+                <div id="rider-top-dashboard" class="hidden bg-blue-600 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden">
+                    <div class="relative z-10">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-blue-200 text-xs font-bold uppercase tracking-widest mb-1">Rider Dashboard</p>
+                                <h2 class="text-2xl font-black mb-1" id="rider-welcome">Welcome!</h2>
+                                <p class="text-sm font-medium text-blue-100 mb-4" id="rider-vehicle-info">Vehicle Info</p>
+                            </div>
+                            <div class="bg-black/20 backdrop-blur border border-white/20 px-3 py-2 rounded-xl text-center">
+                                <p class="text-[9px] text-blue-100 font-bold uppercase mb-0.5">Points</p>
+                                <p class="text-xl font-black text-yellow-400" id="wallet-points-display">0</p>
+                            </div>
+                        </div>
+
+                        <!-- Current Location Broadcast -->
+                        <div class="bg-white/10 rounded-2xl p-3 border border-white/20 mt-2">
+                            <label class="block text-[10px] font-bold text-blue-100 uppercase tracking-wider mb-1">Broadcast Current Location</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="rider-current-loc-input" class="w-full bg-white/20 border border-white/30 rounded-xl py-2 px-3 text-sm text-white placeholder-blue-200 outline-none focus:ring-1 focus:ring-white" placeholder="Where are you?">
+                                <button type="button" onclick="window.getCurrentLocation('rider-current-loc-input')" class="bg-blue-500 hover:bg-blue-400 text-white px-3 rounded-xl border border-blue-400" title="Get GPS">
+                                    <i class="fa-solid fa-location-crosshairs"></i>
+                                </button>
+                                <button type="button" onclick="window.updateRiderLocation()" class="bg-white text-blue-600 px-4 font-bold text-xs rounded-xl shadow-md active:scale-95">Update</button>
+                            </div>
+                        </div>
+
+                        <!-- Master Online Toggle -->
+                        <div class="flex items-center justify-between mt-4 pt-4 border-t border-white/20">
+                            <p class="font-bold text-sm" id="rider-status-text">You are Offline</p>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="rider-status-toggle" class="sr-only peer" onchange="window.toggleShopStatus()">
+                                <div class="w-14 h-7 bg-blue-900 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-emerald-400"></div>
+                            </label>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-motorcycle absolute right-[-20px] bottom-[-20px] text-8xl text-blue-800/30"></i>
+                </div>
+
+                <!-- Specialized Dashboard for Shops (Food/Grocery) -->
+                <div id="shop-top-dashboard" class="hidden bg-gray-900 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden">
                     <div class="relative z-10 flex justify-between items-start">
                         <div>
                             <p class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">Partner Dashboard</p>
                             <h2 class="text-2xl font-black mb-4" id="partner-welcome">Welcome, Partner!</h2>
                         </div>
-                        <div id="ride-partner-wallet" class="hidden bg-white/10 backdrop-blur border border-white/20 px-3 py-2 rounded-xl text-center">
-                            <p class="text-[9px] text-gray-300 font-bold uppercase mb-0.5">Gramzo Points</p>
-                            <p class="text-lg font-black text-yellow-400" id="wallet-points-display">0</p>
-                        </div>
                     </div>
-                    <i class="fa-solid fa-motorcycle absolute right-[-20px] bottom-[-20px] text-8xl text-gray-800" id="dashboard-bg-icon"></i>
+                    <i class="fa-solid fa-store absolute right-[-20px] bottom-[-20px] text-8xl text-gray-800"></i>
                 </div>
                 
-                <!-- Quick Rider Controls (Highlighted for Riders) -->
-                <div id="rider-quick-controls" class="hidden bg-white p-4 rounded-3xl shadow-sm border border-yellow-300 mb-6 relative overflow-hidden">
-                    <div class="absolute right-0 top-0 w-16 h-16 bg-yellow-50 rounded-bl-full flex items-start justify-end p-3 pointer-events-none"><i class="fa-solid fa-motorcycle text-yellow-200 text-xl"></i></div>
-                    <div class="flex justify-between items-center mb-3 border-b border-gray-100 pb-3 relative z-10">
-                        <div>
-                            <h3 class="font-black text-gray-900 text-sm">Rider Status</h3>
-                            <p class="text-[10px] text-gray-500 font-bold" id="rider-quick-status-text">Offline</p>
-                        </div>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="rider-quick-status-toggle" class="sr-only peer" onchange="window.toggleShopStatus(true)">
-                            <div class="w-11 h-6 bg-red-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
-                        </label>
-                    </div>
-                    <div class="relative z-10">
-                        <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5"><i class="fa-solid fa-location-crosshairs text-red-500"></i> Current Stand / Location</label>
-                        <div class="flex gap-2">
-                            <input type="text" id="rider-quick-location" class="input-field !py-2.5 !text-xs !bg-gray-50 flex-1" placeholder="Search or type location...">
-                            <button type="button" onclick="window.getCurrentLocation('rider-quick-location')" class="bg-gray-100 text-gray-600 px-3 rounded-xl hover:bg-gray-200 transition shadow-sm"><i class="fa-solid fa-location-dot"></i></button>
-                        </div>
-                        <button type="button" onclick="window.updateRiderLocation()" class="w-full mt-3 bg-yellow-400 text-gray-900 py-2.5 rounded-xl font-bold text-xs shadow-md hover:bg-yellow-500 active:scale-95 transition-all border border-yellow-500"><i class="fa-solid fa-map-pin mr-1"></i> Broadcast Location</button>
-                    </div>
-                </div>
-
                 <!-- Partner Tasks Tabs -->
                 <div class="flex justify-between items-center border-b border-gray-200 pb-2">
                     <h3 class="font-black text-xl text-gray-800">Task Management</h3>
-                    <div class="flex bg-gray-100 rounded-lg p-1 overflow-x-auto no-scrollbar">
-                        <button id="tab-partner-order-Active" onclick="window.switchPartnerOrderTab('Active')" class="partner-order-tab bg-gray-200 text-gray-900 px-3 py-1 rounded-md text-[10px] font-bold transition whitespace-nowrap">Active</button>
-                        <button id="tab-partner-order-Completed" onclick="window.switchPartnerOrderTab('Completed')" class="partner-order-tab text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold transition whitespace-nowrap">Completed</button>
-                        <button id="tab-partner-order-Rejected" onclick="window.switchPartnerOrderTab('Rejected')" class="partner-order-tab text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold transition whitespace-nowrap">Rejected</button>
+                    <div class="flex bg-gray-100 rounded-lg p-1">
+                        <button id="tab-partner-order-Live" onclick="window.switchPartnerOrderTab('Live')" class="partner-order-tab bg-gray-200 text-gray-900 px-3 py-1 rounded-md text-[10px] font-bold transition">Active</button>
+                        <button id="tab-partner-order-Completed" onclick="window.switchPartnerOrderTab('Completed')" class="partner-order-tab text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold transition">Completed</button>
+                        <button id="tab-partner-order-Rejected" onclick="window.switchPartnerOrderTab('Rejected')" class="partner-order-tab text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold transition">Rejected</button>
                     </div>
                 </div>
 
@@ -526,6 +520,13 @@
             <div id="view-Partner-Profile" class="view-section space-y-6">
                 <h2 class="text-2xl font-black text-gray-900">Partner Settings</h2>
                 
+                <!-- Registration Pending Warning -->
+                <div id="partner-pending-warning" class="hidden bg-orange-50 border-2 border-orange-200 rounded-2xl p-5 text-center">
+                    <i class="fa-solid fa-clock text-4xl text-orange-400 mb-3"></i>
+                    <h3 class="font-black text-lg text-orange-800 mb-1">Account Under Review</h3>
+                    <p class="text-xs text-orange-700 font-medium">Your account is pending approval by the Admin. You cannot receive orders until approved.</p>
+                </div>
+
                 <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="font-bold text-gray-900">Business Profile</h3>
@@ -576,7 +577,7 @@
                                     <img id="partner-qr-preview" class="hidden w-24 h-24 mt-2 border border-gray-200 rounded-lg object-contain bg-white">
                                 </div>
                             </div>
-                            <button type="button" onclick="window.submitPartnerProfile()" id="btn-submit-profile" class="w-full bg-gray-900 text-white px-6 py-4 rounded-2xl font-bold mt-4 shadow-md">Save Config</button>
+                            <button type="button" onclick="window.submitPartnerProfile()" id="btn-submit-profile" class="w-full bg-gray-900 text-white px-6 py-4 rounded-2xl font-bold mt-4">Save Config</button>
                         </div>
 
                         <!-- RIDE SETTINGS -->
@@ -600,15 +601,12 @@
                                 <option value="10">10 Seater</option><option value="11">11 Seater</option><option value="12">12 Seater</option>
                                 <option value="13">13 Seater</option>
                             </select>
-
-                            <label class="block text-xs font-bold text-gray-600 mb-1 ml-1 mt-3">Current Area / Stand Location</label>
-                            <input id="partner-ride-location" class="input-field" placeholder="Where is your vehicle right now?">
                             
                             <button type="button" onclick="window.submitRideProfile()" id="btn-submit-ride-profile" class="w-full bg-gray-900 text-white px-6 py-4 rounded-2xl font-bold mt-4 shadow-md">Update Details</button>
                         </div>
                     </div>
 
-                    <!-- Shop/Ride Status Toggle -->
+                    <!-- Shop Status Toggle -->
                     <div id="shop-status-container" class="mt-6 flex items-center justify-between p-5 bg-white rounded-2xl border-2 border-red-100 shadow-sm">
                         <div>
                             <p class="font-black text-base text-gray-900" id="status-toggle-title">Accepting Orders</p>
@@ -628,26 +626,31 @@
                             <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Item Name</label>
                             <input id="prod-name" class="input-field mt-1" placeholder="E.g. Item Name">
                         </div>
+                        
+                        <!-- Item Category Dropdown -->
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Category</label>
+                            <select id="prod-item-category" class="input-field mt-1 bg-white">
+                                <option value="Main Course">Main Course</option>
+                                <option value="Starters">Starters & Snacks</option>
+                                <option value="Beverages">Beverages</option>
+                                <option value="Desserts">Desserts</option>
+                                <option value="Breads">Breads & Roti</option>
+                                <option value="Groceries">General Groceries</option>
+                                <option value="Essentials">Daily Essentials</option>
+                                <option value="Others">Others</option>
+                            </select>
+                        </div>
+
                         <div class="flex gap-3">
                             <div class="flex-1">
-                                <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Category</label>
-                                <select id="prod-category" class="input-field mt-1 !py-3">
-                                    <option value="Main Course">Main Course</option>
-                                    <option value="Starters">Starters</option>
-                                    <option value="Breads">Breads / Roti</option>
-                                    <option value="Desserts">Desserts / Sweets</option>
-                                    <option value="Beverages">Beverages</option>
-                                    <option value="Others">Others</option>
-                                </select>
+                                <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Prep Time (Mins)</label>
+                                <input type="number" id="prod-prep-time" class="input-field mt-1" placeholder="E.g. 15">
                             </div>
                             <div class="flex-1">
-                                <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Prep Time (Mins)</label>
-                                <input type="number" id="prod-prep-time" class="input-field mt-1 !py-3" placeholder="E.g. 15">
+                                <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Item Image</label>
+                                <input type="file" id="prod-image-upload" accept="image/*" class="w-full text-[10px] text-gray-500 border border-gray-200 rounded-xl p-1.5 bg-gray-50 mt-1">
                             </div>
-                        </div>
-                        <div>
-                            <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Item Image</label>
-                            <input type="file" id="prod-image-upload" accept="image/*" class="w-full text-[10px] text-gray-500 border border-gray-200 rounded-xl p-1.5 bg-gray-50 mt-1">
                         </div>
                         <div id="variant-container" class="space-y-2">
                             <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Portion & Price</label>
@@ -674,50 +677,53 @@
                 <div class="flex justify-between items-center">
                     <h2 class="text-2xl font-black text-gray-900">Admin Control</h2>
                     <div class="flex gap-2">
-                        <button type="button" onclick="window.initRoleListeners()" class="bg-gray-100 px-3 py-1.5 rounded-full text-xs font-bold hover:bg-gray-200"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
-                        <button type="button" onclick="window.logout()" class="bg-red-50 text-red-600 px-3 py-1.5 rounded-full text-xs font-bold hover:bg-red-100"><i class="fa-solid fa-power-off"></i> Logout</button>
+                        <button type="button" onclick="window.initRoleListeners()" class="bg-gray-100 px-3 py-1.5 rounded-full text-xs font-bold"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+                        <button type="button" onclick="window.logout()" class="bg-red-50 text-red-600 px-3 py-1.5 rounded-full text-xs font-bold"><i class="fa-solid fa-power-off"></i> Logout</button>
                     </div>
                 </div>
                 
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <div class="bg-white p-3 rounded-2xl border border-gray-100 text-center shadow-sm"><p class="text-[9px] font-bold text-gray-400 uppercase">Total Sales</p><h4 id="stat-rev-total" class="text-base font-black text-gray-900">₹0</h4></div>
-                    <div class="bg-white p-3 rounded-2xl border border-emerald-100 bg-emerald-50/30 text-center shadow-sm"><p class="text-[9px] font-bold text-emerald-600 uppercase">Food</p><h4 id="stat-rev-food" class="text-base font-black text-emerald-700">₹0</h4></div>
-                    <div class="bg-white p-3 rounded-2xl border border-blue-100 bg-blue-50/30 text-center shadow-sm"><p class="text-[9px] font-bold text-blue-600 uppercase">Grocery</p><h4 id="stat-rev-grocery" class="text-base font-black text-blue-700">₹0</h4></div>
-                    <div class="bg-white p-3 rounded-2xl border border-purple-100 bg-purple-50/30 text-center shadow-sm"><p class="text-[9px] font-bold text-purple-600 uppercase">Rides</p><h4 id="stat-rev-ride" class="text-base font-black text-purple-700">₹0</h4></div>
-                </div>
-                <div class="grid grid-cols-2 gap-3 mt-3">
-                    <div class="bg-white p-3 rounded-2xl border border-gray-100 text-center flex items-center justify-center gap-2"><i class="fa-solid fa-receipt text-gray-400 text-lg"></i><div><p class="text-[9px] font-bold text-gray-400 uppercase">Total Orders</p><h4 id="stat-ord" class="text-lg font-black text-gray-900 leading-none">0</h4></div></div>
-                    <div class="bg-white p-3 rounded-2xl border border-gray-100 text-center flex items-center justify-center gap-2"><i class="fa-solid fa-users text-gray-400 text-lg"></i><div><p class="text-[9px] font-bold text-gray-400 uppercase">Total Users</p><h4 id="stat-users" class="text-lg font-black text-gray-900 leading-none">0</h4></div></div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-white p-4 rounded-2xl border border-gray-100 text-center col-span-2 sm:col-span-1 shadow-sm">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase">Total Sales Value</p>
+                        <h4 id="stat-rev" class="text-2xl font-black text-emerald-600">₹0</h4>
+                        
+                        <div class="mt-3 grid grid-cols-3 gap-1 border-t border-gray-100 pt-3">
+                            <div><p class="text-[8px] font-bold text-gray-400 uppercase">Food</p><p id="stat-rev-food" class="text-sm font-black text-gray-800">₹0</p></div>
+                            <div class="border-l border-gray-100"><p class="text-[8px] font-bold text-gray-400 uppercase">Grocery</p><p id="stat-rev-grocery" class="text-sm font-black text-gray-800">₹0</p></div>
+                            <div class="border-l border-gray-100"><p class="text-[8px] font-bold text-gray-400 uppercase">Rides</p><p id="stat-rev-ride" class="text-sm font-black text-blue-600">₹0</p></div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border border-gray-100 text-center shadow-sm flex flex-col justify-center">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase">Total Orders</p>
+                        <h4 id="stat-ord" class="text-2xl font-black text-blue-600">0</h4>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border border-gray-100 text-center shadow-sm flex flex-col justify-center">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase">Registered Users</p>
+                        <h4 id="stat-users" class="text-2xl font-black text-purple-600">0</h4>
+                    </div>
                 </div>
 
                 <!-- ADMIN USERS TABS -->
-                <div class="bg-white rounded-3xl border border-gray-100 overflow-hidden mt-6">
+                <div class="bg-white rounded-3xl border border-gray-100 overflow-hidden mt-6 shadow-sm">
                     <div class="p-4 bg-gray-50 border-b border-gray-100 flex justify-between items-center overflow-x-auto no-scrollbar">
                         <span class="font-bold text-sm shrink-0 mr-4">Directory</span>
-                        <div class="flex bg-gray-100 rounded-lg p-1 shrink-0">
-                            <button id="tab-user-All" onclick="window.switchUserTab('All')" class="admin-user-tab bg-gray-200 text-gray-900 px-3 py-1 rounded-md text-[10px] font-bold transition">All</button>
+                        <div class="flex bg-gray-200 rounded-lg p-1 shrink-0">
+                            <button id="tab-user-All" onclick="window.switchUserTab('All')" class="admin-user-tab bg-white text-gray-900 shadow-sm px-3 py-1 rounded-md text-[10px] font-bold transition">All</button>
                             <button id="tab-user-User" onclick="window.switchUserTab('User')" class="admin-user-tab text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold transition">Users</button>
                             <button id="tab-user-FoodOwner" onclick="window.switchUserTab('Food Owner')" class="admin-user-tab text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold transition">Shops</button>
                             <button id="tab-user-GroceryShop" onclick="window.switchUserTab('Grocery Shop')" class="admin-user-tab text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold transition">Grocery</button>
                             <button id="tab-user-Rider" onclick="window.switchUserTab('Rider')" class="admin-user-tab text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold transition">Riders</button>
                         </div>
                     </div>
-                    
-                    <div id="admin-load-users-btn-container" class="p-6 text-center">
-                        <button onclick="window.loadAdminUsersList()" class="bg-blue-50 text-blue-600 px-4 py-2 rounded-xl text-xs font-bold border border-blue-100 shadow-sm hover:bg-blue-100"><i class="fa-solid fa-users mr-1"></i> Load User Directory</button>
-                    </div>
-                    
-                    <div id="admin-users-table-container" class="overflow-x-auto hidden">
-                        <table class="w-full text-left text-xs"><tbody id="admin-users-body"></tbody></table>
-                    </div>
+                    <div class="overflow-x-auto"><table class="w-full text-left text-xs"><tbody id="admin-users-body"></tbody></table></div>
                 </div>
 
                 <!-- ADMIN ORDERS TABS -->
-                <div class="bg-white rounded-3xl border border-gray-100 overflow-hidden mt-6">
+                <div class="bg-white rounded-3xl border border-gray-100 overflow-hidden mt-6 shadow-sm">
                     <div class="p-4 bg-gray-50 border-b border-gray-100 flex justify-between items-center overflow-x-auto no-scrollbar">
                         <span class="font-bold text-sm shrink-0 mr-4">Transaction Control</span>
-                        <div class="flex bg-gray-100 rounded-lg p-1 shrink-0">
-                            <button id="tab-order-Active" onclick="window.switchOrderTab('Active')" class="admin-order-tab bg-gray-200 text-gray-900 px-3 py-1 rounded-md text-[10px] font-bold transition">Active</button>
+                        <div class="flex bg-gray-200 rounded-lg p-1 shrink-0">
+                            <button id="tab-order-Live" onclick="window.switchOrderTab('Live')" class="admin-order-tab bg-white text-gray-900 shadow-sm px-3 py-1 rounded-md text-[10px] font-bold transition">Active</button>
                             <button id="tab-order-Completed" onclick="window.switchOrderTab('Completed')" class="admin-order-tab text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold transition">Completed</button>
                             <button id="tab-order-Rejected" onclick="window.switchOrderTab('Rejected')" class="admin-order-tab text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold transition">Rejected</button>
                         </div>
@@ -750,7 +756,7 @@
                     </div>
                 </div>
 
-                <div class="bg-white rounded-3xl border border-gray-100 p-5 mt-6">
+                <div class="bg-white rounded-3xl border border-gray-100 p-5 mt-6 shadow-sm">
                     <h3 class="font-bold text-gray-900 mb-2 border-b border-gray-100 pb-2">Manage Promo Banners</h3>
                     <div class="space-y-3 mt-3">
                         <input type="file" id="admin-offer-file" accept="image/*" multiple class="w-full text-sm border p-1.5 bg-gray-50 rounded-xl">
@@ -758,7 +764,7 @@
                     </div>
                 </div>
 
-                <div class="bg-gray-900 rounded-3xl border border-gray-800 p-5 mt-6">
+                <div class="bg-gray-900 rounded-3xl border border-gray-800 p-5 mt-6 shadow-xl">
                     <h3 class="font-bold text-white mb-2 border-b border-gray-700 pb-2">Manage Scrolling Marquee</h3>
                     <div class="space-y-3 mt-3">
                         <input type="text" id="admin-marquee-text" class="input-field !bg-gray-800 !text-white !border-gray-700" placeholder="Enter text...">
@@ -860,6 +866,34 @@
         </div>
     </div>
 
+    <!-- Custom Prompt Modal (Replaces native prompt) -->
+    <div id="custom-prompt-modal" class="modal-overlay z-[600]">
+        <div class="modal-content !max-w-xs">
+            <h3 class="font-black text-xl text-gray-900 mb-2" id="prompt-title">Prompt</h3>
+            <p class="text-xs text-gray-500 mb-4" id="prompt-desc">Enter value:</p>
+            <input type="text" id="prompt-input" class="input-field mb-4" placeholder="...">
+            <div class="flex gap-2">
+                <button onclick="window.cancelCustomPrompt()" class="flex-1 bg-gray-100 text-gray-600 py-3 rounded-xl font-bold text-sm hover:bg-gray-200">Cancel</button>
+                <button onclick="window.submitCustomPrompt()" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-blue-700">Submit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Confirm Modal (Replaces native confirm) -->
+    <div id="custom-confirm-modal" class="modal-overlay z-[600]">
+        <div class="modal-content !max-w-xs">
+            <div class="w-12 h-12 bg-yellow-50 rounded-full flex items-center justify-center mb-3">
+                <i class="fa-solid fa-triangle-exclamation text-xl text-yellow-500"></i>
+            </div>
+            <h3 class="font-black text-xl text-gray-900 mb-2" id="confirm-title">Confirm Action</h3>
+            <p class="text-sm text-gray-600 mb-6 font-medium" id="confirm-desc">Are you sure you want to do this?</p>
+            <div class="flex gap-2">
+                <button onclick="window.cancelCustomConfirm()" class="flex-1 bg-gray-100 text-gray-600 py-3 rounded-xl font-bold text-sm hover:bg-gray-200">Cancel</button>
+                <button id="btn-confirm-yes" onclick="window.submitCustomConfirm()" class="flex-1 bg-red-600 text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-red-700">Yes</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Global Status Popup Modal -->
     <div id="status-popup-modal" class="modal-overlay z-[500]">
         <div class="modal-content !max-w-xs text-center border-t-8 border-red-500">
@@ -869,19 +903,6 @@
             <h3 id="status-popup-title" class="font-black text-2xl text-gray-900 mb-2">Update</h3>
             <p id="status-popup-desc" class="text-sm text-gray-600 mb-6 font-medium">Details</p>
             <button onclick="document.getElementById('status-popup-modal').classList.remove('active'); window.stopAlertSound && window.stopAlertSound();" class="w-full bg-gray-900 text-white py-3.5 rounded-xl font-bold shadow-md hover:bg-gray-800 transition active:scale-95 text-sm uppercase tracking-widest">Acknowledge</button>
-        </div>
-    </div>
-    
-    <!-- Custom Confirm / Prompt Modal -->
-    <div id="custom-dialog-modal" class="modal-overlay z-[600]">
-        <div class="modal-content !max-w-xs text-center">
-            <h3 id="custom-dialog-title" class="font-black text-xl text-gray-900 mb-2">Confirm</h3>
-            <p id="custom-dialog-desc" class="text-sm text-gray-600 mb-4 font-medium">Are you sure?</p>
-            <input type="text" id="custom-dialog-input" class="input-field mb-4 hidden !py-2.5 text-center font-bold" placeholder="Type here...">
-            <div class="flex gap-2">
-                <button id="custom-dialog-cancel" class="flex-1 bg-gray-100 text-gray-600 py-3 rounded-xl font-bold text-sm hover:bg-gray-200">Cancel</button>
-                <button id="custom-dialog-confirm" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-blue-700">Confirm</button>
-            </div>
         </div>
     </div>
 
@@ -952,7 +973,7 @@
         </div>
     </div>
 
-    <div id="toast-msg" class="fixed top-20 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full text-sm font-bold z-[700] shadow-2xl transition-all duration-300 transform -translate-y-10 opacity-0 pointer-events-none flex items-center gap-2">
+    <div id="toast-msg" class="fixed top-24 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full text-sm font-bold z-[300] shadow-2xl transition-all duration-300 transform -translate-y-10 opacity-0 pointer-events-none flex items-center gap-2">
         <i class="fa-solid fa-circle-info text-emerald-400"></i>
         <span id="toast-text">Message</span>
     </div>
@@ -973,7 +994,6 @@
             appId: "1:674262956986:web:772f68694c77e15bf3fb83"
         };
         
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'gramzo-super-v2'; 
         const app = initializeApp(liveFirebaseConfig);
         const auth = getAuth(app);
         const db = initializeFirestore(app, { experimentalForceLongPolling: true });
@@ -981,6 +1001,7 @@
         // GLOBALS & STATE
         let currentUser = null;
         let currentRestaurantFilter = null;
+        let currentFoodCategoryFilter = null;
         window.cart = [];
         window.appliedPromo = 0;
         window.promoCode = '';
@@ -989,74 +1010,78 @@
         window.lastKnownOrders = {}; 
         let unsubscribeListeners = []; 
         let currentAuthRole = 'User'; 
-        window.currentUserMainCategory = 'Food Owner'; 
+        window.currentUserMainCategory = 'Food Owner'; // Default to Food
 
         // RATING STATE
         window.currentRatingOrderId = null;
         window.currentRatingPartnerId = null;
         window.selectedRating = 0;
-        window.editingProductId = null; 
+        window.editingProductId = null; // Added to track edit mode
 
         // ADMIN TABS STATE
-        window.adminUsersLoaded = false;
         window.adminCurrentUserTab = 'All';
-        window.adminCurrentOrderTab = 'Active';
+        window.adminCurrentOrderTab = 'Live';
         window.adminUsersData = [];
         window.adminOrdersData = [];
 
         // PARTNER TABS STATE
-        window.partnerCurrentOrderTab = 'Active';
+        window.partnerCurrentOrderTab = 'Live';
         window.partnerOrdersData = [];
 
         window.currentSelectedRideType = null;
         window.currentRideDistanceKm = null;
         window.currentRideFares = { Bike: 0, Toto: 0, Car: 0 };
 
-        // Custom Dialog Wrapper to replace alert/prompt/confirm natively
-        window.customDialog = (options) => {
+        // CUSTOM PROMPT/CONFIRM STATE
+        let customPromptResolve = null;
+        let customConfirmResolve = null;
+
+        window.customPrompt = (title, desc, placeholder = "", type = "text") => {
             return new Promise((resolve) => {
-                const modal = document.getElementById('custom-dialog-modal');
-                document.getElementById('custom-dialog-title').innerText = options.title || 'Confirm';
-                document.getElementById('custom-dialog-desc').innerText = options.desc || '';
-                
-                const inputEl = document.getElementById('custom-dialog-input');
-                if(options.type === 'prompt') {
-                    inputEl.classList.remove('hidden');
-                    inputEl.value = '';
-                    inputEl.type = options.inputType || 'text';
-                    inputEl.placeholder = options.placeholder || 'Type here...';
-                    setTimeout(() => inputEl.focus(), 100);
-                } else {
-                    inputEl.classList.add('hidden');
-                }
-
-                const btnCancel = document.getElementById('custom-dialog-cancel');
-                const btnConfirm = document.getElementById('custom-dialog-confirm');
-
-                btnConfirm.innerText = options.confirmText || 'Confirm';
-                btnConfirm.className = options.confirmClass || 'flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-blue-700';
-
-                if(options.type === 'alert') {
-                    btnCancel.classList.add('hidden');
-                } else {
-                    btnCancel.classList.remove('hidden');
-                }
-
-                const cleanup = () => {
-                    modal.classList.remove('active');
-                    btnCancel.onclick = null;
-                    btnConfirm.onclick = null;
-                };
-
-                btnCancel.onclick = () => { cleanup(); resolve(null); };
-                btnConfirm.onclick = () => { 
-                    cleanup(); 
-                    if(options.type === 'prompt') resolve(inputEl.value);
-                    else resolve(true);
-                };
-
-                modal.classList.add('active');
+                document.getElementById('prompt-title').innerText = title;
+                document.getElementById('prompt-desc').innerText = desc;
+                const input = document.getElementById('prompt-input');
+                input.type = type;
+                input.value = '';
+                input.placeholder = placeholder;
+                document.getElementById('custom-prompt-modal').classList.add('active');
+                input.focus();
+                customPromptResolve = resolve;
             });
+        };
+
+        window.submitCustomPrompt = () => {
+            if (customPromptResolve) customPromptResolve(document.getElementById('prompt-input').value);
+            document.getElementById('custom-prompt-modal').classList.remove('active');
+            customPromptResolve = null;
+        };
+
+        window.cancelCustomPrompt = () => {
+            if (customPromptResolve) customPromptResolve(null);
+            document.getElementById('custom-prompt-modal').classList.remove('active');
+            customPromptResolve = null;
+        };
+
+        window.customConfirm = (title, desc, confirmBtnText = "Yes") => {
+            return new Promise((resolve) => {
+                document.getElementById('confirm-title').innerText = title;
+                document.getElementById('confirm-desc').innerText = desc;
+                document.getElementById('btn-confirm-yes').innerText = confirmBtnText;
+                document.getElementById('custom-confirm-modal').classList.add('active');
+                customConfirmResolve = resolve;
+            });
+        };
+
+        window.submitCustomConfirm = () => {
+            if (customConfirmResolve) customConfirmResolve(true);
+            document.getElementById('custom-confirm-modal').classList.remove('active');
+            customConfirmResolve = null;
+        };
+
+        window.cancelCustomConfirm = () => {
+            if (customConfirmResolve) customConfirmResolve(false);
+            document.getElementById('custom-confirm-modal').classList.remove('active');
+            customConfirmResolve = null;
         };
 
         window.handleVillageChange = () => {
@@ -1092,6 +1117,8 @@
                 if(!currentUser) document.getElementById('partner-cta').classList.remove('hidden');
 
                 window.currentRestaurantFilter = null; 
+                window.currentFoodCategoryFilter = null;
+                document.getElementById('food-category-chips').classList.add('hidden');
                 document.getElementById('marketplace-title').innerText = cat === 'Food Owner' ? 'Restaurants Near You' : 'Grocery Stores Near You';
                 document.getElementById('btn-clear-filter').classList.add('hidden');
                 window.loadMarketplaceData();
@@ -1113,8 +1140,8 @@
             return date.toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
         };
 
-        const getCol = (name) => IS_LIVE_WEBSITE ? collection(db, name) : collection(db, 'artifacts', appId, 'public', 'data', name);
-        const getDocRef = (colName, docId) => IS_LIVE_WEBSITE ? doc(db, colName, docId) : doc(db, 'artifacts', appId, 'public', 'data', colName, docId);
+        const getCol = (name) => collection(db, name);
+        const getDocRef = (colName, docId) => doc(db, colName, docId);
 
         window.dbCall = (promise, ms = 8000) => {
             return new Promise((resolve, reject) => {
@@ -1123,19 +1150,22 @@
             });
         };
 
+        // --- Notification & Voice Alert Logic ---
         window.alertAudio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-        window.alertAudio.loop = true; 
+        window.alertAudio.loop = true; // loop until acknowledged
 
         window.speakAlert = (text) => {
             try {
                 if ('speechSynthesis' in window) {
-                    window.speechSynthesis.cancel(); 
+                    window.speechSynthesis.cancel(); // Stop any ongoing speech
                     const msg = new SpeechSynthesisUtterance(text);
                     msg.rate = 1.0; 
                     window.speechSynthesis.speak(msg);
                 }
                 window.alertAudio.play().catch(e => console.log("Audio blocked until user clicks on screen."));
-            } catch(e) { console.error("Speech Error:", e); }
+            } catch(e) {
+                console.error("Speech Synthesis Error:", e);
+            }
         };
 
         window.stopAlertSound = () => {
@@ -1150,14 +1180,19 @@
             window.speakAlert(desc); 
         };
 
+        // NEW LOGO FOR PUSH NOTIFICATION
         window.sendAlert = (title, body) => {
             if ("Notification" in window && Notification.permission === "granted") {
-                new Notification(title, { body: body, icon: 'https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/Android%20Icon.png' });
+                new Notification(title, { 
+                    body: body, 
+                    icon: 'https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/New%20logo%20-Gramzo%20-%206%20may.png' 
+                });
             } else {
                 window.showToast(title + " - " + body, "info");
             }
         };
 
+        // --- Rating & Review System ---
         window.openRatingModal = (orderId, partnerId) => {
             window.currentRatingOrderId = orderId;
             window.currentRatingPartnerId = partnerId;
@@ -1254,7 +1289,7 @@
                 titleEl.innerText = "About Gramzo";
                 bodyEl.innerHTML = `
                     <div class="text-center mb-6">
-                        <img src="https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/ChatGPT%20Image%20May%202%2C%202026%2C%2001_16_21%20PM.png" alt="Gramzo Logo" class="h-12 object-contain mx-auto mb-4">
+                        <img src="https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/New%20logo%20-Gramzo%20-%206%20may.png" alt="Gramzo Logo" class="h-16 object-contain mx-auto mb-4 rounded-2xl shadow-sm">
                         <p class="font-bold text-lg text-gray-800">Welcome to Gramzo.in!</p>
                         <p class="mt-2 leading-relaxed">We are India's emerging instant delivery super app, specially tailored for rural and semi-urban communities.</p>
                     </div>
@@ -1359,18 +1394,13 @@
             initInput('ride-pickup');
             initInput('ride-drop');
             initInput('partner-ride-location');
-            initInput('rider-quick-location');
         };
 
         if (window.isGoogleMapsLoaded) window.setupMapsFeatures();
 
         window.calculateDistance = (origin, dest) => {
             return new Promise((resolve) => {
-                if(!window.google || !window.google.maps) {
-                    console.warn("Google Maps not loaded. Falling back to manual distance entry.");
-                    resolve(null);
-                    return;
-                }
+                if(!window.google || !window.google.maps) resolve(null);
                 const service = new google.maps.DistanceMatrixService();
                 service.getDistanceMatrix({
                     origins: [origin],
@@ -1381,7 +1411,7 @@
                     if(status === 'OK' && res.rows[0].elements[0].status === 'OK') {
                         resolve({
                             text: res.rows[0].elements[0].distance.text,
-                            value: res.rows[0].elements[0].distance.value // in meters
+                            value: res.rows[0].elements[0].distance.value // value is always in meters
                         });
                     } else resolve(null);
                 });
@@ -1404,32 +1434,24 @@
             btnCalc.disabled = true;
 
             let distanceData = await window.calculateDistance(pickup, drop);
-            let distKm = 0;
             
-            // MAPS FALLBACK LOGIC
+            // Custom Prompt Fallback if Maps API fails to calculate distance
             if (!distanceData) {
-                const distStr = await window.customDialog({
-                    title: "Enter Distance",
-                    desc: "Could not fetch auto-distance. Please enter the estimated distance in Kilometers manually:",
-                    type: "prompt",
-                    inputType: "number",
-                    placeholder: "E.g. 5"
-                });
+                btnCalc.innerText = origText;
+                btnCalc.disabled = false;
                 
-                if(distStr) {
-                    distKm = parseFloat(distStr);
-                    if(isNaN(distKm) || distKm <= 0) {
-                        window.showToast("Invalid distance entered.", "error");
-                        btnCalc.innerText = origText; btnCalc.disabled = false;
-                        return;
-                    }
-                } else {
-                    window.showToast("Calculation cancelled.", "error");
-                    btnCalc.innerText = origText; btnCalc.disabled = false;
-                    return;
-                }
-            } else {
-                distKm = (distanceData.value / 1000);
+                const manualDistStr = await window.customPrompt(
+                    "Distance Calculation Failed",
+                    "We couldn't automatically calculate the distance. Please enter the estimated distance in Kilometers:",
+                    "e.g., 5.5",
+                    "number"
+                );
+                
+                if (!manualDistStr) return; // User cancelled
+                const manualDist = parseFloat(manualDistStr);
+                if (isNaN(manualDist) || manualDist <= 0) return window.showToast("Please enter a valid distance.", "error");
+                
+                distanceData = { value: manualDist * 1000, text: `${manualDist} km` };
             }
 
             btnCalc.innerText = origText;
@@ -1438,24 +1460,25 @@
             const distDisplay = document.getElementById('ride-distance-display');
             distDisplay.classList.remove('hidden');
 
+            let distKm = (distanceData.value / 1000);
             window.currentRideDistanceKm = distKm;
             if (isRoundTrip) distKm *= 2;
 
             let estFare = 0;
-            // NEW RIDE FARE LOGIC
-            if (searchType === 'Bike') {
-                // Bike: 20 rs for flat 5 km after that 5 rs per km
+            // Fare Logic Update
+            if (searchType === 'Car') {
+                // Car: 20 base + 12 per km
+                estFare = 20 + (distKm * 12);
+            } else if (searchType === 'Bike') {
+                // Bike: 20 flat for 5km, then 5 per km
                 estFare = distKm <= 5 ? 20 : 20 + ((distKm - 5) * 5);
             } else if (searchType === 'Toto') {
-                // Toto: Flat 100 for 5 km afterwards 10 Rs per km
+                // Toto: 100 flat for 5km, then 10 per km
                 estFare = distKm <= 5 ? 100 : 100 + ((distKm - 5) * 10);
-            } else { 
-                // Car: 20 rs base price plus 12 rs per km
-                estFare = 20 + (distKm * 12);
             }
             
-            estFare = Math.max(20, Math.round(estFare)); // Min safety cap
-            const displayKm = (window.currentRideDistanceKm * (isRoundTrip ? 2 : 1)).toFixed(1);
+            estFare = Math.max(20, Math.round(estFare));
+            const displayKm = distKm.toFixed(1);
 
             distDisplay.innerHTML = `
                 <div class="flex flex-col gap-1.5 py-1">
@@ -1464,7 +1487,7 @@
                 </div>`;
             
             window.currentRideFares = { [searchType]: estFare };
-            window.currentSelectedRideType = searchType;
+            window.currentSelectedRideType = searchType; // Pass into confirmRide
 
             // Hide calc button, show search button
             document.getElementById('btn-calc-fare').classList.add('hidden');
@@ -1489,7 +1512,7 @@
                 const availableDrivers = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(u => 
                     ['Rider', 'Ride Partner'].includes(u.category) && 
                     u.shopStatus === 'Online' && 
-                    u.approvalStatus === 'Approved' && 
+                    u.approvalStatus === 'Approved' && // Ensure driver is approved by admin
                     (u.vehicleType === searchType || (!u.vehicleType && searchType === 'Car'))
                 );
 
@@ -1526,13 +1549,8 @@
         };
 
         window.confirmRide = async (driverPhone, driverName, btn) => {
-            const confirmed = await window.customDialog({
-                title: "Confirm Booking",
-                desc: `Have you confirmed the ride details with ${driverName} via call?`,
-                confirmText: "Yes, Book Now",
-                confirmClass: "flex-1 bg-emerald-500 text-white py-3 rounded-xl font-bold shadow-md hover:bg-emerald-600"
-            });
-            if(!confirmed) return;
+            const confirmed = await window.customConfirm("Confirm Booking", `Have you confirmed the ride details over the phone with ${driverName}?`, "Confirm Booking");
+            if (!confirmed) return;
 
             const pickup = document.getElementById('ride-pickup').value.trim();
             const drop = document.getElementById('ride-drop').value.trim();
@@ -1549,7 +1567,7 @@
                     riderId: driverPhone,
                     riderName: driverName,
                     pickup: pickup,
-                    address: drop, 
+                    address: drop, // Map to address for consistency in history
                     status: 'Requested', 
                     amount: fare,
                     total: fare,
@@ -1565,14 +1583,7 @@
         };
 
         window.startRide = async (orderId) => {
-            const amountStr = await window.customDialog({
-                title: "Start Ride",
-                desc: "Enter the final negotiated Ride Amount (₹):",
-                type: "prompt",
-                inputType: "number",
-                confirmText: "Start Ride"
-            });
-            
+            const amountStr = await window.customPrompt("Ride Fare", "Enter the final negotiated Ride Amount (₹):", "e.g., 150", "number");
             if(!amountStr) return;
             const amount = parseInt(amountStr);
             if(isNaN(amount) || amount <= 0) return window.showToast("Please enter a valid amount.", "error");
@@ -1581,26 +1592,22 @@
                 await window.dbCall(updateDoc(getDocRef('orders', orderId), {
                     status: 'Started',
                     amount: amount,
-                    total: amount 
+                    total: amount // mapped for consistency
                 }), 10000);
                 window.showToast("Ride Started!", "success");
             } catch(e) { window.showToast("Failed to update ride status.", "error"); }
         };
 
         window.completeRide = async (orderId) => {
-            const confirmed = await window.customDialog({
-                title: "Complete Ride",
-                desc: "Are you sure you have completed the ride and collected payment? 20 Gramzo Points will be deducted.",
-                confirmText: "Complete Ride",
-                confirmClass: "flex-1 bg-emerald-500 text-white py-3 rounded-xl font-bold shadow-md"
-            });
-            if(!confirmed) return;
+            const confirmed = await window.customConfirm("Complete Ride", "Are you sure you have completed the ride and collected payment? 20 Gramzo Points will be deducted.", "Complete Ride");
+            if (!confirmed) return;
 
             if((currentUser.walletPoints || 0) < 20) {
                 return window.showToast("Insufficient Gramzo Points to complete this ride. Contact Admin.", "error");
             }
 
             try {
+                // Deduct 20 points
                 const newPoints = (currentUser.walletPoints || 0) - 20;
                 
                 await window.dbCall(updateDoc(getDocRef('orders', orderId), { status: 'Completed' }), 10000);
@@ -1615,15 +1622,8 @@
         };
 
         window.adminAddPoints = async (userId, currentPoints) => {
-            const amountStr = await window.customDialog({
-                title: "Add Points",
-                desc: `Current Points: ${currentPoints}\nEnter amount of points to add:`,
-                type: "prompt",
-                inputType: "number",
-                confirmText: "Add Points"
-            });
+            const amountStr = await window.customPrompt("Add Points", `Current Points: ${currentPoints}\nEnter amount of points to add:`, "amount", "number");
             if(!amountStr) return;
-            
             const pointsToAdd = parseInt(amountStr);
             if(isNaN(pointsToAdd) || pointsToAdd <= 0) return window.showToast("Invalid points amount.", "error");
 
@@ -1679,6 +1679,7 @@
             }
         };
 
+        // --- AUTH UI ---
         window.openAuthModal = (role = 'User') => {
             currentAuthRole = role;
             document.getElementById('auth-overlay').classList.add('active');
@@ -1830,7 +1831,8 @@
 
                     const userData = { 
                         name, phone, pin: pass, role: currentAuthRole, shopStatus: ['Rider', 'Ride Partner'].includes(partnerCategory) ? 'Offline' : 'Open',
-                        approvalStatus: currentAuthRole === 'Partner' ? 'Pending' : 'Approved', uid: auth?.currentUser?.uid || 'unknown',
+                        approvalStatus: currentAuthRole === 'Partner' ? 'Pending' : 'Approved', // Partner needs admin approval
+                        uid: auth?.currentUser?.uid || 'unknown',
                         created: new Date().toISOString(),
                         ...(currentAuthRole === 'Partner' && { 
                             category: partnerCategory, 
@@ -1843,7 +1845,7 @@
                                 carNum: carNum,
                                 carModel: carModel,
                                 seater: seater,
-                                walletPoints: 20, // Initial free points
+                                walletPoints: 20, // Initial free 20 points
                                 currentLocation: ''
                             })
                         })
@@ -1881,13 +1883,20 @@
         window.finalizeLoginSequence = () => {
             window.closeAuthModal();
             
-            // Request Notification Permission on Login safely
+            // Request Notification Permission on Login
             if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
-                Notification.requestPermission().catch(e => console.log("Push block:", e));
+                Notification.requestPermission();
             }
 
             window.showToast(`Welcome back, ${currentUser.name.split(' ')[0]}!`, "success");
 
+            document.getElementById('btn-partner-login-trigger').classList.add('hidden');
+            document.getElementById('btn-login-trigger').classList.add('hidden');
+            document.getElementById('profile-trigger').classList.remove('hidden');
+            
+            document.getElementById('nav-initial').innerText = currentUser.name.charAt(0).toUpperCase();
+            document.getElementById('nav-name').innerText = currentUser.name;
+            document.getElementById('nav-role').innerText = currentUser.role;
             document.getElementById('nav-role').className = `text-[8px] font-bold uppercase ${currentUser.role === 'Admin' ? 'text-purple-500' : currentUser.role === 'Partner' ? 'text-orange-500' : 'text-blue-500'}`;
             document.getElementById('menu-name').innerText = currentUser.name;
             document.getElementById('menu-phone').innerText = currentUser.phone;
@@ -1898,34 +1907,46 @@
             if (currentUser.role === 'Partner') {
                 const isShop = ['Food Owner', 'Grocery Shop'].includes(currentUser.category);
                 const isRide = ['Rider', 'Ride Partner'].includes(currentUser.category);
-
-                const approvalBadge = document.getElementById('partner-approval-status');
-                if (approvalBadge) {
-                    const isAppr = currentUser.approvalStatus === 'Approved';
-                    approvalBadge.innerText = currentUser.approvalStatus || 'Pending';
-                    approvalBadge.className = `text-[10px] font-black uppercase border px-2 py-1 rounded ${isAppr ? 'border-emerald-200 text-emerald-600 bg-emerald-50' : 'border-orange-200 text-orange-600 bg-orange-50'}`;
-                }
+                const isApproved = currentUser.approvalStatus === 'Approved';
 
                 document.getElementById('partner-food-settings').classList.add('hidden');
                 document.getElementById('add-product-container').classList.add('hidden');
                 document.getElementById('partner-catalog-list-container').classList.add('hidden');
                 document.getElementById('partner-ride-setup-form').classList.add('hidden');
-                document.getElementById('ride-partner-wallet').classList.add('hidden');
-                document.getElementById('rider-quick-controls').classList.add('hidden');
+                
+                // Hide both dashboards by default
+                document.getElementById('rider-top-dashboard').classList.add('hidden');
+                document.getElementById('shop-top-dashboard').classList.add('hidden');
+
+                // Warning Banner
+                const warningBanner = document.getElementById('partner-pending-warning');
+                if (!isApproved) {
+                    warningBanner.classList.remove('hidden');
+                } else {
+                    warningBanner.classList.add('hidden');
+                }
 
                 if(isShop) {
-                    document.getElementById('partner-food-settings').classList.remove('hidden');
-                    document.getElementById('add-product-container').classList.remove('hidden');
-                    document.getElementById('partner-catalog-list-container').classList.remove('hidden');
-                    document.getElementById('add-product-title').innerText = currentUser.category === 'Grocery Shop' ? 'Add Grocery Item' : 'Add Menu Item';
-                    document.getElementById('status-toggle-title').innerText = 'Accepting Orders';
+                    document.getElementById('shop-top-dashboard').classList.remove('hidden');
+                    document.getElementById('partner-welcome').innerText = `Welcome, ${currentUser.name.split(' ')[0]}!`;
+                    
+                    if (isApproved) {
+                        document.getElementById('partner-food-settings').classList.remove('hidden');
+                        document.getElementById('add-product-container').classList.remove('hidden');
+                        document.getElementById('partner-catalog-list-container').classList.remove('hidden');
+                        document.getElementById('add-product-title').innerText = currentUser.category === 'Grocery Shop' ? 'Add Grocery Item' : 'Add Menu Item';
+                        document.getElementById('status-toggle-title').innerText = 'Accepting Orders';
+                    }
                 } else if (isRide) {
-                    document.getElementById('partner-ride-setup-form').classList.remove('hidden');
-                    document.getElementById('ride-partner-wallet').classList.remove('hidden');
-                    document.getElementById('rider-quick-controls').classList.remove('hidden');
+                    document.getElementById('rider-top-dashboard').classList.remove('hidden');
+                    document.getElementById('rider-welcome').innerText = `Welcome, ${currentUser.name.split(' ')[0]}!`;
+                    document.getElementById('rider-vehicle-info').innerText = `${currentUser.carModel || 'Vehicle'} - ${currentUser.carNum || 'N/A'}`;
                     document.getElementById('wallet-points-display').innerText = currentUser.walletPoints || 0;
-                    document.getElementById('status-toggle-title').innerText = 'Online & Available';
-                    document.getElementById('dashboard-bg-icon').className = "fa-solid fa-taxi absolute right-[-20px] bottom-[-20px] text-8xl text-gray-800";
+                    
+                    if (isApproved) {
+                        document.getElementById('partner-ride-setup-form').classList.remove('hidden');
+                        if(currentUser.currentLocation) document.getElementById('rider-current-loc-input').value = currentUser.currentLocation;
+                    }
                 }
 
                 if(currentUser.shopName) document.getElementById('hub-name-val').innerText = currentUser.shopName;
@@ -1946,26 +1967,21 @@
                     if(currentUser.carNum) document.getElementById('partner-ride-num').value = currentUser.carNum;
                     if(currentUser.carModel) document.getElementById('partner-ride-model').value = currentUser.carModel;
                     if(currentUser.seater) document.getElementById('partner-ride-seater').value = currentUser.seater;
-                    if(currentUser.currentLocation) {
-                        document.getElementById('partner-ride-location').value = currentUser.currentLocation;
-                        document.getElementById('rider-quick-location').value = currentUser.currentLocation;
-                    }
+                    if(currentUser.currentLocation) document.getElementById('partner-ride-location').value = currentUser.currentLocation;
                 }
 
-                const statusToggle = document.getElementById('partner-status-toggle');
-                const quickToggle = document.getElementById('rider-quick-status-toggle');
+                const statusToggleShop = document.getElementById('partner-status-toggle');
+                const statusToggleRider = document.getElementById('rider-status-toggle');
                 const isCurrentlyOpen = ['Open', 'Online'].includes(currentUser.shopStatus);
+
+                if (statusToggleShop) statusToggleShop.checked = isCurrentlyOpen;
+                if (statusToggleRider) statusToggleRider.checked = isCurrentlyOpen;
                 
-                if (statusToggle) {
-                    statusToggle.checked = isCurrentlyOpen;
-                    document.getElementById('shop-status-text').innerText = isRide 
-                        ? (isCurrentlyOpen ? 'Online & Available' : 'Currently Offline')
-                        : `Currently ${isCurrentlyOpen ? 'Open' : 'Closed'}`;
-                }
-                if (quickToggle) {
-                    quickToggle.checked = isCurrentlyOpen;
-                    document.getElementById('rider-quick-status-text').innerText = isCurrentlyOpen ? 'Online & Available' : 'Currently Offline';
-                }
+                const shopStatusTxt = document.getElementById('shop-status-text');
+                if(shopStatusTxt) shopStatusTxt.innerText = `Currently ${isCurrentlyOpen ? 'Open' : 'Closed'}`;
+                
+                const riderStatusTxt = document.getElementById('rider-status-text');
+                if(riderStatusTxt) riderStatusTxt.innerText = isCurrentlyOpen ? 'You are ONLINE' : 'You are OFFLINE';
 
                 const codToggle = document.getElementById('partner-cod-toggle-setup');
                 if (codToggle && currentUser.codEnabled !== undefined) codToggle.checked = currentUser.codEnabled;
@@ -1990,16 +2006,39 @@
 
         const renderProducts = (items) => {
             const listEl = document.getElementById('market-list');
+            const chipsEl = document.getElementById('food-category-chips');
+            
             if (!listEl) return;
             
+            // Generate Sub-Category Filter Chips if we are inside a specific restaurant
+            if (currentRestaurantFilter && window.currentUserMainCategory === 'Food Owner' && chipsEl) {
+                const restaurantItems = items.filter(i => i.partnerId === currentRestaurantFilter);
+                const uniqueCategories = [...new Set(restaurantItems.map(i => i.category || 'Others'))];
+                
+                if (uniqueCategories.length > 0) {
+                    chipsEl.classList.remove('hidden');
+                    chipsEl.innerHTML = `
+                        <button onclick="window.filterFoodCategory(null)" class="px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors border ${!currentFoodCategoryFilter ? 'bg-red-600 text-white border-red-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}">All Items</button>
+                        ${uniqueCategories.map(cat => `
+                            <button onclick="window.filterFoodCategory('${cat}')" class="px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors border ${currentFoodCategoryFilter === cat ? 'bg-red-600 text-white border-red-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}">${cat}</button>
+                        `).join('')}
+                    `;
+                } else {
+                    chipsEl.classList.add('hidden');
+                }
+            } else if (chipsEl) {
+                chipsEl.classList.add('hidden');
+            }
+            
             const filtered = items.filter(i => {
-                const pShopCat = i.shopCategory || 'Food Owner';
+                const pShopCat = i.shopCategory || 'Food Owner'; // default for older data
                 if (pShopCat !== window.currentUserMainCategory) return false;
-
                 if (currentRestaurantFilter && i.partnerId !== currentRestaurantFilter) return false;
+                if (currentFoodCategoryFilter && i.category !== currentFoodCategoryFilter) return false;
+                
                 if (window.currentSearchQuery) {
                     const q = window.currentSearchQuery.toLowerCase();
-                    return i.name.toLowerCase().includes(q) || (i.shopName && i.shopName.toLowerCase().includes(q)) || (i.subCategory && i.subCategory.toLowerCase().includes(q));
+                    return i.name.toLowerCase().includes(q) || (i.shopName && i.shopName.toLowerCase().includes(q));
                 }
                 return true;
             });
@@ -2015,18 +2054,17 @@
                 return;
             }
 
-            // Organize by Category if viewing a specific restaurant
-            let displayHtml = '';
             const cardWidthClass = currentRestaurantFilter || window.currentUserMainCategory === 'Grocery Shop' ? 'col-span-1 w-full' : 'w-[280px] sm:w-[320px] shrink-0 snap-center';
-            const imgHeight = currentRestaurantFilter || window.currentUserMainCategory === 'Grocery Shop' ? 'h-24' : 'h-32';
-            const textSizeTitle = currentRestaurantFilter || window.currentUserMainCategory === 'Grocery Shop' ? 'text-xs' : 'text-sm';
-            const textAddress = currentRestaurantFilter || window.currentUserMainCategory === 'Grocery Shop' ? 'hidden sm:block' : 'block';
 
-            const buildProductCard = (p) => {
+            listEl.innerHTML = filtered.map(p => {
                 const hasVariants = p.variants && p.variants.length > 0;
                 const displayPrice = hasVariants ? p.variants[0].price : p.price;
                 const isClosed = p.shopStatus === 'Closed' || p.shopStatus === 'Offline';
                 const isOutOfStock = p.inStock === false;
+                
+                const textSizeTitle = currentRestaurantFilter || window.currentUserMainCategory === 'Grocery Shop' ? 'text-xs' : 'text-sm';
+                const textAddress = currentRestaurantFilter || window.currentUserMainCategory === 'Grocery Shop' ? 'hidden sm:block' : 'block';
+                const imgHeight = currentRestaurantFilter || window.currentUserMainCategory === 'Grocery Shop' ? 'h-24' : 'h-32';
                 
                 let addressDisplay = `<div class="mb-2 ${textAddress}">
                     <p class="text-[10px] font-bold text-gray-800 truncate"><i class="fa-solid fa-store text-red-500 mr-1"></i> ${p.shopName || 'Gramzo Partner'}</p>
@@ -2035,11 +2073,18 @@
                 </div>`;
                 
                 let prepTimeDisplay = p.prepTime ? `<p class="text-[9px] sm:text-[10px] text-orange-600 font-bold mb-2"><i class="fa-regular fa-clock mr-1"></i> Prep: ${p.prepTime} mins</p>` : '';
+                
                 let qtyDisplay = `<p class="text-[9px] sm:text-[10px] text-gray-500 uppercase tracking-wide font-medium mb-2">${p.qty || ''}</p>`;
                 
                 if (hasVariants) {
                     const options = p.variants.map((v, i) => `<option value="${i}" data-price="${v.price}">${v.qty}</option>`).join('');
-                    qtyDisplay = `<div class="mb-2"><select onchange="window.updatePriceDisplay(this, 'price-${p.id}')" id="sel-${p.id}" class="text-[10px] sm:text-xs bg-gray-50 border border-gray-200 rounded-lg p-1 outline-none focus:ring-1 ring-red-500 font-medium text-gray-700 w-full">${options}</select></div>`;
+                    qtyDisplay = `
+                        <div class="mb-2">
+                            <select onchange="window.updatePriceDisplay(this, 'price-${p.id}')" id="sel-${p.id}" class="text-[10px] sm:text-xs bg-gray-50 border border-gray-200 rounded-lg p-1 outline-none focus:ring-1 ring-red-500 font-medium text-gray-700 w-full">
+                                ${options}
+                            </select>
+                        </div>
+                    `;
                 }
 
                 let actionHtml = '';
@@ -2052,7 +2097,8 @@
                         <span id="price-${p.id}" class="text-sm sm:text-lg font-black text-red-600 tracking-tight">₹${displayPrice}</span>
                         <button type="button" onclick="${hasVariants ? `window.addToCartVariant('${p.id}', '${p.name.replace(/'/g, "\\'")}', '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')` : `window.addToCartStandard('${p.id}', '${p.name.replace(/'/g, "\\'")}', ${p.price}, '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')`}" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition-colors active:scale-90 shrink-0 border border-red-100">
                             <i class="fa-solid fa-plus text-[10px] sm:text-xs"></i>
-                        </button>`;
+                        </button>
+                    `;
                 }
 
                 const dummyRating = `4.${Math.floor(Math.random() * 5) + 1}`;
@@ -2061,7 +2107,7 @@
                     <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex flex-col transform transition hover:-translate-y-1 hover:shadow-md ${cardWidthClass} ${isClosed || isOutOfStock ? 'opacity-60 grayscale-[0.5]' : ''}">
                         <div class="${imgHeight} bg-gray-100 relative">
                             <img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x300/f3f4f6/a1a1aa?text=Image'">
-                            ${p.subCategory ? `<span class="absolute top-2 left-2 bg-white/90 backdrop-blur text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded text-gray-800 shadow-sm">${p.subCategory}</span>` : ''}
+                            ${p.category ? `<span class="absolute top-2 left-2 bg-white/90 backdrop-blur text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded text-gray-800 shadow-sm">${p.category}</span>` : ''}
                             <span class="absolute bottom-2 right-2 bg-white/95 backdrop-blur text-[9px] font-black px-1.5 py-0.5 rounded text-gray-800 shadow-sm flex items-center gap-1"><i class="fa-solid fa-star text-yellow-500 text-[8px]"></i> ${dummyRating}</span>
                         </div>
                         <div class="p-2.5 sm:p-3 flex-1 flex flex-col justify-between">
@@ -2075,26 +2121,9 @@
                                 ${actionHtml}
                             </div>
                         </div>
-                    </div>`;
-            };
-
-            if (currentRestaurantFilter && window.currentUserMainCategory === 'Food Owner') {
-                const grouped = {};
-                filtered.forEach(p => {
-                    const cat = p.subCategory || 'Others';
-                    if (!grouped[cat]) grouped[cat] = [];
-                    grouped[cat].push(p);
-                });
-                
-                for (const cat in grouped) {
-                    displayHtml += `<div class="col-span-full mt-4 mb-2 border-b border-gray-200 pb-1"><h4 class="font-black text-gray-800 uppercase tracking-widest text-xs">${cat}</h4></div>`;
-                    displayHtml += grouped[cat].map(buildProductCard).join('');
-                }
-            } else {
-                displayHtml = filtered.map(buildProductCard).join('');
-            }
-            
-            listEl.innerHTML = displayHtml;
+                    </div>
+                `;
+            }).join('');
         };
 
         window.renderRestaurants = (restaurants) => {
@@ -2104,59 +2133,49 @@
                 carousel.innerHTML = '<p class="text-xs text-gray-400">No stores available.</p>';
                 return;
             }
+            
+            // Map the first product image to the restaurant if available, otherwise use a placeholder
             carousel.innerHTML = restaurants.map(r => {
                 const isActive = currentRestaurantFilter === r.partnerId;
+                const isOffline = r.shopStatus === 'Closed' || r.shopStatus === 'Offline';
                 return `
-                <div class="cursor-pointer group shrink-0 flex flex-col items-center w-20" onclick="window.filterRestaurant('${r.partnerId}', '${r.shopName.replace(/'/g, "\\'")}')">
-                    <div class="w-16 h-16 rounded-full flex items-center justify-center overflow-hidden mb-2 shadow-sm border-2 transition-all ${isActive ? 'border-red-500 scale-105' : 'border-gray-100 bg-gray-50 group-hover:border-red-300'}">
-                        <img src="${r.image}" class="w-full h-full object-cover" alt="${r.shopName}" onerror="this.src='https://placehold.co/100x100/f3f4f6/a1a1aa?text=Store'">
+                <div class="cursor-pointer group shrink-0 flex flex-col items-center w-20 relative" onclick="window.filterRestaurant('${r.partnerId}', '${r.shopName.replace(/'/g, "\\'")}')">
+                    <div class="w-16 h-16 rounded-full flex items-center justify-center overflow-hidden mb-2 shadow-sm border-2 transition-all ${isActive ? 'border-red-500 scale-105' : 'border-gray-100 bg-gray-50 group-hover:border-red-300'} ${isOffline ? 'grayscale opacity-60' : ''}">
+                        <img src="${r.image}" class="w-full h-full object-cover" alt="${r.shopName}">
                     </div>
-                    <p class="text-center text-[10px] font-bold ${isActive ? 'text-red-600' : 'text-gray-700'} leading-tight w-full px-1 truncate">${r.shopName}</p>
+                    ${isOffline ? `<span class="absolute top-0 right-0 bg-red-500 text-white text-[8px] font-black px-1 rounded uppercase shadow-sm">Closed</span>` : ''}
+                    <p class="text-center text-[10px] font-bold ${isActive ? 'text-red-600' : 'text-gray-700'} leading-tight w-full px-1 truncate ${isOffline ? 'opacity-60' : ''}">${r.shopName}</p>
                 </div>`;
             }).join('');
         };
 
-        const fetchLiveMarketplace = async () => {
+        const extractRestaurants = async () => {
             try {
-                // 1. Fetch Users to get all Approved Partners
-                const usersSnap = await window.dbCall(getDocs(getCol('users')), 8000);
-                const approvedPartners = usersSnap.docs.map(d => ({id: d.id, ...d.data()}))
-                    .filter(u => u.role === 'Partner' && u.approvalStatus === 'Approved' && u.category === window.currentUserMainCategory);
-
-                // 2. Fetch Products
-                const prodSnap = await window.dbCall(getDocs(getCol('products')), 8000);
-                const products = prodSnap.docs.map(d => ({id: d.id, ...d.data()}));
+                // Fetch approved partners from the 'users' collection instead of 'products' to guarantee empty shops also show
+                const snap = await window.dbCall(getDocs(getCol('users')), 5000);
+                const approvedPartners = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(u => u.role === 'Partner' && u.approvalStatus === 'Approved' && (u.category === window.currentUserMainCategory));
                 
-                const uniqueRestaurants = [];
-                approvedPartners.forEach(partner => {
-                    // Find a product image to use as a logo, or use default
-                    const partnerProducts = products.filter(p => p.partnerId === partner.phone);
-                    let displayImg = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&q=80';
-                    if (window.currentUserMainCategory === 'Grocery Shop') displayImg = 'https://images.unsplash.com/photo-1604719312566-8fa2dce60be0?w=200&q=80';
-                    
-                    if (partnerProducts.length > 0 && partnerProducts[0].image) {
-                        displayImg = partnerProducts[0].image;
-                    }
+                // Fetch all products so we can extract an image for the shop
+                const prodSnap = await window.dbCall(getDocs(getCol('products')), 5000);
+                const products = prodSnap.docs.map(d => d.data());
 
-                    uniqueRestaurants.push({
-                        partnerId: partner.phone,
-                        shopName: partner.shopName || partner.name,
-                        shopAddress: partner.shopAddress || '',
-                        image: displayImg
-                    });
+                const uniqueRestaurants = approvedPartners.map(p => {
+                    const shopProducts = products.filter(prod => prod.partnerId === p.id);
+                    let displayImage = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&q=80';
+                    if (window.currentUserMainCategory === 'Grocery Shop') displayImage = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=200&q=80';
+                    if (shopProducts.length > 0 && shopProducts[0].image) displayImage = shopProducts[0].image;
+
+                    return {
+                        partnerId: p.id, 
+                        shopName: p.shopName || p.name, 
+                        shopAddress: p.shopAddress || '',
+                        shopStatus: p.shopStatus || 'Closed',
+                        image: displayImage
+                    };
                 });
-
-                window.renderRestaurants(uniqueRestaurants);
-                // Only pass products whose partners are approved
-                const approvedPartnerIds = approvedPartners.map(p => p.phone);
-                const approvedProducts = products.filter(p => approvedPartnerIds.includes(p.partnerId));
-                renderProducts(approvedProducts);
                 
-            } catch(e) {
-                console.warn("Error fetching live marketplace:", e);
-                const listEl = document.getElementById('market-list');
-                if(listEl) listEl.innerHTML = '<div class="col-span-full py-10 text-center text-red-400 font-medium text-sm">Failed to load live data.</div>';
-            }
+                window.renderRestaurants(uniqueRestaurants);
+            } catch(e) { console.error("Error extracting restaurants:", e); }
         };
 
         window.loadMarketplaceData = () => {
@@ -2185,21 +2204,34 @@
                 }
             }, (err) => console.error(err));
 
-            // Trigger live fetch instead of relying purely on onSnapshot for products, to ensure partners merge correctly
-            fetchLiveMarketplace();
+            onSnapshot(getCol('products'), (snap) => {
+                let items = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
+                
+                extractRestaurants(); // Uses live user data now
+                renderProducts(items);
+            }, (err) => {
+                if (err.code === 'permission-denied') window.showToast("Firebase Permissions Denied! Check rules.", "error");
+            });
         };
 
         window.filterRestaurant = (partnerId, shopName) => {
             if (currentRestaurantFilter === partnerId) {
                 currentRestaurantFilter = null;
+                currentFoodCategoryFilter = null;
                 document.getElementById('marketplace-title').innerText = window.currentUserMainCategory === 'Food Owner' ? 'Restaurants Near You' : 'Grocery Stores Near You';
                 document.getElementById('btn-clear-filter').classList.add('hidden');
             } else {
                 currentRestaurantFilter = partnerId;
+                currentFoodCategoryFilter = null;
                 document.getElementById('marketplace-title').innerText = `${shopName} Items`;
                 document.getElementById('btn-clear-filter').classList.remove('hidden');
             }
-            fetchLiveMarketplace();
+            window.loadMarketplaceData();
+        };
+
+        window.filterFoodCategory = (categoryName) => {
+            currentFoodCategoryFilter = categoryName;
+            window.loadMarketplaceData();
         };
 
         window.updatePriceDisplay = (selectEl, priceId) => {
@@ -2239,334 +2271,6 @@
                     activeNav.classList.add('text-red-600', 'font-black');
                 }
             }, 100);
-        };
-
-        window.switchUserTab = (tab) => {
-            window.adminCurrentUserTab = tab;
-            document.querySelectorAll('.admin-user-tab').forEach(el => {
-                el.classList.remove('bg-gray-200', 'text-gray-900');
-                el.classList.add('text-gray-500');
-            });
-            const activeEl = document.getElementById(`tab-user-${tab.replace(/\s+/g, '')}`);
-            if(activeEl) {
-                activeEl.classList.add('bg-gray-200', 'text-gray-900');
-                activeEl.classList.remove('text-gray-500');
-            }
-            if (window.adminUsersLoaded) {
-                window.renderAdminUsers();
-            } else {
-                document.getElementById('admin-users-table-container').classList.add('hidden');
-                document.getElementById('admin-load-users-btn-container').classList.remove('hidden');
-            }
-        };
-
-        window.loadAdminUsersList = () => {
-            window.adminUsersLoaded = true;
-            document.getElementById('admin-load-users-btn-container').classList.add('hidden');
-            document.getElementById('admin-users-table-container').classList.remove('hidden');
-            window.renderAdminUsers();
-        };
-
-        window.openAdminUserEdit = (phone, name, shopName) => {
-            document.getElementById('edit-u-phone').value = phone;
-            document.getElementById('edit-u-name').value = name;
-            document.getElementById('edit-u-shop').value = shopName && shopName !== 'null' && shopName !== 'undefined' ? shopName : '';
-            document.getElementById('admin-edit-user-modal').classList.add('active');
-        };
-
-        window.submitAdminUserEdit = async () => {
-            const phone = document.getElementById('edit-u-phone').value;
-            const newName = document.getElementById('edit-u-name').value.trim();
-            const newShop = document.getElementById('edit-u-shop').value.trim();
-
-            if(!phone || !newName) return window.showToast("Name cannot be empty.", "error");
-
-            try {
-                await window.dbCall(setDoc(getDocRef('users', phone), {
-                    name: newName,
-                    shopName: newShop || null
-                }, { merge: true }), 10000);
-                window.showToast("User profile updated!", "success");
-                document.getElementById('admin-edit-user-modal').classList.remove('active');
-            } catch(e) {
-                window.showToast("Failed to update.", "error");
-            }
-        };
-
-        window.renderAdminUsers = () => {
-            const usersBody = document.getElementById('admin-users-body');
-            if(!usersBody || !window.adminUsersLoaded) return;
-
-            let filteredUsers = window.adminUsersData.filter(u => {
-                if (window.adminCurrentUserTab === 'All') return true;
-                if (window.adminCurrentUserTab === 'User') return u.role === 'User';
-                if (window.adminCurrentUserTab === 'Food Owner') return u.role === 'Partner' && u.category === 'Food Owner';
-                if (window.adminCurrentUserTab === 'Grocery Shop') return u.role === 'Partner' && u.category === 'Grocery Shop';
-                if (window.adminCurrentUserTab === 'Rider') return u.role === 'Partner' && ['Rider', 'Ride Partner'].includes(u.category);
-                return true;
-            });
-
-            if(filteredUsers.length === 0) {
-                usersBody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-gray-400 text-xs italic">No users found in this category.</td></tr>';
-                return;
-            }
-
-            usersBody.innerHTML = filteredUsers.map(u => {
-                let displayPhone = u.phone ? String(u.phone) : '';
-                if(displayPhone.includes('@')) displayPhone = displayPhone.split('@')[0] + '@...';
-                
-                let detailsHtml = '';
-                let adminControls = '';
-
-                if(u.role === 'Partner') {
-                    const isApproved = u.approvalStatus === 'Approved';
-                    const isVisible = ['Open', 'Online'].includes(u.shopStatus);
-                    
-                    adminControls += `<br/><button onclick="window.adminReviewPartner('${u.phone}', '${isApproved ? 'Pending' : 'Approved'}')" class="mt-2 w-full px-2 py-1.5 rounded text-[9px] font-bold border transition-colors ${isApproved ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100' : 'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100 shadow-sm'}">${isApproved ? 'Revoke Approval' : 'Approve Partner'}</button>`;
-                    
-                    adminControls += `
-                        <div class="mt-1 flex items-center justify-between bg-gray-50 p-1.5 rounded-lg border border-gray-100" title="Admin Override Visibility">
-                            <span class="text-[9px] font-bold text-gray-500">Visible to Users:</span>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" class="sr-only peer" ${isVisible ? 'checked' : ''} onchange="window.adminToggleVisibility('${u.phone}', '${u.category}', this.checked)">
-                                <div class="w-6 h-3 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:left-[1px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-2.5 after:w-2.5 after:transition-all peer-checked:bg-blue-500"></div>
-                            </label>
-                        </div>
-                    `;
-
-                    if(['Rider', 'Ride Partner'].includes(u.category)) {
-                        detailsHtml = `<span class="font-bold text-gray-700">Vehicle:</span> ${u.carModel || 'N/A'} (${u.carNum || 'N/A'})<br/><span class="font-bold text-gray-700">Wallet:</span> ${u.walletPoints || 0} pts<br/><span class="font-bold text-gray-700">Status:</span> <span class="${isApproved ? 'text-emerald-500' : 'text-orange-500'} font-bold">${u.approvalStatus || 'Pending'}</span>`;
-                    } else {
-                        detailsHtml = `<span class="font-bold text-gray-700">Shop:</span> ${u.shopName || 'N/A'}<br/><span class="font-bold text-gray-700">Status:</span> <span class="${isApproved ? 'text-emerald-500' : 'text-orange-500'} font-bold">${u.approvalStatus || 'Pending'}</span>`;
-                    }
-                } else {
-                    detailsHtml = `Verified`;
-                }
-
-                let actionsHtml = `<span class="cursor-pointer font-black text-gray-400 bg-gray-100 px-2 py-0.5 rounded" onclick="this.innerText='${u.pin}'" title="Click to reveal">***</span>`;
-                
-                let editBtn = `<button onclick="window.openAdminUserEdit('${u.phone}', '${u.name.replace(/'/g, "\\'")}', '${(u.shopName || '').replace(/'/g, "\\'")}')" class="text-blue-500 hover:text-blue-700 ml-2" title="Edit User"><i class="fa-solid fa-pen"></i></button>`;
-
-                if (['Rider', 'Ride Partner'].includes(u.category)) {
-                    actionsHtml += `<br/><button onclick="window.adminAddPoints('${u.phone}', ${u.walletPoints || 0})" class="bg-blue-50 text-blue-600 w-full py-1 mt-1 rounded border border-blue-100 text-[9px] font-bold">+ Points</button>`;
-                }
-                
-                actionsHtml += adminControls;
-
-                return `
-                <tr class="hover:bg-gray-50 transition-colors border-b border-gray-50">
-                    <td class="p-4 font-bold text-xs"><span class="px-2 py-0.5 rounded text-[9px] uppercase tracking-widest ${u.role === 'Admin' ? 'bg-purple-100 text-purple-700' : u.role === 'Partner' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'}">${u.category || u.role || 'USER'}</span></td>
-                    <td class="p-4 font-bold text-gray-900 text-xs">${u.name || 'N/A'} ${editBtn}<br/><span class="font-mono font-normal text-[10px] text-gray-500">${displayPhone || 'N/A'}</span></td>
-                    <td class="p-4 text-[10px] text-gray-500">${detailsHtml}</td>
-                    <td class="p-4 text-right font-mono text-gray-900 text-xs">${actionsHtml}</td>
-                </tr>`;
-            }).join('');
-        };
-
-        window.switchOrderTab = (tab) => {
-            window.adminCurrentOrderTab = tab;
-            document.querySelectorAll('.admin-order-tab').forEach(el => {
-                el.classList.remove('bg-gray-200', 'text-gray-900');
-                el.classList.add('text-gray-500');
-            });
-            const activeEl = document.getElementById(`tab-order-${tab}`);
-            if(activeEl) {
-                activeEl.classList.add('bg-gray-200', 'text-gray-900');
-                activeEl.classList.remove('text-gray-500');
-            }
-            window.renderAdminOrders();
-        };
-        
-        window.recalculateAdminStats = () => {
-            if(!window.adminOrdersData || !window.adminUsersData) return;
-            let totalRev = 0, foodRev = 0, groceryRev = 0, rideRev = 0, count = 0;
-            
-            window.adminOrdersData.forEach(o => {
-                if (o.status !== 'Rejected') {
-                    const amt = o.total || o.amount || 0;
-                    totalRev += amt; 
-                    count++;
-                    
-                    if (o.type === 'Ride') {
-                        rideRev += amt;
-                    } else {
-                        const partner = window.adminUsersData.find(u => u.phone === o.restaurantId);
-                        const cat = partner ? partner.category : 'Food Owner';
-                        if (cat === 'Grocery Shop') groceryRev += amt;
-                        else foodRev += amt;
-                    }
-                }
-            });
-
-            const statTotal = document.getElementById('stat-rev-total');
-            if(statTotal) {
-                statTotal.innerText = `₹${totalRev.toFixed(0)}`;
-                document.getElementById('stat-rev-food').innerText = `₹${foodRev.toFixed(0)}`;
-                document.getElementById('stat-rev-grocery').innerText = `₹${groceryRev.toFixed(0)}`;
-                document.getElementById('stat-rev-ride').innerText = `₹${rideRev.toFixed(0)}`;
-            }
-            const statOrd = document.getElementById('stat-ord');
-            if(statOrd) statOrd.innerText = count;
-        };
-
-        window.renderAdminOrders = () => {
-            const adminLog = document.getElementById('admin-log-body');
-            if(!adminLog) return;
-            
-            let filteredOrders = window.adminOrdersData.filter(o => {
-                if (window.adminCurrentOrderTab === 'Active') {
-                    return !['Delivered', 'Completed', 'Rejected'].includes(o.status);
-                } else if (window.adminCurrentOrderTab === 'Completed') {
-                    return ['Delivered', 'Completed'].includes(o.status);
-                } else if (window.adminCurrentOrderTab === 'Rejected') {
-                    return o.status === 'Rejected';
-                }
-                return true;
-            });
-
-            if(filteredOrders.length === 0) {
-                adminLog.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-gray-400 text-xs italic">No ${window.adminCurrentOrderTab.toLowerCase()} orders</td></tr>`;
-                return;
-            }
-
-            let html = '';
-            filteredOrders.forEach(o => {
-                const timeStr = window.formatOrderTime(o.time);
-                let statusColor = o.status === 'Placed' || o.status === 'Requested' ? 'text-amber-500' : o.status === 'Preparing' || o.status === 'Started' || o.status === 'Out for Delivery' ? 'text-blue-500' : o.status === 'Rejected' ? 'text-red-500' : 'text-emerald-500';
-                
-                const displayType = o.type === 'Ride' ? '🚕 Ride' : '🍔 Order';
-
-                html += `
-                    <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="p-4 font-mono font-bold text-[10px] text-gray-500">#${o.id.slice(-5).toUpperCase()}<br/><span class="font-sans font-medium text-[9px] text-gray-400">${timeStr}</span></td>
-                        <td class="p-4 font-bold text-gray-900 text-xs">${o.customer || 'Unknown'}<br/><span class="font-normal text-[10px] text-gray-500">${displayType}</span></td>
-                        <td class="p-4 font-medium text-gray-500 text-xs">${o.type === 'Ride' ? o.riderName : (o.restaurantName || '-')}</td>
-                        <td class="p-4 font-black text-gray-900 text-xs">₹${o.total ? o.total.toFixed(2) : (o.amount || 0)}</td>
-                        <td class="p-4 text-right uppercase text-[9px] font-black ${statusColor} tracking-wider">${o.status}</td>
-                    </tr>`;
-            });
-            adminLog.innerHTML = html;
-        };
-
-        window.switchPartnerOrderTab = (tab) => {
-            window.partnerCurrentOrderTab = tab;
-            document.querySelectorAll('.partner-order-tab').forEach(el => {
-                el.classList.remove('bg-gray-200', 'text-gray-900');
-                el.classList.add('text-gray-500');
-            });
-            const activeEl = document.getElementById(`tab-partner-order-${tab}`);
-            if(activeEl) {
-                activeEl.classList.add('bg-gray-200', 'text-gray-900');
-                activeEl.classList.remove('text-gray-500');
-            }
-            window.renderPartnerOrders();
-        };
-
-        window.renderPartnerOrders = () => {
-            const listEl = document.getElementById('partner-orders-list');
-            if (!listEl || !currentUser) return;
-            
-            let filteredOrders = window.partnerOrdersData.filter(o => {
-                if (window.partnerCurrentOrderTab === 'Active') {
-                    return !['Delivered', 'Completed', 'Rejected'].includes(o.status);
-                } else if (window.partnerCurrentOrderTab === 'Completed') {
-                    return ['Delivered', 'Completed'].includes(o.status);
-                } else if (window.partnerCurrentOrderTab === 'Rejected') {
-                    return o.status === 'Rejected';
-                }
-                return true;
-            });
-
-            if (filteredOrders.length === 0) {
-                listEl.innerHTML = `<p class="text-gray-400 font-medium text-sm text-center py-10 bg-white rounded-3xl shadow-sm border border-gray-100">No ${window.partnerCurrentOrderTab.toLowerCase()} tasks right now.</p>`;
-                return;
-            }
-
-            let html = '';
-            filteredOrders.forEach(o => {
-                const itemsStr = o.items ? o.items.map(i => `${i.name}`).join(', ') : '';
-                const timeStr = window.formatOrderTime(o.time);
-                let cardStyle = 'border-gray-100', actionButtons = '';
-                let paymentBadge = o.paymentMode === 'Prepaid' ? `<span class="bg-blue-100 text-blue-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">Prepaid</span>` : `<span class="bg-gray-100 text-gray-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">COD</span>`;
-                let screenshotHtml = o.paymentMode === 'Prepaid' && o.paymentScreenshot ? `<button type="button" onclick="window.viewImage('${o.paymentScreenshot}')" class="text-[10px] text-blue-600 bg-blue-50 px-2 py-1 rounded font-bold hover:bg-blue-100 transition mt-2 w-full text-left"><i class="fa-solid fa-image"></i> View Payment Screenshot</button>` : '';
-                
-                let customerInfo = `<div class="mb-3 bg-gray-50 p-2 rounded-xl border border-gray-100">
-                    <p class="text-xs font-black text-gray-800"><i class="fa-solid fa-user text-gray-400 mr-1"></i> ${o.customer}</p>
-                    <p class="text-xs font-bold text-blue-600 mt-1"><a href="tel:${o.phone}"><i class="fa-solid fa-phone mr-1"></i> ${o.phone}</a></p>
-                </div>`;
-
-                if (['Rider', 'Ride Partner'].includes(currentUser.category)) {
-                    if (o.type === 'Ride') {
-                        if (o.status === 'Requested') {
-                            actionButtons = `<button type="button" onclick="window.startRide('${o.id}')" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-play mr-1"></i> Start Ride (Enter Amount)</button>`;
-                        } else if (o.status === 'Started') {
-                            actionButtons = `<button type="button" onclick="window.completeRide('${o.id}')" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-check-double mr-1"></i> Complete Ride & Collect ₹${o.amount}</button>`;
-                        } else if (o.status === 'Completed') {
-                            actionButtons = `<div class="w-full bg-gray-100 text-gray-500 py-3 rounded-xl font-bold text-sm text-center border border-gray-200"><i class="fa-solid fa-check mr-1"></i> Completed (₹${o.amount})</div>`;
-                        }
-                    } else {
-                        // Food/Grocery Delivery Logic
-                        if (o.status === 'Ready' && !o.riderId) {
-                            actionButtons = `<button type="button" onclick="window.acceptDelivery('${o.id}')" class="w-full bg-gray-900 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-motorcycle mr-1"></i> Accept Delivery</button>`;
-                        } else if (o.status === 'Out for Delivery' && o.riderId === currentUser.phone) {
-                            actionButtons = `<div class="flex gap-2"><a href="tel:${o.phone}" class="flex-1 bg-white border border-gray-200 text-gray-700 py-3 rounded-xl font-bold text-sm text-center flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone mr-1"></i> Customer</a><button type="button" onclick="window.markDelivered('${o.id}')" class="flex-1 bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md"><i class="fa-solid fa-check-double mr-1"></i> Done</button></div>`;
-                        }
-                    }
-                } else {
-                    if (o.status === 'Placed') actionButtons = `<div class="flex gap-2"><button type="button" onclick="window.acceptFoodOrder('${o.id}')" class="flex-1 bg-black text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-gray-800 transition-colors active:scale-95"><i class="fa-solid fa-check"></i> Accept</button><button type="button" onclick="window.openRejectModal('${o.id}')" class="flex-1 bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm hover:bg-red-100 transition-colors active:scale-95"><i class="fa-solid fa-xmark"></i> Reject</button></div>`;
-                    else if (o.status === 'Accepted') { cardStyle = 'border-blue-200 bg-blue-50/30'; actionButtons = `<button type="button" onclick="window.markPreparing('${o.id}')" class="w-full bg-blue-600 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-blue-700 active:scale-95">Start Preparing</button>`; }
-                    else if (o.status === 'Preparing') { cardStyle = 'border-orange-200 bg-orange-50/30'; actionButtons = `<button type="button" onclick="window.markReady('${o.id}')" class="w-full bg-orange-500 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-orange-600 active:scale-95">Mark Ready for Rider</button>`; }
-                    else if (o.status === 'Ready') { cardStyle = 'border-yellow-200 bg-yellow-50/30'; actionButtons = `<p class="text-xs font-bold text-orange-600 text-center py-2 bg-orange-50 rounded-xl">Waiting for Delivery Partner...</p><button type="button" onclick="window.markOutForDelivery('${o.id}')" class="w-full mt-2 bg-yellow-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95 border border-yellow-600">Self Deliver (Skip Rider)</button>`; }
-                    else if (o.status === 'Out for Delivery') {
-                        if (!o.riderId) { 
-                            actionButtons = `<button type="button" onclick="window.markDelivered('${o.id}')" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-check-double mr-1"></i> Mark as Delivered</button>`;
-                        } else {
-                            actionButtons = `<p class="text-xs font-bold text-yellow-600 text-center py-2 bg-yellow-50 rounded-xl">OUT FOR DELIVERY.. Reaching soon (via ${o.riderName})</p>`;
-                        }
-                    }
-                    else if (o.status === 'Delivered') actionButtons = `<div class="w-full bg-emerald-50 text-emerald-600 py-3 rounded-xl font-bold text-sm text-center border border-emerald-100"><i class="fa-solid fa-circle-check mr-1"></i> Order Completed</div>`;
-                    else if (o.status === 'Rejected') actionButtons = `<div class="w-full bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm text-center border border-red-100"><i class="fa-solid fa-circle-xmark mr-1"></i> Order Rejected</div>`;
-                }
-
-                let ratingHtml = o.rating ? `<div class="mt-2 text-center text-xs font-bold text-yellow-600 bg-yellow-50 rounded-lg py-1 border border-yellow-100"><i class="fa-solid fa-star"></i> Customer Rated: ${o.rating} Star</div>` : '';
-
-                if (o.type === 'Ride') {
-                    html += `
-                        <div class="bg-white rounded-3xl p-5 shadow-sm border border-blue-100 relative overflow-hidden">
-                            <div class="flex justify-between items-start mb-3">
-                                <div>
-                                    <div class="flex items-center gap-2 mb-1">
-                                        <span class="text-[10px] font-black text-blue-500 uppercase tracking-widest bg-blue-50 px-2 py-0.5 rounded"><i class="fa-solid fa-taxi"></i> RIDE</span>
-                                        <span class="text-[9px] font-medium text-gray-400"><i class="fa-regular fa-clock"></i> ${timeStr}</span>
-                                    </div>
-                                    <h4 class="font-bold text-gray-900 text-sm mt-2"><i class="fa-solid fa-user text-gray-400 mr-1"></i> ${o.customer}</h4>
-                                    <a href="tel:${o.phone}" class="text-xs font-bold text-blue-600 block mt-0.5"><i class="fa-solid fa-phone mr-1"></i> ${o.phone}</a>
-                                </div>
-                                <span class="text-xl font-black text-emerald-600">${o.amount ? '₹'+o.amount : '...'}</span>
-                            </div>
-                            
-                            <div class="relative bg-gray-50 p-3 rounded-xl mb-4 border border-gray-100 mt-2">
-                                <div class="absolute top-4 left-3.5 w-2 h-2 rounded-full bg-emerald-500 z-10"></div>
-                                <div class="absolute top-7 left-4 w-0.5 h-6 bg-gray-300 z-10"></div>
-                                <div class="absolute top-14 left-3.5 w-2 h-2 rounded-full bg-red-500 z-10"></div>
-                                
-                                <p class="text-xs font-medium text-gray-700 pl-6 mb-3">From: <b>${o.pickup}</b></p>
-                                <p class="text-xs font-medium text-gray-700 pl-6">To: <b>${o.address}</b></p>
-                            </div>
-                            ${actionButtons}
-                        </div>
-                    `;
-                } else {
-                    html += `<div class="bg-white rounded-3xl p-5 shadow-sm border ${cardStyle}">
-                            <div class="flex justify-between items-start mb-3"><div><div class="flex items-center gap-2 mb-1"><span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Order #${o.id.slice(-4).toUpperCase()}</span><span class="text-[9px] font-medium text-gray-400"><i class="fa-regular fa-clock"></i> ${timeStr}</span>${paymentBadge}</div><h4 class="font-bold text-gray-900 text-sm"><i class="fa-solid fa-map-pin text-red-500 mr-1"></i> ${o.address}</h4></div><span class="text-xl font-black text-emerald-600">₹${o.total.toFixed(2)}</span></div>
-                            ${customerInfo}
-                            <div class="bg-gray-50 p-3 rounded-xl mb-4 border border-gray-100"><p class="text-xs text-gray-700 font-bold mb-1"><i class="fa-solid fa-clipboard-list text-gray-400 mr-1"></i> Items:</p><p class="text-sm text-gray-600 font-medium">${itemsStr}</p>${screenshotHtml}</div>
-                            ${actionButtons}
-                            ${ratingHtml}
-                            </div>`;
-                }
-            });
-            listEl.innerHTML = html;
         };
 
         window.applyPromo = async () => {
@@ -2891,34 +2595,647 @@
         window.markOutForDelivery = async (orderId) => { try { await window.dbCall(updateDoc(getDocRef('orders', orderId), {status: 'Out for Delivery'}), 10000); window.showToast("Order is out for delivery!", "success"); } catch(e) {} };
         window.markDelivered = async (orderId) => { try { await window.dbCall(updateDoc(getDocRef('orders', orderId), {status: 'Delivered'}), 10000); window.showToast("Order Delivered Successfully!", "success"); } catch(e) {} };
 
+        window.updateRiderLocation = async () => {
+            const locInput = document.getElementById('rider-current-loc-input').value.trim();
+            if(!locInput) return window.showToast("Enter a location to broadcast.", "error");
+            
+            try {
+                await window.dbCall(updateDoc(getDocRef('users', currentUser.phone), { currentLocation: locInput }), 10000);
+                currentUser.currentLocation = locInput;
+                window.showToast("Location Broadcasted!", "success");
+            } catch(e) { window.showToast("Failed to update location.", "error"); }
+        };
+
+        window.toggleShopStatus = async () => {
+            const isRide = ['Rider', 'Ride Partner'].includes(currentUser.category);
+            const toggle = isRide ? document.getElementById('rider-status-toggle') : document.getElementById('partner-status-toggle');
+            const isOpen = toggle.checked;
+            const newStatus = isOpen ? (isRide ? 'Online' : 'Open') : (isRide ? 'Offline' : 'Closed');
+            
+            try {
+                await window.dbCall(setDoc(getDocRef('users', currentUser.phone), { shopStatus: newStatus }, { merge: true }), 10000);
+                currentUser.shopStatus = newStatus;
+                
+                if (['Food Owner', 'Grocery Shop'].includes(currentUser.category)) {
+                    const snap = await window.dbCall(getDocs(getCol('products')), 10000);
+                    const myProducts = snap.docs.filter(d => d.data().partnerId === currentUser.phone);
+                    
+                    myProducts.forEach(d => {
+                        updateDoc(getDocRef('products', d.id), { shopStatus: newStatus });
+                    });
+                    
+                    const shopStatusTxt = document.getElementById('shop-status-text');
+                    if(shopStatusTxt) shopStatusTxt.innerText = `Currently ${isOpen ? 'Open' : 'Closed'}`;
+                } else if (isRide) {
+                    const riderStatusTxt = document.getElementById('rider-status-text');
+                    if(riderStatusTxt) riderStatusTxt.innerText = isOpen ? 'You are ONLINE' : 'You are OFFLINE';
+                }
+                
+                window.showToast(`Status marked as ${newStatus}`, "success");
+            } catch(e) {
+                window.showToast("Error updating status", "error");
+                toggle.checked = !isOpen; 
+            }
+        };
+
+        window.togglePartnerStock = async (productId, currentInStock) => {
+            try {
+                await window.dbCall(updateDoc(getDocRef('products', productId), { inStock: !currentInStock }), 10000);
+                window.showToast(currentInStock ? "Marked Out of Stock" : "Marked In Stock", "success");
+            } catch(e) {
+                window.showToast("Error updating stock", "error");
+            }
+        };
+
+        window.addVariantRow = () => {
+            const container = document.getElementById('variant-container');
+            const row = document.createElement('div');
+            row.className = "flex gap-2 variant-row mt-3";
+            row.innerHTML = `
+                <input class="input-field w-1/2 var-qty" placeholder="Size (e.g. Half)">
+                <input type="number" class="input-field w-1/2 var-price" placeholder="Price (₹)">
+                <button type="button" onclick="this.parentElement.remove()" class="w-12 shrink-0 bg-gray-100 text-gray-500 rounded-xl flex justify-center items-center hover:bg-red-50 hover:text-red-500 transition border border-gray-200"><i class="fa-solid fa-xmark"></i></button>
+            `;
+            container.appendChild(row);
+        };
+
+        window.deletePartnerProduct = async (id) => {
+            const confirmed = await window.customConfirm("Delete Item", "Are you sure you want to delete this menu item?", "Delete");
+            if (!confirmed) return;
+            try {
+                await window.dbCall(deleteDoc(getDocRef('products', id)), 10000);
+                window.showToast("Product deleted.", "success");
+            } catch(e) { window.showToast("Failed to delete.", "error"); }
+        };
+
+        window.editPartnerProduct = async (id) => {
+            try {
+                const snap = await window.dbCall(getDoc(getDocRef('products', id)), 5000);
+                if(!snap.exists()) return;
+                const p = snap.data();
+                
+                window.editingProductId = id;
+                document.getElementById('prod-name').value = p.name || '';
+                document.getElementById('prod-prep-time').value = p.prepTime || '';
+                if(p.category && document.getElementById('prod-item-category')) {
+                    document.getElementById('prod-item-category').value = p.category;
+                }
+                
+                const container = document.getElementById('variant-container');
+                container.innerHTML = '<label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Portion & Price</label>';
+                
+                let variants = p.variants && p.variants.length > 0 ? p.variants : [{qty: p.qty || 'Full', price: p.price || 0}];
+                
+                variants.forEach((v, index) => {
+                    const row = document.createElement('div');
+                    row.className = "flex gap-2 variant-row" + (index > 0 ? " mt-3" : "");
+                    row.innerHTML = `
+                        <input class="input-field w-1/2 var-qty" placeholder="Size (e.g. Full)" value="${v.qty}">
+                        <input type="number" class="input-field w-1/2 var-price" placeholder="Price (₹)" value="${v.price}">
+                        ${index > 0 ? `<button type="button" onclick="this.parentElement.remove()" class="w-12 shrink-0 bg-gray-100 text-gray-500 rounded-xl flex justify-center items-center hover:bg-red-50 hover:text-red-500 transition border border-gray-200"><i class="fa-solid fa-xmark"></i></button>` : ''}
+                    `;
+                    container.appendChild(row);
+                });
+                
+                document.getElementById('btn-add-prod').innerText = "Update Item";
+                window.scrollTo({ top: document.getElementById('add-product-container').offsetTop - 60, behavior: 'smooth' });
+                window.showToast("Edit mode enabled. Make your changes and click update.", "info");
+            } catch(e) { window.showToast("Failed to load product details.", "error"); }
+        };
+
+        window.addPartnerProduct = async () => {
+            if(!currentUser) return;
+            if(currentUser.approvalStatus !== 'Approved') return window.showToast("Store not approved yet.", "error");
+
+            const name = document.getElementById('prod-name').value.trim();
+            const prepTime = document.getElementById('prod-prep-time').value.trim() || '15';
+            const itemCatEl = document.getElementById('prod-item-category');
+            const itemCategory = itemCatEl ? itemCatEl.value : 'Others';
+            
+            if(!name) return window.showToast("Enter item name.", "error");
+
+            const rows = document.querySelectorAll('.variant-row');
+            let variants = [];
+            rows.forEach(row => {
+                const qty = row.querySelector('.var-qty').value.trim();
+                const price = parseInt(row.querySelector('.var-price').value);
+                if(qty && !isNaN(price)) variants.push({ qty, price });
+            });
+
+            if(variants.length === 0) return window.showToast("Add at least one size and price.", "error");
+
+            if(!currentUser.shopName) {
+                window.showToast("Please setup and Save your Business Profile first.", "error");
+                document.getElementById('partner-shop-name').focus();
+                return;
+            }
+
+            let defaultImg = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80';
+            const imgInput = document.getElementById('prod-image-upload');
+            
+            const btn = document.getElementById('btn-add-prod');
+            const originalText = btn.innerText;
+            btn.innerText = "Saving...";
+            btn.disabled = true;
+
+            try {
+                let imgUrl = defaultImg;
+                
+                if (window.editingProductId) {
+                    try {
+                        const existingSnap = await window.dbCall(getDoc(getDocRef('products', window.editingProductId)), 5000);
+                        if (existingSnap.exists() && existingSnap.data().image) {
+                            imgUrl = existingSnap.data().image;
+                        }
+                    } catch(e){}
+                }
+
+                if (imgInput && imgInput.files.length > 0) {
+                    imgUrl = await window.resizeImage(imgInput.files[0], 400);
+                }
+
+                const productData = {
+                    name, 
+                    variants,
+                    price: variants[0].price, 
+                    qty: variants[0].qty,     
+                    prepTime: prepTime,
+                    category: itemCategory, // Using actual sub-category now
+                    partnerId: currentUser.phone,
+                    shopName: currentUser.shopName,
+                    shopAddress: currentUser.shopAddress || '',
+                    shopCategory: currentUser.category || 'Food Owner',
+                    openTime: currentUser.openTime || '',
+                    closeTime: currentUser.closeTime || '',
+                    image: imgUrl,
+                    inStock: true,
+                    shopStatus: currentUser.shopStatus || 'Open'
+                };
+
+                if (window.editingProductId) {
+                    await window.dbCall(updateDoc(getDocRef('products', window.editingProductId), productData), 15000);
+                    window.showToast("Successfully updated Menu Item!", "success");
+                    window.editingProductId = null;
+                } else {
+                    productData.created = new Date().toISOString();
+                    await window.dbCall(addDoc(getCol('products'), productData), 15000);
+                    window.showToast("Successfully added to Menu!", "success");
+                }
+                
+                document.getElementById('prod-name').value = '';
+                document.getElementById('prod-prep-time').value = '';
+                if(imgInput) imgInput.value = '';
+                document.getElementById('variant-container').innerHTML = `
+                    <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Portion & Price</label>
+                    <div class="flex gap-2 variant-row">
+                        <input class="input-field w-1/2 var-qty" placeholder="Size (e.g. Full)">
+                        <input type="number" class="input-field w-1/2 var-price" placeholder="Price (₹)">
+                    </div>
+                `;
+            } catch(e) {
+                window.showToast("Network delayed. Saving in background.", "info");
+            } finally {
+                btn.innerText = "Save to Menu";
+                btn.disabled = false;
+            }
+        };
+
+        window.submitRideProfile = async () => {
+            if(!currentUser || !['Rider', 'Ride Partner'].includes(currentUser.category)) return;
+
+            const carNum = document.getElementById('partner-ride-num').value.trim();
+            const carModel = document.getElementById('partner-ride-model').value.trim();
+            const vehicleType = document.getElementById('partner-vehicle-type').value;
+            const seater = vehicleType === 'Bike' ? '1' : (vehicleType === 'Toto' ? '4' : document.getElementById('partner-ride-seater').value);
+
+            if(!carNum || !carModel) return window.showToast("Vehicle Registration and Model are required.", "error");
+
+            const btn = document.getElementById('btn-submit-ride-profile');
+            const orig = btn.innerText;
+            btn.innerText = "Updating...";
+            btn.disabled = true;
+
+            try {
+                const updateData = {
+                    carNum,
+                    carModel,
+                    vehicleType,
+                    seater,
+                    shopName: carModel
+                };
+
+                await window.dbCall(setDoc(getDocRef('users', currentUser.phone), updateData, { merge: true }), 10000);
+                
+                currentUser.carNum = carNum;
+                currentUser.carModel = carModel;
+                currentUser.vehicleType = vehicleType;
+                currentUser.seater = seater;
+                currentUser.shopName = carModel;
+
+                window.showToast("Vehicle Details Updated!", "success");
+            } catch(e) {
+                window.showToast("Error updating details.", "error");
+            } finally {
+                btn.innerText = orig;
+                btn.disabled = false;
+            }
+        };
+
+        window.submitPartnerProfile = async () => {
+            if(!currentUser || !currentUser.phone) return;
+            
+            const shopNameInput = document.getElementById('partner-shop-name');
+            const shopAddressInput = document.getElementById('partner-shop-address');
+            const openTimeInput = document.getElementById('partner-open-time');
+            const closeTimeInput = document.getElementById('partner-close-time');
+            
+            const shopName = shopNameInput ? shopNameInput.value.trim() : null;
+            const shopAddress = shopAddressInput ? shopAddressInput.value.trim() : '';
+            const openTime = openTimeInput ? openTimeInput.value : '';
+            const closeTime = closeTimeInput ? closeTimeInput.value : '';
+            const codEnabled = document.getElementById('partner-cod-toggle-setup').checked;
+            const onlineEnabled = document.getElementById('partner-online-toggle-setup').checked;
+            const qrInput = document.getElementById('partner-qr-upload');
+
+            if (!shopName) return window.showToast("Enter a business name.", "error");
+            if (!shopAddress) return window.showToast("Enter business address.", "error");
+            
+            const btn = document.getElementById('btn-submit-profile');
+            const orig = btn.innerText;
+            btn.innerText = "Submitting...";
+            btn.disabled = true;
+
+            let qrBase64 = currentUser.qrCode || null;
+
+            try {
+                if (onlineEnabled && qrInput && qrInput.files.length > 0) {
+                    qrBase64 = await window.resizeImage(qrInput.files[0], 600);
+                }
+                if(!onlineEnabled) qrBase64 = null; // Remove QR if disabled
+
+                const updateData = { 
+                    shopName: shopName, 
+                    shopAddress: shopAddress,
+                    openTime: openTime,
+                    closeTime: closeTime,
+                    codEnabled: codEnabled,
+                    onlineEnabled: onlineEnabled,
+                    qrCode: qrBase64
+                };
+
+                try {
+                    await window.dbCall(setDoc(getDocRef('users', currentUser.phone), updateData, { merge: true }), 10000);
+                    
+                    // Update timing and details on all products of this partner
+                    const snap = await window.dbCall(getDocs(getCol('products')), 10000);
+                    const myProducts = snap.docs.filter(d => d.data().partnerId === currentUser.phone);
+                    myProducts.forEach(d => {
+                        updateDoc(getDocRef('products', d.id), { shopName, shopAddress, openTime, closeTime });
+                    });
+
+                } catch(dbErr) {
+                    console.warn("DB Write timeout/failed.", dbErr);
+                }
+
+                currentUser.shopName = shopName;
+                currentUser.shopAddress = shopAddress;
+                currentUser.openTime = openTime;
+                currentUser.closeTime = closeTime;
+                currentUser.codEnabled = codEnabled;
+                currentUser.onlineEnabled = onlineEnabled;
+                currentUser.qrCode = qrBase64;
+                
+                window.showToast("Profile saved!", "success");
+                window.finalizeLoginSequence(); 
+            } catch(e) {
+                console.error(e);
+                window.showToast("Network error. Try again.", "error");
+            } finally { 
+                btn.innerText = orig; 
+                btn.disabled = false; 
+            }
+        };
+
+        // --- ADMIN TABS LOGIC ---
+        window.switchUserTab = (tab) => {
+            window.adminCurrentUserTab = tab;
+            document.querySelectorAll('.admin-user-tab').forEach(el => {
+                el.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
+                el.classList.add('text-gray-500');
+            });
+            const activeEl = document.getElementById(`tab-user-${tab.replace(/\s+/g, '')}`);
+            if(activeEl) {
+                activeEl.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
+                activeEl.classList.remove('text-gray-500');
+            }
+            window.renderAdminUsers();
+        };
+
+        window.openAdminUserEdit = (phone, name, shopName) => {
+            document.getElementById('edit-u-phone').value = phone;
+            document.getElementById('edit-u-name').value = name;
+            document.getElementById('edit-u-shop').value = shopName && shopName !== 'null' && shopName !== 'undefined' ? shopName : '';
+            document.getElementById('admin-edit-user-modal').classList.add('active');
+        };
+
+        window.submitAdminUserEdit = async () => {
+            const phone = document.getElementById('edit-u-phone').value;
+            const newName = document.getElementById('edit-u-name').value.trim();
+            const newShop = document.getElementById('edit-u-shop').value.trim();
+
+            if(!phone || !newName) return window.showToast("Name cannot be empty.", "error");
+
+            try {
+                await window.dbCall(setDoc(getDocRef('users', phone), {
+                    name: newName,
+                    shopName: newShop || null
+                }, { merge: true }), 10000);
+                window.showToast("User profile updated!", "success");
+                document.getElementById('admin-edit-user-modal').classList.remove('active');
+            } catch(e) {
+                window.showToast("Failed to update.", "error");
+            }
+        };
+
         window.adminReviewPartner = async (partnerPhone, status) => {
             if(currentUser.role !== 'Admin') return;
+            const actionVerb = status === 'Approved' ? "Approve" : "Revoke";
+            const confirmed = await window.customConfirm(`${actionVerb} Partner`, `Are you sure you want to ${actionVerb.toLowerCase()} this partner's registration?`, `Yes, ${actionVerb}`);
+            if(!confirmed) return;
+
             try {
                 await window.dbCall(setDoc(getDocRef('users', partnerPhone), { approvalStatus: status }, { merge: true }), 10000);
-                window.showToast(`Partner status updated to ${status}!`, "success");
+                window.showToast(`Partner status changed to ${status}!`, "success");
             } catch(e) {
                 window.showToast("Error updating status.", "error");
             }
         };
 
-        window.adminToggleVisibility = async (partnerPhone, category, isTurningOn) => {
+        window.adminToggleUserVisibility = async (partnerPhone, currentStatus) => {
             if(currentUser.role !== 'Admin') return;
-            const newStatus = isTurningOn ? (['Rider', 'Ride Partner'].includes(category) ? 'Online' : 'Open') : (['Rider', 'Ride Partner'].includes(category) ? 'Offline' : 'Closed');
+            const newStatus = currentStatus === 'Closed' || currentStatus === 'Offline' ? 'Open' : 'Closed'; // Force close or open
             
             try {
+                // Update User Node
                 await window.dbCall(setDoc(getDocRef('users', partnerPhone), { shopStatus: newStatus }, { merge: true }), 10000);
                 
-                if (['Food Owner', 'Grocery Shop'].includes(category)) {
-                    const snap = await window.dbCall(getDocs(getCol('products')), 10000);
-                    const myProducts = snap.docs.filter(d => d.data().partnerId === partnerPhone);
-                    myProducts.forEach(d => {
-                        updateDoc(getDocRef('products', d.id), { shopStatus: newStatus });
-                    });
-                }
-                window.showToast(`Visibility forcefully set to ${newStatus}`, "success");
-            } catch(e) {
-                window.showToast("Error updating visibility.", "error");
+                // Update Products Node (if any)
+                const snap = await window.dbCall(getDocs(getCol('products')), 10000);
+                const myProducts = snap.docs.filter(d => d.data().partnerId === partnerPhone);
+                myProducts.forEach(d => {
+                    updateDoc(getDocRef('products', d.id), { shopStatus: newStatus });
+                });
+                
+                window.showToast(`Partner visibility forced ${newStatus}.`, "success");
+            } catch(e) { window.showToast("Error toggling visibility.", "error"); }
+        };
+
+        window.renderAdminUsers = () => {
+            const usersBody = document.getElementById('admin-users-body');
+            if(!usersBody) return;
+
+            let filteredUsers = window.adminUsersData.filter(u => {
+                if (window.adminCurrentUserTab === 'All') return true;
+                if (window.adminCurrentUserTab === 'User') return u.role === 'User';
+                if (window.adminCurrentUserTab === 'Food Owner') return u.role === 'Partner' && u.category === 'Food Owner';
+                if (window.adminCurrentUserTab === 'Grocery Shop') return u.role === 'Partner' && u.category === 'Grocery Shop';
+                if (window.adminCurrentUserTab === 'Rider') return u.role === 'Partner' && ['Rider', 'Ride Partner'].includes(u.category);
+                return true;
+            });
+
+            if(filteredUsers.length === 0) {
+                usersBody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-gray-400 text-xs italic">No users found in this category.</td></tr>';
+                return;
             }
+
+            usersBody.innerHTML = filteredUsers.map(u => {
+                let displayPhone = u.phone ? String(u.phone) : '';
+                if(displayPhone.includes('@')) displayPhone = displayPhone.split('@')[0] + '@...';
+                
+                let detailsHtml = '';
+                let approvalControlsHtml = '';
+                let visibilityToggleHtml = '';
+
+                if(u.role === 'Partner') {
+                    const isApproved = u.approvalStatus === 'Approved';
+                    const isOffline = u.shopStatus === 'Closed' || u.shopStatus === 'Offline';
+                    
+                    // Admin Approval controls
+                    approvalControlsHtml = isApproved 
+                        ? `<button onclick="window.adminReviewPartner('${u.phone}', 'Pending')" class="text-[9px] font-bold bg-orange-50 text-orange-600 px-2 py-1 rounded border border-orange-100 mt-1 w-full text-center">Revoke Approval</button>`
+                        : `<button onclick="window.adminReviewPartner('${u.phone}', 'Approved')" class="text-[9px] font-bold bg-emerald-50 text-emerald-600 px-2 py-1 rounded border border-emerald-100 mt-1 w-full text-center">Approve Now</button>`;
+                    
+                    // Master Visibility Toggle
+                    visibilityToggleHtml = `
+                        <div class="mt-2 flex items-center justify-between bg-gray-50 p-1.5 rounded-lg border border-gray-100">
+                            <span class="text-[8px] font-bold text-gray-500 uppercase">App Visible</span>
+                            <label class="relative inline-flex items-center cursor-pointer transform scale-75">
+                                <input type="checkbox" class="sr-only peer" ${!isOffline ? 'checked' : ''} onchange="window.adminToggleUserVisibility('${u.phone}', '${u.shopStatus}')">
+                                <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                            </label>
+                        </div>
+                    `;
+
+                    if(['Rider', 'Ride Partner'].includes(u.category)) {
+                        detailsHtml = `<span class="font-bold text-gray-700">Vehicle:</span> ${u.carModel || 'N/A'} (${u.carNum || 'N/A'})<br/><span class="font-bold text-gray-700">Wallet:</span> ${u.walletPoints || 0} pts`;
+                    } else {
+                        detailsHtml = `<span class="font-bold text-gray-700">Shop:</span> ${u.shopName || 'N/A'}<br/><span class="font-bold text-gray-700">Status:</span> <span class="${isApproved ? 'text-emerald-500' : 'text-orange-500'} font-bold">${u.approvalStatus || 'Pending'}</span>`;
+                    }
+                } else {
+                    detailsHtml = `Verified User`;
+                }
+
+                let actionsHtml = `<span class="cursor-pointer font-black text-gray-400 bg-gray-100 px-2 py-0.5 rounded" onclick="this.innerText='${u.pin}'" title="Click to reveal">***</span>`;
+                
+                let editBtn = `<button onclick="window.openAdminUserEdit('${u.phone}', '${u.name.replace(/'/g, "\\'")}', '${(u.shopName || '').replace(/'/g, "\\'")}')" class="text-blue-500 hover:text-blue-700 ml-2" title="Edit User"><i class="fa-solid fa-pen"></i></button>`;
+
+                if (['Rider', 'Ride Partner'].includes(u.category)) {
+                    actionsHtml += `<br/><button onclick="window.adminAddPoints('${u.phone}', ${u.walletPoints || 0})" class="bg-blue-50 text-blue-600 px-2 py-1 mt-1 rounded border border-blue-100 text-[9px] font-bold w-full">+ Points</button>`;
+                }
+
+                return `
+                <tr class="hover:bg-gray-50 transition-colors border-b border-gray-50">
+                    <td class="p-3 font-bold text-xs align-top pt-4">
+                        <span class="px-2 py-0.5 rounded text-[9px] uppercase tracking-widest block text-center mb-2 ${u.role === 'Admin' ? 'bg-purple-100 text-purple-700' : u.role === 'Partner' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'}">${u.category || u.role || 'USER'}</span>
+                        ${approvalControlsHtml}
+                    </td>
+                    <td class="p-3 font-bold text-gray-900 text-xs align-top pt-4">${u.name || 'N/A'} ${editBtn}<br/><span class="font-mono font-normal text-[10px] text-gray-500">${displayPhone || 'N/A'}</span></td>
+                    <td class="p-3 text-[10px] text-gray-500 align-top pt-4">${detailsHtml}${visibilityToggleHtml}</td>
+                    <td class="p-3 text-right font-mono text-gray-900 text-xs align-top pt-4">${actionsHtml}</td>
+                </tr>`;
+            }).join('');
+        };
+
+        window.switchOrderTab = (tab) => {
+            window.adminCurrentOrderTab = tab;
+            document.querySelectorAll('.admin-order-tab').forEach(el => {
+                el.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
+                el.classList.add('text-gray-500');
+            });
+            const activeEl = document.getElementById(`tab-order-${tab}`);
+            if(activeEl) {
+                activeEl.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
+                activeEl.classList.remove('text-gray-500');
+            }
+            window.renderAdminOrders();
+        };
+
+        window.renderAdminOrders = () => {
+            const adminLog = document.getElementById('admin-log-body');
+            if(!adminLog) return;
+            
+            let filteredOrders = window.adminOrdersData.filter(o => {
+                if (window.adminCurrentOrderTab === 'Live') {
+                    return !['Delivered', 'Completed', 'Rejected'].includes(o.status);
+                } else if (window.adminCurrentOrderTab === 'Rejected') {
+                    return o.status === 'Rejected';
+                } else {
+                    return ['Delivered', 'Completed'].includes(o.status);
+                }
+            });
+
+            if(filteredOrders.length === 0) {
+                adminLog.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-gray-400 text-xs italic">No ${window.adminCurrentOrderTab.toLowerCase()} orders</td></tr>`;
+                return;
+            }
+
+            let html = '';
+            filteredOrders.forEach(o => {
+                const timeStr = window.formatOrderTime(o.time);
+                let statusColor = o.status === 'Placed' || o.status === 'Requested' ? 'text-amber-500' : o.status === 'Preparing' || o.status === 'Started' || o.status === 'Out for Delivery' ? 'text-blue-500' : o.status === 'Rejected' ? 'text-red-500' : 'text-emerald-500';
+                
+                const displayType = o.type === 'Ride' ? '🚕 Ride' : '🍔 Order';
+
+                html += `
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="p-4 font-mono font-bold text-[10px] text-gray-500">#${o.id.slice(-5).toUpperCase()}<br/><span class="font-sans font-medium text-[9px] text-gray-400">${timeStr}</span></td>
+                        <td class="p-4 font-bold text-gray-900 text-xs">${o.customer || 'Unknown'}<br/><span class="font-normal text-[10px] text-gray-500">${displayType}</span></td>
+                        <td class="p-4 font-medium text-gray-500 text-xs">${o.type === 'Ride' ? o.riderName : (o.restaurantName || '-')}</td>
+                        <td class="p-4 font-black text-gray-900 text-xs">₹${o.total ? o.total.toFixed(2) : (o.amount || 0)}</td>
+                        <td class="p-4 text-right uppercase text-[9px] font-black ${statusColor} tracking-wider">${o.status}</td>
+                    </tr>`;
+            });
+            adminLog.innerHTML = html;
+        };
+
+        window.switchPartnerOrderTab = (tab) => {
+            window.partnerCurrentOrderTab = tab;
+            document.querySelectorAll('.partner-order-tab').forEach(el => {
+                el.classList.remove('bg-gray-200', 'text-gray-900');
+                el.classList.add('text-gray-500');
+            });
+            const activeEl = document.getElementById(`tab-partner-order-${tab}`);
+            if(activeEl) {
+                activeEl.classList.add('bg-gray-200', 'text-gray-900');
+                activeEl.classList.remove('text-gray-500');
+            }
+            window.renderPartnerOrders();
+        };
+
+        window.renderPartnerOrders = () => {
+            const listEl = document.getElementById('partner-orders-list');
+            if (!listEl || !currentUser) return;
+            
+            let filteredOrders = window.partnerOrdersData.filter(o => {
+                if (window.partnerCurrentOrderTab === 'Live') {
+                    return !['Delivered', 'Completed', 'Rejected'].includes(o.status);
+                } else if (window.partnerCurrentOrderTab === 'Rejected') {
+                    return o.status === 'Rejected';
+                } else {
+                    return ['Delivered', 'Completed'].includes(o.status);
+                }
+            });
+
+            if (filteredOrders.length === 0) {
+                listEl.innerHTML = `<p class="text-gray-400 font-medium text-sm text-center py-10 bg-white rounded-3xl shadow-sm border border-gray-100">No ${window.partnerCurrentOrderTab.toLowerCase()} tasks right now.</p>`;
+                return;
+            }
+
+            let html = '';
+            filteredOrders.forEach(o => {
+                const itemsStr = o.items ? o.items.map(i => `${i.name}`).join(', ') : '';
+                const timeStr = window.formatOrderTime(o.time);
+                let cardStyle = 'border-gray-100', actionButtons = '';
+                let paymentBadge = o.paymentMode === 'Prepaid' ? `<span class="bg-blue-100 text-blue-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">Prepaid</span>` : `<span class="bg-gray-100 text-gray-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">COD</span>`;
+                let screenshotHtml = o.paymentMode === 'Prepaid' && o.paymentScreenshot ? `<button type="button" onclick="window.viewImage('${o.paymentScreenshot}')" class="text-[10px] text-blue-600 bg-blue-50 px-2 py-1 rounded font-bold hover:bg-blue-100 transition mt-2 w-full text-left"><i class="fa-solid fa-image"></i> View Payment Screenshot</button>` : '';
+                
+                let customerInfo = `<div class="mb-3 bg-gray-50 p-2 rounded-xl border border-gray-100">
+                    <p class="text-xs font-black text-gray-800"><i class="fa-solid fa-user text-gray-400 mr-1"></i> ${o.customer}</p>
+                    <p class="text-xs font-bold text-blue-600 mt-1"><a href="tel:${o.phone}"><i class="fa-solid fa-phone mr-1"></i> ${o.phone}</a></p>
+                </div>`;
+
+                if (['Rider', 'Ride Partner'].includes(currentUser.category)) {
+                    if (o.type === 'Ride') {
+                        if (o.status === 'Requested') {
+                            actionButtons = `<button type="button" onclick="window.startRide('${o.id}')" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-play mr-1"></i> Start Ride (Enter Amount)</button>`;
+                        } else if (o.status === 'Started') {
+                            actionButtons = `<button type="button" onclick="window.completeRide('${o.id}')" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-check-double mr-1"></i> Complete Ride & Collect ₹${o.amount}</button>`;
+                        } else if (o.status === 'Completed') {
+                            actionButtons = `<div class="w-full bg-gray-100 text-gray-500 py-3 rounded-xl font-bold text-sm text-center border border-gray-200"><i class="fa-solid fa-check mr-1"></i> Completed (₹${o.amount})</div>`;
+                        }
+                    } else {
+                        // Food/Grocery Delivery Logic
+                        if (o.status === 'Ready' && !o.riderId) {
+                            actionButtons = `<button type="button" onclick="window.acceptDelivery('${o.id}')" class="w-full bg-gray-900 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-motorcycle mr-1"></i> Accept Delivery</button>`;
+                        } else if (o.status === 'Out for Delivery' && o.riderId === currentUser.phone) {
+                            actionButtons = `<div class="flex gap-2"><a href="tel:${o.phone}" class="flex-1 bg-white border border-gray-200 text-gray-700 py-3 rounded-xl font-bold text-sm text-center flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone mr-1"></i> Customer</a><button type="button" onclick="window.markDelivered('${o.id}')" class="flex-1 bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md"><i class="fa-solid fa-check-double mr-1"></i> Done</button></div>`;
+                        }
+                    }
+                } else {
+                    if (o.status === 'Placed') actionButtons = `<div class="flex gap-2"><button type="button" onclick="window.acceptFoodOrder('${o.id}')" class="flex-1 bg-black text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-gray-800 transition-colors active:scale-95"><i class="fa-solid fa-check"></i> Accept</button><button type="button" onclick="window.openRejectModal('${o.id}')" class="flex-1 bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm hover:bg-red-100 transition-colors active:scale-95"><i class="fa-solid fa-xmark"></i> Reject</button></div>`;
+                    else if (o.status === 'Accepted') { cardStyle = 'border-blue-200 bg-blue-50/30'; actionButtons = `<button type="button" onclick="window.markPreparing('${o.id}')" class="w-full bg-blue-600 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-blue-700 active:scale-95">Start Preparing</button>`; }
+                    else if (o.status === 'Preparing') { cardStyle = 'border-orange-200 bg-orange-50/30'; actionButtons = `<button type="button" onclick="window.markReady('${o.id}')" class="w-full bg-orange-500 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-orange-600 active:scale-95">Mark Ready for Rider</button>`; }
+                    else if (o.status === 'Ready') { cardStyle = 'border-yellow-200 bg-yellow-50/30'; actionButtons = `<p class="text-xs font-bold text-orange-600 text-center py-2 bg-orange-50 rounded-xl">Waiting for Delivery Partner...</p><button type="button" onclick="window.markOutForDelivery('${o.id}')" class="w-full mt-2 bg-yellow-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95 border border-yellow-600">Self Deliver (Skip Rider)</button>`; }
+                    else if (o.status === 'Out for Delivery') {
+                        if (!o.riderId) { // Self delivery by Food Owner
+                            actionButtons = `<button type="button" onclick="window.markDelivered('${o.id}')" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-check-double mr-1"></i> Mark as Delivered</button>`;
+                        } else {
+                            actionButtons = `<p class="text-xs font-bold text-yellow-600 text-center py-2 bg-yellow-50 rounded-xl">OUT FOR DELIVERY.. Reaching soon (via ${o.riderName})</p>`;
+                        }
+                    }
+                    else if (o.status === 'Delivered') actionButtons = `<div class="w-full bg-emerald-50 text-emerald-600 py-3 rounded-xl font-bold text-sm text-center border border-emerald-100"><i class="fa-solid fa-circle-check mr-1"></i> Order Completed</div>`;
+                    else if (o.status === 'Rejected') actionButtons = `<div class="w-full bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm text-center border border-red-100"><i class="fa-solid fa-circle-xmark mr-1"></i> Order Rejected</div>`;
+                }
+
+                let ratingHtml = o.rating ? `<div class="mt-2 text-center text-xs font-bold text-yellow-600 bg-yellow-50 rounded-lg py-1 border border-yellow-100"><i class="fa-solid fa-star"></i> Customer Rated: ${o.rating} Star</div>` : '';
+
+                if (o.type === 'Ride') {
+                    html += `
+                        <div class="bg-white rounded-3xl p-5 shadow-sm border border-blue-100 relative overflow-hidden">
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span class="text-[10px] font-black text-blue-500 uppercase tracking-widest bg-blue-50 px-2 py-0.5 rounded"><i class="fa-solid fa-taxi"></i> RIDE</span>
+                                        <span class="text-[9px] font-medium text-gray-400"><i class="fa-regular fa-clock"></i> ${timeStr}</span>
+                                    </div>
+                                    <h4 class="font-bold text-gray-900 text-sm mt-2"><i class="fa-solid fa-user text-gray-400 mr-1"></i> ${o.customer}</h4>
+                                    <a href="tel:${o.phone}" class="text-xs font-bold text-blue-600 block mt-0.5"><i class="fa-solid fa-phone mr-1"></i> ${o.phone}</a>
+                                </div>
+                                <span class="text-xl font-black text-emerald-600">${o.amount ? '₹'+o.amount : '...'}</span>
+                            </div>
+                            
+                            <div class="relative bg-gray-50 p-3 rounded-xl mb-4 border border-gray-100 mt-2">
+                                <div class="absolute top-4 left-3.5 w-2 h-2 rounded-full bg-emerald-500 z-10"></div>
+                                <div class="absolute top-7 left-4 w-0.5 h-6 bg-gray-300 z-10"></div>
+                                <div class="absolute top-14 left-3.5 w-2 h-2 rounded-full bg-red-500 z-10"></div>
+                                
+                                <p class="text-xs font-medium text-gray-700 pl-6 mb-3">From: <b>${o.pickup}</b></p>
+                                <p class="text-xs font-medium text-gray-700 pl-6">To: <b>${o.address}</b></p>
+                            </div>
+                            ${actionButtons}
+                        </div>
+                    `;
+                } else {
+                    html += `<div class="bg-white rounded-3xl p-5 shadow-sm border ${cardStyle}">
+                            <div class="flex justify-between items-start mb-3"><div><div class="flex items-center gap-2 mb-1"><span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Order #${o.id.slice(-4).toUpperCase()}</span><span class="text-[9px] font-medium text-gray-400"><i class="fa-regular fa-clock"></i> ${timeStr}</span>${paymentBadge}</div><h4 class="font-bold text-gray-900 text-sm"><i class="fa-solid fa-map-pin text-red-500 mr-1"></i> ${o.address}</h4></div><span class="text-xl font-black text-emerald-600">₹${o.total.toFixed(2)}</span></div>
+                            ${customerInfo}
+                            <div class="bg-gray-50 p-3 rounded-xl mb-4 border border-gray-100"><p class="text-xs text-gray-700 font-bold mb-1"><i class="fa-solid fa-clipboard-list text-gray-400 mr-1"></i> Items:</p><p class="text-sm text-gray-600 font-medium">${itemsStr}</p>${screenshotHtml}</div>
+                            ${actionButtons}
+                            ${ratingHtml}
+                            </div>`;
+                }
+            });
+            listEl.innerHTML = html;
         };
 
         window.adminCreatePromo = async () => {
@@ -2998,357 +3315,6 @@
             }
         };
 
-        window.toggleShopStatus = async (fromQuick = false) => {
-            const toggle = document.getElementById(fromQuick ? 'rider-quick-status-toggle' : 'partner-status-toggle');
-            const isOpen = toggle.checked;
-            const newStatus = isOpen ? (['Rider', 'Ride Partner'].includes(currentUser.category) ? 'Online' : 'Open') : (['Rider', 'Ride Partner'].includes(currentUser.category) ? 'Offline' : 'Closed');
-            
-            const otherToggle = document.getElementById(fromQuick ? 'partner-status-toggle' : 'rider-quick-status-toggle');
-            if (otherToggle) otherToggle.checked = isOpen;
-
-            document.getElementById('shop-status-text').innerText = ['Rider', 'Ride Partner'].includes(currentUser.category) 
-                ? (isOpen ? 'Online & Available' : 'Currently Offline')
-                : `Currently ${newStatus}`;
-            
-            const quickStatusText = document.getElementById('rider-quick-status-text');
-            if(quickStatusText) quickStatusText.innerText = isOpen ? 'Online & Available' : 'Currently Offline';
-            
-            try {
-                await window.dbCall(setDoc(getDocRef('users', currentUser.phone), { shopStatus: newStatus }, { merge: true }), 10000);
-                currentUser.shopStatus = newStatus;
-                
-                if (['Food Owner', 'Grocery Shop'].includes(currentUser.category)) {
-                    const snap = await window.dbCall(getDocs(getCol('products')), 10000);
-                    const myProducts = snap.docs.filter(d => d.data().partnerId === currentUser.phone);
-                    
-                    myProducts.forEach(d => {
-                        updateDoc(getDocRef('products', d.id), { shopStatus: newStatus });
-                    });
-                }
-                
-                window.showToast(`Status marked as ${newStatus}`, "success");
-            } catch(e) {
-                window.showToast("Error updating status", "error");
-                toggle.checked = !isOpen; 
-                if (otherToggle) otherToggle.checked = !isOpen;
-            }
-        };
-
-        window.updateRiderLocation = async () => {
-            if(!currentUser) return;
-            const locInput = document.getElementById('rider-quick-location');
-            const loc = locInput.value.trim();
-            if(!loc) return window.showToast("Please enter a location.", "error");
-
-            const origText = locInput.value;
-            locInput.value = "Saving...";
-
-            try {
-                await window.dbCall(updateDoc(getDocRef('users', currentUser.phone), { currentLocation: loc }), 10000);
-                currentUser.currentLocation = loc;
-                
-                const settingsLoc = document.getElementById('partner-ride-location');
-                if (settingsLoc) settingsLoc.value = loc;
-
-                locInput.value = loc;
-                window.showToast("Location Broadcasted Successfully!", "success");
-            } catch(e) { 
-                locInput.value = origText;
-                window.showToast("Failed to update location.", "error"); 
-            }
-        };
-
-        window.togglePartnerStock = async (productId, currentInStock) => {
-            try {
-                await window.dbCall(updateDoc(getDocRef('products', productId), { inStock: !currentInStock }), 10000);
-                window.showToast(currentInStock ? "Marked Out of Stock" : "Marked In Stock", "success");
-            } catch(e) { window.showToast("Error updating stock", "error"); }
-        };
-
-        window.addVariantRow = () => {
-            const container = document.getElementById('variant-container');
-            const row = document.createElement('div');
-            row.className = "flex gap-2 variant-row mt-3";
-            row.innerHTML = `
-                <input class="input-field w-1/2 var-qty" placeholder="Size (e.g. Half)">
-                <input type="number" class="input-field w-1/2 var-price" placeholder="Price (₹)">
-                <button type="button" onclick="this.parentElement.remove()" class="w-12 shrink-0 bg-gray-100 text-gray-500 rounded-xl flex justify-center items-center hover:bg-red-50 hover:text-red-500 transition border border-gray-200"><i class="fa-solid fa-xmark"></i></button>
-            `;
-            container.appendChild(row);
-        };
-
-        window.deletePartnerProduct = async (id) => {
-            const confirmed = await window.customDialog({
-                title: "Delete Item",
-                desc: "Are you sure you want to permanently delete this menu item?",
-                confirmText: "Delete",
-                confirmClass: "flex-1 bg-red-600 text-white py-3 rounded-xl font-bold shadow-md hover:bg-red-700"
-            });
-            if(!confirmed) return;
-            try {
-                await window.dbCall(deleteDoc(getDocRef('products', id)), 10000);
-                window.showToast("Product deleted.", "success");
-            } catch(e) { window.showToast("Failed to delete.", "error"); }
-        };
-
-        window.editPartnerProduct = async (id) => {
-            try {
-                const snap = await window.dbCall(getDoc(getDocRef('products', id)), 5000);
-                if(!snap.exists()) return;
-                const p = snap.data();
-                
-                window.editingProductId = id;
-                document.getElementById('prod-name').value = p.name || '';
-                document.getElementById('prod-prep-time').value = p.prepTime || '';
-                
-                const catEl = document.getElementById('prod-category');
-                if (catEl && p.subCategory) {
-                    catEl.value = p.subCategory;
-                }
-                
-                const container = document.getElementById('variant-container');
-                container.innerHTML = '<label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Portion & Price</label>';
-                
-                let variants = p.variants && p.variants.length > 0 ? p.variants : [{qty: p.qty || 'Full', price: p.price || 0}];
-                
-                variants.forEach((v, index) => {
-                    const row = document.createElement('div');
-                    row.className = "flex gap-2 variant-row" + (index > 0 ? " mt-3" : "");
-                    row.innerHTML = `
-                        <input class="input-field w-1/2 var-qty" placeholder="Size (e.g. Full)" value="${v.qty}">
-                        <input type="number" class="input-field w-1/2 var-price" placeholder="Price (₹)" value="${v.price}">
-                        ${index > 0 ? `<button type="button" onclick="this.parentElement.remove()" class="w-12 shrink-0 bg-gray-100 text-gray-500 rounded-xl flex justify-center items-center hover:bg-red-50 hover:text-red-500 transition border border-gray-200"><i class="fa-solid fa-xmark"></i></button>` : ''}
-                    `;
-                    container.appendChild(row);
-                });
-                
-                document.getElementById('btn-add-prod').innerText = "Update Item";
-                window.scrollTo({ top: document.getElementById('add-product-container').offsetTop - 60, behavior: 'smooth' });
-                window.showToast("Edit mode enabled. Make your changes and click update.", "info");
-            } catch(e) { window.showToast("Failed to load product details.", "error"); }
-        };
-
-        window.addPartnerProduct = async () => {
-            if(!currentUser) return;
-            if(currentUser.approvalStatus !== 'Approved') return window.showToast("Store not approved yet.", "error");
-
-            const name = document.getElementById('prod-name').value.trim();
-            const prepTime = document.getElementById('prod-prep-time').value.trim() || '15';
-            const subCategory = document.getElementById('prod-category') ? document.getElementById('prod-category').value : 'Others';
-            
-            if(!name) return window.showToast("Enter item name.", "error");
-
-            const rows = document.querySelectorAll('.variant-row');
-            let variants = [];
-            rows.forEach(row => {
-                const qty = row.querySelector('.var-qty').value.trim();
-                const price = parseInt(row.querySelector('.var-price').value);
-                if(qty && !isNaN(price)) variants.push({ qty, price });
-            });
-
-            if(variants.length === 0) return window.showToast("Add at least one size and price.", "error");
-
-            if(!currentUser.shopName) {
-                window.showToast("Please setup and Save your Business Profile first.", "error");
-                document.getElementById('partner-shop-name').focus();
-                return;
-            }
-
-            let defaultImg = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80';
-            const imgInput = document.getElementById('prod-image-upload');
-            
-            const btn = document.getElementById('btn-add-prod');
-            const originalText = btn.innerText;
-            btn.innerText = "Saving...";
-            btn.disabled = true;
-
-            try {
-                let imgUrl = defaultImg;
-                
-                if (window.editingProductId) {
-                    try {
-                        const existingSnap = await window.dbCall(getDoc(getDocRef('products', window.editingProductId)), 5000);
-                        if (existingSnap.exists() && existingSnap.data().image) {
-                            imgUrl = existingSnap.data().image;
-                        }
-                    } catch(e){}
-                }
-
-                if (imgInput && imgInput.files.length > 0) {
-                    imgUrl = await window.resizeImage(imgInput.files[0], 400);
-                }
-
-                const productData = {
-                    name, 
-                    variants,
-                    price: variants[0].price, 
-                    qty: variants[0].qty,     
-                    prepTime: prepTime,
-                    category: currentUser.category === 'Grocery Shop' ? 'Grocery' : 'Food',
-                    subCategory: subCategory,
-                    partnerId: currentUser.phone,
-                    shopName: currentUser.shopName,
-                    shopAddress: currentUser.shopAddress || '',
-                    shopCategory: currentUser.category || 'Food Owner',
-                    openTime: currentUser.openTime || '',
-                    closeTime: currentUser.closeTime || '',
-                    image: imgUrl,
-                    inStock: true,
-                    shopStatus: currentUser.shopStatus || 'Open'
-                };
-
-                if (window.editingProductId) {
-                    await window.dbCall(updateDoc(getDocRef('products', window.editingProductId), productData), 15000);
-                    window.showToast("Successfully updated Menu Item!", "success");
-                    window.editingProductId = null;
-                } else {
-                    productData.created = new Date().toISOString();
-                    await window.dbCall(addDoc(getCol('products'), productData), 15000);
-                    window.showToast("Successfully added to Menu!", "success");
-                }
-                
-                document.getElementById('prod-name').value = '';
-                document.getElementById('prod-prep-time').value = '';
-                if(imgInput) imgInput.value = '';
-                document.getElementById('variant-container').innerHTML = `
-                    <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Portion & Price</label>
-                    <div class="flex gap-2 variant-row">
-                        <input class="input-field w-1/2 var-qty" placeholder="Size (e.g. Full)">
-                        <input type="number" class="input-field w-1/2 var-price" placeholder="Price (₹)">
-                    </div>
-                `;
-            } catch(e) {
-                window.showToast("Network delayed. Saving in background.", "info");
-            } finally {
-                btn.innerText = "Save to Menu";
-                btn.disabled = false;
-            }
-        };
-
-        window.submitRideProfile = async () => {
-            if(!currentUser || !['Rider', 'Ride Partner'].includes(currentUser.category)) return;
-
-            const carNum = document.getElementById('partner-ride-num').value.trim();
-            const carModel = document.getElementById('partner-ride-model').value.trim();
-            const vehicleType = document.getElementById('partner-vehicle-type').value;
-            const seater = vehicleType === 'Bike' ? '1' : (vehicleType === 'Toto' ? '4' : document.getElementById('partner-ride-seater').value);
-            const currentLocation = document.getElementById('partner-ride-location').value.trim();
-
-            if(!carNum || !carModel) return window.showToast("Vehicle Registration and Model are required.", "error");
-
-            const btn = document.getElementById('btn-submit-ride-profile');
-            const orig = btn.innerText;
-            btn.innerText = "Updating...";
-            btn.disabled = true;
-
-            try {
-                const updateData = {
-                    carNum,
-                    carModel,
-                    vehicleType,
-                    seater,
-                    currentLocation,
-                    shopName: carModel
-                };
-
-                await window.dbCall(setDoc(getDocRef('users', currentUser.phone), updateData, { merge: true }), 10000);
-                
-                currentUser.carNum = carNum;
-                currentUser.carModel = carModel;
-                currentUser.vehicleType = vehicleType;
-                currentUser.seater = seater;
-                currentUser.currentLocation = currentLocation;
-                currentUser.shopName = carModel;
-
-                window.showToast("Vehicle Details Updated!", "success");
-            } catch(e) {
-                window.showToast("Error updating details.", "error");
-            } finally {
-                btn.innerText = orig;
-                btn.disabled = false;
-            }
-        };
-
-        window.submitPartnerProfile = async () => {
-            if(!currentUser || !currentUser.phone) return;
-            
-            const shopNameInput = document.getElementById('partner-shop-name');
-            const shopAddressInput = document.getElementById('partner-shop-address');
-            const openTimeInput = document.getElementById('partner-open-time');
-            const closeTimeInput = document.getElementById('partner-close-time');
-            
-            const shopName = shopNameInput ? shopNameInput.value.trim() : null;
-            const shopAddress = shopAddressInput ? shopAddressInput.value.trim() : '';
-            const openTime = openTimeInput ? openTimeInput.value : '';
-            const closeTime = closeTimeInput ? closeTimeInput.value : '';
-            const codEnabled = document.getElementById('partner-cod-toggle-setup').checked;
-            const onlineEnabled = document.getElementById('partner-online-toggle-setup').checked;
-            const qrInput = document.getElementById('partner-qr-upload');
-
-            if (!shopName) return window.showToast("Enter a business name.", "error");
-            if (!shopAddress) return window.showToast("Enter business address.", "error");
-            
-            const btn = document.getElementById('btn-submit-profile');
-            const orig = btn.innerText;
-            btn.innerText = "Submitting...";
-            btn.disabled = true;
-
-            let qrBase64 = currentUser.qrCode || null;
-
-            try {
-                if (onlineEnabled && qrInput && qrInput.files.length > 0) {
-                    qrBase64 = await window.resizeImage(qrInput.files[0], 600);
-                }
-                if(!onlineEnabled) qrBase64 = null;
-
-                // Reverting approval back to pending on major profile change isn't strictly necessary 
-                // but we keep whatever status they currently have.
-                const newStatus = currentUser.approvalStatus || 'Pending'; 
-
-                const updateData = { 
-                    shopName: shopName, 
-                    shopAddress: shopAddress,
-                    openTime: openTime,
-                    closeTime: closeTime,
-                    approvalStatus: newStatus,
-                    codEnabled: codEnabled,
-                    onlineEnabled: onlineEnabled,
-                    qrCode: qrBase64
-                };
-
-                try {
-                    await window.dbCall(setDoc(getDocRef('users', currentUser.phone), updateData, { merge: true }), 10000);
-                    
-                    const snap = await window.dbCall(getDocs(getCol('products')), 10000);
-                    const myProducts = snap.docs.filter(d => d.data().partnerId === currentUser.phone);
-                    myProducts.forEach(d => {
-                        updateDoc(getDocRef('products', d.id), { shopName, shopAddress, openTime, closeTime });
-                    });
-
-                } catch(dbErr) {
-                    console.warn("DB Write timeout/failed.", dbErr);
-                }
-
-                currentUser.shopName = shopName;
-                currentUser.shopAddress = shopAddress;
-                currentUser.openTime = openTime;
-                currentUser.closeTime = closeTime;
-                currentUser.approvalStatus = newStatus;
-                currentUser.codEnabled = codEnabled;
-                currentUser.onlineEnabled = onlineEnabled;
-                currentUser.qrCode = qrBase64;
-                
-                window.showToast("Profile submitted successfully!", "success");
-                window.finalizeLoginSequence(); 
-            } catch(e) {
-                console.error(e);
-                window.showToast("Network error. Try again.", "error");
-            } finally { 
-                btn.innerText = orig; 
-                btn.disabled = false; 
-            }
-        };
-
         window.initRoleListeners = () => {
             if (!auth.currentUser || !currentUser) return;
 
@@ -3357,7 +3323,7 @@
 
             if (currentUser.role === 'Admin') {
                 const unsubOrders = onSnapshot(getCol('orders'), (snap) => {
-                    let rev = 0, count = 0;
+                    let revFood = 0, revGrocery = 0, revRide = 0, count = 0;
                     const orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
                     orders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0));
 
@@ -3366,7 +3332,10 @@
 
                     orders.forEach(o => {
                         if (o.status !== 'Rejected') {
-                            rev += o.total; 
+                            if (o.type === 'Ride') revRide += (o.total || o.amount || 0);
+                            else if (o.restaurantName && o.restaurantName.toLowerCase().includes('grocery')) revGrocery += (o.total || 0); // basic fallback, better to use shopCategory
+                            else revFood += (o.total || 0);
+                            
                             count++;
                         }
                         
@@ -3379,8 +3348,13 @@
                     
                     window.lastKnownOrders = newOrderIds;
                     
+                    document.getElementById('stat-rev').innerText = `₹${(revFood + revGrocery + revRide).toFixed(2)}`;
+                    document.getElementById('stat-rev-food').innerText = `₹${revFood.toFixed(0)}`;
+                    document.getElementById('stat-rev-grocery').innerText = `₹${revGrocery.toFixed(0)}`;
+                    document.getElementById('stat-rev-ride').innerText = `₹${revRide.toFixed(0)}`;
+                    document.getElementById('stat-ord').innerText = count;
+
                     window.adminOrdersData = orders;
-                    window.recalculateAdminStats();
                     if(window.renderAdminOrders) window.renderAdminOrders();
                 });
                 unsubscribeListeners.push(unsubOrders);
@@ -3397,7 +3371,6 @@
 
                     window.adminUsersData = allUsers;
                     if(window.renderAdminUsers) window.renderAdminUsers();
-                    window.recalculateAdminStats(); // Users data needed for food vs grocery split
                 });
                 unsubscribeListeners.push(unsubUsers);
 
@@ -3443,11 +3416,6 @@
                         newOrderIds[o.id] = o.status;
                         
                         if (!firstLoad && window.lastKnownOrders[o.id] && window.lastKnownOrders[o.id] !== o.status) {
-                            let speechStatus = o.status;
-                            if(o.status === 'Preparing') speechStatus = "preparing";
-                            if(o.status === 'Out for Delivery') speechStatus = "out for delivery";
-                            if(o.status === 'Requested') speechStatus = "searching for ride";
-                            
                             window.showStatusPopup("Order Update", `Your order #${o.id.slice(-5).toUpperCase()} is now ${o.status}`);
                         }
 
@@ -3560,8 +3528,6 @@
             }
             else if (currentUser.role === 'Partner') {
                 const orderUnsub = onSnapshot(getCol('orders'), (snap) => {
-                    const listEl = document.getElementById('partner-orders-list');
-                    let html = '';
                     const orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
                     
                     let relevantOrders = [];
@@ -3569,17 +3535,14 @@
                         relevantOrders = orders.filter(o => o.restaurantId === currentUser.phone && o.type !== 'Ride');
                     } else if (['Rider', 'Ride Partner'].includes(currentUser.category)) {
                         relevantOrders = orders.filter(o => 
-                            // Matches Food Deliveries pending a rider OR currently held by this rider
                             (o.status === 'Ready' && !o.riderId && o.type !== 'Ride') || 
                             (o.status === 'Placed' && !o.restaurantId && o.type !== 'Ride') || 
                             (o.riderId === currentUser.phone && ['Out for Delivery'].includes(o.status) && o.type !== 'Ride') ||
-                            // Matches Rides specifically requested to this rider
                             (o.riderId === currentUser.phone && o.type === 'Ride')
                         );
                     }
                     
                     relevantOrders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0));
-                    window.partnerOrdersData = relevantOrders;
 
                     let newOrderIds = {};
                     let firstLoad = Object.keys(window.lastKnownOrders || {}).length === 0;
@@ -3592,6 +3555,7 @@
                     });
                     
                     window.lastKnownOrders = newOrderIds;
+                    window.partnerOrdersData = relevantOrders;
                     if (window.renderPartnerOrders) window.renderPartnerOrders();
                 });
                 unsubscribeListeners.push(orderUnsub);
@@ -3614,6 +3578,7 @@
             }
         };
 
+        // Initialize Session Handlers
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 if (!currentUser) {
@@ -3639,13 +3604,13 @@
                     if (sessionPhone) {
                         if (sessionPhone === 'admin_session' || sessionPhone === 'Gramzo_admin') {
                             currentUser = { name: 'Super Admin', role: 'Admin', phone: 'Admin', docId: 'admin_session', uid: user.uid };
-                            window.finalizeLoginSequence();
+                            window.finalizeLoginSequence(true);
                         } else {
                             try {
                                 const userSnap = await window.dbCall(getDoc(getDocRef('users', sessionPhone)), 5000);
                                 if (userSnap && userSnap.exists()) {
                                     currentUser = { ...userSnap.data(), docId: sessionPhone };
-                                    window.finalizeLoginSequence(); 
+                                    window.finalizeLoginSequence(true); 
                                 }
                             } catch(e) { console.warn("Profile fetch failed."); }
                         }
@@ -3657,14 +3622,6 @@
             }
         });
 
-        // Register Service Worker for PWABuilder / Push Notifications
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./firebase-messaging-sw.js')
-                .then(reg => console.log('Firebase SW registered for Push Notifications.', reg.scope))
-                .catch(err => console.log('SW registration failed (safe to ignore if testing locally): ', err));
-            });
-        }
     </script>
 </body>
 </html>
