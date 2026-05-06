@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "in.gramzo.twa",
+        "sha256_cert_fingerprints": ["5B:92:4F:A1:32:FF:D4:93:E1:30:FB:15:F7:1C:A2:0D:18:8E:FA:C9:E1:44:B1:71:3D:8E:C4:07:CD:5C:12:B9"]
+      }
+    }]
