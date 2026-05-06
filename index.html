@@ -14,7 +14,7 @@
     <!-- AGGRESSIVE AUTO CACHE BUSTER SCRIPT (Self-Healing) -->
     <script>
         (function() {
-            const APP_VERSION = "11.20.0"; // Partner Tabs & Admin Revenue Breakdown Update
+            const APP_VERSION = "11.21.0"; // Admin Controls & Approval Update
             const storedVersion = localStorage.getItem("gramzo_app_version");
             const isForcedUpdate = window.location.search.includes('update=now');
             
@@ -347,7 +347,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.20.0 - Advanced Dashboards & Rides</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.21.0 - Admin System Update</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right">
                             <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
@@ -1093,7 +1093,6 @@
             });
         };
 
-        // --- STREAMING_CHUNK:Alerts & Sound Handlers... ---
         window.alertAudio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
         window.alertAudio.loop = true; 
 
@@ -1129,7 +1128,6 @@
             }
         };
 
-        // --- STREAMING_CHUNK:Rating System... ---
         window.openRatingModal = (orderId, partnerId) => {
             window.currentRatingOrderId = orderId;
             window.currentRatingPartnerId = partnerId;
@@ -1218,7 +1216,6 @@
             }, 3000);
         };
 
-        // --- STREAMING_CHUNK:Page Modals & Views... ---
         window.openStaticPage = (page) => {
             const titleEl = document.getElementById('info-modal-title');
             const bodyEl = document.getElementById('info-modal-body');
@@ -1337,7 +1334,6 @@
 
         if (window.isGoogleMapsLoaded) window.setupMapsFeatures();
 
-        // --- STREAMING_CHUNK:Ride Logic & Fallbacks... ---
         window.calculateDistance = (origin, dest) => {
             return new Promise((resolve) => {
                 if(!window.google || !window.google.maps) {
@@ -1463,6 +1459,7 @@
                 const availableDrivers = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(u => 
                     ['Rider', 'Ride Partner'].includes(u.category) && 
                     u.shopStatus === 'Online' && 
+                    u.approvalStatus === 'Approved' && 
                     (u.vehicleType === searchType || (!u.vehicleType && searchType === 'Car'))
                 );
 
@@ -1652,7 +1649,6 @@
             }
         };
 
-        // --- STREAMING_CHUNK:Auth & Core Initializers... ---
         window.openAuthModal = (role = 'User') => {
             currentAuthRole = role;
             document.getElementById('auth-overlay').classList.add('active');
@@ -1804,7 +1800,7 @@
 
                     const userData = { 
                         name, phone, pin: pass, role: currentAuthRole, shopStatus: ['Rider', 'Ride Partner'].includes(partnerCategory) ? 'Offline' : 'Open',
-                        approvalStatus: 'Approved', uid: auth?.currentUser?.uid || 'unknown',
+                        approvalStatus: currentAuthRole === 'Partner' ? 'Pending' : 'Approved', uid: auth?.currentUser?.uid || 'unknown',
                         created: new Date().toISOString(),
                         ...(currentAuthRole === 'Partner' && { 
                             category: partnerCategory, 
@@ -1862,14 +1858,7 @@
 
             window.showToast(`Welcome back, ${currentUser.name.split(' ')[0]}!`, "success");
 
-            document.getElementById('btn-partner-login-trigger').classList.add('hidden');
-            document.getElementById('btn-login-trigger').classList.add('hidden');
-            document.getElementById('profile-trigger').classList.remove('hidden');
-            
-            document.getElementById('nav-initial').innerText = currentUser.name.charAt(0).toUpperCase();
-            document.getElementById('nav-name').innerText = currentUser.name;
-            document.getElementById('nav-role').innerText = currentUser.role;
-            document.getElementById('nav-role').className = `text-[9px] font-bold uppercase ${currentUser.role === 'Admin' ? 'text-purple-500' : currentUser.role === 'Partner' ? 'text-orange-500' : 'text-blue-500'}`;
+            document.getElementById('nav-role').className = `text-[8px] font-bold uppercase ${currentUser.role === 'Admin' ? 'text-purple-500' : currentUser.role === 'Partner' ? 'text-orange-500' : 'text-blue-500'}`;
             document.getElementById('menu-name').innerText = currentUser.name;
             document.getElementById('menu-phone').innerText = currentUser.phone;
 
@@ -1879,6 +1868,13 @@
             if (currentUser.role === 'Partner') {
                 const isShop = ['Food Owner', 'Grocery Shop'].includes(currentUser.category);
                 const isRide = ['Rider', 'Ride Partner'].includes(currentUser.category);
+
+                const approvalBadge = document.getElementById('partner-approval-status');
+                if (approvalBadge) {
+                    const isAppr = currentUser.approvalStatus === 'Approved';
+                    approvalBadge.innerText = currentUser.approvalStatus || 'Pending';
+                    approvalBadge.className = `text-[10px] font-black uppercase border px-2 py-1 rounded ${isAppr ? 'border-emerald-200 text-emerald-600 bg-emerald-50' : 'border-orange-200 text-orange-600 bg-orange-50'}`;
+                }
 
                 document.getElementById('partner-food-settings').classList.add('hidden');
                 document.getElementById('add-product-container').classList.add('hidden');
@@ -1962,7 +1958,6 @@
             window.loadMarketplaceData();
         };
 
-        // --- STREAMING_CHUNK:Marketplace & Categories Logic... ---
         const renderProducts = (items) => {
             const listEl = document.getElementById('market-list');
             if (!listEl) return;
@@ -2000,7 +1995,7 @@
             const buildProductCard = (p) => {
                 const hasVariants = p.variants && p.variants.length > 0;
                 const displayPrice = hasVariants ? p.variants[0].price : p.price;
-                const isClosed = p.shopStatus === 'Closed';
+                const isClosed = p.shopStatus === 'Closed' || p.shopStatus === 'Offline';
                 const isOutOfStock = p.inStock === false;
                 
                 let addressDisplay = `<div class="mb-2 ${textAddress}">
@@ -2093,7 +2088,7 @@
 
         const fetchLiveMarketplace = async () => {
             try {
-                // 1. Fetch Users to get all Approved Partners (even if they have no products yet)
+                // 1. Fetch Users to get all Approved Partners
                 const usersSnap = await window.dbCall(getDocs(getCol('users')), 8000);
                 const approvedPartners = usersSnap.docs.map(d => ({id: d.id, ...d.data()}))
                     .filter(u => u.role === 'Partner' && u.approvalStatus === 'Approved' && u.category === window.currentUserMainCategory);
@@ -2122,7 +2117,10 @@
                 });
 
                 window.renderRestaurants(uniqueRestaurants);
-                renderProducts(products);
+                // Only pass products whose partners are approved
+                const approvedPartnerIds = approvedPartners.map(p => p.phone);
+                const approvedProducts = products.filter(p => approvedPartnerIds.includes(p.partnerId));
+                renderProducts(approvedProducts);
                 
             } catch(e) {
                 console.warn("Error fetching live marketplace:", e);
@@ -2213,7 +2211,6 @@
             }, 100);
         };
 
-        // --- STREAMING_CHUNK:Admin Directory & Edit Logic... ---
         window.switchUserTab = (tab) => {
             window.adminCurrentUserTab = tab;
             document.querySelectorAll('.admin-user-tab').forEach(el => {
@@ -2289,11 +2286,28 @@
                 if(displayPhone.includes('@')) displayPhone = displayPhone.split('@')[0] + '@...';
                 
                 let detailsHtml = '';
+                let adminControls = '';
+
                 if(u.role === 'Partner') {
+                    const isApproved = u.approvalStatus === 'Approved';
+                    const isVisible = ['Open', 'Online'].includes(u.shopStatus);
+                    
+                    adminControls += `<br/><button onclick="window.adminReviewPartner('${u.phone}', '${isApproved ? 'Pending' : 'Approved'}')" class="mt-2 w-full px-2 py-1.5 rounded text-[9px] font-bold border transition-colors ${isApproved ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100' : 'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100 shadow-sm'}">${isApproved ? 'Revoke Approval' : 'Approve Partner'}</button>`;
+                    
+                    adminControls += `
+                        <div class="mt-1 flex items-center justify-between bg-gray-50 p-1.5 rounded-lg border border-gray-100" title="Admin Override Visibility">
+                            <span class="text-[9px] font-bold text-gray-500">Visible to Users:</span>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" class="sr-only peer" ${isVisible ? 'checked' : ''} onchange="window.adminToggleVisibility('${u.phone}', '${u.category}', this.checked)">
+                                <div class="w-6 h-3 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:left-[1px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-2.5 after:w-2.5 after:transition-all peer-checked:bg-blue-500"></div>
+                            </label>
+                        </div>
+                    `;
+
                     if(['Rider', 'Ride Partner'].includes(u.category)) {
-                        detailsHtml = `<span class="font-bold text-gray-700">Vehicle:</span> ${u.carModel || 'N/A'} (${u.carNum || 'N/A'})<br/><span class="font-bold text-gray-700">Wallet:</span> ${u.walletPoints || 0} pts`;
+                        detailsHtml = `<span class="font-bold text-gray-700">Vehicle:</span> ${u.carModel || 'N/A'} (${u.carNum || 'N/A'})<br/><span class="font-bold text-gray-700">Wallet:</span> ${u.walletPoints || 0} pts<br/><span class="font-bold text-gray-700">Status:</span> <span class="${isApproved ? 'text-emerald-500' : 'text-orange-500'} font-bold">${u.approvalStatus || 'Pending'}</span>`;
                     } else {
-                        detailsHtml = `<span class="font-bold text-gray-700">Shop:</span> ${u.shopName || 'N/A'}<br/><span class="font-bold text-gray-700">Status:</span> <span class="${u.approvalStatus === 'Approved' ? 'text-emerald-500' : 'text-orange-500'} font-bold">${u.approvalStatus}</span>`;
+                        detailsHtml = `<span class="font-bold text-gray-700">Shop:</span> ${u.shopName || 'N/A'}<br/><span class="font-bold text-gray-700">Status:</span> <span class="${isApproved ? 'text-emerald-500' : 'text-orange-500'} font-bold">${u.approvalStatus || 'Pending'}</span>`;
                     }
                 } else {
                     detailsHtml = `Verified`;
@@ -2304,8 +2318,10 @@
                 let editBtn = `<button onclick="window.openAdminUserEdit('${u.phone}', '${u.name.replace(/'/g, "\\'")}', '${(u.shopName || '').replace(/'/g, "\\'")}')" class="text-blue-500 hover:text-blue-700 ml-2" title="Edit User"><i class="fa-solid fa-pen"></i></button>`;
 
                 if (['Rider', 'Ride Partner'].includes(u.category)) {
-                    actionsHtml += `<br/><button onclick="window.adminAddPoints('${u.phone}', ${u.walletPoints || 0})" class="bg-blue-50 text-blue-600 px-2 py-1 mt-1 rounded border border-blue-100 text-[9px] font-bold">+ Points</button>`;
+                    actionsHtml += `<br/><button onclick="window.adminAddPoints('${u.phone}', ${u.walletPoints || 0})" class="bg-blue-50 text-blue-600 w-full py-1 mt-1 rounded border border-blue-100 text-[9px] font-bold">+ Points</button>`;
                 }
+                
+                actionsHtml += adminControls;
 
                 return `
                 <tr class="hover:bg-gray-50 transition-colors border-b border-gray-50">
@@ -2317,7 +2333,6 @@
             }).join('');
         };
 
-        // --- STREAMING_CHUNK:Admin Orders & Revenue logic... ---
         window.switchOrderTab = (tab) => {
             window.adminCurrentOrderTab = tab;
             document.querySelectorAll('.admin-order-tab').forEach(el => {
@@ -2403,7 +2418,6 @@
             adminLog.innerHTML = html;
         };
 
-        // --- STREAMING_CHUNK:Partner Active Tasks Logic... ---
         window.switchPartnerOrderTab = (tab) => {
             window.partnerCurrentOrderTab = tab;
             document.querySelectorAll('.partner-order-tab').forEach(el => {
@@ -2525,7 +2539,6 @@
             listEl.innerHTML = html;
         };
 
-        // --- STREAMING_CHUNK:Cart & Shopping Logic... ---
         window.applyPromo = async () => {
             const codeInput = document.getElementById('promo-code-input');
             if (!codeInput) return;
@@ -2799,7 +2812,6 @@
             }
         };
 
-        // --- STREAMING_CHUNK:Partner Order State Machines... ---
         window.openRejectModal = (id) => {
             window.currentRejectOrderId = id;
             document.getElementById('reject-reason').value = '';
@@ -2849,250 +2861,36 @@
         window.markOutForDelivery = async (orderId) => { try { await window.dbCall(updateDoc(getDocRef('orders', orderId), {status: 'Out for Delivery'}), 10000); window.showToast("Order is out for delivery!", "success"); } catch(e) {} };
         window.markDelivered = async (orderId) => { try { await window.dbCall(updateDoc(getDocRef('orders', orderId), {status: 'Delivered'}), 10000); window.showToast("Order Delivered Successfully!", "success"); } catch(e) {} };
 
-        // --- STREAMING_CHUNK:Global Data Listeners... ---
-        window.initRoleListeners = () => {
-            if (!auth.currentUser || !currentUser) return;
-
-            unsubscribeListeners.forEach(u => u());
-            unsubscribeListeners = [];
-
-            if (currentUser.role === 'Admin') {
-                const unsubOrders = onSnapshot(getCol('orders'), (snap) => {
-                    const orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                    orders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0));
-
-                    let newOrderIds = {};
-                    let firstLoad = Object.keys(window.lastKnownOrders || {}).length === 0;
-
-                    orders.forEach(o => {
-                        newOrderIds[o.id] = o.status;
-                        if (!firstLoad && !window.lastKnownOrders[o.id]) {
-                            window.speakAlert("New order received");
-                            window.showStatusPopup("New Order Alert", `Order #${o.id.slice(-5).toUpperCase()} placed for ₹${o.total}`);
-                        }
-                    });
-                    
-                    window.lastKnownOrders = newOrderIds;
-                    window.adminOrdersData = orders;
-                    window.recalculateAdminStats();
-                    if(window.renderAdminOrders) window.renderAdminOrders();
-                });
-                unsubscribeListeners.push(unsubOrders);
-
-                const unsubUsers = onSnapshot(getCol('users'), (snap) => {
-                    const allUsers = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                    document.getElementById('stat-users').innerText = allUsers.length;
-                    
-                    const partners = allUsers.filter(u => u.role === 'Partner' && u.approvalStatus === 'Approved');
-                    const promoSelect = document.getElementById('admin-promo-restaurant');
-                    if(promoSelect) {
-                        promoSelect.innerHTML = '<option value="Global">All Restaurants (Global)</option>' + partners.map(p => `<option value="${p.id}">${p.shopName || p.name}</option>`).join('');
-                    }
-
-                    window.adminUsersData = allUsers;
-                    window.recalculateAdminStats();
-                    if(window.renderAdminUsers) window.renderAdminUsers();
-                });
-                unsubscribeListeners.push(unsubUsers);
-
-                const unsubPromos = onSnapshot(getCol('promos'), (snap) => {
-                    const promoList = document.getElementById('admin-promo-list');
-                    if(!promoList) return;
-                    const promos = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                    if(promos.length === 0) {
-                        promoList.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-400">No promo codes active.</td></tr>';
-                        return;
-                    }
-                    promoList.innerHTML = promos.map(p => `
-                        <tr class="border-b border-gray-50">
-                            <td class="p-2 font-bold text-gray-900 uppercase">${p.code}</td>
-                            <td class="p-2 font-black text-red-600">${p.discount}%</td>
-                            <td class="p-2 text-gray-500 text-[10px] truncate max-w-[100px]">${p.restaurantName || 'All Restaurants'}</td>
-                            <td class="p-2 text-right">
-                                <button onclick="window.togglePromo('${p.id}', ${p.isActive})" class="px-2 py-1 rounded text-[10px] font-bold ${p.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'}">${p.isActive ? 'Active' : 'Disabled'}</button>
-                                <button onclick="window.deletePromo('${p.id}')" class="px-2 py-1 rounded text-[10px] font-bold bg-red-100 text-red-700 ml-1"><i class="fa-solid fa-trash"></i></button>
-                            </td>
-                        </tr>
-                    `).join('');
-                });
-                unsubscribeListeners.push(unsubPromos);
-            } 
-            else if (currentUser.role === 'User') {
-                const unsubUserOrders = onSnapshot(getCol('orders'), (snap) => {
-                    const listEl = document.getElementById('user-orders-list');
-                    if(!listEl) return;
-                    const myOrders = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(o => o.phone === currentUser.phone);
-                    myOrders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0));
-                    window.userOrderHistory = myOrders;
-
-                    if(myOrders.length === 0) {
-                        listEl.innerHTML = '<div class="text-center py-10 bg-white rounded-3xl border border-gray-100"><img src="https://cdn-icons-png.flaticon.com/512/1008/1008000.png" class="w-16 h-16 mx-auto mb-4 opacity-20"><p class="text-gray-400 font-medium text-sm">No orders yet. Discover great food around you!</p></div>';
-                        return;
-                    }
-
-                    let newOrderIds = {};
-                    let firstLoad = Object.keys(window.lastKnownOrders || {}).length === 0;
-
-                    listEl.innerHTML = myOrders.map(o => {
-                        newOrderIds[o.id] = o.status;
-                        
-                        if (!firstLoad && window.lastKnownOrders[o.id] && window.lastKnownOrders[o.id] !== o.status) {
-                            window.showStatusPopup("Order Update", `Your order #${o.id.slice(-5).toUpperCase()} is now ${o.status}`);
-                        }
-
-                        const timeStr = window.formatOrderTime(o.time);
-                        let statusColor = 'text-orange-500', progressWidth = '15%', statusText = 'Pending Approval';
-                        if(o.status === 'Accepted') { statusColor = 'text-blue-500'; progressWidth = '30%'; statusText = 'Order Confirmed'; }
-                        if(o.status === 'Preparing') { statusColor = 'text-blue-500'; progressWidth = '50%'; statusText = 'Food is Preparing'; }
-                        if(o.status === 'Ready') { statusColor = 'text-yellow-500'; progressWidth = '65%'; statusText = 'Waiting for Delivery'; }
-                        if(o.status === 'Out for Delivery') { statusColor = 'text-yellow-500'; progressWidth = '85%'; statusText = 'OUT FOR DELIVERY.. Reaching soon'; }
-                        if(o.status === 'Delivered') { statusColor = 'text-emerald-500'; progressWidth = '100%'; statusText = 'Delivered Successfully'; }
-                        if(o.status === 'Rejected') { statusColor = 'text-red-500'; progressWidth = '100%'; statusText = 'Order Rejected'; }
-
-                        const itemsList = o.items ? o.items.map(i => i.name).join(', ') : '';
-                        const paymentBadge = o.paymentMode === 'Prepaid' ? `<span class="bg-blue-100 text-blue-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">Prepaid</span>` : `<span class="bg-gray-100 text-gray-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">COD</span>`;
-
-                        let trackingHtml = '';
-                        if (o.type === 'Ride') {
-                            if (o.status === 'Requested') statusText = "Searching for Cab...";
-                            if (o.status === 'Started') { statusColor = 'text-blue-500'; progressWidth = '50%'; statusText = "Ride Started"; }
-                            if (o.status === 'Completed') { statusColor = 'text-emerald-500'; progressWidth = '100%'; statusText = "Ride Completed"; }
-
-                            trackingHtml = `
-                            <div class="mt-4 bg-blue-50 border border-blue-100 rounded-xl p-3">
-                                <p class="text-[10px] font-black uppercase text-blue-600 mb-1">Assigned Cab Details</p>
-                                <div class="flex items-center gap-2">
-                                    <div class="w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center text-blue-700"><i class="fa-solid fa-taxi"></i></div>
-                                    <div class="flex-1">
-                                        <p class="text-xs font-bold text-gray-900">${o.riderName}</p>
-                                        <p class="text-[10px] text-gray-500">${o.riderId || ''}</p>
-                                    </div>
-                                    <a href="tel:${o.riderId}" class="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone text-xs"></i></a>
-                                </div>
-                                <div class="relative bg-gray-50 p-2 rounded-xl border border-gray-100 mt-2">
-                                    <div class="absolute top-3 left-2.5 w-1.5 h-1.5 rounded-full bg-emerald-500 z-10"></div>
-                                    <div class="absolute top-5 left-3 w-0.5 h-4 bg-gray-300 z-10"></div>
-                                    <div class="absolute top-9 left-2.5 w-1.5 h-1.5 rounded-full bg-red-500 z-10"></div>
-                                    <p class="text-[10px] font-medium text-gray-700 pl-5 mb-1.5">From: <b>${o.pickup}</b></p>
-                                    <p class="text-[10px] font-medium text-gray-700 pl-5">To: <b>${o.address}</b></p>
-                                </div>
-                            </div>`;
-                        } else if (o.status === 'Out for Delivery') {
-                            const displayRiderName = o.riderName || 'Restaurant (Self Delivery)';
-                            const displayRiderPhone = o.riderPhone || '';
-                            trackingHtml = `
-                            <div class="mt-4 bg-blue-50 border border-blue-100 rounded-xl p-3">
-                                <p class="text-[10px] font-black uppercase text-blue-600 mb-1">Delivery Partner Allocated</p>
-                                <div class="flex items-center gap-2">
-                                    <div class="w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center text-blue-700"><i class="fa-solid fa-motorcycle"></i></div>
-                                    <div class="flex-1">
-                                        <p class="text-xs font-bold text-gray-900">${displayRiderName}</p>
-                                        <p class="text-[10px] text-gray-500">${displayRiderPhone}</p>
-                                    </div>
-                                    ${displayRiderPhone ? `<a href="tel:${displayRiderPhone}" class="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone text-xs"></i></a>` : ''}
-                                </div>
-                            </div>`;
-                        } else if (o.status === 'Rejected' && o.rejectReason) {
-                            trackingHtml = `<p class="text-xs font-bold text-red-500 mt-3 bg-red-50 p-2 rounded-lg border border-red-100"><i class="fa-solid fa-circle-info mr-1"></i> Reason: ${o.rejectReason}</p>`;
-                        }
-                        
-                        let ratingHtml = '';
-                        if (o.status === 'Delivered' || o.status === 'Completed') {
-                            if (o.rating) {
-                                ratingHtml = `
-                                    <div class="mt-3 bg-yellow-50 p-3 rounded-xl border border-yellow-100">
-                                        <div class="flex items-center justify-between">
-                                            <span class="text-[10px] font-bold text-yellow-700">Your Rating</span>
-                                            <span class="text-sm font-black text-yellow-500">${o.rating} <i class="fa-solid fa-star"></i></span>
-                                        </div>
-                                        ${o.review ? `<p class="text-xs text-gray-600 mt-1 italic">"${o.review}"</p>` : ''}
-                                    </div>
-                                `;
-                            } else {
-                                ratingHtml = `<button onclick="window.openRatingModal('${o.id}', '${o.restaurantId || o.riderId}')" class="w-full mt-3 bg-yellow-400 text-gray-900 py-3 rounded-xl font-bold text-xs shadow-sm hover:bg-yellow-500 transition-colors"><i class="fa-solid fa-star mr-1"></i> Rate Your Experience</button>`;
-                            }
-                        }
-
-                        let resAddressHtml = o.restaurantAddress && o.type !== 'Ride' ? `<p class="text-[9px] text-gray-500 font-medium mb-1"><i class="fa-solid fa-location-dot"></i> ${o.restaurantAddress}</p>` : '';
-
-                        return `
-                            <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 relative overflow-hidden transition-all hover:shadow-md">
-                                <div class="flex justify-between items-start mb-2">
-                                    <div>
-                                        <div class="flex items-center gap-2 mb-1"><span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">${o.type === 'Ride' ? '🚕 RIDE' : 'Order'} #${o.id.slice(-5).toUpperCase()}</span><span class="text-[9px] font-medium text-gray-400"><i class="fa-regular fa-clock"></i> ${timeStr}</span>${o.type !== 'Ride' ? paymentBadge : ''}</div>
-                                        <h4 class="font-black text-gray-900 text-base leading-none">${o.type === 'Ride' ? 'Ride Service' : (o.restaurantName || 'Gramzo Partner')}</h4>
-                                    </div>
-                                    <span class="text-xl font-black text-gray-900">₹${o.total ? o.total.toFixed(2) : (o.amount || 0)}</span>
-                                </div>
-                                ${resAddressHtml}
-                                ${o.type !== 'Ride' ? `<p class="text-xs text-gray-500 mb-5 font-medium line-clamp-2 mt-2">${itemsList}</p>` : ''}
-                                <div class="mb-2 mt-4 bg-gray-50 p-3 rounded-xl">
-                                    <div class="flex justify-between text-[10px] font-black uppercase tracking-wider mb-2 ${statusColor}"><span>${statusText}</span></div>
-                                    <div class="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden"><div class="bg-current h-1.5 rounded-full transition-all duration-1000 ${statusColor.replace('text-', 'bg-')}" style="width: ${progressWidth}"></div></div>
-                                </div>
-                                ${trackingHtml}
-                                ${ratingHtml}
-                                ${o.type !== 'Ride' ? `<button onclick="window.downloadInvoice('${o.id}')" class="w-full mt-2 bg-white text-red-600 py-3 rounded-xl font-bold text-xs border border-red-100 hover:bg-red-50 transition-colors"><i class="fa-solid fa-file-pdf mr-1"></i> Download Invoice</button>` : ''}
-                            </div>`;
-                    }).join('');
-                    
-                    window.lastKnownOrders = newOrderIds;
-                });
-                unsubscribeListeners.push(unsubUserOrders);
-            }
-            else if (currentUser.role === 'Partner') {
-                const orderUnsub = onSnapshot(getCol('orders'), (snap) => {
-                    const orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                    
-                    let relevantOrders = [];
-                    if (['Food Owner', 'Grocery Shop'].includes(currentUser.category)) {
-                        relevantOrders = orders.filter(o => o.restaurantId === currentUser.phone && o.type !== 'Ride');
-                    } else if (['Rider', 'Ride Partner'].includes(currentUser.category)) {
-                        relevantOrders = orders.filter(o => 
-                            (o.status === 'Ready' && !o.riderId && o.type !== 'Ride') || 
-                            (o.status === 'Placed' && !o.restaurantId && o.type !== 'Ride') || 
-                            (o.riderId === currentUser.phone && ['Out for Delivery'].includes(o.status) && o.type !== 'Ride') ||
-                            (o.riderId === currentUser.phone && o.type === 'Ride')
-                        );
-                    }
-                    
-                    relevantOrders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0));
-
-                    let newOrderIds = {};
-                    let firstLoad = Object.keys(window.lastKnownOrders || {}).length === 0;
-
-                    relevantOrders.forEach(o => {
-                        newOrderIds[o.id] = o.status;
-                        if (!firstLoad && !window.lastKnownOrders[o.id]) {
-                            window.showStatusPopup("New Task Received!", `Order #${o.id.slice(-5).toUpperCase()} needs attention.`);
-                        }
-                    });
-                    
-                    window.lastKnownOrders = newOrderIds;
-                    window.partnerOrdersData = relevantOrders;
-                    if (window.renderPartnerOrders) window.renderPartnerOrders();
-                });
-                unsubscribeListeners.push(orderUnsub);
-
-                if (['Food Owner', 'Grocery Shop'].includes(currentUser.category)) {
-                    const catalogUnsub = onSnapshot(getCol('products'), (snap) => {
-                        const list = document.getElementById('partner-catalog-list');
-                        if (!list) return;
-                        const items = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(p => p.partnerId === currentUser.phone); 
-                        if (items.length === 0) { list.innerHTML = '<p class="text-sm text-gray-400 text-center py-4 bg-white rounded-2xl border border-gray-100">No items added to catalogue yet.</p>'; return; }
-                        list.innerHTML = items.map(p => {
-                            const variantsDisplay = p.variants ? p.variants.map(v => `${v.qty}: ₹${v.price}`).join(', ') : `${p.qty || ''}: ₹${p.price}`;
-                            const stockColor = p.inStock !== false ? 'text-emerald-600 border-emerald-200 bg-emerald-50' : 'text-red-500 border-red-200 bg-red-50';
-                            const stockText = p.inStock !== false ? 'In Stock' : 'Out of Stock';
-                            return `<div class="flex justify-between items-center bg-white border border-gray-100 p-4 rounded-2xl shadow-sm"><div class="flex-1 mr-4"><p class="font-black text-sm text-gray-900">${p.name}</p><p class="text-[10px] text-gray-500">${p.subCategory || p.category}</p><p class="text-xs text-gray-700 font-bold mt-1">${variantsDisplay}</p></div><div class="flex items-center gap-2 shrink-0"><button type="button" onclick="window.editPartnerProduct('${p.id}')" class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-colors shrink-0" title="Edit Item"><i class="fa-solid fa-pen text-xs"></i></button><button type="button" onclick="window.togglePartnerStock('${p.id}', ${p.inStock !== false})" class="text-[10px] font-black uppercase tracking-wider ${stockColor} border px-2 py-1 rounded transition whitespace-nowrap">${stockText}</button><button type="button" onclick="window.deletePartnerProduct('${p.id}')" class="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors shrink-0"><i class="fa-solid fa-trash text-xs"></i></button></div></div>`;
-                        }).join('');
-                    });
-                    unsubscribeListeners.push(catalogUnsub);
-                }
+        window.adminReviewPartner = async (partnerPhone, status) => {
+            if(currentUser.role !== 'Admin') return;
+            try {
+                await window.dbCall(setDoc(getDocRef('users', partnerPhone), { approvalStatus: status }, { merge: true }), 10000);
+                window.showToast(`Partner status updated to ${status}!`, "success");
+            } catch(e) {
+                window.showToast("Error updating status.", "error");
             }
         };
 
-        // --- STREAMING_CHUNK:Admin Settings & Partner Profile Utilities... ---
+        window.adminToggleVisibility = async (partnerPhone, category, isTurningOn) => {
+            if(currentUser.role !== 'Admin') return;
+            const newStatus = isTurningOn ? (['Rider', 'Ride Partner'].includes(category) ? 'Online' : 'Open') : (['Rider', 'Ride Partner'].includes(category) ? 'Offline' : 'Closed');
+            
+            try {
+                await window.dbCall(setDoc(getDocRef('users', partnerPhone), { shopStatus: newStatus }, { merge: true }), 10000);
+                
+                if (['Food Owner', 'Grocery Shop'].includes(category)) {
+                    const snap = await window.dbCall(getDocs(getCol('products')), 10000);
+                    const myProducts = snap.docs.filter(d => d.data().partnerId === partnerPhone);
+                    myProducts.forEach(d => {
+                        updateDoc(getDocRef('products', d.id), { shopStatus: newStatus });
+                    });
+                }
+                window.showToast(`Visibility forcefully set to ${newStatus}`, "success");
+            } catch(e) {
+                window.showToast("Error updating visibility.", "error");
+            }
+        };
+
         window.adminCreatePromo = async () => {
             if(currentUser.role !== 'Admin') return;
             const code = document.getElementById('admin-promo-code').value.trim().toUpperCase();
@@ -3473,7 +3271,9 @@
                 }
                 if(!onlineEnabled) qrBase64 = null;
 
-                const newStatus = 'Approved'; 
+                // Reverting approval back to pending on major profile change isn't strictly necessary 
+                // but we keep whatever status they currently have.
+                const newStatus = currentUser.approvalStatus || 'Pending'; 
 
                 const updateData = { 
                     shopName: shopName, 
@@ -3519,7 +3319,271 @@
             }
         };
 
-        // --- STREAMING_CHUNK:Final App Bootstrapper... ---
+        window.initRoleListeners = () => {
+            if (!auth.currentUser || !currentUser) return;
+
+            unsubscribeListeners.forEach(u => u());
+            unsubscribeListeners = [];
+
+            if (currentUser.role === 'Admin') {
+                const unsubOrders = onSnapshot(getCol('orders'), (snap) => {
+                    let rev = 0, count = 0;
+                    const orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                    orders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0));
+
+                    let newOrderIds = {};
+                    let firstLoad = Object.keys(window.lastKnownOrders || {}).length === 0;
+
+                    orders.forEach(o => {
+                        if (o.status !== 'Rejected') {
+                            rev += o.total; 
+                            count++;
+                        }
+                        
+                        newOrderIds[o.id] = o.status;
+                        if (!firstLoad && !window.lastKnownOrders[o.id]) {
+                            window.speakAlert("New order received");
+                            window.showStatusPopup("New Order Alert", `Order #${o.id.slice(-5).toUpperCase()} placed for ₹${o.total}`);
+                        }
+                    });
+                    
+                    window.lastKnownOrders = newOrderIds;
+                    
+                    window.adminOrdersData = orders;
+                    window.recalculateAdminStats();
+                    if(window.renderAdminOrders) window.renderAdminOrders();
+                });
+                unsubscribeListeners.push(unsubOrders);
+
+                const unsubUsers = onSnapshot(getCol('users'), (snap) => {
+                    const allUsers = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                    document.getElementById('stat-users').innerText = allUsers.length;
+                    
+                    const partners = allUsers.filter(u => u.role === 'Partner' && u.approvalStatus === 'Approved');
+                    const promoSelect = document.getElementById('admin-promo-restaurant');
+                    if(promoSelect) {
+                        promoSelect.innerHTML = '<option value="Global">All Restaurants (Global)</option>' + partners.map(p => `<option value="${p.id}">${p.shopName || p.name}</option>`).join('');
+                    }
+
+                    window.adminUsersData = allUsers;
+                    if(window.renderAdminUsers) window.renderAdminUsers();
+                    window.recalculateAdminStats(); // Users data needed for food vs grocery split
+                });
+                unsubscribeListeners.push(unsubUsers);
+
+                const unsubPromos = onSnapshot(getCol('promos'), (snap) => {
+                    const promoList = document.getElementById('admin-promo-list');
+                    if(!promoList) return;
+                    const promos = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                    if(promos.length === 0) {
+                        promoList.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-400">No promo codes active.</td></tr>';
+                        return;
+                    }
+                    promoList.innerHTML = promos.map(p => `
+                        <tr class="border-b border-gray-50">
+                            <td class="p-2 font-bold text-gray-900 uppercase">${p.code}</td>
+                            <td class="p-2 font-black text-red-600">${p.discount}%</td>
+                            <td class="p-2 text-gray-500 text-[10px] truncate max-w-[100px]">${p.restaurantName || 'All Restaurants'}</td>
+                            <td class="p-2 text-right">
+                                <button onclick="window.togglePromo('${p.id}', ${p.isActive})" class="px-2 py-1 rounded text-[10px] font-bold ${p.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'}">${p.isActive ? 'Active' : 'Disabled'}</button>
+                                <button onclick="window.deletePromo('${p.id}')" class="px-2 py-1 rounded text-[10px] font-bold bg-red-100 text-red-700 ml-1"><i class="fa-solid fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    `).join('');
+                });
+                unsubscribeListeners.push(unsubPromos);
+            } 
+            else if (currentUser.role === 'User') {
+                const unsubUserOrders = onSnapshot(getCol('orders'), (snap) => {
+                    const listEl = document.getElementById('user-orders-list');
+                    if(!listEl) return;
+                    const myOrders = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(o => o.phone === currentUser.phone);
+                    myOrders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0));
+                    window.userOrderHistory = myOrders;
+
+                    if(myOrders.length === 0) {
+                        listEl.innerHTML = '<div class="text-center py-10 bg-white rounded-3xl border border-gray-100"><img src="https://cdn-icons-png.flaticon.com/512/1008/1008000.png" class="w-16 h-16 mx-auto mb-4 opacity-20"><p class="text-gray-400 font-medium text-sm">No orders yet. Discover great food around you!</p></div>';
+                        return;
+                    }
+
+                    let newOrderIds = {};
+                    let firstLoad = Object.keys(window.lastKnownOrders || {}).length === 0;
+
+                    listEl.innerHTML = myOrders.map(o => {
+                        newOrderIds[o.id] = o.status;
+                        
+                        if (!firstLoad && window.lastKnownOrders[o.id] && window.lastKnownOrders[o.id] !== o.status) {
+                            let speechStatus = o.status;
+                            if(o.status === 'Preparing') speechStatus = "preparing";
+                            if(o.status === 'Out for Delivery') speechStatus = "out for delivery";
+                            if(o.status === 'Requested') speechStatus = "searching for ride";
+                            
+                            window.showStatusPopup("Order Update", `Your order #${o.id.slice(-5).toUpperCase()} is now ${o.status}`);
+                        }
+
+                        const timeStr = window.formatOrderTime(o.time);
+                        let statusColor = 'text-orange-500', progressWidth = '15%', statusText = 'Pending Approval';
+                        if(o.status === 'Accepted') { statusColor = 'text-blue-500'; progressWidth = '30%'; statusText = 'Order Confirmed'; }
+                        if(o.status === 'Preparing') { statusColor = 'text-blue-500'; progressWidth = '50%'; statusText = 'Food is Preparing'; }
+                        if(o.status === 'Ready') { statusColor = 'text-yellow-500'; progressWidth = '65%'; statusText = 'Waiting for Delivery'; }
+                        if(o.status === 'Out for Delivery') { statusColor = 'text-yellow-500'; progressWidth = '85%'; statusText = 'OUT FOR DELIVERY.. Reaching soon'; }
+                        if(o.status === 'Delivered') { statusColor = 'text-emerald-500'; progressWidth = '100%'; statusText = 'Delivered Successfully'; }
+                        if(o.status === 'Rejected') { statusColor = 'text-red-500'; progressWidth = '100%'; statusText = 'Order Rejected'; }
+
+                        const itemsList = o.items ? o.items.map(i => i.name).join(', ') : '';
+                        const paymentBadge = o.paymentMode === 'Prepaid' ? `<span class="bg-blue-100 text-blue-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">Prepaid</span>` : `<span class="bg-gray-100 text-gray-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">COD</span>`;
+
+                        let trackingHtml = '';
+                        if (o.type === 'Ride') {
+                            if (o.status === 'Requested') statusText = "Searching for Cab...";
+                            if (o.status === 'Started') { statusColor = 'text-blue-500'; progressWidth = '50%'; statusText = "Ride Started"; }
+                            if (o.status === 'Completed') { statusColor = 'text-emerald-500'; progressWidth = '100%'; statusText = "Ride Completed"; }
+
+                            trackingHtml = `
+                            <div class="mt-4 bg-blue-50 border border-blue-100 rounded-xl p-3">
+                                <p class="text-[10px] font-black uppercase text-blue-600 mb-1">Assigned Cab Details</p>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center text-blue-700"><i class="fa-solid fa-taxi"></i></div>
+                                    <div class="flex-1">
+                                        <p class="text-xs font-bold text-gray-900">${o.riderName}</p>
+                                        <p class="text-[10px] text-gray-500">${o.riderId || ''}</p>
+                                    </div>
+                                    <a href="tel:${o.riderId}" class="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone text-xs"></i></a>
+                                </div>
+                                <div class="relative bg-gray-50 p-2 rounded-xl border border-gray-100 mt-2">
+                                    <div class="absolute top-3 left-2.5 w-1.5 h-1.5 rounded-full bg-emerald-500 z-10"></div>
+                                    <div class="absolute top-5 left-3 w-0.5 h-4 bg-gray-300 z-10"></div>
+                                    <div class="absolute top-9 left-2.5 w-1.5 h-1.5 rounded-full bg-red-500 z-10"></div>
+                                    <p class="text-[10px] font-medium text-gray-700 pl-5 mb-1.5">From: <b>${o.pickup}</b></p>
+                                    <p class="text-[10px] font-medium text-gray-700 pl-5">To: <b>${o.address}</b></p>
+                                </div>
+                            </div>`;
+                        } else if (o.status === 'Out for Delivery') {
+                            const displayRiderName = o.riderName || 'Restaurant (Self Delivery)';
+                            const displayRiderPhone = o.riderPhone || '';
+                            trackingHtml = `
+                            <div class="mt-4 bg-blue-50 border border-blue-100 rounded-xl p-3">
+                                <p class="text-[10px] font-black uppercase text-blue-600 mb-1">Delivery Partner Allocated</p>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center text-blue-700"><i class="fa-solid fa-motorcycle"></i></div>
+                                    <div class="flex-1">
+                                        <p class="text-xs font-bold text-gray-900">${displayRiderName}</p>
+                                        <p class="text-[10px] text-gray-500">${displayRiderPhone}</p>
+                                    </div>
+                                    ${displayRiderPhone ? `<a href="tel:${displayRiderPhone}" class="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone text-xs"></i></a>` : ''}
+                                </div>
+                                <div class="w-full h-32 mt-3 rounded-lg overflow-hidden border border-blue-200 bg-gray-200 relative pointer-events-none">
+                                    <iframe width="100%" height="100%" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" 
+                                        src="https://maps.google.com/maps?q=${encodeURIComponent(o.address)}&t=&z=15&ie=UTF8&iwloc=&output=embed">
+                                    </iframe>
+                                    <div class="absolute top-2 left-2 bg-white/90 backdrop-blur px-2 py-1 rounded text-[9px] font-black text-blue-600 shadow-sm animate-pulse">
+                                        <i class="fa-solid fa-satellite-dish mr-1"></i> Live Tracking - Reaching soon
+                                    </div>
+                                </div>
+                            </div>`;
+                        } else if (o.status === 'Rejected' && o.rejectReason) {
+                            trackingHtml = `<p class="text-xs font-bold text-red-500 mt-3 bg-red-50 p-2 rounded-lg border border-red-100"><i class="fa-solid fa-circle-info mr-1"></i> Reason: ${o.rejectReason}</p>`;
+                        }
+                        
+                        let ratingHtml = '';
+                        if (o.status === 'Delivered' || o.status === 'Completed') {
+                            if (o.rating) {
+                                ratingHtml = `
+                                    <div class="mt-3 bg-yellow-50 p-3 rounded-xl border border-yellow-100">
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-[10px] font-bold text-yellow-700">Your Rating</span>
+                                            <span class="text-sm font-black text-yellow-500">${o.rating} <i class="fa-solid fa-star"></i></span>
+                                        </div>
+                                        ${o.review ? `<p class="text-xs text-gray-600 mt-1 italic">"${o.review}"</p>` : ''}
+                                    </div>
+                                `;
+                            } else {
+                                ratingHtml = `<button onclick="window.openRatingModal('${o.id}', '${o.restaurantId || o.riderId}')" class="w-full mt-3 bg-yellow-400 text-gray-900 py-3 rounded-xl font-bold text-xs shadow-sm hover:bg-yellow-500 transition-colors"><i class="fa-solid fa-star mr-1"></i> Rate Your Experience</button>`;
+                            }
+                        }
+
+                        let resAddressHtml = o.restaurantAddress && o.type !== 'Ride' ? `<p class="text-[9px] text-gray-500 font-medium mb-1"><i class="fa-solid fa-location-dot"></i> ${o.restaurantAddress}</p>` : '';
+
+                        return `
+                            <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 relative overflow-hidden transition-all hover:shadow-md">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div>
+                                        <div class="flex items-center gap-2 mb-1"><span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">${o.type === 'Ride' ? '🚕 RIDE' : 'Order'} #${o.id.slice(-5).toUpperCase()}</span><span class="text-[9px] font-medium text-gray-400"><i class="fa-regular fa-clock"></i> ${timeStr}</span>${o.type !== 'Ride' ? paymentBadge : ''}</div>
+                                        <h4 class="font-black text-gray-900 text-base leading-none">${o.type === 'Ride' ? 'Ride Service' : (o.restaurantName || 'Gramzo Partner')}</h4>
+                                    </div>
+                                    <span class="text-xl font-black text-gray-900">₹${o.total ? o.total.toFixed(2) : (o.amount || 0)}</span>
+                                </div>
+                                ${resAddressHtml}
+                                ${o.type !== 'Ride' ? `<p class="text-xs text-gray-500 mb-5 font-medium line-clamp-2 mt-2">${itemsList}</p>` : ''}
+                                <div class="mb-2 mt-4 bg-gray-50 p-3 rounded-xl">
+                                    <div class="flex justify-between text-[10px] font-black uppercase tracking-wider mb-2 ${statusColor}"><span>${statusText}</span></div>
+                                    <div class="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden"><div class="bg-current h-1.5 rounded-full transition-all duration-1000 ${statusColor.replace('text-', 'bg-')}" style="width: ${progressWidth}"></div></div>
+                                </div>
+                                ${trackingHtml}
+                                ${ratingHtml}
+                            </div>`;
+                    }).join('');
+                    
+                    window.lastKnownOrders = newOrderIds;
+                });
+                unsubscribeListeners.push(unsubUserOrders);
+            }
+            else if (currentUser.role === 'Partner') {
+                const orderUnsub = onSnapshot(getCol('orders'), (snap) => {
+                    const listEl = document.getElementById('partner-orders-list');
+                    let html = '';
+                    const orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                    
+                    let relevantOrders = [];
+                    if (['Food Owner', 'Grocery Shop'].includes(currentUser.category)) {
+                        relevantOrders = orders.filter(o => o.restaurantId === currentUser.phone && o.type !== 'Ride');
+                    } else if (['Rider', 'Ride Partner'].includes(currentUser.category)) {
+                        relevantOrders = orders.filter(o => 
+                            // Matches Food Deliveries pending a rider OR currently held by this rider
+                            (o.status === 'Ready' && !o.riderId && o.type !== 'Ride') || 
+                            (o.status === 'Placed' && !o.restaurantId && o.type !== 'Ride') || 
+                            (o.riderId === currentUser.phone && ['Out for Delivery'].includes(o.status) && o.type !== 'Ride') ||
+                            // Matches Rides specifically requested to this rider
+                            (o.riderId === currentUser.phone && o.type === 'Ride')
+                        );
+                    }
+                    
+                    relevantOrders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0));
+                    window.partnerOrdersData = relevantOrders;
+
+                    let newOrderIds = {};
+                    let firstLoad = Object.keys(window.lastKnownOrders || {}).length === 0;
+
+                    relevantOrders.forEach(o => {
+                        newOrderIds[o.id] = o.status;
+                        if (!firstLoad && !window.lastKnownOrders[o.id]) {
+                            window.showStatusPopup("New Task Received!", `Order #${o.id.slice(-5).toUpperCase()} needs attention.`);
+                        }
+                    });
+                    
+                    window.lastKnownOrders = newOrderIds;
+                    if (window.renderPartnerOrders) window.renderPartnerOrders();
+                });
+                unsubscribeListeners.push(orderUnsub);
+
+                if (['Food Owner', 'Grocery Shop'].includes(currentUser.category)) {
+                    const catalogUnsub = onSnapshot(getCol('products'), (snap) => {
+                        const list = document.getElementById('partner-catalog-list');
+                        if (!list) return;
+                        const items = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(p => p.partnerId === currentUser.phone); 
+                        if (items.length === 0) { list.innerHTML = '<p class="text-sm text-gray-400 text-center py-4 bg-white rounded-2xl border border-gray-100">No items added to catalogue yet.</p>'; return; }
+                        list.innerHTML = items.map(p => {
+                            const variantsDisplay = p.variants ? p.variants.map(v => `${v.qty}: ₹${v.price}`).join(', ') : `${p.qty || ''}: ₹${p.price}`;
+                            const stockColor = p.inStock !== false ? 'text-emerald-600 border-emerald-200 bg-emerald-50' : 'text-red-500 border-red-200 bg-red-50';
+                            const stockText = p.inStock !== false ? 'In Stock' : 'Out of Stock';
+                            return `<div class="flex justify-between items-center bg-white border border-gray-100 p-4 rounded-2xl shadow-sm"><div class="flex-1 mr-4"><p class="font-black text-sm text-gray-900">${p.name}</p><p class="text-[10px] text-gray-500">${p.shopCategory || p.category}</p><p class="text-xs text-gray-700 font-bold mt-1">${variantsDisplay}</p></div><div class="flex items-center gap-2 shrink-0"><button type="button" onclick="window.editPartnerProduct('${p.id}')" class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-colors shrink-0" title="Edit Item"><i class="fa-solid fa-pen text-xs"></i></button><button type="button" onclick="window.togglePartnerStock('${p.id}', ${p.inStock !== false})" class="text-[10px] font-black uppercase tracking-wider ${stockColor} border px-2 py-1 rounded transition whitespace-nowrap">${stockText}</button><button type="button" onclick="window.deletePartnerProduct('${p.id}')" class="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors shrink-0"><i class="fa-solid fa-trash text-xs"></i></button></div></div>`;
+                        }).join('');
+                    });
+                    unsubscribeListeners.push(catalogUnsub);
+                }
+            }
+        };
+
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 if (!currentUser) {
@@ -3545,13 +3609,13 @@
                     if (sessionPhone) {
                         if (sessionPhone === 'admin_session' || sessionPhone === 'Gramzo_admin') {
                             currentUser = { name: 'Super Admin', role: 'Admin', phone: 'Admin', docId: 'admin_session', uid: user.uid };
-                            window.finalizeLoginSequence(true);
+                            window.finalizeLoginSequence();
                         } else {
                             try {
                                 const userSnap = await window.dbCall(getDoc(getDocRef('users', sessionPhone)), 5000);
                                 if (userSnap && userSnap.exists()) {
                                     currentUser = { ...userSnap.data(), docId: sessionPhone };
-                                    window.finalizeLoginSequence(true); 
+                                    window.finalizeLoginSequence(); 
                                 }
                             } catch(e) { console.warn("Profile fetch failed."); }
                         }
