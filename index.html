@@ -1435,52 +1435,103 @@
 
         if (window.isGoogleMapsLoaded) window.setupMapsFeatures();
 
+        window.handleRideTypeChange = () => {
+            const searchType = document.getElementById('ride-search-type').value;
+            const roundTripContainer = document.getElementById('round-trip-container');
+            const roundTripCheckbox = document.getElementById('ride-round-trip');
+            const roundTripLabelText = document.getElementById('round-trip-label-text');
+
+            if (searchType === 'Car') {
+                roundTripContainer.style.display = 'flex';
+                roundTripCheckbox.checked = true;
+                roundTripCheckbox.disabled = true; // Force checked
+                roundTripLabelText.innerText = "Round Trip (Mandatory for Car)";
+                roundTripLabelText.classList.add('text-red-600');
+            } else if (searchType === 'Toto') {
+                roundTripContainer.style.display = 'flex';
+                roundTripCheckbox.disabled = false; // Optional
+                roundTripLabelText.innerText = "Round Trip (Optional)";
+                roundTripLabelText.classList.remove('text-red-600');
+            } else {
+                roundTripContainer.style.display = 'none';
+                roundTripCheckbox.checked = false;
+            }
+        };
+
         window.calculateDistance = (origin, dest) => {
             return new Promise((resolve) => {
-                if(!window.google || !window.google.maps) resolve(null);
+                if(!window.google || !window.google.maps) {
+                    resolve({ error: "Maps API not loaded." });
+                    return;
+                }
                 const service = new google.maps.DistanceMatrixService();
                 service.getDistanceMatrix({
                     origins: [origin],
                     destinations: [dest],
                     travelMode: 'DRIVING',
                     unitSystem: google.maps.UnitSystem.METRIC
-                }, (res, status) => {
-                    if(status === 'OK' && res.rows[0].elements[0].status === 'OK') {
-                        resolve({
-                            text: res.rows[0].elements[0].distance.text,
-                            value: res.rows[0].elements[0].distance.value // value is always in meters
-                        });
-                    } else resolve(null);
+                }, async (res, status) => {
+                    let fallbackNeeded = false;
+                    
+                    if(status === 'OK') {
+                        const element = res.rows[0].elements[0];
+                        if (element.status === 'OK') {
+                            resolve({
+                                text: element.distance.text,
+                                value: element.distance.value // value is always in meters
+                            });
+                            return;
+                        } else {
+                            fallbackNeeded = true;
+                        }
+                    } else {
+                        fallbackNeeded = true;
+                    }
+
+                    // SMART FALLBACK FOR RURAL AREAS (If Google can't find a driving route)
+                    if (fallbackNeeded) {
+                        try {
+                            const geocoder = new google.maps.Geocoder();
+                            const getCoords = (addr) => new Promise((resGeo) => {
+                                geocoder.geocode({ address: addr }, (results, geoStatus) => {
+                                    if (geoStatus === 'OK' && results[0]) resGeo(results[0].geometry.location);
+                                    else resGeo(null);
+                                });
+                            });
+
+                            const originLoc = await getCoords(origin);
+                            const destLoc = await getCoords(dest);
+
+                            if (originLoc && destLoc) {
+                                // Haversine calculation (Straight line distance)
+                                const R = 6371e3; // meters
+                                const lat1 = originLoc.lat(); const lon1 = originLoc.lng();
+                                const lat2 = destLoc.lat(); const lon2 = destLoc.lng();
+                                
+                                const dLat = (lat2 - lat1) * Math.PI / 180;
+                                const dLon = (lon2 - lon1) * Math.PI / 180;
+                                const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                                          Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                                          Math.sin(dLon/2) * Math.sin(dLon/2);
+                                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                                const straightDistanceMeters = R * c;
+                                
+                                // Multiply by 1.35 for realistic road detour estimate
+                                const estimatedRoadDistance = Math.round(straightDistanceMeters * 1.35);
+                                
+                                resolve({
+                                    text: `${(estimatedRoadDistance / 1000).toFixed(1)} km`,
+                                    value: estimatedRoadDistance
+                                });
+                            } else {
+                                resolve({ error: `Could not locate one of these addresses on the map.` });
+                            }
+                        } catch(e) {
+                            resolve({ error: `Routing failed and GPS fallback failed.` });
+                        }
+                    }
                 });
             });
-        };
-
-        window.handleRideTypeChange = () => {
-            const type = document.getElementById('ride-search-type').value;
-            const rtContainer = document.getElementById('round-trip-container');
-            const rtCheckbox = document.getElementById('ride-round-trip');
-            const rtLabel = document.getElementById('round-trip-label-text');
-
-            if (type === 'Car') {
-                rtContainer.style.display = 'flex';
-                rtCheckbox.checked = true;
-                rtCheckbox.disabled = true;
-                rtLabel.innerText = "Round Trip (Mandatory for Car)";
-                rtLabel.classList.add('text-red-600');
-            } else if (type === 'Toto') {
-                rtContainer.style.display = 'flex';
-                rtCheckbox.disabled = false;
-                rtLabel.innerText = "Round Trip (Double Distance)";
-                rtLabel.classList.remove('text-red-600');
-            } else {
-                rtContainer.style.display = 'none';
-                rtCheckbox.checked = false;
-                rtCheckbox.disabled = false;
-            }
-            
-            document.getElementById('ride-distance-display').classList.add('hidden');
-            document.getElementById('btn-calc-fare').classList.remove('hidden');
-            document.getElementById('btn-find-rides').classList.add('hidden');
         };
 
         window.calculateRideFares = async () => {
@@ -1500,11 +1551,12 @@
 
             let distanceData = await window.calculateDistance(pickup, drop);
             
-            // Strictly enforce automatic calculation
-            if (!distanceData) {
+            // Strictly enforce automatic calculation with detailed error reporting
+            if (!distanceData || distanceData.error) {
                 btnCalc.innerText = origText;
                 btnCalc.disabled = false;
-                return window.showToast("Automatic calculation failed. Please select precise locations from the dropdown suggestions.", "error");
+                const errMsg = distanceData ? distanceData.error : "Calculation failed. Please select precise locations.";
+                return window.showToast(errMsg, "error");
             }
 
             btnCalc.innerText = origText;
