@@ -291,19 +291,31 @@
                             <div class="absolute top-8 left-4 w-0.5 h-8 bg-gray-200 z-10"></div>
                             <div class="absolute top-16 left-3.5 w-2 h-2 rounded-full bg-red-500 z-10"></div>
                             
-                            <input type="text" id="ride-pickup" class="w-full bg-gray-50 border border-gray-100 rounded-xl py-3 pl-10 pr-4 text-sm outline-none focus:ring-1 focus:ring-red-400 mb-3" placeholder="Enter Pickup Location">
-                            <input type="text" id="ride-drop" class="w-full bg-gray-50 border border-gray-100 rounded-xl py-3 pl-10 pr-4 text-sm outline-none focus:ring-1 focus:ring-red-400" placeholder="Where are you going?">
+                            <input type="text" id="ride-pickup" oninput="window.resetRideCalc()" class="w-full bg-gray-50 border border-gray-100 rounded-xl py-3 pl-10 pr-10 text-sm outline-none focus:ring-1 focus:ring-red-400 mb-3" placeholder="Enter Pickup Location">
+                            <button type="button" onclick="window.getCurrentLocation('ride-pickup')" class="absolute right-3 top-3.5 text-gray-400 hover:text-red-600 focus:outline-none" title="Use Current Location">
+                                <i class="fa-solid fa-location-crosshairs text-lg"></i>
+                            </button>
+
+                            <input type="text" id="ride-drop" oninput="window.resetRideCalc()" class="w-full bg-gray-50 border border-gray-100 rounded-xl py-3 pl-10 pr-4 text-sm outline-none focus:ring-1 focus:ring-red-400" placeholder="Where are you going?">
                         </div>
                         
-                        <select id="ride-search-type" class="w-full bg-gray-50 border border-gray-100 rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-red-400 mt-3 font-bold text-gray-700" onchange="window.handleRideTypeChange()">
-                            <option value="Car" selected>🚕 Car / Cab (Multi-person)</option>
-                            <option value="Bike">🏍️ Bike (Max 1 Person)</option>
-                            <option value="Toto">🛺 Toto / Auto</option>
-                        </select>
+                        <div class="flex gap-2 mt-3">
+                            <div class="flex-[2]">
+                                <select id="ride-search-type" class="w-full bg-gray-50 border border-gray-100 rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-red-400 font-bold text-gray-700" onchange="window.handleRideTypeChange(); window.resetRideCalc();">
+                                    <option value="Car" selected>🚕 Car / Cab (Multi-person)</option>
+                                    <option value="Bike">🏍️ Bike (Max 1 Person)</option>
+                                    <option value="Toto">🛺 Toto / Auto</option>
+                                </select>
+                            </div>
+                            <div class="flex-1 relative">
+                                <p class="absolute -top-2 left-2 bg-white px-1 text-[8px] font-bold text-red-500 rounded z-10">Wait Time</p>
+                                <input type="number" id="ride-wait-time" oninput="window.resetRideCalc()" class="w-full bg-gray-50 border border-gray-100 rounded-xl py-3 px-3 text-sm outline-none focus:ring-1 focus:ring-red-400 font-bold text-gray-800" placeholder="Mins" min="0" value="0">
+                            </div>
+                        </div>
 
                         <!-- Round Trip (Toto Optional, Car Mandatory) -->
                         <label class="flex items-center gap-2 text-xs font-bold text-gray-700 mt-3" id="round-trip-container" style="display: flex;">
-                            <input type="checkbox" id="ride-round-trip" class="w-4 h-4 text-red-600 focus:ring-red-500 rounded border-gray-300 disabled:opacity-50" checked disabled>
+                            <input type="checkbox" id="ride-round-trip" onchange="window.resetRideCalc()" class="w-4 h-4 text-red-600 focus:ring-red-500 rounded border-gray-300 disabled:opacity-50" checked disabled>
                             <span id="round-trip-label-text" class="text-red-600">Round Trip (Mandatory for Car)</span>
                         </label>
 
@@ -315,7 +327,7 @@
 
                         <button type="button" id="btn-calc-fare" onclick="window.calculateRideFares()" class="w-full bg-gray-900 text-white font-bold py-3.5 rounded-xl mt-4 text-sm hover:bg-gray-800 transition active:scale-95 shadow-md">Calculate Fare</button>
                         
-                        <div id="ride-distance-display" class="hidden mt-4 text-center py-3 px-4 bg-blue-50 text-blue-700 font-bold rounded-xl text-sm border border-blue-100"></div>
+                        <div id="ride-distance-display" class="hidden mt-4 text-center py-3 px-4 bg-blue-50 border border-blue-100 rounded-xl"></div>
 
                         <button type="button" id="btn-find-rides" onclick="window.searchRides()" class="hidden w-full bg-yellow-400 text-gray-900 font-bold py-3.5 rounded-xl mt-4 text-sm hover:bg-yellow-500 transition active:scale-95 shadow-md border border-yellow-500"><i class="fa-solid fa-magnifying-glass mr-1"></i> Search Rides</button>
                     </div>
@@ -1460,78 +1472,29 @@
 
         window.calculateDistance = (origin, dest) => {
             return new Promise((resolve) => {
-                if(!window.google || !window.google.maps) {
-                    resolve({ error: "Maps API not loaded." });
-                    return;
-                }
+                if(!window.google || !window.google.maps) resolve(null);
                 const service = new google.maps.DistanceMatrixService();
                 service.getDistanceMatrix({
                     origins: [origin],
                     destinations: [dest],
                     travelMode: 'DRIVING',
                     unitSystem: google.maps.UnitSystem.METRIC
-                }, async (res, status) => {
-                    let fallbackNeeded = false;
-                    
-                    if(status === 'OK') {
-                        const element = res.rows[0].elements[0];
-                        if (element.status === 'OK') {
-                            resolve({
-                                text: element.distance.text,
-                                value: element.distance.value // value is always in meters
-                            });
-                            return;
-                        } else {
-                            fallbackNeeded = true;
-                        }
-                    } else {
-                        fallbackNeeded = true;
-                    }
-
-                    // SMART FALLBACK FOR RURAL AREAS (If Google can't find a driving route)
-                    if (fallbackNeeded) {
-                        try {
-                            const geocoder = new google.maps.Geocoder();
-                            const getCoords = (addr) => new Promise((resGeo) => {
-                                geocoder.geocode({ address: addr }, (results, geoStatus) => {
-                                    if (geoStatus === 'OK' && results[0]) resGeo(results[0].geometry.location);
-                                    else resGeo(null);
-                                });
-                            });
-
-                            const originLoc = await getCoords(origin);
-                            const destLoc = await getCoords(dest);
-
-                            if (originLoc && destLoc) {
-                                // Haversine calculation (Straight line distance)
-                                const R = 6371e3; // meters
-                                const lat1 = originLoc.lat(); const lon1 = originLoc.lng();
-                                const lat2 = destLoc.lat(); const lon2 = destLoc.lng();
-                                
-                                const dLat = (lat2 - lat1) * Math.PI / 180;
-                                const dLon = (lon2 - lon1) * Math.PI / 180;
-                                const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                                          Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                                          Math.sin(dLon/2) * Math.sin(dLon/2);
-                                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-                                const straightDistanceMeters = R * c;
-                                
-                                // Multiply by 1.35 for realistic road detour estimate
-                                const estimatedRoadDistance = Math.round(straightDistanceMeters * 1.35);
-                                
-                                resolve({
-                                    text: `${(estimatedRoadDistance / 1000).toFixed(1)} km`,
-                                    value: estimatedRoadDistance
-                                });
-                            } else {
-                                resolve({ error: `Could not locate one of these addresses on the map.` });
-                            }
-                        } catch(e) {
-                            resolve({ error: `Routing failed and GPS fallback failed.` });
-                        }
-                    }
+                }, (res, status) => {
+                    if(status === 'OK' && res.rows[0].elements[0].status === 'OK') {
+                        resolve({
+                            text: res.rows[0].elements[0].distance.text,
+                            value: res.rows[0].elements[0].distance.value // value is always in meters
+                        });
+                    } else resolve(null);
                 });
             });
+        };
+
+        window.resetRideCalc = () => {
+            document.getElementById('btn-calc-fare').classList.remove('hidden');
+            document.getElementById('btn-find-rides').classList.add('hidden');
+            document.getElementById('ride-distance-display').classList.add('hidden');
+            document.getElementById('ride-results-list').innerHTML = '';
         };
 
         window.calculateRideFares = async () => {
@@ -1540,6 +1503,7 @@
             const searchType = document.getElementById('ride-search-type').value;
             const isRoundTrip = document.getElementById('ride-round-trip').checked;
             const tncChecked = document.getElementById('ride-tnc').checked;
+            const waitTime = parseInt(document.getElementById('ride-wait-time').value) || 0;
 
             if(!pickup || !drop) return window.showToast("Please enter Pickup and Drop locations.", "error");
             if(!tncChecked) return window.showToast("Please accept the Terms & Conditions.", "error");
@@ -1551,12 +1515,23 @@
 
             let distanceData = await window.calculateDistance(pickup, drop);
             
-            // Strictly enforce automatic calculation with detailed error reporting
-            if (!distanceData || distanceData.error) {
+            // Custom Prompt Fallback if Maps API fails to calculate distance
+            if (!distanceData) {
                 btnCalc.innerText = origText;
                 btnCalc.disabled = false;
-                const errMsg = distanceData ? distanceData.error : "Calculation failed. Please select precise locations.";
-                return window.showToast(errMsg, "error");
+                
+                const manualDistStr = await window.customPrompt(
+                    "Distance Calculation Failed",
+                    "We couldn't automatically calculate the distance. Please enter the estimated distance in Kilometers:",
+                    "e.g., 5.5",
+                    "number"
+                );
+                
+                if (!manualDistStr) return; // User cancelled
+                const manualDist = parseFloat(manualDistStr);
+                if (isNaN(manualDist) || manualDist <= 0) return window.showToast("Please enter a valid distance.", "error");
+                
+                distanceData = { value: manualDist * 1000, text: `${manualDist} km` };
             }
 
             btnCalc.innerText = origText;
@@ -1567,19 +1542,16 @@
 
             let baseKm = (distanceData.value / 1000);
             let distKm = baseKm;
+            let isDouble = searchType === 'Car' || isRoundTrip;
             
-            // Double the distance if it's a Car (mandatory) or Toto (optional round trip)
-            if (searchType === 'Car' || isRoundTrip) {
-                distKm = baseKm * 2;
-            }
-
+            if (isDouble) distKm = baseKm * 2;
             window.currentRideDistanceKm = distKm;
 
             let estFare = 0;
             // Fare Logic Update
             if (searchType === 'Car') {
-                // Car: 20 base + 12 per km
-                estFare = 20 + (distKm * 12);
+                // Car: 20 base + 15 per km (distKm is already doubled)
+                estFare = 20 + (distKm * 15);
             } else if (searchType === 'Bike') {
                 // Bike: 20 flat for 5km, then 5 per km
                 estFare = distKm <= 5 ? 20 : 20 + ((distKm - 5) * 5);
@@ -1588,24 +1560,35 @@
                 estFare = distKm <= 5 ? 100 : 100 + ((distKm - 5) * 10);
             }
             
+            estFare += (waitTime * 1); // 1 Rs per min wait time
             estFare = Math.max(20, Math.round(estFare));
-            const displayKm = distKm.toFixed(1);
 
-            let roundTripBadge = (searchType === 'Car' || isRoundTrip) ? `<span class="bg-red-100 text-red-700 px-2 py-0.5 rounded text-[9px] font-black uppercase ml-2">Round Trip Included</span>` : '';
+            let displayKm = distKm.toFixed(1);
+            let distanceStrForDb = `${displayKm} km`;
+            let distanceHtml = `Distance: <b>${displayKm} km</b>`;
+            
+            if (isDouble) {
+                distanceHtml = `Dist: <b>${baseKm.toFixed(1)}km × 2 = ${displayKm}km</b> (Round Trip)`;
+                distanceStrForDb = `${baseKm.toFixed(1)}km × 2 = ${displayKm}km`;
+            }
 
             distDisplay.innerHTML = `
-                <div class="flex flex-col gap-1.5 py-1">
-                    <div class="text-base text-gray-900 flex items-center justify-center flex-wrap gap-2">
-                        <span><i class="fa-solid fa-route text-blue-500"></i> Distance: <b>${displayKm} km</b></span>
-                        <span class="text-blue-200 hidden sm:inline">|</span> 
-                        <span>Est. Fare: <b>₹${estFare}</b></span>
-                        ${roundTripBadge}
+                <div class="flex flex-col gap-2 py-1">
+                    <div class="text-[11px] text-blue-700 font-bold bg-blue-100/50 py-1.5 rounded-lg">
+                        <i class="fa-solid fa-route mr-1"></i> ${distanceHtml}
                     </div>
-                    <div class="text-[10px] text-gray-500 font-medium opacity-90">*Waiting period charges: ₹1 per minute applies separately.</div>
+                    <div class="text-lg text-gray-900 font-black">
+                        Est. Fare: <span class="text-emerald-600">₹${estFare}</span>
+                    </div>
+                    <div class="text-[9px] text-gray-500 font-bold tracking-wide uppercase">
+                        Includes ₹${waitTime} wait charge &nbsp;|&nbsp; Additional Wait: ₹1/min
+                    </div>
                 </div>`;
             
             window.currentRideFares = { [searchType]: estFare };
-            window.currentSelectedRideType = searchType; // Pass into confirmRide
+            window.currentSelectedRideType = searchType; 
+            window.currentRideWaitTime = waitTime;
+            window.currentRideDistStr = distanceStrForDb;
 
             // Hide calc button, show search button
             document.getElementById('btn-calc-fare').classList.add('hidden');
@@ -1656,7 +1639,7 @@
                         
                         <div class="flex gap-2 mt-4 pt-4 border-t border-gray-100">
                             <a href="tel:${d.phone}" class="flex-1 bg-gray-100 text-gray-800 font-bold py-2.5 rounded-xl text-xs text-center border border-gray-200 hover:bg-gray-200 transition"><i class="fa-solid fa-phone mr-1"></i> Call</a>
-                            <button onclick="window.confirmRide('${d.id}', '${d.name.replace(/'/g, "\\'")}', this)" class="flex-[2] bg-yellow-400 text-gray-900 font-bold py-2.5 rounded-xl text-xs shadow-sm hover:bg-yellow-500 transition active:scale-95"><i class="fa-solid fa-check mr-1"></i> Confirm Booking</button>
+                            <button onclick="window.confirmRide('${d.phone}', '${d.name.replace(/'/g, "\\'")}', this)" class="flex-[2] bg-yellow-400 text-gray-900 font-bold py-2.5 rounded-xl text-xs shadow-sm hover:bg-yellow-500 transition active:scale-95"><i class="fa-solid fa-paper-plane mr-1"></i> Request Ride</button>
                         </div>
                     </div>
                 `).join('');
@@ -1682,13 +1665,15 @@
                     type: 'Ride',
                     customer: currentUser.name || 'Unknown', 
                     phone: currentUser.phone || '', 
-                    riderId: String(driverPhone), // Guarantee string match
+                    riderId: driverPhone,
                     riderName: driverName,
                     pickup: pickup,
                     address: drop, // Map to address for consistency in history
                     status: 'Requested', 
                     amount: fare,
                     total: fare,
+                    waitingTime: window.currentRideWaitTime || 0,
+                    distanceStr: window.currentRideDistStr || '',
                     time: serverTimestamp() 
                 }), 15000);
 
@@ -1700,20 +1685,47 @@
             }
         };
 
-        window.startRide = async (orderId) => {
-            const amountStr = await window.customPrompt("Ride Fare", "Enter the final negotiated Ride Amount (₹):", "e.g., 150", "number");
-            if(!amountStr) return;
-            const amount = parseInt(amountStr);
-            if(isNaN(amount) || amount <= 0) return window.showToast("Please enter a valid amount.", "error");
+        window.driverReviewRide = async (orderId, calcFare) => {
+            const newFareStr = await window.customPrompt(
+                "Propose Fare", 
+                `System calculated fare is ₹${calcFare}.\nEnter your final offer for the customer (₹):`, 
+                calcFare, 
+                "number"
+            );
+            if(!newFareStr) return;
+            const newFare = parseInt(newFareStr);
+            if(isNaN(newFare) || newFare < 10) return window.showToast("Please enter a valid fare amount.", "error");
 
             try {
-                await window.dbCall(updateDoc(getDocRef('orders', orderId), {
-                    status: 'Started',
-                    amount: amount,
-                    total: amount // mapped for consistency
+                await window.dbCall(updateDoc(getDocRef('orders', orderId), { 
+                    status: 'Rider Accepted', 
+                    amount: newFare, 
+                    total: newFare 
                 }), 10000);
+                window.showToast("Fare offer sent to customer!", "success");
+            } catch(e) { window.showToast("Failed to send offer.", "error"); }
+        };
+
+        window.userAcceptRideFare = async (orderId) => {
+            try {
+                await window.dbCall(updateDoc(getDocRef('orders', orderId), { status: 'Confirmed' }), 10000);
+                window.showToast("Ride Confirmed! Driver is on the way.", "success");
+            } catch(e) { window.showToast("Failed to confirm.", "error"); }
+        };
+
+        window.userRejectRideFare = async (orderId, inputId) => {
+            const comment = document.getElementById(inputId).value.trim() || 'No reason provided';
+            try {
+                await window.dbCall(updateDoc(getDocRef('orders', orderId), { status: 'Rejected', rejectReason: comment }), 10000);
+                window.showToast("Ride Rejected.", "success");
+            } catch(e) { window.showToast("Failed to reject.", "error"); }
+        };
+
+        window.markRideStarted = async (orderId) => {
+            try {
+                await window.dbCall(updateDoc(getDocRef('orders', orderId), { status: 'Started' }), 10000);
                 window.showToast("Ride Started!", "success");
-            } catch(e) { window.showToast("Failed to update ride status.", "error"); }
+            } catch(e) { window.showToast("Failed to start ride.", "error"); }
         };
 
         window.completeRide = async (orderId) => {
@@ -3588,8 +3600,27 @@
                         let trackingHtml = '';
                         if (o.type === 'Ride') {
                             if (o.status === 'Requested') statusText = "Searching for Cab...";
-                            if (o.status === 'Started') { statusColor = 'text-blue-500'; progressWidth = '50%'; statusText = "Ride Started"; }
+                            if (o.status === 'Rider Accepted') statusText = "Driver Responded!";
+                            if (o.status === 'Confirmed') { statusColor = 'text-blue-500'; progressWidth = '50%'; statusText = "Driver is arriving..."; }
+                            if (o.status === 'Started') { statusColor = 'text-blue-500'; progressWidth = '75%'; statusText = "Ride in Progress"; }
                             if (o.status === 'Completed') { statusColor = 'text-emerald-500'; progressWidth = '100%'; statusText = "Ride Completed"; }
+
+                            let fareActionHtml = '';
+                            if (o.status === 'Rider Accepted') {
+                                fareActionHtml = `
+                                    <div class="mt-3 bg-yellow-50 border border-yellow-200 p-3 rounded-xl">
+                                        <p class="text-[10px] font-black uppercase text-yellow-700 mb-1">Driver's Final Quote</p>
+                                        <p class="text-xs font-bold text-gray-800 mb-3">Proposed Fare: <span class="text-lg text-emerald-600">₹${o.amount}</span></p>
+                                        <div class="flex gap-2 mb-2">
+                                            <button onclick="window.userAcceptRideFare('${o.id}')" class="flex-1 bg-emerald-500 text-white py-2.5 rounded-lg font-bold text-xs shadow-sm active:scale-95"><i class="fa-solid fa-check mr-1"></i> Accept Ride</button>
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <input type="text" id="rej-cmt-${o.id}" class="flex-[2] border border-gray-200 rounded-lg px-2 text-xs outline-none focus:border-red-400 bg-white" placeholder="Reason to reject...">
+                                            <button onclick="window.userRejectRideFare('${o.id}', 'rej-cmt-${o.id}')" class="flex-1 bg-red-100 text-red-600 py-2.5 rounded-lg font-bold text-xs active:scale-95">Reject</button>
+                                        </div>
+                                    </div>
+                                `;
+                            }
 
                             trackingHtml = `
                             <div class="mt-4 bg-blue-50 border border-blue-100 rounded-xl p-3">
@@ -3608,7 +3639,12 @@
                                     <div class="absolute top-9 left-2.5 w-1.5 h-1.5 rounded-full bg-red-500 z-10"></div>
                                     <p class="text-[10px] font-medium text-gray-700 pl-5 mb-1.5">From: <b>${o.pickup}</b></p>
                                     <p class="text-[10px] font-medium text-gray-700 pl-5">To: <b>${o.address}</b></p>
+                                    <div class="pl-5 flex gap-2 text-[9px] text-gray-500 font-bold border-t border-gray-200 pt-2 mt-2">
+                                        <span><i class="fa-solid fa-route text-gray-400"></i> ${o.distanceStr || 'N/A'}</span>
+                                        <span><i class="fa-regular fa-clock text-gray-400"></i> Wait: ${o.waitingTime || 0}m</span>
+                                    </div>
                                 </div>
+                                ${fareActionHtml}
                             </div>`;
                         } else if (o.status === 'Out for Delivery') {
                             const displayRiderName = o.riderName || 'Restaurant (Self Delivery)';
@@ -3628,31 +3664,31 @@
                                     <iframe width="100%" height="100%" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" 
                                         src="https://maps.google.com/maps?q=${encodeURIComponent(o.address)}&t=&z=15&ie=UTF8&iwloc=&output=embed">
                                     </iframe>
-                                    <div class="absolute top-2 left-2 bg-white/90 backdrop-blur px-2 py-1 rounded text-[9px] font-black text-blue-600 shadow-sm animate-pulse">
-                                        <i class="fa-solid fa-satellite-dish mr-1"></i> Live Tracking - Reaching soon
-                                    </div>
-                                </div>
-                            </div>`;
-                        } else if (o.status === 'Rejected' && o.rejectReason) {
-                            trackingHtml = `<p class="text-xs font-bold text-red-500 mt-3 bg-red-50 p-2 rounded-lg border border-red-100"><i class="fa-solid fa-circle-info mr-1"></i> Reason: ${o.rejectReason}</p>`;
-                        }
+                        const timeStr = window.formatOrderTime(o.time);
+                        let cardStyle = 'border-gray-100', actionButtons = '';
+                        let paymentBadge = o.paymentMode === 'Prepaid' ? `<span class="bg-blue-100 text-blue-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">Prepaid</span>` : `<span class="bg-gray-100 text-gray-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">COD</span>`;
+                        let screenshotHtml = o.paymentMode === 'Prepaid' && o.paymentScreenshot ? `<button type="button" onclick="window.viewImage('${o.paymentScreenshot}')" class="text-[10px] text-blue-600 bg-blue-50 px-2 py-1 rounded font-bold hover:bg-blue-100 transition mt-2 w-full text-left"><i class="fa-solid fa-image"></i> View Payment Screenshot</button>` : '';
                         
-                        let ratingHtml = '';
-                        if (o.status === 'Delivered' || o.status === 'Completed') {
-                            if (o.rating) {
-                                ratingHtml = `
-                                    <div class="mt-3 bg-yellow-50 p-3 rounded-xl border border-yellow-100">
-                                        <div class="flex items-center justify-between">
-                                            <span class="text-[10px] font-bold text-yellow-700">Your Rating</span>
-                                            <span class="text-sm font-black text-yellow-500">${o.rating} <i class="fa-solid fa-star"></i></span>
-                                        </div>
-                                        ${o.review ? `<p class="text-xs text-gray-600 mt-1 italic">"${o.review}"</p>` : ''}
-                                    </div>
-                                `;
-                            } else {
-                                ratingHtml = `<button onclick="window.openRatingModal('${o.id}', '${o.restaurantId || o.riderId}')" class="w-full mt-3 bg-yellow-400 text-gray-900 py-3 rounded-xl font-bold text-xs shadow-sm hover:bg-yellow-500 transition-colors"><i class="fa-solid fa-star mr-1"></i> Rate Your Experience</button>`;
-                            }
+                        let customerInfo = `<div class="mb-3 bg-gray-50 p-2 rounded-xl border border-gray-100">
+                            <p class="text-xs font-black text-gray-800"><i class="fa-solid fa-user text-gray-400 mr-1"></i> ${o.customer}</p>
+                            <p class="text-xs font-bold text-blue-600 mt-1"><a href="tel:${o.phone}"><i class="fa-solid fa-phone mr-1"></i> ${o.phone}</a></p>
+                        </div>`;
+
+                        if (['Rider', 'Ride Partner'].includes(currentUser.category)) {
+                    if (o.type === 'Ride') {
+                        if (o.status === 'Requested') {
+                            actionButtons = `<button type="button" onclick="window.driverReviewRide('${o.id}', ${o.amount})" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-hand-holding-dollar mr-1"></i> Review & Propose Fare</button>`;
+                        } else if (o.status === 'Rider Accepted') {
+                            actionButtons = `<div class="w-full bg-yellow-50 text-yellow-700 py-3 rounded-xl font-bold text-sm text-center border border-yellow-200"><i class="fa-solid fa-clock mr-1"></i> Waiting for Customer to Accept ₹${o.amount}</div>`;
+                        } else if (o.status === 'Confirmed') {
+                            actionButtons = `<button type="button" onclick="window.markRideStarted('${o.id}')" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-play mr-1"></i> Start Ride</button>`;
+                        } else if (o.status === 'Started') {
+                            actionButtons = `<button type="button" onclick="window.completeRide('${o.id}')" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-check-double mr-1"></i> End Ride & Collect ₹${o.amount}</button>`;
+                        } else if (o.status === 'Completed') {
+                            actionButtons = `<div class="w-full bg-gray-100 text-gray-500 py-3 rounded-xl font-bold text-sm text-center border border-gray-200"><i class="fa-solid fa-check mr-1"></i> Completed (₹${o.amount})</div>`;
                         }
+                    } else {
+                        // Food/Grocery Delivery Logic
 
                         let resAddressHtml = o.restaurantAddress && o.type !== 'Ride' ? `<p class="text-[9px] text-gray-500 font-medium mb-1"><i class="fa-solid fa-location-dot"></i> ${o.restaurantAddress}</p>` : '';
 
@@ -3727,38 +3763,38 @@
                             return `<div class="flex justify-between items-center bg-white border border-gray-100 p-4 rounded-2xl shadow-sm"><div class="flex-1 mr-4"><p class="font-black text-sm text-gray-900">${p.name}</p><p class="text-[10px] text-gray-500">${p.shopCategory || p.category}</p><p class="text-xs text-gray-700 font-bold mt-1">${variantsDisplay}</p></div><div class="flex items-center gap-2 shrink-0"><button type="button" onclick="window.editPartnerProduct('${p.id}')" class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-colors shrink-0" title="Edit Item"><i class="fa-solid fa-pen text-xs"></i></button><button type="button" onclick="window.togglePartnerStock('${p.id}', ${p.inStock !== false})" class="text-[10px] font-black uppercase tracking-wider ${stockColor} border px-2 py-1 rounded transition whitespace-nowrap">${stockText}</button><button type="button" onclick="window.deletePartnerProduct('${p.id}')" class="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors shrink-0"><i class="fa-solid fa-trash text-xs"></i></button></div></div>`;
                         }).join('');
                     });
-                    unsubscribeListeners.push(catalogUnsub);
-                }
-            }
-        };
+                        let ratingHtml = o.rating ? `<div class="mt-2 text-center text-xs font-bold text-yellow-600 bg-yellow-50 rounded-lg py-1 border border-yellow-100"><i class="fa-solid fa-star"></i> Customer Rated: ${o.rating} Star</div>` : '';
 
-        // Initialize Session Handlers
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                if (!currentUser) {
-                    let sessionPhone = null;
-                    try {
-                        const sessionSnap = await window.dbCall(getDoc(getDocRef('sessions', user.uid)), 5000);
-                        if (sessionSnap && sessionSnap.exists()) {
-                            sessionPhone = sessionSnap.data().phone;
-                        }
-                    } catch(e) { console.warn("Session fetch delayed."); }
-
-                    if (!sessionPhone) {
-                        try {
-                            const usersSnap = await window.dbCall(getDocs(getCol('users')), 5000);
-                            const matchedUser = usersSnap.docs.find(d => d.data().uid === user.uid);
-                            if (matchedUser) {
-                                sessionPhone = matchedUser.id;
-                                setDoc(getDocRef('sessions', user.uid), { phone: sessionPhone }, { merge: true }).catch(()=>{});
-                            }
-                        } catch(e) { console.warn("Fallback fetch failed."); }
-                    }
-
-                    if (sessionPhone) {
-                        if (sessionPhone === 'admin_session' || sessionPhone === 'Gramzo_admin') {
-                            currentUser = { name: 'Super Admin', role: 'Admin', phone: 'Admin', docId: 'admin_session', uid: user.uid };
-                            window.finalizeLoginSequence(true);
+                        if (o.type === 'Ride') {
+                            html += `
+                                <div class="bg-white rounded-3xl p-5 shadow-sm border border-blue-100 relative overflow-hidden">
+                                    <div class="flex justify-between items-start mb-3">
+                                        <div>
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <span class="text-[10px] font-black text-blue-500 uppercase tracking-widest bg-blue-50 px-2 py-0.5 rounded"><i class="fa-solid fa-taxi"></i> RIDE</span>
+                                                <span class="text-[9px] font-medium text-gray-400"><i class="fa-regular fa-clock"></i> ${timeStr}</span>
+                                            </div>
+                                            <h4 class="font-bold text-gray-900 text-sm mt-2"><i class="fa-solid fa-user text-gray-400 mr-1"></i> ${o.customer}</h4>
+                                            <a href="tel:${o.phone}" class="text-xs font-bold text-blue-600 block mt-0.5"><i class="fa-solid fa-phone mr-1"></i> ${o.phone}</a>
+                                        </div>
+                                        <span class="text-xl font-black text-emerald-600">${o.amount ? '₹'+o.amount : '...'}</span>
+                                    </div>
+                                    
+                                    <div class="relative bg-gray-50 p-3 rounded-xl mb-4 border border-gray-100 mt-2">
+                                        <div class="absolute top-3 left-2.5 w-1.5 h-1.5 rounded-full bg-emerald-500 z-10"></div>
+                                        <div class="absolute top-5 left-3 w-0.5 h-4 bg-gray-300 z-10"></div>
+                                        <div class="absolute top-9 left-2.5 w-1.5 h-1.5 rounded-full bg-red-500 z-10"></div>
+                                        
+                                        <p class="text-[10px] font-medium text-gray-700 pl-6 mb-1.5">From: <b>${o.pickup}</b></p>
+                                        <p class="text-[10px] font-medium text-gray-700 pl-6 mb-2">To: <b>${o.address}</b></p>
+                                        <div class="pl-6 flex gap-2 text-[10px] text-gray-500 font-bold border-t border-gray-200 pt-2 mt-2">
+                                            <span><i class="fa-solid fa-route text-gray-400"></i> ${o.distanceStr || 'N/A'}</span>
+                                            <span><i class="fa-regular fa-clock text-gray-400"></i> Wait: ${o.waitingTime || 0}m</span>
+                                        </div>
+                                    </div>
+                                    ${actionButtons}
+                                </div>
+                            `;
                         } else {
                             try {
                                 const userSnap = await window.dbCall(getDoc(getDocRef('users', sessionPhone)), 5000);
