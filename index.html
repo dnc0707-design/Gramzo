@@ -14,7 +14,7 @@
     <!-- AGGRESSIVE AUTO CACHE BUSTER SCRIPT -->
     <script>
         (function() {
-            const APP_VERSION = "11.24.0"; // Live Network Sync Update
+            const APP_VERSION = "11.26.0"; // Live Network Sync Update
             
             // 1. Always kill service workers to prevent HTML caching
             if ('serviceWorker' in navigator) {
@@ -32,22 +32,27 @@
                 if ('caches' in window) {
                     caches.keys().then(names => { names.forEach(name => caches.delete(name)) });
                 }
-                window.location.replace(window.location.pathname + '?v=' + new Date().getTime());
+                let newUrl = new URL(window.location.href);
+                newUrl.searchParams.set('v', new Date().getTime());
+                window.location.replace(newUrl.toString());
             }
 
             // 3. LIVE SERVER PING (The Ultimate Fallback)
-            // Silently checks GitHub 2 seconds after opening to see if you pushed a new update
+            // Silently checks live code 2 seconds after opening to see if you pushed a new update
             setTimeout(() => {
                 fetch(window.location.pathname + '?nocache=' + new Date().getTime(), { cache: "no-store" })
                     .then(res => res.text())
                     .then(html => {
-                        // If the live GitHub code has a different APP_VERSION, it forces a reload
+                        // If the live code has a different APP_VERSION, it forces a reload
                         if (!html.includes('const APP_VERSION = "' + APP_VERSION + '"')) {
-                            console.log("Newer version found on GitHub. Force reloading...");
+                            console.log("Newer version found. Force reloading...");
+                            localStorage.removeItem("gramzo_app_version");
                             if ('caches' in window) {
                                 caches.keys().then(names => { names.forEach(name => caches.delete(name)) });
                             }
-                            window.location.replace(window.location.pathname + '?v=' + new Date().getTime());
+                            let newUrl = new URL(window.location.href);
+                            newUrl.searchParams.set('v', new Date().getTime());
+                            window.location.replace(newUrl.toString());
                         }
                     }).catch(e => console.log("Offline mode active."));
             }, 2000);
@@ -363,7 +368,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.24.0 - Live Network Sync</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.26.0 - Live Network Sync</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right">
                             <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
@@ -895,7 +900,7 @@
             <p class="text-sm text-gray-600 mb-6 font-medium" id="confirm-desc">Are you sure you want to do this?</p>
             <div class="flex gap-2">
                 <button onclick="window.cancelCustomConfirm()" class="flex-1 bg-gray-100 text-gray-600 py-3 rounded-xl font-bold text-sm hover:bg-gray-200">Cancel</button>
-                <button id="btn-confirm-yes" onclick="window.submitCustomConfirm()" class="flex-1 bg-red-600 text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-red-700">Yes</button>
+                <button id="btn-confirm-yes" onclick="window.submitCustomConfirm()" class="flex-[1.5] bg-red-600 text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-red-700">Yes</button>
             </div>
         </div>
     </div>
@@ -1038,6 +1043,31 @@
         window.currentSelectedRideType = null;
         window.currentRideDistanceKm = null;
         window.currentRideFares = { Bike: 0, Toto: 0, Car: 0 };
+
+        // WAKE LOCK STATE (Prevents app from sleeping to ensure notifications)
+        window.wakeLockRef = null;
+        window.requestWakeLock = async () => {
+            if ('wakeLock' in navigator) {
+                try {
+                    window.wakeLockRef = await navigator.wakeLock.request('screen');
+                    console.log('Screen Wake Lock active');
+                } catch (err) {
+                    console.log('Wake Lock error:', err);
+                }
+            }
+        };
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                if (currentUser && ['Partner', 'Admin'].includes(currentUser.role)) {
+                    window.requestWakeLock();
+                }
+                // Force an audio check if there are active unacknowledged popups missed while minimized
+                if (document.getElementById('status-popup-modal').classList.contains('active')) {
+                    window.speakAlert(document.getElementById('status-popup-desc').innerText);
+                }
+            }
+        });
 
         // CUSTOM PROMPT/CONFIRM STATE
         let customPromptResolve = null;
@@ -1545,7 +1575,7 @@
                         
                         <div class="flex gap-2 mt-4 pt-4 border-t border-gray-100">
                             <a href="tel:${d.phone}" class="flex-1 bg-gray-100 text-gray-800 font-bold py-2.5 rounded-xl text-xs text-center border border-gray-200 hover:bg-gray-200 transition"><i class="fa-solid fa-phone mr-1"></i> Call</a>
-                            <button onclick="window.confirmRide('${d.phone}', '${d.name.replace(/'/g, "\\'")}', this)" class="flex-[2] bg-yellow-400 text-gray-900 font-bold py-2.5 rounded-xl text-xs shadow-sm hover:bg-yellow-500 transition active:scale-95"><i class="fa-solid fa-check mr-1"></i> Confirm Booking</button>
+                            <button onclick="window.confirmRide('${d.id}', '${d.name.replace(/'/g, "\\'")}', this)" class="flex-[2] bg-yellow-400 text-gray-900 font-bold py-2.5 rounded-xl text-xs shadow-sm hover:bg-yellow-500 transition active:scale-95"><i class="fa-solid fa-check mr-1"></i> Confirm Booking</button>
                         </div>
                     </div>
                 `).join('');
@@ -1571,7 +1601,7 @@
                     type: 'Ride',
                     customer: currentUser.name || 'Unknown', 
                     phone: currentUser.phone || '', 
-                    riderId: driverPhone,
+                    riderId: String(driverPhone), // Guarantee string match
                     riderName: driverName,
                     pickup: pickup,
                     address: drop, // Map to address for consistency in history
@@ -1910,6 +1940,10 @@
 
             window.setupBottomNav(currentUser.role);
             window.switchMainView(currentUser.role === 'Admin' ? 'Admin' : currentUser.role === 'Partner' ? 'Partner' : 'User');
+
+            if (['Partner', 'Admin'].includes(currentUser.role)) {
+                window.requestWakeLock();
+            }
 
             if (currentUser.role === 'Partner') {
                 const isShop = ['Food Owner', 'Grocery Shop'].includes(currentUser.category);
@@ -2588,7 +2622,7 @@
             try {
                 await window.dbCall(updateDoc(getDocRef('orders', orderId), {
                     status: 'Out for Delivery',
-                    riderId: currentUser.phone,
+                    riderId: currentUser.id || currentUser.phone || currentUser.docId, // Guaranteed strict match
                     riderName: currentUser.name,
                     riderPhone: currentUser.phone
                 }), 10000);
@@ -3194,7 +3228,7 @@
                         } else if (o.status === 'Started') {
                             actionButtons = `<button type="button" onclick="window.completeRide('${o.id}')" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-check-double mr-1"></i> Complete Ride & Collect ₹${o.amount}</button>`;
                         } else if (o.status === 'Completed') {
-                            actionButtons = `<div class="w-full bg-gray-100 text-gray-500 py-3 rounded-xl font-bold text-sm text-center border border-gray-200"><i class="fa-solid fa-check mr-1"></i> Completed (₹${o.amount})</div>`;
+                            actionButtons = `<div class="w-full bg-gray-100 text-gray-50 py-3 rounded-xl font-bold text-sm text-center border border-gray-200"><i class="fa-solid fa-check mr-1"></i> Completed (₹${o.amount})</div>`;
                         }
                     } else {
                         // Food/Grocery Delivery Logic
@@ -3213,7 +3247,16 @@
                         if (!o.riderId) { // Self delivery by Food Owner
                             actionButtons = `<button type="button" onclick="window.markDelivered('${o.id}')" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-check-double mr-1"></i> Mark as Delivered</button>`;
                         } else {
-                            actionButtons = `<p class="text-xs font-bold text-yellow-600 text-center py-2 bg-yellow-50 rounded-xl">OUT FOR DELIVERY.. Reaching soon (via ${o.riderName})</p>`;
+                            // SHOW RIDER INFO TO THE FOOD PARTNER
+                            actionButtons = `
+                            <div class="flex gap-2 w-full mt-1">
+                                <div class="flex-1 bg-yellow-50 border border-yellow-200 text-yellow-700 py-2 rounded-xl flex flex-col items-center justify-center">
+                                    <span class="text-[9px] font-black uppercase">Out for Delivery</span>
+                                    <span class="text-xs font-bold">${o.riderName || 'Rider'}</span>
+                                </div>
+                                <a href="tel:${o.riderPhone || o.riderId}" class="flex-[0.3] bg-blue-600 text-white rounded-xl flex items-center justify-center text-lg shadow-md active:scale-95"><i class="fa-solid fa-phone"></i></a>
+                            </div>
+                            `;
                         }
                     }
                     else if (o.status === 'Delivered') actionButtons = `<div class="w-full bg-emerald-50 text-emerald-600 py-3 rounded-xl font-bold text-sm text-center border border-emerald-100"><i class="fa-solid fa-circle-check mr-1"></i> Order Completed</div>`;
