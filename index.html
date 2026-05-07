@@ -14,7 +14,7 @@
     <!-- AGGRESSIVE AUTO CACHE BUSTER SCRIPT -->
     <script>
         (function() {
-            const APP_VERSION = "11.26.0"; // Live Network Sync Update
+            const APP_VERSION = "11.27.0"; // Full Feature & UI Bleed Fix
             
             // 1. Always kill service workers to prevent HTML caching
             if ('serviceWorker' in navigator) {
@@ -38,12 +38,10 @@
             }
 
             // 3. LIVE SERVER PING (The Ultimate Fallback)
-            // Silently checks live code 2 seconds after opening to see if you pushed a new update
             setTimeout(() => {
                 fetch(window.location.pathname + '?nocache=' + new Date().getTime(), { cache: "no-store" })
                     .then(res => res.text())
                     .then(html => {
-                        // If the live code has a different APP_VERSION, it forces a reload
                         if (!html.includes('const APP_VERSION = "' + APP_VERSION + '"')) {
                             console.log("Newer version found. Force reloading...");
                             localStorage.removeItem("gramzo_app_version");
@@ -200,7 +198,7 @@
     <!-- Scrollable Content Starts Here -->
     <div class="pt-[60px]">
         <!-- Full-Width Banner Image -->
-        <div class="w-full bg-gray-100">
+        <div id="global-top-banner" class="w-full bg-gray-100">
             <img src="https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/ChatGPT%20Image%20May%202%2C%202026%2C%2001_32_51%20PM.png" alt="Gramzo Top Banner" class="w-full h-[120px] sm:h-[200px] md:h-[280px] lg:h-[350px] object-cover object-center block">
         </div>
 
@@ -380,7 +378,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.26.0 - Live Network Sync</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.27.0 - UI Bleed Fix</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right">
                             <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
@@ -1651,7 +1649,7 @@
                         
                         <div class="flex gap-2 mt-4 pt-4 border-t border-gray-100">
                             <a href="tel:${d.phone}" class="flex-1 bg-gray-100 text-gray-800 font-bold py-2.5 rounded-xl text-xs text-center border border-gray-200 hover:bg-gray-200 transition"><i class="fa-solid fa-phone mr-1"></i> Call</a>
-                            <button onclick="window.confirmRide('${d.phone}', '${d.name.replace(/'/g, "\\'")}', this)" class="flex-[2] bg-yellow-400 text-gray-900 font-bold py-2.5 rounded-xl text-xs shadow-sm hover:bg-yellow-500 transition active:scale-95"><i class="fa-solid fa-paper-plane mr-1"></i> Request Ride</button>
+                            <button onclick="window.confirmRide('${d.phone}', '${(d.name || '').replace(/'/g, "\\'")}', this)" class="flex-[2] bg-yellow-400 text-gray-900 font-bold py-2.5 rounded-xl text-xs shadow-sm hover:bg-yellow-500 transition active:scale-95"><i class="fa-solid fa-paper-plane mr-1"></i> Request Ride</button>
                         </div>
                     </div>
                 `).join('');
@@ -1677,8 +1675,8 @@
                     type: 'Ride',
                     customer: currentUser.name || 'Unknown', 
                     phone: currentUser.phone || '', 
-                    riderId: driverPhone,
-                    riderName: driverName,
+                    riderId: String(driverPhone),
+                    riderName: driverName || 'Driver',
                     pickup: pickup,
                     address: drop, // Map to address for consistency in history
                     status: 'Requested', 
@@ -1882,6 +1880,18 @@
             }
 
             if (viewName === 'Cart') window.renderCartUI();
+
+            // FIX: Hide User-specific global elements on Partner/Admin screens
+            const globalBanner = document.getElementById('global-top-banner');
+            const marqueeContainer = document.getElementById('marquee-container');
+            
+            if (viewName !== 'User') {
+                if(globalBanner) globalBanner.style.display = 'none';
+                if(marqueeContainer) marqueeContainer.style.display = 'none';
+            } else {
+                if(globalBanner) globalBanner.style.display = 'block';
+                if(marqueeContainer) marqueeContainer.style.display = 'flex';
+            }
         };
         
         window.logout = async () => {
@@ -1996,7 +2006,7 @@
                     window.dbCall(setDoc(userRef, userData, { merge: true }), 4000).catch(e=>{});
                     if(auth.currentUser) window.dbCall(setDoc(getDocRef('sessions', auth.currentUser.uid), { phone }, { merge: true }), 3000).catch(e=>{});
                     
-                    currentUser = { ...userData, docId: phone };
+                    currentUser = { ...userData, docId: phone, phone: phone };
                     window.finalizeLoginSequence();
                 } else if (type === 'login') {
                     const phone = document.getElementById('login-phone').value.trim();
@@ -2012,7 +2022,8 @@
                     const data = snap.data();
                     if (data.pin !== pass) throw new Error("Incorrect password.");
 
-                    currentUser = { ...data, docId: phone };
+                    // Default to 'User' role if missing in old data
+                    currentUser = { ...data, docId: phone, phone: phone, role: data.role || 'User' };
                     if(auth.currentUser) window.dbCall(setDoc(getDocRef('sessions', auth.currentUser.uid), { phone }, { merge: true }), 3000).catch(e=>{});
                     window.finalizeLoginSequence();
                 }
@@ -2030,18 +2041,19 @@
                 Notification.requestPermission();
             }
 
-            window.showToast(`Welcome back, ${currentUser.name.split(' ')[0]}!`, "success");
+            const displayName = currentUser.name ? currentUser.name.split(' ')[0] : 'User';
+            window.showToast(`Welcome back, ${displayName}!`, "success");
 
             document.getElementById('btn-partner-login-trigger').classList.add('hidden');
             document.getElementById('btn-login-trigger').classList.add('hidden');
             document.getElementById('profile-trigger').classList.remove('hidden');
             
-            document.getElementById('nav-initial').innerText = currentUser.name.charAt(0).toUpperCase();
-            document.getElementById('nav-name').innerText = currentUser.name;
-            document.getElementById('nav-role').innerText = currentUser.role;
+            document.getElementById('nav-initial').innerText = displayName.charAt(0).toUpperCase();
+            document.getElementById('nav-name').innerText = currentUser.name || 'User';
+            document.getElementById('nav-role').innerText = currentUser.role || 'User';
             document.getElementById('nav-role').className = `text-[8px] font-bold uppercase ${currentUser.role === 'Admin' ? 'text-purple-500' : currentUser.role === 'Partner' ? 'text-orange-500' : 'text-blue-500'}`;
-            document.getElementById('menu-name').innerText = currentUser.name;
-            document.getElementById('menu-phone').innerText = currentUser.phone;
+            document.getElementById('menu-name').innerText = currentUser.name || 'User';
+            document.getElementById('menu-phone').innerText = currentUser.phone || 'Phone hidden';
 
             window.setupBottomNav(currentUser.role);
             window.switchMainView(currentUser.role === 'Admin' ? 'Admin' : currentUser.role === 'Partner' ? 'Partner' : 'User');
@@ -2074,7 +2086,7 @@
 
                 if(isShop) {
                     document.getElementById('shop-top-dashboard').classList.remove('hidden');
-                    document.getElementById('partner-welcome').innerText = `Welcome, ${currentUser.name.split(' ')[0]}!`;
+                    document.getElementById('partner-welcome').innerText = `Welcome, ${displayName}!`;
                     
                     if (isApproved) {
                         document.getElementById('partner-food-settings').classList.remove('hidden');
@@ -2085,7 +2097,7 @@
                     }
                 } else if (isRide) {
                     document.getElementById('rider-top-dashboard').classList.remove('hidden');
-                    document.getElementById('rider-welcome').innerText = `Welcome, ${currentUser.name.split(' ')[0]}!`;
+                    document.getElementById('rider-welcome').innerText = `Welcome, ${displayName}!`;
                     document.getElementById('rider-vehicle-info').innerText = `${currentUser.carModel || 'Vehicle'} - ${currentUser.carNum || 'N/A'}`;
                     document.getElementById('wallet-points-display').innerText = currentUser.walletPoints || 0;
                     
@@ -2734,9 +2746,9 @@
             try {
                 await window.dbCall(updateDoc(getDocRef('orders', orderId), {
                     status: 'Out for Delivery',
-                    riderId: currentUser.id || currentUser.phone || currentUser.docId, // Guaranteed strict match
-                    riderName: currentUser.name,
-                    riderPhone: currentUser.phone
+                    riderId: String(currentUser.phone || currentUser.docId),
+                    riderName: currentUser.name || 'Rider',
+                    riderPhone: currentUser.phone || ''
                 }), 10000);
                 window.showToast("Delivery Accepted!", "success");
             } catch(e) { window.showToast("Failed to update.", "error"); }
@@ -3207,7 +3219,7 @@
 
                 let actionsHtml = `<span class="cursor-pointer font-black text-gray-400 bg-gray-100 px-2 py-0.5 rounded" onclick="this.innerText='${u.pin}'" title="Click to reveal">***</span>`;
                 
-                let editBtn = `<button onclick="window.openAdminUserEdit('${u.phone}', '${u.name.replace(/'/g, "\\'")}', '${(u.shopName || '').replace(/'/g, "\\'")}')" class="text-blue-500 hover:text-blue-700 ml-2" title="Edit User"><i class="fa-solid fa-pen"></i></button>`;
+                let editBtn = `<button onclick="window.openAdminUserEdit('${u.phone}', '${(u.name || '').replace(/'/g, "\\'")}', '${(u.shopName || '').replace(/'/g, "\\'")}')" class="text-blue-500 hover:text-blue-700 ml-2" title="Edit User"><i class="fa-solid fa-pen"></i></button>`;
 
                 if (['Rider', 'Ride Partner'].includes(u.category)) {
                     actionsHtml += `<br/><button onclick="window.adminAddPoints('${u.phone}', ${u.walletPoints || 0})" class="bg-blue-50 text-blue-600 px-2 py-1 mt-1 rounded border border-blue-100 text-[9px] font-bold w-full">+ Points</button>`;
@@ -3286,7 +3298,6 @@
             adminLog.innerHTML = html;
         };
 
-        // --- PARTNER TABS LOGIC ---
         window.switchPartnerOrderTab = (tab) => {
             window.partnerCurrentOrderTab = tab;
             document.querySelectorAll('.partner-order-tab').forEach(el => {
@@ -3350,7 +3361,7 @@
                         // Food/Grocery Delivery Logic
                         if (o.status === 'Ready' && !o.riderId) {
                             actionButtons = `<button type="button" onclick="window.acceptDelivery('${o.id}')" class="w-full bg-gray-900 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-motorcycle mr-1"></i> Accept Delivery</button>`;
-                        } else if (o.status === 'Out for Delivery' && o.riderId === currentUser.phone) {
+                        } else if (o.status === 'Out for Delivery' && String(o.riderId) === String(currentUser.phone)) {
                             actionButtons = `<div class="flex gap-2"><a href="tel:${o.phone}" class="flex-1 bg-white border border-gray-200 text-gray-700 py-3 rounded-xl font-bold text-sm text-center flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone mr-1"></i> Customer</a><button type="button" onclick="window.markDelivered('${o.id}')" class="flex-1 bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md"><i class="fa-solid fa-check-double mr-1"></i> Done</button></div>`;
                         }
                     }
