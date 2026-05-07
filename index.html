@@ -14,7 +14,7 @@
     <!-- AGGRESSIVE AUTO CACHE BUSTER SCRIPT -->
     <script>
         (function() {
-            const APP_VERSION = "11.27.0"; // Live Network Sync Update
+            const APP_VERSION = "11.26.0"; // Live Network Sync Update
             
             // 1. Always kill service workers to prevent HTML caching
             if ('serviceWorker' in navigator) {
@@ -3767,34 +3767,32 @@
         };
 
         // Initialize Session Handlers
-                                <div class="bg-white rounded-3xl p-5 shadow-sm border border-blue-100 relative overflow-hidden">
-                                    <div class="flex justify-between items-start mb-3">
-                                        <div>
-                                            <div class="flex items-center gap-2 mb-1">
-                                                <span class="text-[10px] font-black text-blue-500 uppercase tracking-widest bg-blue-50 px-2 py-0.5 rounded"><i class="fa-solid fa-taxi"></i> RIDE</span>
-                                                <span class="text-[9px] font-medium text-gray-400"><i class="fa-regular fa-clock"></i> ${timeStr}</span>
-                                            </div>
-                                            <h4 class="font-bold text-gray-900 text-sm mt-2"><i class="fa-solid fa-user text-gray-400 mr-1"></i> ${o.customer}</h4>
-                                            <a href="tel:${o.phone}" class="text-xs font-bold text-blue-600 block mt-0.5"><i class="fa-solid fa-phone mr-1"></i> ${o.phone}</a>
-                                        </div>
-                                        <span class="text-xl font-black text-emerald-600">${o.amount ? '₹'+o.amount : '...'}</span>
-                                    </div>
-                                    
-                                    <div class="relative bg-gray-50 p-3 rounded-xl mb-4 border border-gray-100 mt-2">
-                                        <div class="absolute top-3 left-2.5 w-1.5 h-1.5 rounded-full bg-emerald-500 z-10"></div>
-                                        <div class="absolute top-5 left-3 w-0.5 h-4 bg-gray-300 z-10"></div>
-                                        <div class="absolute top-9 left-2.5 w-1.5 h-1.5 rounded-full bg-red-500 z-10"></div>
-                                        
-                                        <p class="text-[10px] font-medium text-gray-700 pl-6 mb-1.5">From: <b>${o.pickup}</b></p>
-                                        <p class="text-[10px] font-medium text-gray-700 pl-6 mb-2">To: <b>${o.address}</b></p>
-                                        <div class="pl-6 flex gap-2 text-[10px] text-gray-500 font-bold border-t border-gray-200 pt-2 mt-2">
-                                            <span><i class="fa-solid fa-route text-gray-400"></i> ${o.distanceStr || 'N/A'}</span>
-                                            <span><i class="fa-regular fa-clock text-gray-400"></i> Wait: ${o.waitingTime || 0}m</span>
-                                        </div>
-                                    </div>
-                                    ${actionButtons}
-                                </div>
-                            `;
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                if (!currentUser) {
+                    let sessionPhone = null;
+                    try {
+                        const sessionSnap = await window.dbCall(getDoc(getDocRef('sessions', user.uid)), 5000);
+                        if (sessionSnap && sessionSnap.exists()) {
+                            sessionPhone = sessionSnap.data().phone;
+                        }
+                    } catch(e) { console.warn("Session fetch delayed."); }
+
+                    if (!sessionPhone) {
+                        try {
+                            const usersSnap = await window.dbCall(getDocs(getCol('users')), 5000);
+                            const matchedUser = usersSnap.docs.find(d => d.data().uid === user.uid);
+                            if (matchedUser) {
+                                sessionPhone = matchedUser.id;
+                                setDoc(getDocRef('sessions', user.uid), { phone: sessionPhone }, { merge: true }).catch(()=>{});
+                            }
+                        } catch(e) { console.warn("Fallback fetch failed."); }
+                    }
+
+                    if (sessionPhone) {
+                        if (sessionPhone === 'admin_session' || sessionPhone === 'Gramzo_admin') {
+                            currentUser = { name: 'Super Admin', role: 'Admin', phone: 'Admin', docId: 'admin_session', uid: user.uid };
+                            window.finalizeLoginSequence(true);
                         } else {
                             try {
                                 const userSnap = await window.dbCall(getDoc(getDocRef('users', sessionPhone)), 5000);
