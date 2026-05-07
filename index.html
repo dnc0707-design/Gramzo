@@ -295,16 +295,16 @@
                             <input type="text" id="ride-drop" class="w-full bg-gray-50 border border-gray-100 rounded-xl py-3 pl-10 pr-4 text-sm outline-none focus:ring-1 focus:ring-red-400" placeholder="Where are you going?">
                         </div>
                         
-                        <select id="ride-search-type" class="w-full bg-gray-50 border border-gray-100 rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-red-400 mt-3 font-bold text-gray-700" onchange="document.getElementById('round-trip-container').style.display = this.value === 'Toto' ? 'flex' : 'none'">
-                            <option value="Car">🚕 Car / Cab (Multi-person)</option>
+                        <select id="ride-search-type" class="w-full bg-gray-50 border border-gray-100 rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-red-400 mt-3 font-bold text-gray-700" onchange="window.handleRideTypeChange()">
+                            <option value="Car" selected>🚕 Car / Cab (Multi-person)</option>
                             <option value="Bike">🏍️ Bike (Max 1 Person)</option>
                             <option value="Toto">🛺 Toto / Auto</option>
                         </select>
 
-                        <!-- Round Trip (Toto Only) -->
-                        <label class="items-center gap-2 text-xs font-bold text-gray-700 mt-3 hidden" id="round-trip-container" style="display: none;">
-                            <input type="checkbox" id="ride-round-trip" class="w-4 h-4 text-red-600 focus:ring-red-500 rounded border-gray-300">
-                            <span>Round Trip (Double Distance)</span>
+                        <!-- Round Trip (Toto Optional, Car Mandatory) -->
+                        <label class="flex items-center gap-2 text-xs font-bold text-gray-700 mt-3" id="round-trip-container" style="display: flex;">
+                            <input type="checkbox" id="ride-round-trip" class="w-4 h-4 text-red-600 focus:ring-red-500 rounded border-gray-300 disabled:opacity-50" checked disabled>
+                            <span id="round-trip-label-text" class="text-red-600">Round Trip (Mandatory for Car)</span>
                         </label>
 
                         <!-- T&C Checkbox -->
@@ -1455,11 +1455,39 @@
             });
         };
 
+        window.handleRideTypeChange = () => {
+            const type = document.getElementById('ride-search-type').value;
+            const rtContainer = document.getElementById('round-trip-container');
+            const rtCheckbox = document.getElementById('ride-round-trip');
+            const rtLabel = document.getElementById('round-trip-label-text');
+
+            if (type === 'Car') {
+                rtContainer.style.display = 'flex';
+                rtCheckbox.checked = true;
+                rtCheckbox.disabled = true;
+                rtLabel.innerText = "Round Trip (Mandatory for Car)";
+                rtLabel.classList.add('text-red-600');
+            } else if (type === 'Toto') {
+                rtContainer.style.display = 'flex';
+                rtCheckbox.disabled = false;
+                rtLabel.innerText = "Round Trip (Double Distance)";
+                rtLabel.classList.remove('text-red-600');
+            } else {
+                rtContainer.style.display = 'none';
+                rtCheckbox.checked = false;
+                rtCheckbox.disabled = false;
+            }
+            
+            document.getElementById('ride-distance-display').classList.add('hidden');
+            document.getElementById('btn-calc-fare').classList.remove('hidden');
+            document.getElementById('btn-find-rides').classList.add('hidden');
+        };
+
         window.calculateRideFares = async () => {
             const pickup = document.getElementById('ride-pickup').value.trim();
             const drop = document.getElementById('ride-drop').value.trim();
             const searchType = document.getElementById('ride-search-type').value;
-            const isRoundTrip = searchType === 'Toto' && document.getElementById('ride-round-trip').checked;
+            const isRoundTrip = document.getElementById('ride-round-trip').checked;
             const tncChecked = document.getElementById('ride-tnc').checked;
 
             if(!pickup || !drop) return window.showToast("Please enter Pickup and Drop locations.", "error");
@@ -1472,23 +1500,11 @@
 
             let distanceData = await window.calculateDistance(pickup, drop);
             
-            // Custom Prompt Fallback if Maps API fails to calculate distance
+            // Strictly enforce automatic calculation
             if (!distanceData) {
                 btnCalc.innerText = origText;
                 btnCalc.disabled = false;
-                
-                const manualDistStr = await window.customPrompt(
-                    "Distance Calculation Failed",
-                    "We couldn't automatically calculate the distance. Please enter the estimated distance in Kilometers:",
-                    "e.g., 5.5",
-                    "number"
-                );
-                
-                if (!manualDistStr) return; // User cancelled
-                const manualDist = parseFloat(manualDistStr);
-                if (isNaN(manualDist) || manualDist <= 0) return window.showToast("Please enter a valid distance.", "error");
-                
-                distanceData = { value: manualDist * 1000, text: `${manualDist} km` };
+                return window.showToast("Automatic calculation failed. Please select precise locations from the dropdown suggestions.", "error");
             }
 
             btnCalc.innerText = origText;
@@ -1497,9 +1513,15 @@
             const distDisplay = document.getElementById('ride-distance-display');
             distDisplay.classList.remove('hidden');
 
-            let distKm = (distanceData.value / 1000);
+            let baseKm = (distanceData.value / 1000);
+            let distKm = baseKm;
+            
+            // Double the distance if it's a Car (mandatory) or Toto (optional round trip)
+            if (searchType === 'Car' || isRoundTrip) {
+                distKm = baseKm * 2;
+            }
+
             window.currentRideDistanceKm = distKm;
-            if (isRoundTrip) distKm *= 2;
 
             let estFare = 0;
             // Fare Logic Update
@@ -1517,9 +1539,16 @@
             estFare = Math.max(20, Math.round(estFare));
             const displayKm = distKm.toFixed(1);
 
+            let roundTripBadge = (searchType === 'Car' || isRoundTrip) ? `<span class="bg-red-100 text-red-700 px-2 py-0.5 rounded text-[9px] font-black uppercase ml-2">Round Trip Included</span>` : '';
+
             distDisplay.innerHTML = `
                 <div class="flex flex-col gap-1.5 py-1">
-                    <div class="text-base text-gray-900"><i class="fa-solid fa-route text-blue-500"></i> Distance: <b>${displayKm} km</b> <span class="mx-2 text-blue-200">|</span> Est. Fare: <b>₹${estFare}</b></div>
+                    <div class="text-base text-gray-900 flex items-center justify-center flex-wrap gap-2">
+                        <span><i class="fa-solid fa-route text-blue-500"></i> Distance: <b>${displayKm} km</b></span>
+                        <span class="text-blue-200 hidden sm:inline">|</span> 
+                        <span>Est. Fare: <b>₹${estFare}</b></span>
+                        ${roundTripBadge}
+                    </div>
                     <div class="text-[10px] text-gray-500 font-medium opacity-90">*Waiting period charges: ₹1 per minute applies separately.</div>
                 </div>`;
             
