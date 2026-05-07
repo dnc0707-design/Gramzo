@@ -2104,13 +2104,17 @@
                 const isOutOfStock = p.inStock === false;
                 
                 const textSizeTitle = currentRestaurantFilter || window.currentUserMainCategory === 'Grocery Shop' ? 'text-xs' : 'text-sm';
-                const textAddress = currentRestaurantFilter || window.currentUserMainCategory === 'Grocery Shop' ? 'hidden sm:block' : 'block';
                 const imgHeight = currentRestaurantFilter || window.currentUserMainCategory === 'Grocery Shop' ? 'h-24' : 'h-32';
                 
-                let addressDisplay = `<div class="mb-2 ${textAddress}">
-                    <p class="text-[10px] font-bold text-gray-800 truncate"><i class="fa-solid fa-store text-red-500 mr-1"></i> ${p.shopName || 'Gramzo Partner'}</p>
-                    ${p.shopAddress ? `<p class="text-[9px] text-gray-500 font-medium mt-0.5 leading-tight truncate"><i class="fa-solid fa-location-dot text-gray-400 mr-1"></i> ${p.shopAddress}</p>` : ''}
-                    ${(p.openTime && p.closeTime) ? `<p class="text-[9px] text-blue-600 font-bold mt-0.5 leading-tight"><i class="fa-regular fa-clock text-blue-500 mr-1"></i> ${window.formatTime12(p.openTime)} - ${window.formatTime12(p.closeTime)}</p>` : ''}
+                // Always show the shop name! Only hide the extra address details on mobile if space is tight.
+                const extraDetailsClass = currentRestaurantFilter || window.currentUserMainCategory === 'Grocery Shop' ? 'hidden sm:block' : 'block';
+                
+                let addressDisplay = `<div class="mb-2">
+                    <p class="text-[10px] font-bold text-gray-800 truncate bg-gray-100 inline-block px-1.5 py-0.5 rounded mb-1"><i class="fa-solid fa-store text-red-500 mr-1"></i> ${p.shopName || 'Gramzo Partner'}</p>
+                    <div class="${extraDetailsClass}">
+                        ${p.shopAddress ? `<p class="text-[9px] text-gray-500 font-medium leading-tight truncate"><i class="fa-solid fa-location-dot text-gray-400 mr-1"></i> ${p.shopAddress}</p>` : ''}
+                        ${(p.openTime && p.closeTime) ? `<p class="text-[9px] text-blue-600 font-bold mt-0.5 leading-tight"><i class="fa-regular fa-clock text-blue-500 mr-1"></i> ${window.formatTime12(p.openTime)} - ${window.formatTime12(p.closeTime)}</p>` : ''}
+                    </div>
                 </div>`;
                 
                 let prepTimeDisplay = p.prepTime ? `<p class="text-[9px] sm:text-[10px] text-orange-600 font-bold mb-2"><i class="fa-regular fa-clock mr-1"></i> Prep: ${p.prepTime} mins</p>` : '';
@@ -2430,8 +2434,11 @@
             list.innerHTML = window.cart.map((i, idx) => `
                 <div class="flex justify-between items-center py-3 border-b border-gray-50 last:border-0 group">
                     <div class="flex items-center gap-3">
-                        <i class="fa-regular fa-square-caret-up text-emerald-500"></i>
-                        <span class="text-sm font-bold text-gray-800">${i.name}</span>
+                        <i class="fa-regular fa-square-caret-up text-emerald-500 mt-0.5 self-start"></i>
+                        <div>
+                            <p class="text-sm font-bold text-gray-800 leading-tight">${i.name}</p>
+                            <p class="text-[9px] font-bold text-gray-500 mt-0.5 uppercase tracking-wider"><i class="fa-solid fa-store text-red-400 mr-1"></i> ${i.shopName || 'Gramzo Partner'}</p>
+                        </div>
                     </div>
                     <div class="flex items-center gap-4">
                         <span class="text-sm font-black text-gray-900">₹${i.price}</span>
