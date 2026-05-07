@@ -14,7 +14,7 @@
     <!-- AGGRESSIVE AUTO CACHE BUSTER SCRIPT -->
     <script>
         (function() {
-            const APP_VERSION = "11.26.0"; // Live Network Sync Update
+            const APP_VERSION = "11.27.0"; // Live Network Sync Update
             
             // 1. Always kill service workers to prevent HTML caching
             if ('serviceWorker' in navigator) {
@@ -3324,11 +3324,15 @@
                 if (['Rider', 'Ride Partner'].includes(currentUser.category)) {
                     if (o.type === 'Ride') {
                         if (o.status === 'Requested') {
-                            actionButtons = `<button type="button" onclick="window.startRide('${o.id}')" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-play mr-1"></i> Start Ride (Enter Amount)</button>`;
+                            actionButtons = `<button type="button" onclick="window.driverReviewRide('${o.id}', ${o.amount})" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-hand-holding-dollar mr-1"></i> Review & Propose Fare</button>`;
+                        } else if (o.status === 'Rider Accepted') {
+                            actionButtons = `<div class="w-full bg-yellow-50 text-yellow-700 py-3 rounded-xl font-bold text-sm text-center border border-yellow-200"><i class="fa-solid fa-clock mr-1"></i> Waiting for Customer to Accept ₹${o.amount}</div>`;
+                        } else if (o.status === 'Confirmed') {
+                            actionButtons = `<button type="button" onclick="window.markRideStarted('${o.id}')" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-play mr-1"></i> Start Ride</button>`;
                         } else if (o.status === 'Started') {
-                            actionButtons = `<button type="button" onclick="window.completeRide('${o.id}')" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-check-double mr-1"></i> Complete Ride & Collect ₹${o.amount}</button>`;
+                            actionButtons = `<button type="button" onclick="window.completeRide('${o.id}')" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-check-double mr-1"></i> End Ride & Collect ₹${o.amount}</button>`;
                         } else if (o.status === 'Completed') {
-                            actionButtons = `<div class="w-full bg-gray-100 text-gray-50 py-3 rounded-xl font-bold text-sm text-center border border-gray-200"><i class="fa-solid fa-check mr-1"></i> Completed (₹${o.amount})</div>`;
+                            actionButtons = `<div class="w-full bg-gray-100 text-gray-500 py-3 rounded-xl font-bold text-sm text-center border border-gray-200"><i class="fa-solid fa-check mr-1"></i> Completed (₹${o.amount})</div>`;
                         }
                     } else {
                         // Food/Grocery Delivery Logic
@@ -3347,7 +3351,6 @@
                         if (!o.riderId) { // Self delivery by Food Owner
                             actionButtons = `<button type="button" onclick="window.markDelivered('${o.id}')" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-check-double mr-1"></i> Mark as Delivered</button>`;
                         } else {
-                            // SHOW RIDER INFO TO THE FOOD PARTNER
                             actionButtons = `
                             <div class="flex gap-2 w-full mt-1">
                                 <div class="flex-1 bg-yellow-50 border border-yellow-200 text-yellow-700 py-2 rounded-xl flex flex-col items-center justify-center">
@@ -3379,7 +3382,6 @@
                                 </div>
                                 <span class="text-xl font-black text-emerald-600">${o.amount ? '₹'+o.amount : '...'}</span>
                             </div>
-                            
                             <div class="relative bg-gray-50 p-3 rounded-xl mb-4 border border-gray-100 mt-2">
                                 <div class="absolute top-4 left-3.5 w-2 h-2 rounded-full bg-emerald-500 z-10"></div>
                                 <div class="absolute top-7 left-4 w-0.5 h-6 bg-gray-300 z-10"></div>
@@ -3639,10 +3641,6 @@
                                     <div class="absolute top-9 left-2.5 w-1.5 h-1.5 rounded-full bg-red-500 z-10"></div>
                                     <p class="text-[10px] font-medium text-gray-700 pl-5 mb-1.5">From: <b>${o.pickup}</b></p>
                                     <p class="text-[10px] font-medium text-gray-700 pl-5">To: <b>${o.address}</b></p>
-                                    <div class="pl-5 flex gap-2 text-[9px] text-gray-500 font-bold border-t border-gray-200 pt-2 mt-2">
-                                        <span><i class="fa-solid fa-route text-gray-400"></i> ${o.distanceStr || 'N/A'}</span>
-                                        <span><i class="fa-regular fa-clock text-gray-400"></i> Wait: ${o.waitingTime || 0}m</span>
-                                    </div>
                                 </div>
                                 ${fareActionHtml}
                             </div>`;
@@ -3664,31 +3662,31 @@
                                     <iframe width="100%" height="100%" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" 
                                         src="https://maps.google.com/maps?q=${encodeURIComponent(o.address)}&t=&z=15&ie=UTF8&iwloc=&output=embed">
                                     </iframe>
-                        const timeStr = window.formatOrderTime(o.time);
-                        let cardStyle = 'border-gray-100', actionButtons = '';
-                        let paymentBadge = o.paymentMode === 'Prepaid' ? `<span class="bg-blue-100 text-blue-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">Prepaid</span>` : `<span class="bg-gray-100 text-gray-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">COD</span>`;
-                        let screenshotHtml = o.paymentMode === 'Prepaid' && o.paymentScreenshot ? `<button type="button" onclick="window.viewImage('${o.paymentScreenshot}')" class="text-[10px] text-blue-600 bg-blue-50 px-2 py-1 rounded font-bold hover:bg-blue-100 transition mt-2 w-full text-left"><i class="fa-solid fa-image"></i> View Payment Screenshot</button>` : '';
-                        
-                        let customerInfo = `<div class="mb-3 bg-gray-50 p-2 rounded-xl border border-gray-100">
-                            <p class="text-xs font-black text-gray-800"><i class="fa-solid fa-user text-gray-400 mr-1"></i> ${o.customer}</p>
-                            <p class="text-xs font-bold text-blue-600 mt-1"><a href="tel:${o.phone}"><i class="fa-solid fa-phone mr-1"></i> ${o.phone}</a></p>
-                        </div>`;
-
-                        if (['Rider', 'Ride Partner'].includes(currentUser.category)) {
-                    if (o.type === 'Ride') {
-                        if (o.status === 'Requested') {
-                            actionButtons = `<button type="button" onclick="window.driverReviewRide('${o.id}', ${o.amount})" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-hand-holding-dollar mr-1"></i> Review & Propose Fare</button>`;
-                        } else if (o.status === 'Rider Accepted') {
-                            actionButtons = `<div class="w-full bg-yellow-50 text-yellow-700 py-3 rounded-xl font-bold text-sm text-center border border-yellow-200"><i class="fa-solid fa-clock mr-1"></i> Waiting for Customer to Accept ₹${o.amount}</div>`;
-                        } else if (o.status === 'Confirmed') {
-                            actionButtons = `<button type="button" onclick="window.markRideStarted('${o.id}')" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-play mr-1"></i> Start Ride</button>`;
-                        } else if (o.status === 'Started') {
-                            actionButtons = `<button type="button" onclick="window.completeRide('${o.id}')" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-check-double mr-1"></i> End Ride & Collect ₹${o.amount}</button>`;
-                        } else if (o.status === 'Completed') {
-                            actionButtons = `<div class="w-full bg-gray-100 text-gray-500 py-3 rounded-xl font-bold text-sm text-center border border-gray-200"><i class="fa-solid fa-check mr-1"></i> Completed (₹${o.amount})</div>`;
+                                    <div class="absolute top-2 left-2 bg-white/90 backdrop-blur px-2 py-1 rounded text-[9px] font-black text-blue-600 shadow-sm animate-pulse">
+                                        <i class="fa-solid fa-satellite-dish mr-1"></i> Live Tracking - Reaching soon
+                                    </div>
+                                </div>
+                            </div>`;
+                        } else if (o.status === 'Rejected' && o.rejectReason) {
+                            trackingHtml = `<p class="text-xs font-bold text-red-500 mt-3 bg-red-50 p-2 rounded-lg border border-red-100"><i class="fa-solid fa-circle-info mr-1"></i> Reason: ${o.rejectReason}</p>`;
                         }
-                    } else {
-                        // Food/Grocery Delivery Logic
+
+                        let ratingHtml = '';
+                        if (o.status === 'Delivered' || o.status === 'Completed') {
+                            if (o.rating) {
+                                ratingHtml = `
+                                    <div class="mt-3 bg-yellow-50 p-3 rounded-xl border border-yellow-100">
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-[10px] font-bold text-yellow-700">Your Rating</span>
+                                            <span class="text-sm font-black text-yellow-500">${o.rating} <i class="fa-solid fa-star"></i></span>
+                                        </div>
+                                        ${o.review ? `<p class="text-xs text-gray-600 mt-1 italic">"${o.review}"</p>` : ''}
+                                    </div>
+                                `;
+                            } else {
+                                ratingHtml = `<button onclick="window.openRatingModal('${o.id}', '${o.restaurantId || o.riderId}')" class="w-full mt-3 bg-yellow-400 text-gray-900 py-3 rounded-xl font-bold text-xs shadow-sm hover:bg-yellow-500 transition-colors"><i class="fa-solid fa-star mr-1"></i> Rate Your Experience</button>`;
+                            }
+                        }
 
                         let resAddressHtml = o.restaurantAddress && o.type !== 'Ride' ? `<p class="text-[9px] text-gray-500 font-medium mb-1"><i class="fa-solid fa-location-dot"></i> ${o.restaurantAddress}</p>` : '';
 
@@ -3763,10 +3761,12 @@
                             return `<div class="flex justify-between items-center bg-white border border-gray-100 p-4 rounded-2xl shadow-sm"><div class="flex-1 mr-4"><p class="font-black text-sm text-gray-900">${p.name}</p><p class="text-[10px] text-gray-500">${p.shopCategory || p.category}</p><p class="text-xs text-gray-700 font-bold mt-1">${variantsDisplay}</p></div><div class="flex items-center gap-2 shrink-0"><button type="button" onclick="window.editPartnerProduct('${p.id}')" class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-colors shrink-0" title="Edit Item"><i class="fa-solid fa-pen text-xs"></i></button><button type="button" onclick="window.togglePartnerStock('${p.id}', ${p.inStock !== false})" class="text-[10px] font-black uppercase tracking-wider ${stockColor} border px-2 py-1 rounded transition whitespace-nowrap">${stockText}</button><button type="button" onclick="window.deletePartnerProduct('${p.id}')" class="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors shrink-0"><i class="fa-solid fa-trash text-xs"></i></button></div></div>`;
                         }).join('');
                     });
-                        let ratingHtml = o.rating ? `<div class="mt-2 text-center text-xs font-bold text-yellow-600 bg-yellow-50 rounded-lg py-1 border border-yellow-100"><i class="fa-solid fa-star"></i> Customer Rated: ${o.rating} Star</div>` : '';
+                    unsubscribeListeners.push(catalogUnsub);
+                }
+            }
+        };
 
-                        if (o.type === 'Ride') {
-                            html += `
+        // Initialize Session Handlers
                                 <div class="bg-white rounded-3xl p-5 shadow-sm border border-blue-100 relative overflow-hidden">
                                     <div class="flex justify-between items-start mb-3">
                                         <div>
