@@ -14,7 +14,7 @@
     <!-- AGGRESSIVE AUTO CACHE BUSTER SCRIPT -->
     <script>
         (function() {
-            const APP_VERSION = "11.26.0"; // Live Network Sync Update
+            const APP_VERSION = "11.26.1"; // Live Network Sync Update
             
             // 1. Always kill service workers to prevent HTML caching
             if ('serviceWorker' in navigator) {
@@ -380,7 +380,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.26.0 - Live Network Sync</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.26.1 - Live Network Sync</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right">
                             <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
@@ -743,7 +743,6 @@
                     <div class="p-4 bg-gray-50 border-b border-gray-100 flex justify-between items-center overflow-x-auto no-scrollbar">
                         <span class="font-bold text-sm shrink-0 mr-4">Directory</span>
                         <div class="flex bg-gray-200 rounded-lg p-1 shrink-0">
-                            <!-- Removed the default active white styling from the 'All' tab -->
                             <button id="tab-user-All" onclick="window.switchUserTab('All')" class="admin-user-tab text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold transition">All</button>
                             <button id="tab-user-User" onclick="window.switchUserTab('User')" class="admin-user-tab text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold transition">Users</button>
                             <button id="tab-user-FoodOwner" onclick="window.switchUserTab('Food Owner')" class="admin-user-tab text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold transition">Shops</button>
@@ -1650,8 +1649,8 @@
                         ${d.currentLocation ? `<p class="text-[10px] font-medium text-gray-500 mt-1 mb-3"><i class="fa-solid fa-location-dot text-red-400"></i> Driver currently at: <b>${d.currentLocation}</b></p>` : '<div class="mb-3"></div>'}
                         
                         <div class="flex gap-2 mt-4 pt-4 border-t border-gray-100">
-                            <a href="tel:${d.phone}" class="flex-1 bg-gray-100 text-gray-800 font-bold py-2.5 rounded-xl text-xs text-center border border-gray-200 hover:bg-gray-200 transition"><i class="fa-solid fa-phone mr-1"></i> Call</a>
-                            <button onclick="window.confirmRide('${d.phone}', '${d.name.replace(/'/g, "\\'")}', this)" class="flex-[2] bg-yellow-400 text-gray-900 font-bold py-2.5 rounded-xl text-xs shadow-sm hover:bg-yellow-500 transition active:scale-95"><i class="fa-solid fa-paper-plane mr-1"></i> Request Ride</button>
+                            <a href="tel:${d.id}" class="flex-1 bg-gray-100 text-gray-800 font-bold py-2.5 rounded-xl text-xs text-center border border-gray-200 hover:bg-gray-200 transition"><i class="fa-solid fa-phone mr-1"></i> Call</a>
+                            <button onclick="window.confirmRide('${d.id}', '${(d.name || '').replace(/'/g, "\\'")}', this)" class="flex-[2] bg-yellow-400 text-gray-900 font-bold py-2.5 rounded-xl text-xs shadow-sm hover:bg-yellow-500 transition active:scale-95"><i class="fa-solid fa-paper-plane mr-1"></i> Request Ride</button>
                         </div>
                     </div>
                 `).join('');
@@ -1677,8 +1676,8 @@
                     type: 'Ride',
                     customer: currentUser.name || 'Unknown', 
                     phone: currentUser.phone || '', 
-                    riderId: driverPhone,
-                    riderName: driverName,
+                    riderId: String(driverPhone),
+                    riderName: driverName || 'Driver',
                     pickup: pickup,
                     address: drop, // Map to address for consistency in history
                     status: 'Requested', 
@@ -3286,7 +3285,6 @@
             adminLog.innerHTML = html;
         };
 
-        // --- PARTNER TABS LOGIC ---
         window.switchPartnerOrderTab = (tab) => {
             window.partnerCurrentOrderTab = tab;
             document.querySelectorAll('.partner-order-tab').forEach(el => {
@@ -3350,7 +3348,7 @@
                         // Food/Grocery Delivery Logic
                         if (o.status === 'Ready' && !o.riderId) {
                             actionButtons = `<button type="button" onclick="window.acceptDelivery('${o.id}')" class="w-full bg-gray-900 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-motorcycle mr-1"></i> Accept Delivery</button>`;
-                        } else if (o.status === 'Out for Delivery' && o.riderId === currentUser.phone) {
+                        } else if (o.status === 'Out for Delivery' && String(o.riderId) === String(currentUser.phone)) {
                             actionButtons = `<div class="flex gap-2"><a href="tel:${o.phone}" class="flex-1 bg-white border border-gray-200 text-gray-700 py-3 rounded-xl font-bold text-sm text-center flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone mr-1"></i> Customer</a><button type="button" onclick="window.markDelivered('${o.id}')" class="flex-1 bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md"><i class="fa-solid fa-check-double mr-1"></i> Done</button></div>`;
                         }
                     }
