@@ -14,7 +14,7 @@
     <!-- AGGRESSIVE AUTO CACHE BUSTER SCRIPT -->
     <script>
         (function() {
-            const APP_VERSION = "11.26.0"; // Live Network Sync Update
+            const APP_VERSION = "11.27.0"; // Live Network Sync Update
             
             // 1. Always kill service workers to prevent HTML caching
             if ('serviceWorker' in navigator) {
@@ -195,6 +195,7 @@
         </div>
     </div>
 
+    <!-- Scrollable Content Starts Here -->
     <div class="pt-[60px]">
         <!-- Full-Width Banner Image -->
         <div class="w-full bg-gray-100">
@@ -377,7 +378,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.26.0 - Live Network Sync</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.27.0 - Live Network Sync</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right">
                             <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
@@ -402,31 +403,26 @@
                     
                     <div class="space-y-5 pt-6 border-t border-gray-100" id="checkout-details-section" style="display:none;">
                         
-                        <!-- VILLAGE SELECTION AREA -->
+                        <!-- NEW GPS AND ADDRESS INPUTS -->
                         <div>
-                            <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2 ml-2">Select Village *</label>
-                            <select id="cart-village" class="input-field !py-3 !rounded-xl mb-3 bg-white" onchange="window.handleVillageChange()">
-                                <option value="" disabled selected>-- Select Village --</option>
-                                <option value="Kotaldi">Kotaldi</option>
-                                <option value="Kinaidi">Kinaidi</option>
-                                <option value="Lalgrah">Lalgrah</option>
-                                <option value="Ramchandrapur">Ramchandrapur</option>
-                                <option value="Krishnapur">Krishnapur</option>
-                                <option value="Muradi">Muradi</option>
-                                <option value="Jashpur">Jashpur</option>
-                                <option value="Gangpur">Gangpur</option>
-                                <option value="Baranti Dam">Baranti Dam</option>
-                                <option value="Sakambari Plant">Sakambari Plant</option>
-                                <option value="Others">Others</option>
-                            </select>
-                            <input type="text" id="cart-other-village" class="input-field !py-3 !rounded-xl mb-3 hidden" placeholder="Type your village name...">
-                            
-                            <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2 ml-2">Detailed Delivery Address</label>
-                            <div class="relative">
-                                <textarea id="cart-address" rows="3" class="input-field !py-3 resize-none !rounded-xl pr-20" placeholder="E.g. House No, Landmark..."></textarea>
+                            <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2 ml-2">Delivery Address (GPS) *</label>
+                            <div class="relative mb-3">
+                                <textarea id="cart-address" onblur="window.updateCartDeliveryFee()" rows="2" class="input-field !py-3 resize-none !rounded-xl pr-20" placeholder="Fetching your GPS location..."></textarea>
                                 <button type="button" onclick="window.getCurrentLocation('cart-address')" class="absolute right-3 top-3 text-red-500 text-xs font-bold bg-red-50 px-2 py-1 rounded border border-red-100 hover:bg-red-100">
                                     <i class="fa-solid fa-location-crosshairs"></i> GPS
                                 </button>
+                            </div>
+                            <div id="delivery-fee-display" class="mb-4 ml-2 text-[10px] font-bold text-blue-600"></div>
+
+                            <div class="flex gap-3 mb-3">
+                                <div class="flex-1">
+                                    <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2 ml-2">Village *</label>
+                                    <input type="text" id="cart-village" class="input-field !py-3 !rounded-xl" placeholder="E.g., Kotaldi">
+                                </div>
+                                <div class="flex-1">
+                                    <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2 ml-2">Landmark</label>
+                                    <input type="text" id="cart-landmark" class="input-field !py-3 !rounded-xl" placeholder="E.g., Near Temple">
+                                </div>
                             </div>
                         </div>
 
@@ -524,7 +520,7 @@
                 <div class="flex justify-between items-center border-b border-gray-200 pb-2">
                     <h3 class="font-black text-xl text-gray-800">Task Management</h3>
                     <div class="flex bg-gray-100 rounded-lg p-1">
-                        <button id="tab-partner-order-Live" onclick="window.switchPartnerOrderTab('Live')" class="partner-order-tab bg-gray-200 text-gray-900 px-3 py-1 rounded-md text-[10px] font-bold transition">Active</button>
+                        <button id="tab-partner-order-Live" onclick="window.switchPartnerOrderTab('Live')" class="partner-order-tab bg-white text-gray-900 shadow-sm px-3 py-1 rounded-md text-[10px] font-bold transition">Active</button>
                         <button id="tab-partner-order-Completed" onclick="window.switchPartnerOrderTab('Completed')" class="partner-order-tab text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold transition">Completed</button>
                         <button id="tab-partner-order-Rejected" onclick="window.switchPartnerOrderTab('Rejected')" class="partner-order-tab text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold transition">Rejected</button>
                     </div>
@@ -740,7 +736,6 @@
                     <div class="p-4 bg-gray-50 border-b border-gray-100 flex justify-between items-center overflow-x-auto no-scrollbar">
                         <span class="font-bold text-sm shrink-0 mr-4">Directory</span>
                         <div class="flex bg-gray-200 rounded-lg p-1 shrink-0">
-                            <!-- Removed the default active white styling from the 'All' tab -->
                             <button id="tab-user-All" onclick="window.switchUserTab('All')" class="admin-user-tab text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold transition">All</button>
                             <button id="tab-user-User" onclick="window.switchUserTab('User')" class="admin-user-tab text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold transition">Users</button>
                             <button id="tab-user-FoodOwner" onclick="window.switchUserTab('Food Owner')" class="admin-user-tab text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold transition">Shops</button>
@@ -993,6 +988,19 @@
         </div>
     </div>
 
+    <!-- Find Riders Modal for Partners -->
+    <div id="find-riders-modal" class="modal-overlay z-[250]">
+        <div class="modal-content !max-w-md">
+            <div class="flex justify-between items-center mb-4 border-b pb-2">
+                <h3 class="font-black text-xl text-gray-900">Available Riders</h3>
+                <button type="button" onclick="document.getElementById('find-riders-modal').classList.remove('active')" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="online-riders-list" class="space-y-3 max-h-[50vh] overflow-y-auto">
+                <div class="text-center py-6 text-gray-400 font-medium text-xs"><i class="fa-solid fa-spinner fa-spin mb-2"></i> Fetching riders...</div>
+            </div>
+        </div>
+    </div>
+
     <div id="toast-msg" class="fixed top-24 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full text-sm font-bold z-[300] shadow-2xl transition-all duration-300 transform -translate-y-10 opacity-0 pointer-events-none flex items-center gap-2">
         <i class="fa-solid fa-circle-info text-emerald-400"></i>
         <span id="toast-text">Message</span>
@@ -1048,12 +1056,17 @@
         // PARTNER TABS STATE
         window.partnerCurrentOrderTab = 'Live';
         window.partnerOrdersData = [];
+        window.currentAssignOrderId = null; // Track order being assigned
 
         window.currentSelectedRideType = null;
         window.currentRideDistanceKm = null;
         window.currentRideFares = { Bike: 0, Toto: 0, Car: 0 };
+        
+        // DISTANCE STATE
+        window.currentDeliveryFee = null;
+        window.currentDeliveryDistance = null;
 
-        // WAKE LOCK STATE (Prevents app from sleeping to ensure notifications)
+        // WAKE LOCK STATE
         window.wakeLockRef = null;
         window.requestWakeLock = async () => {
             if ('wakeLock' in navigator) {
@@ -1071,14 +1084,12 @@
                 if (currentUser && ['Partner', 'Admin'].includes(currentUser.role)) {
                     window.requestWakeLock();
                 }
-                // Force an audio check if there are active unacknowledged popups missed while minimized
                 if (document.getElementById('status-popup-modal').classList.contains('active')) {
                     window.speakAlert(document.getElementById('status-popup-desc').innerText);
                 }
             }
         });
 
-        // CUSTOM PROMPT/CONFIRM STATE
         let customPromptResolve = null;
         let customConfirmResolve = null;
 
@@ -1128,17 +1139,6 @@
             if (customConfirmResolve) customConfirmResolve(false);
             document.getElementById('custom-confirm-modal').classList.remove('active');
             customConfirmResolve = null;
-        };
-
-        window.handleVillageChange = () => {
-            const village = document.getElementById('cart-village').value;
-            const otherInput = document.getElementById('cart-other-village');
-            if (village === 'Others') {
-                otherInput.classList.remove('hidden');
-            } else {
-                otherInput.classList.add('hidden');
-            }
-            window.renderCartUI(); 
         };
 
         window.switchMainCategory = (cat) => {
@@ -1198,20 +1198,18 @@
 
         // --- Notification & Voice Alert Logic ---
         window.alertAudio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-        window.alertAudio.loop = true; // loop until acknowledged
+        window.alertAudio.loop = true; 
 
         window.speakAlert = (text) => {
             try {
                 if ('speechSynthesis' in window) {
-                    window.speechSynthesis.cancel(); // Stop any ongoing speech
+                    window.speechSynthesis.cancel();
                     const msg = new SpeechSynthesisUtterance(text);
                     msg.rate = 1.0; 
                     window.speechSynthesis.speak(msg);
                 }
                 window.alertAudio.play().catch(e => console.log("Audio blocked until user clicks on screen."));
-            } catch(e) {
-                console.error("Speech Synthesis Error:", e);
-            }
+            } catch(e) { console.error("Speech Synthesis Error:", e); }
         };
 
         window.stopAlertSound = () => {
@@ -1226,7 +1224,6 @@
             window.speakAlert(desc); 
         };
 
-        // NEW LOGO FOR PUSH NOTIFICATION
         window.sendAlert = (title, body) => {
             if ("Notification" in window && Notification.permission === "granted") {
                 new Notification(title, { 
@@ -1327,146 +1324,6 @@
             }, 3000);
         };
 
-        window.openStaticPage = (page) => {
-            const titleEl = document.getElementById('info-modal-title');
-            const bodyEl = document.getElementById('info-modal-body');
-            
-            if (page === 'about') {
-                titleEl.innerText = "About Gramzo";
-                bodyEl.innerHTML = `
-                    <div class="text-center mb-6">
-                        <img src="https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/New%20logo%20-Gramzo%20-%206%20may.png" alt="Gramzo Logo" class="h-16 object-contain mx-auto mb-4 rounded-2xl shadow-sm">
-                        <p class="font-bold text-lg text-gray-800">Welcome to Gramzo.in!</p>
-                        <p class="mt-2 leading-relaxed">We are India's emerging instant delivery super app, specially tailored for rural and semi-urban communities.</p>
-                    </div>
-                    
-                    <div class="bg-red-50 p-4 rounded-xl border border-red-100 mb-4">
-                        <h4 class="font-black text-red-600 mb-1"><i class="fa-solid fa-bullseye mr-1"></i> Our Mission</h4>
-                        <p class="text-gray-700">To deliver convenience and joy to every doorstep in rural India by seamlessly connecting local communities with local businesses, ensuring no village is left behind.</p>
-                    </div>
-                    
-                    <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 mb-4">
-                        <h4 class="font-black text-blue-600 mb-1"><i class="fa-solid fa-eye mr-1"></i> Our Vision</h4>
-                        <p class="text-gray-700">To be the most trusted and accessible super app for daily needs in every village, bridging the gap between urban amenities and rural accessibility.</p>
-                    </div>
-                    
-                    <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100">
-                        <h4 class="font-black text-emerald-600 mb-2"><i class="fa-solid fa-gem mr-1"></i> Our Core Values</h4>
-                        <ul class="list-none space-y-2 text-gray-700">
-                            <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i><strong>Community First:</strong> We prioritize the needs of our local communities.</li>
-                            <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i><strong>Empowering Locals:</strong> We help local businesses grow and reach more customers.</li>
-                            <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i><strong>Reliability & Trust:</strong> We deliver on our promises, every single time.</li>
-                        </ul>
-                    </div>
-                `;
-            } else if (page === 'contact') {
-                titleEl.innerText = "Contact Us";
-                bodyEl.innerHTML = `
-                    <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100 text-center">
-                        <i class="fa-solid fa-headset text-4xl text-red-500 mb-4"></i>
-                        <h4 class="font-black text-xl text-gray-900 mb-2">We'd love to hear from you!</h4>
-                        <p class="text-gray-600 mb-6">Have any questions, suggestions, or need help with your order? Our support team is always ready.</p>
-                        
-                        <a href="tel:7980230656" class="inline-block bg-red-600 text-white font-black px-6 py-3 rounded-xl shadow-md hover:bg-red-700 transition active:scale-95 mb-6 text-lg">
-                            <i class="fa-solid fa-phone mr-2"></i> +91 7980230656
-                        </a>
-                        
-                        <div class="text-left bg-white p-5 rounded-xl border border-gray-200 shadow-sm w-full">
-                            <p class="font-black text-gray-900 border-b border-gray-100 pb-2 mb-3"><i class="fa-solid fa-building text-red-500 mr-2"></i> Registered Office Address</p>
-                            <p class="font-bold text-gray-800">Gramzo.in</p>
-                            <p class="text-gray-600 mt-1">Kotaldi, Near Oriya baba Ashram</p>
-                            <p class="text-gray-600">Pin no - 723156</p>
-                            <p class="text-gray-600">Purulia, West Bengal</p>
-                        </div>
-                    </div>
-                `;
-            } else if (page === 'terms') {
-                titleEl.innerText = "Terms & Conditions";
-                bodyEl.innerHTML = `
-                    <p class="text-xs text-gray-400 mb-4 italic">Last Updated: May 2026</p>
-                    
-                    <h4 class="font-black text-gray-800 text-base mb-1">1. Acceptance of Terms</h4>
-                    <p class="text-gray-600 mb-4 leading-relaxed">By accessing and using the Gramzo app and website, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.</p>
-                    
-                    <h4 class="font-black text-gray-800 text-base mb-1">2. Platform as a Facilitator</h4>
-                    <p class="text-gray-600 mb-4 leading-relaxed">Gramzo acts as a technology platform connecting independent local restaurants, delivery partners, and consumers. Gramzo is not a restaurant or food preparation entity. The respective partner restaurants are solely responsible for the quality, safety, and preparation of the food.</p>
-                    
-                    <h4 class="font-black text-gray-800 text-base mb-1">3. User Accounts & Responsibilities</h4>
-                    <p class="text-gray-600 mb-4 leading-relaxed">You are responsible for maintaining the confidentiality of your account credentials (phone number and PIN). You agree to accept responsibility for all activities that occur under your account. Gramzo reserves the right to suspend or terminate accounts that violate our policies or exhibit fraudulent behavior.</p>
-                    
-                    <h4 class="font-black text-gray-800 text-base mb-1">4. Orders, Cancellations & Pricing</h4>
-                    <p class="text-gray-600 mb-4 leading-relaxed">All prices listed on the platform are determined by the restaurant partners. Gramzo applies a standard platform/handling fee for service maintenance. Once an order is placed and accepted by the restaurant, it cannot be canceled by the user. Refunds are subject to the restaurant's policies and Gramzo's sole discretion in cases of missing items or defective delivery.</p>
-                    
-                    <h4 class="font-black text-gray-800 text-base mb-1">5. Delivery</h4>
-                    <p class="text-gray-600 mb-4 leading-relaxed">Delivery times shown are estimates and may vary based on weather, traffic, and restaurant preparation times. Gramzo strives to provide the fastest delivery possible through our rider network but does not guarantee exact timeframes.</p>
-                    
-                    <h4 class="font-black text-gray-800 text-base mb-1">6. Limitation of Liability</h4>
-                    <p class="text-gray-600 mb-4 leading-relaxed">In no event shall Gramzo be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of or inability to use the service, including but not limited to food quality issues, delivery delays, or allergic reactions.</p>
-                    
-                    <h4 class="font-black text-gray-800 text-base mb-1">7. Modifications</h4>
-                    <p class="text-gray-600 mb-4 leading-relaxed">Gramzo reserves the right to modify these terms at any time. Continued use of the platform after changes constitutes acceptance of the new terms.</p>
-                `;
-            }
-            
-            document.getElementById('info-modal').classList.add('active');
-        };
-
-        window.handleSearchInput = () => {
-            window.currentSearchQuery = document.getElementById('global-search').value.toLowerCase();
-            window.loadMarketplaceData();
-        };
-
-        window.startApp = async () => {
-            if (!auth.currentUser) {
-                try { await window.dbCall(signInAnonymously(auth), 10000); } 
-                catch (e) { console.error(e); }
-            }
-        };
-
-        window.setupMapsFeatures = () => {
-            if(typeof google === 'undefined') return;
-            const initInput = (id) => {
-                const input = document.getElementById(id);
-                if (input && input.tagName === 'INPUT' && !input.dataset.mapsInit) {
-                    const autocomplete = new google.maps.places.Autocomplete(input, { componentRestrictions: { country: "in" } });
-                    autocomplete.addListener('place_changed', () => {
-                        const place = autocomplete.getPlace();
-                        if(place && place.formatted_address) input.value = place.formatted_address;
-                    });
-                    input.dataset.mapsInit = 'true';
-                }
-            };
-            initInput('user-location-input');
-            initInput('ride-pickup');
-            initInput('ride-drop');
-            initInput('partner-ride-location');
-        };
-
-        if (window.isGoogleMapsLoaded) window.setupMapsFeatures();
-
-        window.handleRideTypeChange = () => {
-            const searchType = document.getElementById('ride-search-type').value;
-            const roundTripContainer = document.getElementById('round-trip-container');
-            const roundTripCheckbox = document.getElementById('ride-round-trip');
-            const roundTripLabelText = document.getElementById('round-trip-label-text');
-
-            if (searchType === 'Car') {
-                roundTripContainer.style.display = 'flex';
-                roundTripCheckbox.checked = true;
-                roundTripCheckbox.disabled = true; // Force checked
-                roundTripLabelText.innerText = "Round Trip (Mandatory for Car)";
-                roundTripLabelText.classList.add('text-red-600');
-            } else if (searchType === 'Toto') {
-                roundTripContainer.style.display = 'flex';
-                roundTripCheckbox.disabled = false; // Optional
-                roundTripLabelText.innerText = "Round Trip (Optional)";
-                roundTripLabelText.classList.remove('text-red-600');
-            } else {
-                roundTripContainer.style.display = 'none';
-                roundTripCheckbox.checked = false;
-            }
-        };
-
         window.calculateDistance = (origin, dest) => {
             return new Promise((resolve) => {
                 if(!window.google || !window.google.maps) resolve(null);
@@ -1485,288 +1342,6 @@
                     } else resolve(null);
                 });
             });
-        };
-
-        window.resetRideCalc = () => {
-            document.getElementById('btn-calc-fare').classList.remove('hidden');
-            document.getElementById('btn-find-rides').classList.add('hidden');
-            document.getElementById('ride-distance-display').classList.add('hidden');
-            document.getElementById('ride-results-list').innerHTML = '';
-        };
-
-        window.calculateRideFares = async () => {
-            const pickup = document.getElementById('ride-pickup').value.trim();
-            const drop = document.getElementById('ride-drop').value.trim();
-            const searchType = document.getElementById('ride-search-type').value;
-            const isRoundTrip = document.getElementById('ride-round-trip').checked;
-            const tncChecked = document.getElementById('ride-tnc').checked;
-            const waitTime = parseInt(document.getElementById('ride-wait-time').value) || 0;
-
-            if(!pickup || !drop) return window.showToast("Please enter Pickup and Drop locations.", "error");
-            if(!tncChecked) return window.showToast("Please accept the Terms & Conditions.", "error");
-
-            const btnCalc = document.getElementById('btn-calc-fare');
-            const origText = btnCalc.innerText;
-            btnCalc.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Calculating...';
-            btnCalc.disabled = true;
-
-            let distanceData = await window.calculateDistance(pickup, drop);
-            
-            // Custom Prompt Fallback if Maps API fails to calculate distance
-            if (!distanceData) {
-                btnCalc.innerText = origText;
-                btnCalc.disabled = false;
-                
-                const manualDistStr = await window.customPrompt(
-                    "Distance Calculation Failed",
-                    "We couldn't automatically calculate the distance. Please enter the estimated distance in Kilometers:",
-                    "e.g., 5.5",
-                    "number"
-                );
-                
-                if (!manualDistStr) return; // User cancelled
-                const manualDist = parseFloat(manualDistStr);
-                if (isNaN(manualDist) || manualDist <= 0) return window.showToast("Please enter a valid distance.", "error");
-                
-                distanceData = { value: manualDist * 1000, text: `${manualDist} km` };
-            }
-
-            btnCalc.innerText = origText;
-            btnCalc.disabled = false;
-            
-            const distDisplay = document.getElementById('ride-distance-display');
-            distDisplay.classList.remove('hidden');
-
-            let baseKm = (distanceData.value / 1000);
-            let distKm = baseKm;
-            let isDouble = searchType === 'Car' || isRoundTrip;
-            
-            if (isDouble) distKm = baseKm * 2;
-            window.currentRideDistanceKm = distKm;
-
-            let estFare = 0;
-            // Fare Logic Update
-            if (searchType === 'Car') {
-                estFare = 20 + (distKm * 15);
-            } else if (searchType === 'Bike') {
-                estFare = distKm <= 5 ? 20 : 20 + ((distKm - 5) * 5);
-            } else if (searchType === 'Toto') {
-                estFare = distKm <= 5 ? 100 : 100 + ((distKm - 5) * 10);
-            }
-            
-            estFare += (waitTime * 1); // 1 Rs per min wait time
-            estFare = Math.max(20, Math.round(estFare));
-
-            let displayKm = distKm.toFixed(1);
-            let distanceStrForDb = `${displayKm} km`;
-            let distanceHtml = `Distance: <b>${displayKm} km</b>`;
-            
-            if (isDouble) {
-                distanceHtml = `Dist: <b>${baseKm.toFixed(1)}km × 2 = ${displayKm}km</b> (Round Trip)`;
-                distanceStrForDb = `${baseKm.toFixed(1)}km × 2 = ${displayKm}km`;
-            }
-
-            let fareBreakdownStr = "";
-            if (searchType === 'Car') {
-                fareBreakdownStr = `Base Fare: ₹20 + ₹15/km`;
-            } else if (searchType === 'Bike') {
-                fareBreakdownStr = `Base: ₹20 (upto 5km) + ₹5/km`;
-            } else if (searchType === 'Toto') {
-                fareBreakdownStr = `Base: ₹100 (upto 5km) + ₹10/km`;
-            }
-
-            distDisplay.innerHTML = `
-                <div class="flex flex-col gap-2 py-1">
-                    <div class="text-[11px] text-blue-700 font-bold bg-blue-100/50 py-1.5 rounded-lg">
-                        <i class="fa-solid fa-route mr-1"></i> ${distanceHtml}
-                    </div>
-                    <div class="text-lg text-gray-900 font-black">
-                        Est. Fare: <span class="text-emerald-600">₹${estFare}</span>
-                    </div>
-                    <div class="text-[10px] text-gray-700 font-bold bg-gray-100/80 border border-gray-200 py-1.5 rounded-lg">
-                        <i class="fa-solid fa-calculator text-gray-500 mr-1"></i> Breakdown: ${fareBreakdownStr}
-                    </div>
-                    <div class="text-[9px] text-gray-500 font-bold tracking-wide uppercase">
-                        Includes ₹${waitTime} wait charge &nbsp;|&nbsp; Additional Wait: ₹1/min
-                    </div>
-                </div>`;
-            
-            window.currentRideFares = { [searchType]: estFare };
-            window.currentSelectedRideType = searchType; 
-            window.currentRideWaitTime = waitTime;
-            window.currentRideDistStr = distanceStrForDb;
-
-            // Hide calc button, show search button
-            document.getElementById('btn-calc-fare').classList.add('hidden');
-            document.getElementById('btn-find-rides').classList.remove('hidden');
-        };
-
-        window.searchRides = async () => {
-            if(!currentUser) { window.openAuthModal('User'); return; }
-            if(currentUser.role !== 'User') return window.showToast("Log in as User to book rides.", "error");
-
-            const pickup = document.getElementById('ride-pickup').value.trim();
-            const drop = document.getElementById('ride-drop').value.trim();
-            const searchType = window.currentSelectedRideType || document.getElementById('ride-search-type').value;
-
-            if(!pickup || !drop) return window.showToast("Please calculate fares first.", "error");
-
-            const listEl = document.getElementById('ride-results-list');
-            listEl.innerHTML = `<div class="text-center py-6"><i class="fa-solid fa-spinner fa-spin text-yellow-500 text-2xl mb-2"></i><p class="text-xs font-bold text-gray-600">Finding nearby ${searchType}s...</p></div>`;
-
-            try {
-                const snap = await window.dbCall(getDocs(getCol('users')), 8000);
-                const availableDrivers = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(u => 
-                    ['Rider', 'Ride Partner'].includes(u.category) && 
-                    u.shopStatus === 'Online' && 
-                    u.approvalStatus === 'Approved' && 
-                    (u.vehicleType === searchType || (!u.vehicleType && searchType === 'Car'))
-                );
-
-                if(availableDrivers.length === 0) {
-                    listEl.innerHTML = `<div class="bg-red-50 p-4 rounded-xl border border-red-100 text-center"><i class="fa-solid fa-car-side text-red-400 text-2xl mb-2"></i><p class="text-sm font-bold text-red-600">No ${searchType}s Available Right Now</p><p class="text-xs text-red-500 mt-1">Please try again after some time.</p></div>`;
-                    return;
-                }
-
-                listEl.innerHTML = availableDrivers.map(d => `
-                    <div class="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm relative overflow-hidden group hover:border-yellow-400 transition-colors">
-                        <div class="flex justify-between items-start mb-2">
-                            <div>
-                                <h4 class="font-black text-gray-900 text-lg">${d.shopName || 'Cab'} <span class="text-xs font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded">${d.vehicleType === 'Bike' ? '1 Person Max' : (d.seater || 4) + ' Seater'}</span></h4>
-                                <p class="text-[10px] font-bold text-gray-500 tracking-wider uppercase mt-1"><i class="fa-solid fa-id-card text-gray-400"></i> ${d.carNum || 'N/A'}</p>
-                                <p class="text-xs font-bold text-gray-700 mt-2"><i class="fa-solid fa-user-tie text-yellow-500 w-4"></i> ${d.name}</p>
-                            </div>
-                            <div class="w-12 h-12 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center text-xl shrink-0">
-                                <i class="fa-solid fa-${d.vehicleType === 'Bike' ? 'motorcycle' : 'taxi'}"></i>
-                            </div>
-                        </div>
-                        
-                        ${d.currentLocation ? `<p class="text-[10px] font-medium text-gray-500 mt-1 mb-3"><i class="fa-solid fa-location-dot text-red-400"></i> Driver currently at: <b>${d.currentLocation}</b></p>` : '<div class="mb-3"></div>'}
-                        
-                        <div class="flex gap-2 mt-4 pt-4 border-t border-gray-100">
-                            <a href="tel:${d.phone}" class="flex-1 bg-gray-100 text-gray-800 font-bold py-2.5 rounded-xl text-xs text-center border border-gray-200 hover:bg-gray-200 transition"><i class="fa-solid fa-phone mr-1"></i> Call</a>
-                            <button onclick="window.confirmRide('${d.phone}', '${d.name.replace(/'/g, "\\'")}', this)" class="flex-[2] bg-yellow-400 text-gray-900 font-bold py-2.5 rounded-xl text-xs shadow-sm hover:bg-yellow-500 transition active:scale-95"><i class="fa-solid fa-paper-plane mr-1"></i> Request Ride</button>
-                        </div>
-                    </div>
-                `).join('');
-
-            } catch(e) {
-                listEl.innerHTML = `<span class="text-red-600"><i class="fa-solid fa-triangle-exclamation"></i> Error finding rides. Try again.</span>`;
-            }
-        };
-
-        window.confirmRide = async (driverPhone, driverName, btn) => {
-            const confirmed = await window.customConfirm("Confirm Booking", `Have you confirmed the ride details over the phone with ${driverName}?`, "Confirm Booking");
-            if (!confirmed) return;
-
-            const pickup = document.getElementById('ride-pickup').value.trim();
-            const drop = document.getElementById('ride-drop').value.trim();
-            const fare = window.currentRideFares[window.currentSelectedRideType];
-
-            const origTxt = btn.innerHTML;
-            btn.innerHTML = "Booking..."; btn.disabled = true;
-
-            try {
-                await window.dbCall(addDoc(getCol('orders'), { 
-                    type: 'Ride',
-                    customer: currentUser.name || 'Unknown', 
-                    phone: currentUser.phone || '', 
-                    riderId: driverPhone,
-                    riderName: driverName,
-                    pickup: pickup,
-                    address: drop, 
-                    status: 'Requested', 
-                    amount: fare,
-                    total: fare,
-                    waitingTime: window.currentRideWaitTime || 0,
-                    distanceStr: window.currentRideDistStr || '',
-                    time: serverTimestamp() 
-                }), 15000);
-
-                window.showToast("Ride Requested Successfully!", "success");
-                window.switchMainView('Orders'); 
-            } catch(e) {
-                window.showToast("Failed to book ride.", "error");
-                btn.innerHTML = origTxt; btn.disabled = false;
-            }
-        };
-
-        window.driverReviewRide = async (orderId, calcFare) => {
-            const newFareStr = await window.customPrompt(
-                "Propose Fare", 
-                `System calculated fare is ₹${calcFare}.\nEnter your final offer for the customer (₹):`, 
-                calcFare, 
-                "number"
-            );
-            if(!newFareStr) return;
-            const newFare = parseInt(newFareStr);
-            if(isNaN(newFare) || newFare < 10) return window.showToast("Please enter a valid fare amount.", "error");
-
-            try {
-                await window.dbCall(updateDoc(getDocRef('orders', orderId), { 
-                    status: 'Rider Accepted', 
-                    amount: newFare, 
-                    total: newFare 
-                }), 10000);
-                window.showToast("Fare offer sent to customer!", "success");
-            } catch(e) { window.showToast("Failed to send offer.", "error"); }
-        };
-
-        window.userAcceptRideFare = async (orderId) => {
-            try {
-                await window.dbCall(updateDoc(getDocRef('orders', orderId), { status: 'Confirmed' }), 10000);
-                window.showToast("Ride Confirmed! Driver is on the way.", "success");
-            } catch(e) { window.showToast("Failed to confirm.", "error"); }
-        };
-
-        window.userRejectRideFare = async (orderId, inputId) => {
-            const comment = document.getElementById(inputId).value.trim() || 'No reason provided';
-            try {
-                await window.dbCall(updateDoc(getDocRef('orders', orderId), { status: 'Rejected', rejectReason: comment }), 10000);
-                window.showToast("Ride Rejected.", "success");
-            } catch(e) { window.showToast("Failed to reject.", "error"); }
-        };
-
-        window.markRideStarted = async (orderId) => {
-            try {
-                await window.dbCall(updateDoc(getDocRef('orders', orderId), { status: 'Started' }), 10000);
-                window.showToast("Ride Started!", "success");
-            } catch(e) { window.showToast("Failed to start ride.", "error"); }
-        };
-
-        window.completeRide = async (orderId) => {
-            const confirmed = await window.customConfirm("Complete Ride", "Are you sure you have completed the ride and collected payment? 20 Gramzo Points will be deducted.", "Complete Ride");
-            if (!confirmed) return;
-
-            if((currentUser.walletPoints || 0) < 20) {
-                return window.showToast("Insufficient Gramzo Points to complete this ride. Contact Admin.", "error");
-            }
-
-            try {
-                const newPoints = (currentUser.walletPoints || 0) - 20;
-                await window.dbCall(updateDoc(getDocRef('orders', orderId), { status: 'Completed' }), 10000);
-                await window.dbCall(updateDoc(getDocRef('users', currentUser.phone), { walletPoints: newPoints }), 10000);
-                
-                currentUser.walletPoints = newPoints;
-                const pointDisplay = document.getElementById('wallet-points-display');
-                if(pointDisplay) pointDisplay.innerText = newPoints;
-
-                window.showToast("Ride Completed successfully!", "success");
-            } catch(e) { window.showToast("Failed to end ride.", "error"); }
-        };
-
-        window.adminAddPoints = async (userId, currentPoints) => {
-            const amountStr = await window.customPrompt("Add Points", `Current Points: ${currentPoints}\nEnter amount of points to add:`, "amount", "number");
-            if(!amountStr) return;
-            const pointsToAdd = parseInt(amountStr);
-            if(isNaN(pointsToAdd) || pointsToAdd <= 0) return window.showToast("Invalid points amount.", "error");
-
-            try {
-                await window.dbCall(updateDoc(getDocRef('users', userId), {
-                    walletPoints: (currentPoints || 0) + pointsToAdd
-                }), 10000);
-                window.showToast("Points added successfully!", "success");
-            } catch(e) { window.showToast("Failed to add points.", "error"); }
         };
 
         window.getCurrentLocation = (inputId) => {
@@ -1789,6 +1364,7 @@
                             if (status === "OK" && results[0]) {
                                 inputEl.value = results[0].formatted_address;
                                 window.showToast("Location detected successfully!", "success");
+                                if(inputId === 'cart-address') window.updateCartDeliveryFee();
                             } else {
                                 inputEl.value = "";
                                 window.showToast("Location text unreadable. Please type it.", "error");
@@ -1812,6 +1388,31 @@
                 window.showToast("Geolocation not supported by browser.", "error");
             }
         };
+
+        window.setupMapsFeatures = () => {
+            if(typeof google === 'undefined') return;
+            const initInput = (id) => {
+                const input = document.getElementById(id);
+                if (input && (input.tagName === 'INPUT' || input.tagName === 'TEXTAREA') && !input.dataset.mapsInit) {
+                    const autocomplete = new google.maps.places.Autocomplete(input, { componentRestrictions: { country: "in" } });
+                    autocomplete.addListener('place_changed', () => {
+                        const place = autocomplete.getPlace();
+                        if(place && place.formatted_address) {
+                            input.value = place.formatted_address;
+                            if(id === 'cart-address') window.updateCartDeliveryFee();
+                        }
+                    });
+                    input.dataset.mapsInit = 'true';
+                }
+            };
+            initInput('user-location-input');
+            initInput('ride-pickup');
+            initInput('ride-drop');
+            initInput('partner-ride-location');
+            initInput('cart-address');
+            initInput('partner-shop-address');
+        };
+        if (window.isGoogleMapsLoaded) window.setupMapsFeatures();
 
         // --- AUTH UI ---
         window.openAuthModal = (role = 'User') => {
@@ -1873,7 +1474,15 @@
                 activeNav.classList.add('text-red-600', 'font-black');
             }
 
-            if (viewName === 'Cart') window.renderCartUI();
+            if (viewName === 'Cart') {
+                const cartAddr = document.getElementById('cart-address');
+                const userLoc = document.getElementById('user-location-input');
+                if (cartAddr && !cartAddr.value.trim() && userLoc && userLoc.value.trim()) {
+                    cartAddr.value = userLoc.value;
+                    setTimeout(() => window.updateCartDeliveryFee(), 500);
+                }
+                window.renderCartUI();
+            }
         };
         
         window.logout = async () => {
@@ -1965,7 +1574,7 @@
 
                     const userData = { 
                         name, phone, pin: pass, role: currentAuthRole, shopStatus: ['Rider', 'Ride Partner'].includes(partnerCategory) ? 'Offline' : 'Open',
-                        approvalStatus: currentAuthRole === 'Partner' ? 'Pending' : 'Approved',
+                        approvalStatus: currentAuthRole === 'Partner' ? 'Pending' : 'Approved', 
                         uid: auth?.currentUser?.uid || 'unknown',
                         created: new Date().toISOString(),
                         ...(currentAuthRole === 'Partner' && { 
@@ -1979,7 +1588,7 @@
                                 carNum: carNum,
                                 carModel: carModel,
                                 seater: seater,
-                                walletPoints: 20,
+                                walletPoints: 20, 
                                 currentLocation: ''
                             })
                         })
@@ -2004,11 +1613,6 @@
                     const data = snap.data();
                     if (data.pin !== pass) throw new Error("Incorrect password.");
 
-                    // Force Fallback for improperly structured Rider accounts
-                    if (data.role === 'Partner' && data.carNum && !['Rider', 'Ride Partner'].includes(data.category)) {
-                        data.category = 'Rider'; // Force into rider category if they have a car number
-                    }
-
                     currentUser = { ...data, docId: phone };
                     if(auth.currentUser) window.dbCall(setDoc(getDocRef('sessions', auth.currentUser.uid), { phone }, { merge: true }), 3000).catch(e=>{});
                     window.finalizeLoginSequence();
@@ -2022,7 +1626,6 @@
         window.finalizeLoginSequence = () => {
             window.closeAuthModal();
             
-            // Request Notification Permission on Login
             if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
                 Notification.requestPermission();
             }
@@ -2075,7 +1678,7 @@
 
             if (currentUser.role === 'Partner') {
                 const isShop = ['Food Owner', 'Grocery Shop'].includes(currentUser.category);
-                const isRide = ['Rider', 'Ride Partner'].includes(currentUser.category);
+                const isRide = ['Rider', 'Ride Partner'].includes(currentUser.category) || currentUser.vehicleType || currentUser.carNum;
                 const isApproved = currentUser.approvalStatus === 'Approved';
 
                 document.getElementById('partner-food-settings').classList.add('hidden');
@@ -2093,7 +1696,7 @@
                     warningBanner.classList.add('hidden');
                 }
 
-                if(isShop) {
+                if(isShop && !isRide) {
                     document.getElementById('shop-top-dashboard').classList.remove('hidden');
                     document.getElementById('partner-welcome').innerText = `Welcome, ${currentUser.name.split(' ')[0]}!`;
                     
@@ -2177,6 +1780,7 @@
             
             if (!listEl) return;
             
+            // Generate Sub-Category Filter Chips if we are inside a specific restaurant
             if (currentRestaurantFilter && window.currentUserMainCategory === 'Food Owner' && chipsEl) {
                 const restaurantItems = items.filter(i => i.partnerId === currentRestaurantFilter);
                 const uniqueCategories = [...new Set(restaurantItems.map(i => i.category || 'Others'))];
@@ -2197,14 +1801,15 @@
             }
             
             const filtered = items.filter(i => {
-                const pShopCat = i.shopCategory || 'Food Owner'; 
+                const pShopCat = i.shopCategory || 'Food Owner'; // default for older data
                 if (pShopCat !== window.currentUserMainCategory) return false;
                 if (currentRestaurantFilter && i.partnerId !== currentRestaurantFilter) return false;
                 if (currentFoodCategoryFilter && i.category !== currentFoodCategoryFilter) return false;
                 
                 if (window.currentSearchQuery) {
                     const q = window.currentSearchQuery.toLowerCase();
-                    return i.name.toLowerCase().includes(q) || (i.shopName && i.shopName.toLowerCase().includes(q));
+                    /* STRING SAFETY: Prevent crash if name or shopName is undefined in DB */
+                    return (i.name || '').toLowerCase().includes(q) || ((i.shopName || '').toLowerCase().includes(q));
                 }
                 return true;
             });
@@ -2262,9 +1867,10 @@
                 } else if (isOutOfStock) {
                     actionHtml = `<span class="text-[9px] font-black text-orange-500 uppercase tracking-widest bg-orange-50 px-1.5 py-1 rounded">No Stock</span>`;
                 } else {
+                    /* STRING SAFETY: Prevent crash during replace if name or shopName is missing */
                     actionHtml = `
                         <span id="price-${p.id}" class="text-sm sm:text-lg font-black text-red-600 tracking-tight">₹${displayPrice}</span>
-                        <button type="button" onclick="${hasVariants ? `window.addToCartVariant('${p.id}', '${p.name.replace(/'/g, "\\'")}', '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')` : `window.addToCartStandard('${p.id}', '${p.name.replace(/'/g, "\\'")}', ${p.price}, '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')`}" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition-colors active:scale-90 shrink-0 border border-red-100">
+                        <button type="button" onclick="${hasVariants ? `window.addToCartVariant('${p.id}', '${(p.name||'').replace(/'/g, "\\'")}', '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')` : `window.addToCartStandard('${p.id}', '${(p.name||'').replace(/'/g, "\\'")}', ${p.price}, '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')`}" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition-colors active:scale-90 shrink-0 border border-red-100">
                             <i class="fa-solid fa-plus text-[10px] sm:text-xs"></i>
                         </button>
                     `;
@@ -2281,7 +1887,7 @@
                         </div>
                         <div class="p-2.5 sm:p-3 flex-1 flex flex-col justify-between">
                             <div>
-                                <h4 class="font-bold text-gray-900 ${textSizeTitle} leading-tight mb-1 truncate">${p.name}</h4>
+                                <h4 class="font-bold text-gray-900 ${textSizeTitle} leading-tight mb-1 truncate">${p.name || 'Item'}</h4>
                                 ${addressDisplay}
                                 ${prepTimeDisplay}
                                 ${qtyDisplay}
@@ -2307,38 +1913,62 @@
                 const isActive = currentRestaurantFilter === r.partnerId;
                 const isOffline = r.shopStatus === 'Closed' || r.shopStatus === 'Offline';
                 return `
-                <div class="cursor-pointer group shrink-0 flex flex-col items-center w-20 relative" onclick="window.filterRestaurant('${r.partnerId}', '${r.shopName.replace(/'/g, "\\'")}')">
+                <div class="cursor-pointer group shrink-0 flex flex-col items-center w-20 relative" onclick="window.filterRestaurant('${r.partnerId}', '${(r.shopName || '').replace(/'/g, "\\'")}')">
                     <div class="w-16 h-16 rounded-full flex items-center justify-center overflow-hidden mb-2 shadow-sm border-2 transition-all ${isActive ? 'border-red-500 scale-105' : 'border-gray-100 bg-gray-50 group-hover:border-red-300'} ${isOffline ? 'grayscale opacity-60' : ''}">
-                        <img src="${r.image}" class="w-full h-full object-cover" alt="${r.shopName}">
+                        <img src="${r.image}" class="w-full h-full object-cover" alt="${r.shopName || 'Shop'}" onerror="this.src='https://placehold.co/100x100/f3f4f6/a1a1aa?text=Shop'">
                     </div>
                     ${isOffline ? `<span class="absolute top-0 right-0 bg-red-500 text-white text-[8px] font-black px-1 rounded uppercase shadow-sm">Closed</span>` : ''}
-                    <p class="text-center text-[10px] font-bold ${isActive ? 'text-red-600' : 'text-gray-700'} leading-tight w-full px-1 truncate ${isOffline ? 'opacity-60' : ''}">${r.shopName}</p>
+                    <p class="text-center text-[10px] font-bold ${isActive ? 'text-red-600' : 'text-gray-700'} leading-tight w-full px-1 truncate ${isOffline ? 'opacity-60' : ''}">${r.shopName || 'Partner'}</p>
                 </div>`;
             }).join('');
         };
 
-        const extractRestaurants = async () => {
+        const extractRestaurants = async (items) => {
             try {
-                const snap = await window.dbCall(getDocs(getCol('users')), 5000);
-                const approvedPartners = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(u => u.role === 'Partner' && u.approvalStatus === 'Approved' && (u.category === window.currentUserMainCategory));
+                let uniqueRestaurants = [];
                 
-                const prodSnap = await window.dbCall(getDocs(getCol('products')), 5000);
-                const products = prodSnap.docs.map(d => d.data());
+                try {
+                    // Try fetching from users (Will fail if strict security rules block global user reads)
+                    const snap = await window.dbCall(getDocs(getCol('users')), 4000);
+                    const approvedPartners = snap.docs.map(d => ({id: d.id, ...d.data()}))
+                        .filter(u => u.role === 'Partner' && u.approvalStatus === 'Approved' && (u.category === window.currentUserMainCategory));
+                    
+                    uniqueRestaurants = approvedPartners.map(p => {
+                        const shopProds = items.filter(prod => prod.partnerId === p.id);
+                        let displayImage = window.currentUserMainCategory === 'Grocery Shop' ? 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=200&q=80' : 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&q=80';
+                        const pWithImg = shopProds.find(x => x.image);
+                        if (pWithImg) displayImage = pWithImg.image;
 
-                const uniqueRestaurants = approvedPartners.map(p => {
-                    const shopProducts = products.filter(prod => prod.partnerId === p.id);
-                    let displayImage = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&q=80';
-                    if (window.currentUserMainCategory === 'Grocery Shop') displayImage = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=200&q=80';
-                    if (shopProducts.length > 0 && shopProducts[0].image) displayImage = shopProducts[0].image;
+                        return {
+                            partnerId: p.id, 
+                            shopName: p.shopName || p.name || 'Partner', 
+                            shopAddress: p.shopAddress || '',
+                            shopStatus: p.shopStatus || 'Closed',
+                            image: displayImage
+                        };
+                    });
+                } catch (userErr) {
+                    // FALLBACK: If 'users' fetch fails due to Security Rules, strictly extract shops from the 'products' array instead!
+                    console.log("Extracting shops from products collection fallback.");
+                    const uniquePartners = [...new Set(items.map(p => p.partnerId).filter(id => id))];
+                    
+                    uniqueRestaurants = uniquePartners.map(id => {
+                        const shopProds = items.filter(p => p.partnerId === id);
+                        if(shopProds.length === 0) return null;
+                        
+                        let displayImage = window.currentUserMainCategory === 'Grocery Shop' ? 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=200&q=80' : 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&q=80';
+                        const pWithImg = shopProds.find(x => x.image);
+                        if (pWithImg) displayImage = pWithImg.image;
 
-                    return {
-                        partnerId: p.id, 
-                        shopName: p.shopName || p.name, 
-                        shopAddress: p.shopAddress || '',
-                        shopStatus: p.shopStatus || 'Closed',
-                        image: displayImage
-                    };
-                });
+                        return {
+                            partnerId: id,
+                            shopName: shopProds[0].shopName || 'Partner',
+                            shopAddress: shopProds[0].shopAddress || '',
+                            shopStatus: shopProds[0].shopStatus || 'Closed',
+                            image: displayImage
+                        };
+                    }).filter(r => r !== null);
+                }
                 
                 window.renderRestaurants(uniqueRestaurants);
             } catch(e) { console.error("Error extracting restaurants:", e); }
@@ -2373,7 +2003,7 @@
             onSnapshot(getCol('products'), (snap) => {
                 let items = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
                 
-                extractRestaurants(); 
+                extractRestaurants(items); // Passes items directly to prevent redundant fetch & apply fallback logic
                 renderProducts(items);
             }, (err) => {
                 if (err.code === 'permission-denied') window.showToast("Firebase Permissions Denied! Check rules.", "error");
@@ -2381,62 +2011,236 @@
         };
 
         window.filterRestaurant = (partnerId, shopName) => {
-            if (currentRestaurantFilter === partnerId) {
-                currentRestaurantFilter = null;
-                currentFoodCategoryFilter = null;
-                document.getElementById('marketplace-title').innerText = window.currentUserMainCategory === 'Food Owner' ? 'Restaurants Near You' : 'Grocery Stores Near You';
-                document.getElementById('btn-clear-filter').classList.add('hidden');
-            } else {
-                currentRestaurantFilter = partnerId;
-                currentFoodCategoryFilter = null;
-                document.getElementById('marketplace-title').innerText = `${shopName} Items`;
-                document.getElementById('btn-clear-filter').classList.remove('hidden');
-            }
-            window.loadMarketplaceData();
-        };
 
-        window.filterFoodCategory = (categoryName) => {
-            currentFoodCategoryFilter = categoryName;
-            window.loadMarketplaceData();
-        };
+            if(!pickup || !drop) return window.showToast("Please calculate fares first.", "error");
 
-        window.updatePriceDisplay = (selectEl, priceId) => {
-            const price = selectEl.options[selectEl.selectedIndex].dataset.price;
-            document.getElementById(priceId).innerText = `₹${price}`;
-        };
+            const listEl = document.getElementById('ride-results-list');
+            listEl.innerHTML = `<div class="text-center py-6"><i class="fa-solid fa-spinner fa-spin text-yellow-500 text-2xl mb-2"></i><p class="text-xs font-bold text-gray-600">Finding nearby ${searchType}s...</p></div>`;
 
-        window.setupBottomNav = (role) => {
-            const bNav = document.getElementById('bottom-nav');
-            bNav.classList.remove('hidden');
-            const container = bNav.querySelector('div');
-            container.innerHTML = ''; 
+            try {
+                const snap = await window.dbCall(getDocs(getCol('users')), 8000);
+                const availableDrivers = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(u => 
+                    (['Rider', 'Ride Partner'].includes(u.category) || u.vehicleType || u.carNum) && 
+                    u.shopStatus === 'Online' && 
+                    u.approvalStatus === 'Approved' && 
+                    (u.vehicleType === searchType || (!u.vehicleType && searchType === 'Car'))
+                );
 
-            const createNavItem = (id, icon, label, targetView) => `
-                <button type="button" id="nav-btn-${id}" onclick="window.switchMainView('${targetView}')" class="b-nav-item flex flex-col items-center gap-1 w-16 text-gray-400 font-medium transition-colors relative">
-                    <i class="${icon} text-xl mb-0.5"></i>
-                    <span class="text-[10px] tracking-wide">${label}</span>
-                    ${id === 'Cart' && window.cart.length > 0 ? `<span class="absolute -top-1 right-2 bg-red-600 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-sm">${window.cart.length}</span>` : ''}
-                </button>
-            `;
-
-            if (role === 'User') {
-                container.innerHTML += createNavItem('User', 'fa-solid fa-house', 'Home', 'User');
-                container.innerHTML += createNavItem('Cart', 'fa-solid fa-basket-shopping', 'Cart', 'Cart');
-                container.innerHTML += createNavItem('Orders', 'fa-solid fa-receipt', 'History', 'Orders'); 
-            } else if (role === 'Partner') {
-                container.innerHTML += createNavItem('Partner', 'fa-solid fa-utensils', 'Tasks', 'Partner');
-                container.innerHTML += createNavItem('Partner-Profile', 'fa-solid fa-store', 'Settings', 'Partner-Profile');
-            } else if (role === 'Admin') {
-                container.innerHTML += createNavItem('Admin', 'fa-solid fa-chart-line', 'Dashboard', 'Admin');
-            }
-            
-            setTimeout(() => {
-                const activeNav = document.getElementById(`nav-btn-${role === 'Admin' ? 'Admin' : role === 'Partner' ? 'Partner' : 'User'}`);
-                if (activeNav) {
-                    activeNav.classList.remove('text-gray-400', 'font-medium');
-                    activeNav.classList.add('text-red-600', 'font-black');
+                if(availableDrivers.length === 0) {
+                    listEl.innerHTML = `<div class="bg-red-50 p-4 rounded-xl border border-red-100 text-center"><i class="fa-solid fa-car-side text-red-400 text-2xl mb-2"></i><p class="text-sm font-bold text-red-600">No ${searchType}s Available Right Now</p><p class="text-xs text-red-500 mt-1">Please try again after some time.</p></div>`;
+                    return;
                 }
-            }, 100);
+
+                listEl.innerHTML = availableDrivers.map(d => `
+                    <div class="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm relative overflow-hidden group hover:border-yellow-400 transition-colors">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <h4 class="font-black text-gray-900 text-lg">${d.shopName || 'Cab'} <span class="text-xs font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded">${d.vehicleType === 'Bike' ? '1 Person Max' : (d.seater || 4) + ' Seater'}</span></h4>
+                                <p class="text-[10px] font-bold text-gray-500 tracking-wider uppercase mt-1"><i class="fa-solid fa-id-card text-gray-400"></i> ${d.carNum || 'N/A'}</p>
+                                <p class="text-xs font-bold text-gray-700 mt-2"><i class="fa-solid fa-user-tie text-yellow-500 w-4"></i> ${d.name}</p>
+                            </div>
+                            <div class="w-12 h-12 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center text-xl shrink-0">
+                                <i class="fa-solid fa-${d.vehicleType === 'Bike' ? 'motorcycle' : 'taxi'}"></i>
+                            </div>
+                        </div>
+                        
+                        ${d.currentLocation ? `<p class="text-[10px] font-medium text-gray-500 mt-1 mb-3"><i class="fa-solid fa-location-dot text-red-400"></i> Driver currently at: <b>${d.currentLocation}</b></p>` : '<div class="mb-3"></div>'}
+                        
+                        <div class="flex gap-2 mt-4 pt-4 border-t border-gray-100">
+                            <a href="tel:${d.phone}" class="flex-1 bg-gray-100 text-gray-800 font-bold py-2.5 rounded-xl text-xs text-center border border-gray-200 hover:bg-gray-200 transition"><i class="fa-solid fa-phone mr-1"></i> Call</a>
+                            <button onclick="window.confirmRide('${d.phone}', '${d.name.replace(/'/g, "\\'")}', this)" class="flex-[2] bg-yellow-400 text-gray-900 font-bold py-2.5 rounded-xl text-xs shadow-sm hover:bg-yellow-500 transition active:scale-95"><i class="fa-solid fa-paper-plane mr-1"></i> Request Ride</button>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch(e) {
+                listEl.innerHTML = `<span class="text-red-600"><i class="fa-solid fa-triangle-exclamation"></i> Error finding rides. Try again.</span>`;
+            }
+        };
+
+        window.confirmRide = async (driverPhone, driverName, btn) => {
+            const confirmed = await window.customConfirm("Confirm Booking", `Have you confirmed the ride details over the phone with ${driverName}?`, "Confirm Booking");
+            if (!confirmed) return;
+
+            const pickup = document.getElementById('ride-pickup').value.trim();
+            const drop = document.getElementById('ride-drop').value.trim();
+            const fare = window.currentRideFares[window.currentSelectedRideType];
+
+            const origTxt = btn.innerHTML;
+            btn.innerHTML = "Booking..."; btn.disabled = true;
+
+            try {
+                await window.dbCall(addDoc(getCol('orders'), { 
+                    type: 'Ride',
+                    customer: currentUser.name || 'Unknown', 
+                    phone: currentUser.phone || '', 
+                    riderId: driverPhone,
+                    riderName: driverName,
+                    pickup: pickup,
+                    address: drop,
+                    status: 'Requested', 
+                    amount: fare,
+                    total: fare,
+                    waitingTime: window.currentRideWaitTime || 0,
+                    distanceStr: window.currentRideDistStr || '',
+                    time: serverTimestamp() 
+                }), 15000);
+
+                window.showToast("Ride Requested Successfully!", "success");
+                window.switchMainView('Orders'); 
+            } catch(e) {
+                window.showToast("Failed to book ride.", "error");
+                btn.innerHTML = origTxt; btn.disabled = false;
+            }
+        };
+
+        window.driverReviewRide = async (orderId, calcFare) => {
+            const newFareStr = await window.customPrompt(
+                "Propose Fare", 
+                `System calculated fare is ₹${calcFare}.\nEnter your final offer for the customer (₹):`, 
+                calcFare, 
+                "number"
+            );
+            if(!newFareStr) return;
+            const newFare = parseInt(newFareStr);
+            if(isNaN(newFare) || newFare < 10) return window.showToast("Please enter a valid fare amount.", "error");
+
+            try {
+                await window.dbCall(updateDoc(getDocRef('orders', orderId), { 
+                    status: 'Rider Accepted', 
+                    amount: newFare, 
+                    total: newFare 
+                }), 10000);
+                window.showToast("Fare offer sent to customer!", "success");
+            } catch(e) { window.showToast("Failed to send offer.", "error"); }
+        };
+
+        window.userAcceptRideFare = async (orderId) => {
+            try {
+                await window.dbCall(updateDoc(getDocRef('orders', orderId), { status: 'Confirmed' }), 10000);
+                window.showToast("Ride Confirmed! Driver is on the way.", "success");
+            } catch(e) { window.showToast("Failed to confirm.", "error"); }
+        };
+
+        window.userRejectRideFare = async (orderId, inputId) => {
+            const comment = document.getElementById(inputId).value.trim() || 'No reason provided';
+            try {
+                await window.dbCall(updateDoc(getDocRef('orders', orderId), { status: 'Rejected', rejectReason: comment }), 10000);
+                window.showToast("Ride Rejected.", "success");
+            } catch(e) { window.showToast("Failed to reject.", "error"); }
+        };
+
+        window.markRideStarted = async (orderId) => {
+            try {
+                await window.dbCall(updateDoc(getDocRef('orders', orderId), { status: 'Started' }), 10000);
+                window.showToast("Ride Started!", "success");
+            } catch(e) { window.showToast("Failed to start ride.", "error"); }
+        };
+
+        window.completeRide = async (orderId) => {
+            const confirmed = await window.customConfirm("Complete Ride", "Are you sure you have completed the ride and collected payment? 20 Gramzo Points will be deducted.", "Complete Ride");
+            if (!confirmed) return;
+
+            if((currentUser.walletPoints || 0) < 20) {
+                return window.showToast("Insufficient Gramzo Points to complete this ride. Contact Admin.", "error");
+            }
+
+            try {
+                const newPoints = (currentUser.walletPoints || 0) - 20;
+                
+                await window.dbCall(updateDoc(getDocRef('orders', orderId), { status: 'Completed' }), 10000);
+                await window.dbCall(updateDoc(getDocRef('users', currentUser.phone), { walletPoints: newPoints }), 10000);
+                
+                currentUser.walletPoints = newPoints;
+                const pointDisplay = document.getElementById('wallet-points-display');
+                if(pointDisplay) pointDisplay.innerText = newPoints;
+
+                window.showToast("Ride Completed successfully!", "success");
+            } catch(e) { window.showToast("Failed to end ride.", "error"); }
+        };
+
+        window.adminAddPoints = async (userId, currentPoints) => {
+            const amountStr = await window.customPrompt("Add Points", `Current Points: ${currentPoints}\nEnter amount of points to add:`, "amount", "number");
+            if(!amountStr) return;
+            const pointsToAdd = parseInt(amountStr);
+            if(isNaN(pointsToAdd) || pointsToAdd <= 0) return window.showToast("Invalid points amount.", "error");
+
+            try {
+                await window.dbCall(updateDoc(getDocRef('users', userId), {
+                    walletPoints: (currentPoints || 0) + pointsToAdd
+                }), 10000);
+                window.showToast("Points added successfully!", "success");
+            } catch(e) { window.showToast("Failed to add points.", "error"); }
+        };
+
+        window.adminCreatePromo = async () => {
+            const code = document.getElementById('admin-promo-code').value.trim().toUpperCase();
+            const discount = parseInt(document.getElementById('admin-promo-discount').value);
+            const resId = document.getElementById('admin-promo-restaurant').value;
+            const resName = document.getElementById('admin-promo-restaurant').options[document.getElementById('admin-promo-restaurant').selectedIndex].text;
+
+            if(!code || isNaN(discount)) return window.showToast("Enter valid code and discount", "error");
+
+            try {
+                await window.dbCall(setDoc(getDocRef('promos', code), {
+                    code: code,
+                    discount: discount,
+                    restaurantId: resId,
+                    restaurantName: resId === 'Global' ? 'Global' : resName,
+                    isActive: true,
+                    created: serverTimestamp()
+                }), 5000);
+                window.showToast("Promo Created!", "success");
+                document.getElementById('admin-promo-code').value = '';
+                document.getElementById('admin-promo-discount').value = '';
+            } catch(e) { window.showToast("Failed to create promo", "error"); }
+        };
+
+        window.togglePromo = async (id, currentStatus) => {
+            try {
+                await window.dbCall(updateDoc(getDocRef('promos', id), { isActive: !currentStatus }), 5000);
+                window.showToast("Promo status updated", "success");
+            } catch(e) { window.showToast("Failed to update promo", "error"); }
+        };
+
+        window.deletePromo = async (id) => {
+            const confirmed = await window.customConfirm("Delete Promo", "Are you sure you want to delete this promo code?", "Delete");
+            if(confirmed) {
+                try {
+                    await window.dbCall(deleteDoc(getDocRef('promos', id)), 5000);
+                    window.showToast("Promo deleted", "success");
+                } catch(e) { window.showToast("Failed to delete", "error"); }
+            }
+        };
+
+        window.adminUpdateOffer = async () => {
+            const input = document.getElementById('admin-offer-file');
+            if(!input.files || input.files.length === 0) return window.showToast("Select images first", "error");
+            
+            const btn = document.getElementById('btn-update-offer');
+            const orig = btn.innerText; btn.innerText = "Publishing..."; btn.disabled = true;
+
+            try {
+                let promises = [];
+                for(let i=0; i<input.files.length; i++) {
+                    promises.push(window.resizeImage(input.files[i], 800));
+                }
+                const b64Images = await Promise.all(promises);
+                await window.dbCall(setDoc(getDocRef('settings', 'app_config'), { offerBanners: b64Images }, { merge: true }), 10000);
+                window.showToast("Banners updated!", "success");
+                input.value = '';
+            } catch(e) { window.showToast("Failed to update banners", "error"); }
+            finally { btn.innerText = orig; btn.disabled = false; }
+        };
+
+        window.adminUpdateMarquee = async () => {
+            const text = document.getElementById('admin-marquee-text').value.trim();
+            if(!text) return window.showToast("Enter some text", "error");
+            try {
+                await window.dbCall(setDoc(getDocRef('settings', 'app_config'), { marqueeText: text }, { merge: true }), 5000);
+                window.showToast("Marquee updated!", "success");
+                document.getElementById('admin-marquee-text').value = '';
+            } catch(e) { window.showToast("Failed to update marquee", "error"); }
         };
 
         window.applyPromo = async () => {
@@ -2498,24 +2302,74 @@
                 return;
             }
 
-            window.cart.push({name, price, partnerId, shopName});
+            const existingItemIndex = window.cart.findIndex(i => i.name === name);
+            if (existingItemIndex > -1) {
+                window.cart[existingItemIndex].qty = (window.cart[existingItemIndex].qty || 1) + 1;
+            } else {
+                window.cart.push({name, price, partnerId, shopName, qty: 1});
+            }
+            
             window.renderCartUI();
             window.showToast(`${name} added!`, "success");
             window.setupBottomNav(currentUser.role);
         };
 
+        window.updateCartQty = (idx, delta) => {
+            window.cart[idx].qty = (window.cart[idx].qty || 1) + delta;
+            if (window.cart[idx].qty <= 0) {
+                window.removeFromCart(idx);
+            } else {
+                window.renderCartUI();
+            }
+        };
+
+        window.updateCartDeliveryFee = async () => {
+            const dest = document.getElementById('cart-address').value.trim();
+            if(!dest) return;
+
+            const origin = window.currentCartPartner ? window.currentCartPartner.shopAddress : null;
+            if(!origin) {
+                 window.showToast("Restaurant address not found. Cannot calculate delivery.", "error");
+                 return;
+            }
+
+            const distDisplay = document.getElementById('delivery-fee-display');
+            distDisplay.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Calculating distance...';
+
+            const distData = await window.calculateDistance(origin, dest);
+            if(!distData) {
+                 distDisplay.innerHTML = '<span class="text-red-500"><i class="fa-solid fa-triangle-exclamation"></i> Invalid GPS distance. Please refine your address.</span>';
+                 window.currentDeliveryFee = null;
+                 window.renderCartUI();
+                 return;
+            }
+
+            let distKm = distData.value / 1000;
+            window.currentDeliveryDistance = distKm;
+
+            if (distKm <= 5) {
+                 window.currentDeliveryFee = 10;
+            } else {
+                 window.currentDeliveryFee = 10 + (Math.ceil(distKm - 5) * 3);
+            }
+
+            distDisplay.innerHTML = `<i class="fa-solid fa-route"></i> Distance: ${distKm.toFixed(1)} km`;
+            window.renderCartUI();
+        };
+
         window.renderCartUI = async () => {
             const list = document.getElementById('cart-items-list');
             const summaryTotals = document.getElementById('cart-summary-totals');
-            
-            const villageSelect = document.getElementById('cart-village');
-            const selectedVillage = villageSelect ? villageSelect.value : '';
-            const deliveryFee = (selectedVillage === 'Others') ? 30 : 0;
 
-            const sub = window.cart.reduce((s, i) => s + i.price, 0);
-            const handlingFee = window.cart.length > 0 ? 5 : 0;
+            const sub = window.cart.reduce((s, i) => s + (i.price * (i.qty || 1)), 0);
+            const handlingFee = window.cart.length > 0 ? 2 : 0; 
+            const packagingFee = window.cart.length > 0 ? 5 : 0; 
+            
+            let deliveryFee = window.currentDeliveryFee;
+            let displayDeliveryFee = deliveryFee !== null ? `₹${deliveryFee.toFixed(2)}` : '<span class="text-orange-500 text-[10px]">Enter Address to Calculate</span>';
+
             const discountAmt = (sub * (window.appliedPromo || 0)) / 100;
-            const total = sub - discountAmt + handlingFee + deliveryFee;
+            const total = sub - discountAmt + handlingFee + packagingFee + (deliveryFee || 0);
 
             if (summaryTotals) {
                 const discountHtml = window.appliedPromo > 0 
@@ -2525,8 +2379,9 @@
                 summaryTotals.innerHTML = `
                     <div class="flex justify-between text-sm text-gray-600 font-medium"><span>Item Subtotal</span><span id="cart-subtotal">₹${sub.toFixed(2)}</span></div>
                     ${discountHtml}
-                    <div class="flex justify-between text-sm text-red-600 font-bold"><span>Delivery Fee</span><span>${deliveryFee === 0 ? 'FREE' : '₹30.00'}</span></div>
+                    <div class="flex justify-between text-sm text-gray-600 font-medium"><span>Packaging Fee</span><span id="cart-packaging">₹${packagingFee.toFixed(2)}</span></div>
                     <div class="flex justify-between text-sm text-gray-600 font-medium"><span>Platform Fee</span><span id="cart-handling">₹${handlingFee.toFixed(2)}</span></div>
+                    <div class="flex justify-between text-sm text-red-600 font-bold"><span>Delivery Fee</span><span>${displayDeliveryFee}</span></div>
                     
                     <div class="pt-3 mt-3 border-t border-gray-200 border-dashed flex justify-between items-center">
                         <span class="text-sm font-black text-gray-900">Grand Total</span>
@@ -2562,9 +2417,14 @@
                         </div>
                     </div>
                     <div class="flex items-center gap-4">
-                        <span class="text-sm font-black text-gray-900">₹${i.price}</span>
+                        <div class="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-2 py-1">
+                            <button onclick="window.updateCartQty(${idx}, -1)" class="text-red-500 hover:text-red-700 w-4 h-4 flex items-center justify-center"><i class="fa-solid fa-minus text-[10px]"></i></button>
+                            <span class="text-xs font-black text-gray-800 w-4 text-center">${i.qty || 1}</span>
+                            <button onclick="window.updateCartQty(${idx}, 1)" class="text-emerald-500 hover:text-emerald-700 w-4 h-4 flex items-center justify-center"><i class="fa-solid fa-plus text-[10px]"></i></button>
+                        </div>
+                        <span class="text-sm font-black text-gray-900 w-12 text-right">₹${i.price * (i.qty || 1)}</span>
                         <button type="button" onclick="window.removeFromCart(${idx})" class="w-6 h-6 rounded bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors">
-                            <i class="fa-solid fa-minus text-[10px]"></i>
+                            <i class="fa-solid fa-trash text-[10px]"></i>
                         </button>
                     </div>
                 </div>`).join('');
@@ -2617,13 +2477,10 @@
                 window.promoCode = '';
                 const promoInput = document.getElementById('promo-code-input');
                 if(promoInput) promoInput.value = '';
-                const villageSelect = document.getElementById('cart-village');
-                if(villageSelect) villageSelect.value = '';
-                const otherInput = document.getElementById('cart-other-village');
-                if(otherInput) {
-                    otherInput.value = '';
-                    otherInput.classList.add('hidden');
-                }
+                window.currentDeliveryFee = null;
+                window.currentDeliveryDistance = null;
+                const distDisplay = document.getElementById('delivery-fee-display');
+                if (distDisplay) distDisplay.innerHTML = '';
             }
             window.renderCartUI(); 
             window.setupBottomNav(currentUser?.role);
@@ -2632,19 +2489,17 @@
         window.placeOrder = async () => {
             if(window.cart.length === 0) return;
             
-            const village = document.getElementById('cart-village').value;
-            if(!village) return window.showToast("Please select a village.", "error");
-            
-            let finalVillage = village;
-            if(village === 'Others') {
-                finalVillage = document.getElementById('cart-other-village').value.trim();
-                if(!finalVillage) return window.showToast("Please type your village name.", "error");
+            const addrDetails = document.getElementById('cart-address').value.trim();
+            const village = document.getElementById('cart-village').value.trim();
+            const landmark = document.getElementById('cart-landmark').value.trim();
+
+            if(!addrDetails || !village) return window.showToast("Please provide GPS address and Village.", "error");
+
+            if(window.currentDeliveryFee === null) {
+                return window.showToast("Please allow delivery fee calculation by providing valid addresses.", "error");
             }
 
-            const addrDetails = document.getElementById('cart-address').value.trim();
-            if(!addrDetails) return window.showToast("Please provide detailed delivery address.", "error");
-
-            const fullAddress = `${addrDetails}, ${finalVillage}`;
+            const fullAddress = `${addrDetails}, Village: ${village}, Landmark: ${landmark || 'N/A'}`;
 
             const paymentRadio = document.querySelector('input[name="payment_mode"]:checked');
             if(!paymentRadio && window.currentCartPartner) return window.showToast("Please select a payment method.", "error");
@@ -2658,11 +2513,13 @@
                 try { paymentScreenshot = await window.resizeImage(fileInput.files[0], 800); } catch(e) { return window.showToast("Failed to process image.", "error"); }
             }
 
-            const deliveryFee = (village === 'Others') ? 30 : 0;
-            const sub = window.cart.reduce((s,i) => s + i.price, 0);
-            const handlingFee = window.cart.length > 0 ? 5 : 0;
+            const sub = window.cart.reduce((s,i) => s + (i.price * (i.qty || 1)), 0);
+            const handlingFee = window.cart.length > 0 ? 2 : 0;
+            const packagingFee = window.cart.length > 0 ? 5 : 0;
+            const deliveryFee = window.currentDeliveryFee || 0;
+            
             const discountAmt = (sub * (window.appliedPromo || 0)) / 100;
-            const total = sub - discountAmt + handlingFee + deliveryFee;
+            const total = sub - discountAmt + handlingFee + packagingFee + deliveryFee;
             
             const restaurantId = window.cart[0].partnerId || null;
             const restaurantName = window.cart[0].shopName || null;
@@ -2679,12 +2536,17 @@
                     items: window.cart.map(item => ({
                         name: item.name || '',
                         price: item.price || 0,
+                        qty: item.qty || 1,
                         partnerId: item.partnerId || null,
                         shopName: item.shopName || null
                     })), 
                     subtotal: sub || 0, 
                     discount: discountAmt || 0, 
                     promoCode: window.promoCode || null,
+                    packagingFee: packagingFee,
+                    platformFee: handlingFee,
+                    deliveryFee: deliveryFee,
+                    distanceKm: window.currentDeliveryDistance,
                     total: total || 0, 
                     address: fullAddress || '', 
                     status: 'Placed', 
@@ -2699,8 +2561,11 @@
                 window.cart = []; window.appliedPromo = 0; window.promoCode = '';
                 document.getElementById('cart-address').value = '';
                 document.getElementById('cart-village').value = '';
-                document.getElementById('cart-other-village').value = '';
-                document.getElementById('cart-other-village').classList.add('hidden');
+                document.getElementById('cart-landmark').value = '';
+                window.currentDeliveryFee = null;
+                window.currentDeliveryDistance = null;
+                const distDisplay = document.getElementById('delivery-fee-display');
+                if (distDisplay) distDisplay.innerHTML = '';
                 if(document.getElementById('promo-code-input')) document.getElementById('promo-code-input').value = '';
                 if(document.getElementById('payment-screenshot')) document.getElementById('payment-screenshot').value = '';
                 
@@ -2764,61 +2629,75 @@
         window.markOutForDelivery = async (orderId) => { try { await window.dbCall(updateDoc(getDocRef('orders', orderId), {status: 'Out for Delivery'}), 10000); window.showToast("Order is out for delivery!", "success"); } catch(e) {} };
         window.markDelivered = async (orderId) => { try { await window.dbCall(updateDoc(getDocRef('orders', orderId), {status: 'Delivered'}), 10000); window.showToast("Order Delivered Successfully!", "success"); } catch(e) {} };
 
-        window.markSelfDelivery = async (orderId) => {
+        window.openFindRidersModal = async (orderId) => {
+            window.currentAssignOrderId = orderId;
+            document.getElementById('find-riders-modal').classList.add('active');
+            const listEl = document.getElementById('online-riders-list');
+            listEl.innerHTML = `<div class="text-center py-6 text-gray-400 font-medium text-xs"><i class="fa-solid fa-spinner fa-spin mb-2"></i> Fetching riders...</div>`;
+
             try {
-                await window.dbCall(updateDoc(getDocRef('orders', orderId), {
-                    status: 'Out for Delivery',
-                    riderId: String(currentUser.phone || currentUser.docId).trim(),
-                    riderName: (currentUser.shopName || currentUser.name) + " (Self Delivery)",
-                    riderPhone: currentUser.phone || ''
-                }), 10000);
-                window.showToast("Marked for Self Delivery!", "success");
-            } catch(e) { window.showToast("Failed to update.", "error"); }
+                const snap = await window.dbCall(getDocs(getCol('users')), 5000);
+                const riders = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(u => 
+                    (['Rider', 'Ride Partner'].includes(u.category) || u.vehicleType || u.carNum) && 
+                    u.shopStatus === 'Online' && 
+                    u.approvalStatus === 'Approved'
+                );
+
+                if (riders.length === 0) {
+                    listEl.innerHTML = `<p class="text-center py-6 text-red-500 font-bold text-xs"><i class="fa-solid fa-triangle-exclamation mb-2 text-lg"></i><br/>No riders online right now.</p>`;
+                    return;
+                }
+
+                listEl.innerHTML = riders.map(r => `
+                    <div class="flex justify-between items-center bg-gray-50 border border-gray-200 p-3 rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center"><i class="fa-solid fa-motorcycle"></i></div>
+                            <div>
+                                <p class="font-bold text-sm text-gray-900">${r.name}</p>
+                                <p class="text-[10px] text-gray-500">${r.phone}</p>
+                                ${r.currentLocation ? `<p class="text-[9px] text-gray-400 mt-0.5 truncate w-32"><i class="fa-solid fa-location-dot"></i> ${r.currentLocation}</p>` : ''}
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <a href="tel:${r.phone}" class="bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-[10px] font-bold text-center hover:bg-gray-300 transition"><i class="fa-solid fa-phone"></i> Call</a>
+                            <button onclick="window.assignRider('${r.id}', '${r.name.replace(/'/g, "\\'")}', '${r.phone}')" class="bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold text-center shadow-sm hover:bg-emerald-600 transition">Assign</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch(e) {
+                listEl.innerHTML = `<p class="text-center py-6 text-red-500 font-bold text-xs">Error loading riders.</p>`;
+            }
         };
 
-        window.assignRiderToOrder = async (orderId, riderPhone, riderName) => {
+        window.assignRider = async (riderId, riderName, riderPhone) => {
+            if (!window.currentAssignOrderId) return;
+            const confirmed = await window.customConfirm("Assign Rider", `Assign this order to ${riderName}?`, "Assign");
+            if (!confirmed) return;
+
             try {
-                await window.dbCall(updateDoc(getDocRef('orders', orderId), {
-                    riderId: String(riderPhone).trim(),
+                await window.dbCall(updateDoc(getDocRef('orders', window.currentAssignOrderId), {
+                    riderId: riderId,
                     riderName: riderName,
                     riderPhone: riderPhone
                 }), 10000);
                 window.showToast(`Order assigned to ${riderName}!`, "success");
-                document.getElementById('info-modal').classList.remove('active');
+                document.getElementById('find-riders-modal').classList.remove('active');
             } catch(e) { window.showToast("Failed to assign rider.", "error"); }
         };
 
-        window.showOnlineRiders = async (orderId) => {
-            window.showToast("Fetching available riders...", "info");
+        window.selfDeliveryOrder = async (orderId) => {
+            const confirmed = await window.customConfirm("Self Delivery", "Are you delivering this order yourself? This will skip the rider assignment.", "Self Deliver");
+            if (!confirmed) return;
+            
             try {
-                const snap = await window.dbCall(getDocs(getCol('users')), 5000);
-                const riders = snap.docs.map(d => d.data()).filter(u => ['Rider', 'Ride Partner'].includes(u.category) && u.shopStatus === 'Online' && u.approvalStatus === 'Approved');
-                
-                const titleEl = document.getElementById('info-modal-title');
-                const bodyEl = document.getElementById('info-modal-body');
-                
-                titleEl.innerText = "Available Delivery Partners";
-                
-                if(riders.length === 0) {
-                    bodyEl.innerHTML = '<div class="text-center py-6 text-gray-500 font-medium">No riders are currently online. You may need to self-deliver.</div>';
-                } else {
-                    bodyEl.innerHTML = '<div class="space-y-3">' + riders.map(r => `
-                        <div class="bg-blue-50 border border-blue-100 p-3 rounded-xl flex justify-between items-center">
-                            <div>
-                                <p class="font-bold text-sm text-gray-900">${r.name}</p>
-                                <p class="text-[10px] text-gray-500">${r.carModel || 'Delivery Vehicle'} - ${r.carNum || 'N/A'}</p>
-                            </div>
-                            <div class="flex gap-2">
-                                <a href="tel:${r.phone}" class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone text-xs"></i></a>
-                                <button onclick="window.assignRiderToOrder('${orderId}', '${r.phone}', '${r.name.replace(/'/g, "\\'")}')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg text-xs font-bold shadow-sm transition active:scale-95">Assign</button>
-                            </div>
-                        </div>
-                    `).join('') + '</div>';
-                }
-                document.getElementById('info-modal').classList.add('active');
-            } catch(e) {
-                window.showToast("Failed to fetch riders.", "error");
-            }
+                await window.dbCall(updateDoc(getDocRef('orders', orderId), {
+                    status: 'Out for Delivery',
+                    riderId: currentUser.phone || currentUser.docId, 
+                    riderName: 'Restaurant (Self Delivery)',
+                    riderPhone: currentUser.phone || ''
+                }), 10000);
+                window.showToast("Marked as Self Delivery!", "success");
+            } catch(e) { window.showToast("Failed to update.", "error"); }
         };
 
         window.updateRiderLocation = async () => {
@@ -2833,7 +2712,7 @@
         };
 
         window.toggleShopStatus = async () => {
-            const isRide = ['Rider', 'Ride Partner'].includes(currentUser.category);
+            const isRide = ['Rider', 'Ride Partner'].includes(currentUser.category) || currentUser.vehicleType || currentUser.carNum;
             const toggle = isRide ? document.getElementById('rider-status-toggle') : document.getElementById('partner-status-toggle');
             if (!toggle) return;
 
@@ -3025,7 +2904,8 @@
         };
 
         window.submitRideProfile = async () => {
-            if(!currentUser || !['Rider', 'Ride Partner'].includes(currentUser.category)) return;
+            const isRide = ['Rider', 'Ride Partner'].includes(currentUser.category) || currentUser.vehicleType || currentUser.carNum;
+            if(!currentUser || !isRide) return;
 
             const carNum = document.getElementById('partner-ride-num').value.trim();
             const carModel = document.getElementById('partner-ride-model').value.trim();
@@ -3212,92 +3092,6 @@
             } catch(e) { window.showToast("Error toggling visibility.", "error"); }
         };
 
-        window.adminCreatePromo = async () => {
-            const codeInput = document.getElementById('admin-promo-code').value.trim().toUpperCase();
-            const discountInput = parseInt(document.getElementById('admin-promo-discount').value);
-            const restInput = document.getElementById('admin-promo-restaurant');
-            const restId = restInput.value;
-            const restName = restInput.options[restInput.selectedIndex].text;
-
-            if (!codeInput || isNaN(discountInput) || discountInput <= 0 || discountInput > 100) {
-                return window.showToast("Please enter a valid code and discount %", "error");
-            }
-
-            const btn = document.querySelector('button[onclick="window.adminCreatePromo()"]');
-            const origTxt = btn.innerText; btn.innerText = "Creating..."; btn.disabled = true;
-
-            try {
-                await window.dbCall(addDoc(getCol('promos'), {
-                    code: codeInput,
-                    discount: discountInput,
-                    restaurantId: restId,
-                    restaurantName: restId === 'Global' ? 'All Restaurants' : restName,
-                    isActive: true,
-                    created: serverTimestamp()
-                }), 10000);
-                window.showToast("Promo Code Created!", "success");
-                document.getElementById('admin-promo-code').value = '';
-                document.getElementById('admin-promo-discount').value = '';
-            } catch(e) {
-                window.showToast("Failed to create promo.", "error");
-            } finally {
-                btn.innerText = origTxt; btn.disabled = false;
-            }
-        };
-
-        window.togglePromo = async (id, currentStatus) => {
-            try {
-                await window.dbCall(updateDoc(getDocRef('promos', id), { isActive: !currentStatus }), 10000);
-                window.showToast(currentStatus ? "Promo Disabled" : "Promo Enabled", "success");
-            } catch(e) {
-                window.showToast("Error updating promo.", "error");
-            }
-        };
-
-        window.deletePromo = async (id) => {
-            const confirmed = await window.customConfirm("Delete Promo", "Are you sure you want to delete this promo code?", "Delete");
-            if (!confirmed) return;
-            try {
-                await window.dbCall(deleteDoc(getDocRef('promos', id)), 10000);
-                window.showToast("Promo deleted.", "success");
-            } catch(e) {
-                window.showToast("Failed to delete.", "error");
-            }
-        };
-
-        window.adminUpdateOffer = async () => {
-            const fileInput = document.getElementById('admin-offer-file');
-            if (!fileInput.files || fileInput.files.length === 0) return window.showToast("Select an image first.", "error");
-            
-            const btn = document.getElementById('btn-update-offer');
-            const orig = btn.innerText; btn.innerText = "Uploading..."; btn.disabled = true;
-            try {
-                const base64Img = await window.resizeImage(fileInput.files[0], 800);
-                await window.dbCall(setDoc(getDocRef('settings', 'app_config'), { offerBanners: [base64Img] }, { merge: true }), 15000);
-                window.showToast("Offer Banner Updated!", "success");
-                fileInput.value = '';
-            } catch(e) {
-                window.showToast("Failed to update banner.", "error");
-            } finally {
-                btn.innerText = orig; btn.disabled = false;
-            }
-        };
-
-        window.adminUpdateMarquee = async () => {
-            const text = document.getElementById('admin-marquee-text').value.trim();
-            const btn = document.getElementById('btn-update-marquee');
-            const orig = btn.innerText; btn.innerText = "Publishing..."; btn.disabled = true;
-            try {
-                await window.dbCall(setDoc(getDocRef('settings', 'app_config'), { marqueeText: text }, { merge: true }), 10000);
-                window.showToast("Marquee text updated!", "success");
-                document.getElementById('admin-marquee-text').value = '';
-            } catch(e) {
-                window.showToast("Failed to update marquee.", "error");
-            } finally {
-                btn.innerText = orig; btn.disabled = false;
-            }
-        };
-
         window.renderAdminUsers = () => {
             const usersBody = document.getElementById('admin-users-body');
             if(!usersBody) return;
@@ -3308,11 +3102,12 @@
             }
 
             let filteredUsers = window.adminUsersData.filter(u => {
+                const isRider = ['Rider', 'Ride Partner'].includes(u.category) || u.vehicleType || u.carNum;
                 if (window.adminCurrentUserTab === 'All') return true;
                 if (window.adminCurrentUserTab === 'User') return u.role === 'User';
-                if (window.adminCurrentUserTab === 'Food Owner') return u.role === 'Partner' && u.category === 'Food Owner';
-                if (window.adminCurrentUserTab === 'Grocery Shop') return u.role === 'Partner' && u.category === 'Grocery Shop';
-                if (window.adminCurrentUserTab === 'Rider') return u.role === 'Partner' && ['Rider', 'Ride Partner'].includes(u.category);
+                if (window.adminCurrentUserTab === 'Food Owner') return u.role === 'Partner' && u.category === 'Food Owner' && !isRider;
+                if (window.adminCurrentUserTab === 'Grocery Shop') return u.role === 'Partner' && u.category === 'Grocery Shop' && !isRider;
+                if (window.adminCurrentUserTab === 'Rider') return u.role === 'Partner' && isRider;
                 return true;
             });
 
@@ -3328,6 +3123,8 @@
                 let detailsHtml = '';
                 let approvalControlsHtml = '';
                 let visibilityToggleHtml = '';
+                
+                const isRider = ['Rider', 'Ride Partner'].includes(u.category) || u.vehicleType || u.carNum;
 
                 if(u.role === 'Partner') {
                     const isApproved = u.approvalStatus === 'Approved';
@@ -3347,7 +3144,7 @@
                         </div>
                     `;
 
-                    if(['Rider', 'Ride Partner'].includes(u.category)) {
+                    if(isRider) {
                         detailsHtml = `<span class="font-bold text-gray-700">Vehicle:</span> ${u.carModel || 'N/A'} (${u.carNum || 'N/A'})<br/><span class="font-bold text-gray-700">Wallet:</span> ${u.walletPoints || 0} pts`;
                     } else {
                         detailsHtml = `<span class="font-bold text-gray-700">Shop:</span> ${u.shopName || 'N/A'}<br/><span class="font-bold text-gray-700">Status:</span> <span class="${isApproved ? 'text-emerald-500' : 'text-orange-500'} font-bold">${u.approvalStatus || 'Pending'}</span>`;
@@ -3360,7 +3157,7 @@
                 
                 let editBtn = `<button onclick="window.openAdminUserEdit('${u.phone}', '${u.name.replace(/'/g, "\\'")}', '${(u.shopName || '').replace(/'/g, "\\'")}')" class="text-blue-500 hover:text-blue-700 ml-2" title="Edit User"><i class="fa-solid fa-pen"></i></button>`;
 
-                if (['Rider', 'Ride Partner'].includes(u.category)) {
+                if (isRider) {
                     actionsHtml += `<br/><button onclick="window.adminAddPoints('${u.phone}', ${u.walletPoints || 0})" class="bg-blue-50 text-blue-600 px-2 py-1 mt-1 rounded border border-blue-100 text-[9px] font-bold w-full">+ Points</button>`;
                 }
 
@@ -3375,6 +3172,20 @@
                     <td class="p-3 text-right font-mono text-gray-900 text-xs align-top pt-4">${actionsHtml}</td>
                 </tr>`;
             }).join('');
+        };
+
+        window.switchOrderTab = (tab) => {
+            window.adminCurrentOrderTab = tab;
+            document.querySelectorAll('.admin-order-tab').forEach(el => {
+                el.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
+                el.classList.add('text-gray-500');
+            });
+            const activeEl = document.getElementById(`tab-order-${tab}`);
+            if(activeEl) {
+                activeEl.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
+                activeEl.classList.remove('text-gray-500');
+            }
+            window.renderAdminOrders();
         };
 
         window.switchPartnerOrderTab = (tab) => {
@@ -3394,7 +3205,7 @@
         window.renderPartnerOrders = () => {
             const listEl = document.getElementById('partner-orders-list');
             if(!listEl) return;
-
+            
             let filteredOrders = window.partnerOrdersData.filter(o => {
                 if (window.partnerCurrentOrderTab === 'Live') {
                     return !['Delivered', 'Completed', 'Rejected'].includes(o.status);
@@ -3406,60 +3217,74 @@
             });
 
             if(filteredOrders.length === 0) {
-                listEl.innerHTML = `<div class="text-center py-10 bg-white rounded-3xl border border-gray-100"><i class="fa-solid fa-clipboard-list text-4xl text-gray-300 mb-3 block"></i><p class="text-gray-400 font-medium text-sm">No ${window.partnerCurrentOrderTab.toLowerCase()} tasks found.</p></div>`;
+                listEl.innerHTML = `<div class="text-center py-10 bg-white rounded-3xl border border-gray-100"><i class="fa-solid fa-folder-open text-3xl text-gray-300 mb-3 block"></i><p class="text-gray-400 font-medium text-sm">No ${window.partnerCurrentOrderTab.toLowerCase()} tasks right now.</p></div>`;
                 return;
             }
 
+            const isRider = ['Rider', 'Ride Partner'].includes(currentUser.category) || currentUser.vehicleType || currentUser.carNum;
+            const myId = String(currentUser.phone || currentUser.docId).trim();
+
             listEl.innerHTML = filteredOrders.map(o => {
                 const timeStr = window.formatOrderTime(o.time);
-                let statusColor = o.status === 'Placed' || o.status === 'Requested' ? 'text-amber-500' : o.status === 'Preparing' || o.status === 'Started' || o.status === 'Out for Delivery' ? 'text-blue-500' : o.status === 'Rejected' ? 'text-red-500' : 'text-emerald-500';
+                let statusColor = 'text-orange-500';
+                if(['Accepted', 'Rider Accepted'].includes(o.status)) statusColor = 'text-blue-500';
+                if(['Preparing', 'Started'].includes(o.status)) statusColor = 'text-indigo-500';
+                if(['Ready', 'Out for Delivery'].includes(o.status)) statusColor = 'text-yellow-500';
+                if(['Delivered', 'Completed'].includes(o.status)) statusColor = 'text-emerald-500';
+                if(o.status === 'Rejected') statusColor = 'text-red-500';
 
                 let actionHtml = '';
-                if (['Food Owner', 'Grocery Shop'].includes(currentUser.category)) {
-                    if (o.status === 'Placed') {
-                        actionHtml = `
-                            <button onclick="window.acceptFoodOrder('${o.id}')" class="flex-1 bg-emerald-50 text-emerald-600 border border-emerald-200 py-2 rounded-xl text-[10px] font-black tracking-wide hover:bg-emerald-600 hover:text-white transition-colors">ACCEPT</button>
-                            <button onclick="window.openRejectModal('${o.id}')" class="flex-1 bg-red-50 text-red-600 border border-red-200 py-2 rounded-xl text-[10px] font-black tracking-wide hover:bg-red-600 hover:text-white transition-colors">REJECT</button>
-                        `;
-                    } else if (o.status === 'Accepted') {
-                        actionHtml = `<button onclick="window.markPreparing('${o.id}')" class="w-full bg-blue-50 text-blue-600 border border-blue-200 py-2 rounded-xl text-[10px] font-black tracking-wide hover:bg-blue-600 hover:text-white transition-colors">MARK PREPARING</button>`;
-                    } else if (o.status === 'Preparing') {
-                        actionHtml = `<button onclick="window.markReady('${o.id}')" class="w-full bg-yellow-50 text-yellow-600 border border-yellow-200 py-2 rounded-xl text-[10px] font-black tracking-wide hover:bg-yellow-500 hover:text-white transition-colors">MARK READY</button>`;
-                    } else if (o.status === 'Ready' && !o.riderId) {
-                        actionHtml = `
-                            <button onclick="window.markSelfDelivery('${o.id}')" class="flex-1 bg-purple-50 text-purple-600 border border-purple-200 py-2 rounded-xl text-[10px] font-black tracking-wide hover:bg-purple-600 hover:text-white transition-colors">SELF DELIVERY</button>
-                            <button onclick="window.showOnlineRiders('${o.id}')" class="flex-[1.5] bg-gray-50 text-gray-600 border border-gray-200 py-2 rounded-xl text-[10px] font-black tracking-wide hover:bg-gray-200 transition-colors"><i class="fa-solid fa-motorcycle mr-1"></i> FIND RIDERS</button>
-                        `;
-                    } else if (o.status === 'Ready' && o.riderId) {
-                        actionHtml = `<p class="text-[10px] font-bold text-blue-600 text-center w-full bg-blue-50 py-2 rounded-xl border border-blue-100">Rider assigned: ${o.riderName}</p>`;
-                    } else if (o.status === 'Out for Delivery' && o.riderId === String(currentUser.phone || currentUser.docId).trim()) {
-                        actionHtml = `<button onclick="window.markDelivered('${o.id}')" class="w-full bg-emerald-50 text-emerald-600 border border-emerald-200 py-2 rounded-xl text-[10px] font-black tracking-wide hover:bg-emerald-600 hover:text-white transition-colors">MARK DELIVERED (SELF)</button>`;
-                    } else if (o.status === 'Out for Delivery') {
-                        actionHtml = `<p class="text-[10px] font-bold text-blue-600 text-center w-full bg-blue-50 py-2 rounded-xl border border-blue-100">Out for delivery by: ${o.riderName}</p>`;
-                    }
-                } else if (['Rider', 'Ride Partner'].includes(currentUser.category)) {
+
+                if(o.status === 'Placed') {
+                    actionHtml = `<button onclick="window.acceptFoodOrder('${o.id}')" class="flex-1 bg-blue-600 text-white py-2 rounded-xl text-xs font-bold hover:bg-blue-700 transition">Accept Order</button><button onclick="window.openRejectModal('${o.id}')" class="w-10 flex-none bg-red-50 text-red-600 py-2 rounded-xl text-xs font-bold border border-red-100 hover:bg-red-600 hover:text-white transition"><i class="fa-solid fa-xmark"></i></button>`;
+                } else if(o.status === 'Accepted') {
+                    actionHtml = `<button onclick="window.markPreparing('${o.id}')" class="flex-1 bg-indigo-500 text-white py-2 rounded-xl text-xs font-bold shadow-sm">Mark Preparing</button>`;
+                } else if(o.status === 'Preparing') {
+                    actionHtml = `<button onclick="window.markReady('${o.id}')" class="flex-1 bg-yellow-400 text-gray-900 py-2 rounded-xl text-xs font-bold shadow-sm">Mark Ready for Dispatch</button>`;
+                } else if(o.status === 'Ready' && !isRider) {
+                    actionHtml = `
+                        <div class="flex gap-2 w-full">
+                            <button onclick="window.openFindRidersModal('${o.id}')" class="flex-[1.5] bg-blue-600 text-white py-2.5 rounded-xl text-xs font-bold shadow-sm hover:bg-blue-700 transition"><i class="fa-solid fa-motorcycle mr-1"></i> Find Rider</button>
+                            <button onclick="window.selfDeliveryOrder('${o.id}')" class="flex-1 bg-emerald-50 text-emerald-600 border border-emerald-100 py-2.5 rounded-xl text-[10px] font-bold shadow-sm hover:bg-emerald-600 hover:text-white transition whitespace-nowrap"><i class="fa-solid fa-person-walking mr-1"></i> Self Deliver</button>
+                        </div>
+                    `;
+                }
+
+                if (isRider) {
                     if (o.type === 'Ride') {
-                        if (o.status === 'Requested') {
-                            actionHtml = `
-                                <button onclick="window.driverReviewRide('${o.id}', ${o.amount})" class="flex-1 bg-emerald-50 text-emerald-600 border border-emerald-200 py-2 rounded-xl text-[10px] font-black tracking-wide hover:bg-emerald-600 hover:text-white transition-colors">SEND QUOTE</button>
-                                <button onclick="window.openRejectModal('${o.id}')" class="flex-1 bg-red-50 text-red-600 border border-red-200 py-2 rounded-xl text-[10px] font-black tracking-wide hover:bg-red-600 hover:text-white transition-colors">REJECT</button>
-                            `;
-                        } else if (o.status === 'Confirmed') {
-                             actionHtml = `<button onclick="window.markRideStarted('${o.id}')" class="w-full bg-blue-50 text-blue-600 border border-blue-200 py-2 rounded-xl text-[10px] font-black tracking-wide hover:bg-blue-600 hover:text-white transition-colors">START RIDE</button>`;
-                        } else if (o.status === 'Started') {
-                             actionHtml = `<button onclick="window.completeRide('${o.id}')" class="w-full bg-emerald-50 text-emerald-600 border border-emerald-200 py-2 rounded-xl text-[10px] font-black tracking-wide hover:bg-emerald-600 hover:text-white transition-colors">COMPLETE RIDE</button>`;
+                        if(o.status === 'Requested') {
+                            actionHtml = `<button onclick="window.driverReviewRide('${o.id}', ${o.amount})" class="flex-1 bg-emerald-500 text-white py-2.5 rounded-xl text-xs font-bold shadow-sm hover:bg-emerald-600 transition"><i class="fa-solid fa-handshake mr-1"></i> Review & Propose Fare</button>`;
+                        } else if(o.status === 'Rider Accepted') {
+                            actionHtml = `<p class="w-full text-center text-xs font-bold text-gray-500 bg-gray-50 py-2 rounded-xl border border-gray-100 animate-pulse">Waiting for Customer Confirmation...</p>`;
+                        } else if(o.status === 'Confirmed') {
+                            actionHtml = `<button onclick="window.markRideStarted('${o.id}')" class="flex-1 bg-blue-600 text-white py-2.5 rounded-xl text-xs font-bold shadow-sm active:scale-95"><i class="fa-solid fa-play mr-1"></i> Start Ride</button>`;
+                        } else if(o.status === 'Started') {
+                            actionHtml = `<button onclick="window.completeRide('${o.id}')" class="flex-1 bg-emerald-500 text-white py-2.5 rounded-xl text-xs font-bold shadow-sm active:scale-95"><i class="fa-solid fa-flag-checkered mr-1"></i> Complete & Collect Payment</button>`;
                         }
-                    } else { 
-                        if (o.status === 'Ready' && !o.riderId) {
-                            actionHtml = `<button onclick="window.acceptDelivery('${o.id}')" class="w-full bg-blue-50 text-blue-600 border border-blue-200 py-2 rounded-xl text-[10px] font-black tracking-wide hover:bg-blue-600 hover:text-white transition-colors">ACCEPT DELIVERY</button>`;
-                        } else if (o.status === 'Out for Delivery') {
-                            actionHtml = `<button onclick="window.markDelivered('${o.id}')" class="w-full bg-emerald-50 text-emerald-600 border border-emerald-200 py-2 rounded-xl text-[10px] font-black tracking-wide hover:bg-emerald-600 hover:text-white transition-colors">MARK DELIVERED</button>`;
+                    } else {
+                        // Food delivery tasks assigned to this rider
+                        if (o.status === 'Ready' && (!o.riderId || o.riderId === myId)) {
+                            actionHtml = `<button onclick="window.acceptDelivery('${o.id}')" class="flex-1 bg-blue-600 text-white py-2.5 rounded-xl text-xs font-bold shadow-sm active:scale-95"><i class="fa-solid fa-box-open mr-1"></i> Pick Up Delivery</button>`;
+                        } else if (o.status === 'Out for Delivery' && o.riderId === myId) {
+                            actionHtml = `<button onclick="window.markDelivered('${o.id}')" class="flex-1 bg-emerald-500 text-white py-2.5 rounded-xl text-xs font-bold shadow-sm active:scale-95"><i class="fa-solid fa-check-double mr-1"></i> Mark Delivered</button>`;
                         }
                     }
                 }
 
-                const itemsList = o.items ? o.items.map(i => i.name).join(', ') : (o.type === 'Ride' ? `<span class="text-blue-600">From:</span> ${o.pickup}<br/><span class="text-emerald-600">To:</span> ${o.address}` : '');
+                const itemsList = o.items ? o.items.map(i => `<span class="font-bold text-gray-800">${i.qty || 1}x</span> ${i.name}`).join(', ') : (o.type === 'Ride' ? `<span class="text-blue-600 font-medium">Pickup:</span> ${o.pickup}<br/><span class="text-emerald-600 font-medium mt-1 inline-block">Drop:</span> ${o.address}` : '');
                 const paymentBadge = o.paymentMode === 'Prepaid' ? `<span class="bg-blue-100 text-blue-700 text-[9px] font-black px-1.5 py-0.5 rounded uppercase">Prepaid</span>` : `<span class="bg-gray-100 text-gray-700 text-[9px] font-black px-1.5 py-0.5 rounded uppercase">COD</span>`;
+
+                let breakdownHtml = '';
+                if (o.type !== 'Ride' && o.subtotal) {
+                    breakdownHtml = `
+                        <div class="mt-2 bg-gray-50 rounded p-2 text-[10px] font-medium text-gray-600 border border-gray-100">
+                            <div class="flex justify-between"><span>Food Total:</span><span>₹${(o.subtotal||0).toFixed(2)}</span></div>
+                            <div class="flex justify-between"><span>Packaging Fee:</span><span>₹${(o.packagingFee||0).toFixed(2)}</span></div>
+                            <div class="flex justify-between"><span>Platform Fee:</span><span>₹${(o.platformFee||0).toFixed(2)}</span></div>
+                            <div class="flex justify-between"><span>Delivery Fee:</span><span>₹${(o.deliveryFee||0).toFixed(2)}</span></div>
+                        </div>
+                    `;
+                }
 
                 return `
                     <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 relative overflow-hidden transition-all">
@@ -3480,28 +3305,15 @@
                         </div>
                         
                         <div class="mb-3">
-                            <p class="text-xs text-gray-600 font-medium leading-relaxed">${itemsList}</p>
-                            ${o.type !== 'Ride' && o.address ? `<p class="text-[10px] text-gray-500 mt-1"><i class="fa-solid fa-location-dot text-red-400"></i> ${o.address}</p>` : ''}
+                            <div class="text-xs text-gray-600 leading-relaxed">${itemsList}</div>
+                            ${breakdownHtml}
+                            ${o.type !== 'Ride' && o.address ? `<p class="text-[10px] text-gray-500 mt-2"><i class="fa-solid fa-location-dot text-red-400"></i> ${o.address}</p>` : ''}
                             ${o.rejectReason ? `<p class="text-[10px] text-red-500 font-bold mt-1 bg-red-50 p-1.5 rounded border border-red-100">Reason: ${o.rejectReason}</p>` : ''}
                         </div>
                         
                         ${actionHtml ? `<div class="flex gap-2 mt-3 pt-3 border-t border-gray-50">${actionHtml}</div>` : ''}
                     </div>`;
             }).join('');
-        };
-
-        window.switchOrderTab = (tab) => {
-            window.adminCurrentOrderTab = tab;
-            document.querySelectorAll('.admin-order-tab').forEach(el => {
-                el.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
-                el.classList.add('text-gray-500');
-            });
-            const activeEl = document.getElementById(`tab-order-${tab}`);
-            if(activeEl) {
-                activeEl.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
-                activeEl.classList.remove('text-gray-500');
-            }
-            window.renderAdminOrders();
         };
 
         window.renderAdminOrders = () => {
@@ -3539,6 +3351,15 @@
                     ? `<span class="text-blue-500 font-medium">From:</span> ${o.pickup || 'N/A'}<br/><span class="text-emerald-500 font-medium">To:</span> ${o.address || 'N/A'}` 
                     : o.address || 'N/A';
 
+                const itemsList = o.items ? o.items.map(i => `<span class="font-bold text-gray-800">${i.qty || 1}x</span> ${i.name}`).join(', ') : '';
+                let detailsPopup = '';
+                if (o.type !== 'Ride') {
+                    detailsPopup = `<div class="mt-1 p-1.5 bg-gray-50 border border-gray-100 rounded-lg text-[9px] text-gray-600">
+                        <div class="mb-1">${itemsList}</div>
+                        <div class="pt-1 border-t border-gray-200">Food: ₹${o.subtotal||0} | Pkg: ₹${o.packagingFee||0} | Plat: ₹${o.platformFee||0} | Del: ₹${o.deliveryFee||0}</div>
+                    </div>`;
+                }
+
                 html += `
                     <tr class="hover:bg-gray-50 transition-colors border-b border-gray-50">
                         <td class="p-3 font-mono font-bold text-[10px] text-gray-500 align-top pt-4">#${o.id.slice(-5).toUpperCase()}<br/><span class="font-sans font-medium text-[9px] text-gray-400">${timeStr}</span></td>
@@ -3547,7 +3368,10 @@
                             <a href="tel:${o.phone}" class="font-mono font-normal text-[10px] text-blue-600 hover:underline inline-block mt-0.5"><i class="fa-solid fa-phone text-[8px]"></i> ${o.phone || 'N/A'}</a><br/>
                             <span class="font-normal text-[10px] text-gray-500 leading-snug mt-1 inline-block"><i class="fa-solid fa-location-dot text-[8px] text-red-400"></i> ${addressDisplay}</span>
                         </td>
-                        <td class="p-3 font-medium text-gray-600 text-xs align-top pt-4">${o.type === 'Ride' ? (o.riderName || 'Pending') : (o.restaurantName || '-')}</td>
+                        <td class="p-3 font-medium text-gray-600 text-xs align-top pt-4">
+                            ${o.type === 'Ride' ? (o.riderName || 'Pending') : (o.restaurantName || '-')}
+                            ${detailsPopup}
+                        </td>
                         <td class="p-3 font-black text-gray-900 text-xs align-top pt-4">₹${o.total ? o.total.toFixed(2) : (o.amount || 0)}</td>
                         <td class="p-3 text-right align-top pt-4">
                             <span class="uppercase text-[9px] font-black ${statusColor} tracking-wider">${o.status}</span>
@@ -3577,10 +3401,10 @@
                     let firstLoad = Object.keys(window.lastKnownOrders || {}).length === 0;
 
                     orders.forEach(o => {
+                        // AUTO-REJECTION LOGIC: If Ride is Requested and > 15 mins old
                         if (o.type === 'Ride' && o.status === 'Requested' && o.time) {
                             const orderTime = o.time.toMillis ? o.time.toMillis() : new Date(o.time).getTime();
                             if (now - orderTime > FIFTEEN_MINS) {
-                                console.log(`Auto-rejecting expired ride: ${o.id}`);
                                 updateDoc(getDocRef('orders', o.id), { 
                                     status: 'Rejected', 
                                     rejectReason: 'Auto-rejected: No rider confirmed within 15 minutes.' 
@@ -3686,7 +3510,7 @@
                         if(o.status === 'Delivered') { statusColor = 'text-emerald-500'; progressWidth = '100%'; statusText = 'Delivered Successfully'; }
                         if(o.status === 'Rejected') { statusColor = 'text-red-500'; progressWidth = '100%'; statusText = 'Order Rejected'; }
 
-                        const itemsList = o.items ? o.items.map(i => i.name).join(', ') : '';
+                        const itemsList = o.items ? o.items.map(i => `<span class="font-bold text-gray-800">${i.qty || 1}x</span> ${i.name}`).join(', ') : '';
                         const paymentBadge = o.paymentMode === 'Prepaid' ? `<span class="bg-blue-100 text-blue-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">Prepaid</span>` : `<span class="bg-gray-100 text-gray-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">COD</span>`;
 
                         let trackingHtml = '';
@@ -3778,6 +3602,19 @@
                             }
                         }
 
+                        let breakdownHtml = '';
+                        if (o.type !== 'Ride' && o.subtotal) {
+                            breakdownHtml = `
+                                <div class="mt-2 bg-gray-50 rounded p-2 text-[10px] font-medium text-gray-600 border border-gray-100">
+                                    <div class="flex justify-between"><span>Food Total:</span><span>₹${(o.subtotal||0).toFixed(2)}</span></div>
+                                    <div class="flex justify-between"><span>Packaging Fee:</span><span>₹${(o.packagingFee||0).toFixed(2)}</span></div>
+                                    <div class="flex justify-between"><span>Platform Fee:</span><span>₹${(o.platformFee||0).toFixed(2)}</span></div>
+                                    <div class="flex justify-between"><span>Delivery Fee ${o.distanceKm ? '(' + o.distanceKm.toFixed(1) + 'km)' : ''}:</span><span>₹${(o.deliveryFee||0).toFixed(2)}</span></div>
+                                    <div class="flex justify-between font-black text-gray-900 mt-1 border-t pt-1"><span>Total:</span><span>₹${(o.total||0).toFixed(2)}</span></div>
+                                </div>
+                            `;
+                        }
+
                         let resAddressHtml = o.restaurantAddress && o.type !== 'Ride' ? `<p class="text-[9px] text-gray-500 font-medium mb-1"><i class="fa-solid fa-location-dot"></i> ${o.restaurantAddress}</p>` : '';
 
                         return `
@@ -3790,7 +3627,7 @@
                                     <span class="text-xl font-black text-gray-900">₹${o.total ? o.total.toFixed(2) : (o.amount || 0)}</span>
                                 </div>
                                 ${resAddressHtml}
-                                ${o.type !== 'Ride' ? `<p class="text-xs text-gray-500 mb-5 font-medium line-clamp-2 mt-2">${itemsList}</p>` : ''}
+                                ${o.type !== 'Ride' ? `<div class="text-xs text-gray-500 mb-2 mt-2 leading-relaxed">${itemsList}</div>${breakdownHtml}` : ''}
                                 <div class="mb-2 mt-4 bg-gray-50 p-3 rounded-xl">
                                     <div class="flex justify-between text-[10px] font-black uppercase tracking-wider mb-2 ${statusColor}"><span>${statusText}</span></div>
                                     <div class="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden"><div class="bg-current h-1.5 rounded-full transition-all duration-1000 ${statusColor.replace('text-', 'bg-')}" style="width: ${progressWidth}"></div></div>
@@ -3811,14 +3648,14 @@
                     let relevantOrders = [];
                     const myId = String(currentUser.phone || currentUser.docId).trim();
 
-                    if (['Food Owner', 'Grocery Shop'].includes(currentUser.category)) {
+                    const isRider = ['Rider', 'Ride Partner'].includes(currentUser.category) || currentUser.vehicleType || currentUser.carNum;
+
+                    if (['Food Owner', 'Grocery Shop'].includes(currentUser.category) && !isRider) {
                         relevantOrders = orders.filter(o => String(o.restaurantId || '').trim() === myId && o.type !== 'Ride');
-                    } else if (['Rider', 'Ride Partner'].includes(currentUser.category)) {
+                    } else if (isRider) {
                         relevantOrders = orders.filter(o => {
                             const orderRiderId = String(o.riderId || '').trim();
-                            // 1. Rides specifically assigned to this rider's phone number
                             const isMyRide = o.type === 'Ride' && orderRiderId === myId;
-                            // 2. Food/Grocery orders ready for delivery that need a rider OR already picked up by this rider
                             const canDeliverFood = o.type !== 'Ride' && (
                                 (o.status === 'Ready' && !o.riderId) || 
                                 (orderRiderId === myId && o.status === 'Out for Delivery')
