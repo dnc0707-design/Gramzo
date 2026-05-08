@@ -3735,10 +3735,12 @@
                         relevantOrders = orders.filter(o => o.restaurantId === currentUser.phone && o.type !== 'Ride');
                     } else if (['Rider', 'Ride Partner'].includes(currentUser.category)) {
                         relevantOrders = orders.filter(o => 
-                            (o.status === 'Ready' && !o.riderId && o.type !== 'Ride') || 
-                            (o.status === 'Placed' && !o.restaurantId && o.type !== 'Ride') || 
-                            (o.riderId === currentUser.phone && ['Out for Delivery'].includes(o.status) && o.type !== 'Ride') ||
-                            (o.riderId === currentUser.phone && o.type === 'Ride')
+                            (o.type === 'Ride' && String(o.riderId) === String(currentUser.phone)) || 
+                            (o.type !== 'Ride' && (
+                                (o.status === 'Ready' && !o.riderId) || 
+                                (o.status === 'Placed' && !o.restaurantId) || 
+                                (o.riderId === currentUser.phone && o.status === 'Out for Delivery')
+                            ))
                         );
                     }
                     
