@@ -378,7 +378,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.27.0 - UI Bleed Fix</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.27.0 - Web Optimized</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right">
                             <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
@@ -1006,16 +1006,25 @@
 
         const IS_LIVE_WEBSITE = true;
 
-        const liveFirebaseConfig = {
-            apiKey: "AIzaSyCA4U4jva7HHeMP-yk1VJy3l_BBct3Gohg",
-            authDomain: "gramzo.firebaseapp.com",
-            projectId: "gramzo",
-            storageBucket: "gramzo.firebasestorage.app",
-            messagingSenderId: "674262956986",
-            appId: "1:674262956986:web:772f68694c77e15bf3fb83"
-        };
+        // Firebase Configuration injected via environment or fallback
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'gramzo-app-live';
+        const customToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let firebaseConfig;
+        if (typeof __firebase_config !== 'undefined') {
+            firebaseConfig = JSON.parse(__firebase_config);
+        } else {
+            firebaseConfig = {
+                apiKey: "AIzaSyCA4U4jva7HHeMP-yk1VJy3l_BBct3Gohg",
+                authDomain: "gramzo.firebaseapp.com",
+                projectId: "gramzo",
+                storageBucket: "gramzo.firebasestorage.app",
+                messagingSenderId: "674262956986",
+                appId: "1:674262956986:web:772f68694c77e15bf3fb83"
+            };
+        }
         
-        const app = initializeApp(liveFirebaseConfig);
+        const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = initializeFirestore(app, { experimentalForceLongPolling: true });
 
@@ -1187,15 +1196,37 @@
             return date.toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
         };
 
-        const getCol = (name) => collection(db, name);
-        const getDocRef = (colName, docId) => doc(db, colName, docId);
+        // COMPLIANT DATABASE ACCESS - RULE 1 STRICT PATHS
+        const getCol = (name) => collection(db, 'artifacts', appId, 'public', 'data', name);
+        const getDocRef = (colName, docId) => doc(db, 'artifacts', appId, 'public', 'data', colName, docId);
 
-        window.dbCall = (promise, ms = 8000) => {
+        let isAuthInitialized = false;
+        window.startApp = async () => {
+            if (isAuthInitialized) return;
+            try {
+                if (customToken) {
+                    await signInWithCustomToken(auth, customToken);
+                } else if (!auth.currentUser) {
+                    await signInAnonymously(auth);
+                }
+                isAuthInitialized = true;
+            } catch (error) {
+                console.error("Auth init error:", error);
+                try { await signInAnonymously(auth); isAuthInitialized = true; } catch (e) {}
+            }
+        };
+
+        window.dbCall = async (promise, ms = 8000) => {
+            await window.startApp(); // Rule 3 Guarantee
+            if (!auth.currentUser) throw new Error("Not authenticated");
             return new Promise((resolve, reject) => {
                 const timer = setTimeout(() => { reject(new Error("Timeout")); }, ms);
                 promise.then(res => { clearTimeout(timer); resolve(res); }).catch(err => { clearTimeout(timer); reject(err); });
             });
         };
+
+        // Call startApp immediately to begin auth process
+        window.startApp();
 
         // --- Notification & Voice Alert Logic ---
         window.alertAudio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
@@ -1415,13 +1446,6 @@
         window.handleSearchInput = () => {
             window.currentSearchQuery = document.getElementById('global-search').value.toLowerCase();
             window.loadMarketplaceData();
-        };
-
-        window.startApp = async () => {
-            if (!auth.currentUser) {
-                try { await window.dbCall(signInAnonymously(auth), 10000); } 
-                catch (e) { console.error(e); }
-            }
         };
 
         window.setupMapsFeatures = () => {
@@ -1648,8 +1672,8 @@
                         ${d.currentLocation ? `<p class="text-[10px] font-medium text-gray-500 mt-1 mb-3"><i class="fa-solid fa-location-dot text-red-400"></i> Driver currently at: <b>${d.currentLocation}</b></p>` : '<div class="mb-3"></div>'}
                         
                         <div class="flex gap-2 mt-4 pt-4 border-t border-gray-100">
-                            <a href="tel:${d.phone}" class="flex-1 bg-gray-100 text-gray-800 font-bold py-2.5 rounded-xl text-xs text-center border border-gray-200 hover:bg-gray-200 transition"><i class="fa-solid fa-phone mr-1"></i> Call</a>
-                            <button onclick="window.confirmRide('${d.phone}', '${(d.name || '').replace(/'/g, "\\'")}', this)" class="flex-[2] bg-yellow-400 text-gray-900 font-bold py-2.5 rounded-xl text-xs shadow-sm hover:bg-yellow-500 transition active:scale-95"><i class="fa-solid fa-paper-plane mr-1"></i> Request Ride</button>
+                            <a href="tel:${d.phone || d.id}" class="flex-1 bg-gray-100 text-gray-800 font-bold py-2.5 rounded-xl text-xs text-center border border-gray-200 hover:bg-gray-200 transition"><i class="fa-solid fa-phone mr-1"></i> Call</a>
+                            <button onclick="window.confirmRide('${d.phone || d.id}', '${(d.name || '').replace(/'/g, "\\'")}', this)" class="flex-[2] bg-yellow-400 text-gray-900 font-bold py-2.5 rounded-xl text-xs shadow-sm hover:bg-yellow-500 transition active:scale-95"><i class="fa-solid fa-paper-plane mr-1"></i> Request Ride</button>
                         </div>
                     </div>
                 `).join('');
@@ -1881,7 +1905,6 @@
 
             if (viewName === 'Cart') window.renderCartUI();
 
-            // FIX: Hide User-specific global elements on Partner/Admin screens
             const globalBanner = document.getElementById('global-top-banner');
             const marqueeContainer = document.getElementById('marquee-container');
             
@@ -1983,7 +2006,7 @@
 
                     const userData = { 
                         name, phone, pin: pass, role: currentAuthRole, shopStatus: ['Rider', 'Ride Partner'].includes(partnerCategory) ? 'Offline' : 'Open',
-                        approvalStatus: currentAuthRole === 'Partner' ? 'Pending' : 'Approved', // Partner needs admin approval
+                        approvalStatus: currentAuthRole === 'Partner' ? 'Pending' : 'Approved',
                         uid: auth?.currentUser?.uid || 'unknown',
                         created: new Date().toISOString(),
                         ...(currentAuthRole === 'Partner' && { 
@@ -1997,7 +2020,7 @@
                                 carNum: carNum,
                                 carModel: carModel,
                                 seater: seater,
-                                walletPoints: 20, // Initial free 20 points
+                                walletPoints: 20, 
                                 currentLocation: ''
                             })
                         })
@@ -2022,7 +2045,6 @@
                     const data = snap.data();
                     if (data.pin !== pass) throw new Error("Incorrect password.");
 
-                    // Default to 'User' role if missing in old data
                     currentUser = { ...data, docId: phone, phone: phone, role: data.role || 'User' };
                     if(auth.currentUser) window.dbCall(setDoc(getDocRef('sessions', auth.currentUser.uid), { phone }, { merge: true }), 3000).catch(e=>{});
                     window.finalizeLoginSequence();
@@ -2036,7 +2058,6 @@
         window.finalizeLoginSequence = () => {
             window.closeAuthModal();
             
-            // Request Notification Permission on Login
             if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
                 Notification.requestPermission();
             }
@@ -2072,11 +2093,9 @@
                 document.getElementById('partner-catalog-list-container').classList.add('hidden');
                 document.getElementById('partner-ride-setup-form').classList.add('hidden');
                 
-                // Hide both dashboards by default
                 document.getElementById('rider-top-dashboard').classList.add('hidden');
                 document.getElementById('shop-top-dashboard').classList.add('hidden');
 
-                // Warning Banner
                 const warningBanner = document.getElementById('partner-pending-warning');
                 if (!isApproved) {
                     warningBanner.classList.remove('hidden');
@@ -2168,7 +2187,6 @@
             
             if (!listEl) return;
             
-            // Generate Sub-Category Filter Chips if we are inside a specific restaurant
             if (currentRestaurantFilter && window.currentUserMainCategory === 'Food Owner' && chipsEl) {
                 const restaurantItems = items.filter(i => i.partnerId === currentRestaurantFilter);
                 const uniqueCategories = [...new Set(restaurantItems.map(i => i.category || 'Others'))];
@@ -2189,7 +2207,7 @@
             }
             
             const filtered = items.filter(i => {
-                const pShopCat = i.shopCategory || 'Food Owner'; // default for older data
+                const pShopCat = i.shopCategory || 'Food Owner'; 
                 if (pShopCat !== window.currentUserMainCategory) return false;
                 if (currentRestaurantFilter && i.partnerId !== currentRestaurantFilter) return false;
                 if (currentFoodCategoryFilter && i.category !== currentFoodCategoryFilter) return false;
@@ -2223,7 +2241,6 @@
                 const textSizeTitle = currentRestaurantFilter || window.currentUserMainCategory === 'Grocery Shop' ? 'text-xs' : 'text-sm';
                 const imgHeight = currentRestaurantFilter || window.currentUserMainCategory === 'Grocery Shop' ? 'h-24' : 'h-32';
                 
-                // Always show the shop name! Only hide the extra address details on mobile if space is tight.
                 const extraDetailsClass = currentRestaurantFilter || window.currentUserMainCategory === 'Grocery Shop' ? 'hidden sm:block' : 'block';
                 
                 let addressDisplay = `<div class="mb-2">
@@ -2296,7 +2313,6 @@
                 return;
             }
             
-            // Map the first product image to the restaurant if available, otherwise use a placeholder
             carousel.innerHTML = restaurants.map(r => {
                 const isActive = currentRestaurantFilter === r.partnerId;
                 const isOffline = r.shopStatus === 'Closed' || r.shopStatus === 'Offline';
@@ -2313,11 +2329,9 @@
 
         const extractRestaurants = async () => {
             try {
-                // Fetch approved partners from the 'users' collection instead of 'products' to guarantee empty shops also show
                 const snap = await window.dbCall(getDocs(getCol('users')), 5000);
                 const approvedPartners = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(u => u.role === 'Partner' && u.approvalStatus === 'Approved' && (u.category === window.currentUserMainCategory));
                 
-                // Fetch all products so we can extract an image for the shop
                 const prodSnap = await window.dbCall(getDocs(getCol('products')), 5000);
                 const products = prodSnap.docs.map(d => d.data());
 
@@ -2369,7 +2383,7 @@
             onSnapshot(getCol('products'), (snap) => {
                 let items = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
                 
-                extractRestaurants(); // Uses live user data now
+                extractRestaurants(); 
                 renderProducts(items);
             }, (err) => {
                 if (err.code === 'permission-denied') window.showToast("Firebase Permissions Denied! Check rules.", "error");
@@ -3281,6 +3295,11 @@
                 const addressDisplay = o.type === 'Ride' 
                     ? `<span class="text-blue-500 font-medium">From:</span> ${o.pickup || 'N/A'}<br/><span class="text-emerald-500 font-medium">To:</span> ${o.address || 'N/A'}` 
                     : o.address || 'N/A';
+                    
+                let adminActionHtml = '';
+                if (!['Delivered', 'Completed', 'Rejected'].includes(o.status)) {
+                    adminActionHtml = `<br/><button onclick="window.openRejectModal('${o.id}')" class="mt-2 bg-red-50 text-red-600 border border-red-100 px-2 py-1 rounded shadow-sm text-[8px] hover:bg-red-100 transition active:scale-95 capitalize"><i class="fa-solid fa-xmark mr-0.5"></i> Reject</button>`;
+                }
 
                 html += `
                     <tr class="hover:bg-gray-50 transition-colors border-b border-gray-50">
@@ -3292,7 +3311,10 @@
                         </td>
                         <td class="p-3 font-medium text-gray-600 text-xs align-top pt-4">${o.type === 'Ride' ? (o.riderName || 'Pending') : (o.restaurantName || '-')}</td>
                         <td class="p-3 font-black text-gray-900 text-xs align-top pt-4">₹${o.total ? o.total.toFixed(2) : (o.amount || 0)}</td>
-                        <td class="p-3 text-right uppercase text-[9px] font-black ${statusColor} tracking-wider align-top pt-4">${o.status}</td>
+                        <td class="p-3 text-right uppercase text-[9px] font-black ${statusColor} tracking-wider align-top pt-4">
+                            ${o.status}
+                            ${adminActionHtml}
+                        </td>
                     </tr>`;
             });
             adminLog.innerHTML = html;
@@ -3498,25 +3520,25 @@
                 await window.dbCall(setDoc(getDocRef('settings', 'app_config'), { marqueeText: text }, { merge: true }), 10000);
                 window.showToast("Marquee Updated!", "success");
                 document.getElementById('admin-marquee-text').value = "";
-            } catch(e) {
-                window.showToast("Error updating marquee.", "error");
-            } finally {
-                btn.innerText = orig;
-                btn.disabled = false;
-            }
-        };
-
-        window.initRoleListeners = () => {
-            if (!auth.currentUser || !currentUser) return;
-
-            unsubscribeListeners.forEach(u => u());
-            unsubscribeListeners = [];
-
-            if (currentUser.role === 'Admin') {
-                const unsubOrders = onSnapshot(getCol('orders'), (snap) => {
-                    let revFood = 0, revGrocery = 0, revRide = 0, count = 0;
+            else if (currentUser.role === 'Partner') {
+                const orderUnsub = onSnapshot(getCol('orders'), (snap) => {
                     const orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                    orders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0));
+                    
+                    let relevantOrders = [];
+                    const myPhoneStr = String(currentUser.phone || currentUser.docId);
+                    
+                    if (['Food Owner', 'Grocery Shop'].includes(currentUser.category)) {
+                        relevantOrders = orders.filter(o => String(o.restaurantId) === myPhoneStr && o.type !== 'Ride');
+                    } else if (['Rider', 'Ride Partner'].includes(currentUser.category)) {
+                        relevantOrders = orders.filter(o => 
+                            (o.status === 'Ready' && !o.riderId && o.type !== 'Ride') || 
+                            (o.status === 'Placed' && !o.restaurantId && o.type !== 'Ride') || 
+                            (String(o.riderId) === myPhoneStr && ['Out for Delivery'].includes(o.status) && o.type !== 'Ride') ||
+                            (String(o.riderId) === myPhoneStr && o.type === 'Ride')
+                        );
+                    }
+                    
+                    relevantOrders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0));
 
                     let newOrderIds = {};
                     let firstLoad = Object.keys(window.lastKnownOrders || {}).length === 0;
@@ -3524,7 +3546,7 @@
                     orders.forEach(o => {
                         if (o.status !== 'Rejected') {
                             if (o.type === 'Ride') revRide += (o.total || o.amount || 0);
-                            else if (o.restaurantName && o.restaurantName.toLowerCase().includes('grocery')) revGrocery += (o.total || 0); // basic fallback, better to use shopCategory
+                            else if (o.restaurantName && o.restaurantName.toLowerCase().includes('grocery')) revGrocery += (o.total || 0); 
                             else revFood += (o.total || 0);
                             
                             count++;
@@ -3547,7 +3569,7 @@
 
                     window.adminOrdersData = orders;
                     if(window.renderAdminOrders) window.renderAdminOrders();
-                });
+                }, (err) => console.error("Admin Orders Snapshot Error:", err));
                 unsubscribeListeners.push(unsubOrders);
 
                 const unsubUsers = onSnapshot(getCol('users'), (snap) => {
@@ -3562,7 +3584,7 @@
 
                     window.adminUsersData = allUsers;
                     if(window.renderAdminUsers) window.renderAdminUsers();
-                });
+                }, (err) => console.error("Admin Users Snapshot Error:", err));
                 unsubscribeListeners.push(unsubUsers);
 
                 const unsubPromos = onSnapshot(getCol('promos'), (snap) => {
@@ -3584,7 +3606,7 @@
                             </td>
                         </tr>
                     `).join('');
-                });
+                }, (err) => console.error("Admin Promos Snapshot Error:", err));
                 unsubscribeListeners.push(unsubPromos);
             } 
             else if (currentUser.role === 'User') {
@@ -3646,7 +3668,6 @@
                                     </div>
                                 `;
                             }
-
                             trackingHtml = `
                             <div class="mt-4 bg-blue-50 border border-blue-100 rounded-xl p-3">
                                 <p class="text-[10px] font-black uppercase text-blue-600 mb-1">Assigned Cab Details</p>
