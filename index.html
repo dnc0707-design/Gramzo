@@ -480,10 +480,6 @@
                                 <h2 class="text-2xl font-black mb-1" id="rider-welcome">Welcome!</h2>
                                 <p class="text-sm font-medium text-blue-100 mb-4" id="rider-vehicle-info">Vehicle Info</p>
                             </div>
-                            <div class="bg-black/20 backdrop-blur border border-white/20 px-3 py-2 rounded-xl text-center">
-                                <p class="text-[9px] text-blue-100 font-bold uppercase mb-0.5">Points</p>
-                                <p class="text-xl font-black text-yellow-400" id="wallet-points-display">0</p>
-                            </div>
                         </div>
 
                         <!-- Current Location Broadcast -->
@@ -1763,40 +1759,13 @@
         };
 
         window.completeRide = async (orderId) => {
-            const confirmed = await window.customConfirm("Complete Ride", "Are you sure you have completed the ride and collected payment? 20 Gramzo Points will be deducted.", "Complete Ride");
+            const confirmed = await window.customConfirm("Complete Ride", "Are you sure you have completed the ride and collected payment?", "Complete Ride");
             if (!confirmed) return;
 
-            if((currentUser.walletPoints || 0) < 20) {
-                return window.showToast("Insufficient Gramzo Points to complete this ride. Contact Admin.", "error");
-            }
-
             try {
-                // Deduct 20 points
-                const newPoints = (currentUser.walletPoints || 0) - 20;
-                
                 await window.dbCall(updateDoc(getDocRef('orders', orderId), { status: 'Completed' }), 10000);
-                await window.dbCall(updateDoc(getDocRef('users', currentUser.phone), { walletPoints: newPoints }), 10000);
-                
-                currentUser.walletPoints = newPoints;
-                const pointDisplay = document.getElementById('wallet-points-display');
-                if(pointDisplay) pointDisplay.innerText = newPoints;
-
                 window.showToast("Ride Completed successfully!", "success");
             } catch(e) { window.showToast("Failed to end ride.", "error"); }
-        };
-
-        window.adminAddPoints = async (userId, currentPoints) => {
-            const amountStr = await window.customPrompt("Add Points", `Current Points: ${currentPoints}\nEnter amount of points to add:`, "amount", "number");
-            if(!amountStr) return;
-            const pointsToAdd = parseInt(amountStr);
-            if(isNaN(pointsToAdd) || pointsToAdd <= 0) return window.showToast("Invalid points amount.", "error");
-
-            try {
-                await window.dbCall(updateDoc(getDocRef('users', userId), {
-                    walletPoints: (currentPoints || 0) + pointsToAdd
-                }), 10000);
-                window.showToast("Points added successfully!", "success");
-            } catch(e) { window.showToast("Failed to add points.", "error"); }
         };
 
         window.getCurrentLocation = (inputId) => {
@@ -2020,7 +1989,6 @@
                                 carNum: carNum,
                                 carModel: carModel,
                                 seater: seater,
-                                walletPoints: 20, 
                                 currentLocation: ''
                             })
                         })
@@ -2118,7 +2086,6 @@
                     document.getElementById('rider-top-dashboard').classList.remove('hidden');
                     document.getElementById('rider-welcome').innerText = `Welcome, ${displayName}!`;
                     document.getElementById('rider-vehicle-info').innerText = `${currentUser.carModel || 'Vehicle'} - ${currentUser.carNum || 'N/A'}`;
-                    document.getElementById('wallet-points-display').innerText = currentUser.walletPoints || 0;
                     
                     if (isApproved) {
                         document.getElementById('partner-ride-setup-form').classList.remove('hidden');
@@ -3223,7 +3190,7 @@
                     `;
 
                     if(['Rider', 'Ride Partner'].includes(u.category)) {
-                        detailsHtml = `<span class="font-bold text-gray-700">Vehicle:</span> ${u.carModel || 'N/A'} (${u.carNum || 'N/A'})<br/><span class="font-bold text-gray-700">Wallet:</span> ${u.walletPoints || 0} pts`;
+                        detailsHtml = `<span class="font-bold text-gray-700">Vehicle:</span> ${u.carModel || 'N/A'} (${u.carNum || 'N/A'})`;
                     } else {
                         detailsHtml = `<span class="font-bold text-gray-700">Shop:</span> ${u.shopName || 'N/A'}<br/><span class="font-bold text-gray-700">Status:</span> <span class="${isApproved ? 'text-emerald-500' : 'text-orange-500'} font-bold">${u.approvalStatus || 'Pending'}</span>`;
                     }
@@ -3234,10 +3201,6 @@
                 let actionsHtml = `<span class="cursor-pointer font-black text-gray-400 bg-gray-100 px-2 py-0.5 rounded" onclick="this.innerText='${u.pin}'" title="Click to reveal">***</span>`;
                 
                 let editBtn = `<button onclick="window.openAdminUserEdit('${u.phone}', '${(u.name || '').replace(/'/g, "\\'")}', '${(u.shopName || '').replace(/'/g, "\\'")}')" class="text-blue-500 hover:text-blue-700 ml-2" title="Edit User"><i class="fa-solid fa-pen"></i></button>`;
-
-                if (['Rider', 'Ride Partner'].includes(u.category)) {
-                    actionsHtml += `<br/><button onclick="window.adminAddPoints('${u.phone}', ${u.walletPoints || 0})" class="bg-blue-50 text-blue-600 px-2 py-1 mt-1 rounded border border-blue-100 text-[9px] font-bold w-full">+ Points</button>`;
-                }
 
                 return `
                 <tr class="hover:bg-gray-50 transition-colors border-b border-gray-50">
@@ -3520,6 +3483,95 @@
                 await window.dbCall(setDoc(getDocRef('settings', 'app_config'), { marqueeText: text }, { merge: true }), 10000);
                 window.showToast("Marquee Updated!", "success");
                 document.getElementById('admin-marquee-text').value = "";
+            } catch(e) {
+                window.showToast("Error updating marquee.", "error");
+            } finally {
+                btn.innerText = orig;
+                btn.disabled = false;
+            }
+        };
+
+        window.initRoleListeners = () => {
+            if (!auth.currentUser || !currentUser) return;
+
+            unsubscribeListeners.forEach(u => u());
+            unsubscribeListeners = [];
+
+            if (currentUser.role === 'Admin') {
+                const unsubOrders = onSnapshot(getCol('orders'), (snap) => {
+                    let revFood = 0, revGrocery = 0, revRide = 0, count = 0;
+                    const orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                    orders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0));
+
+                    let newOrderIds = {};
+                    let firstLoad = Object.keys(window.lastKnownOrders || {}).length === 0;
+
+                    orders.forEach(o => {
+                        if (o.status !== 'Rejected') {
+                            if (o.type === 'Ride') revRide += (o.total || o.amount || 0);
+                            else if (o.restaurantName && o.restaurantName.toLowerCase().includes('grocery')) revGrocery += (o.total || 0); 
+                            else revFood += (o.total || 0);
+                            
+                            count++;
+                        }
+                        
+                        newOrderIds[o.id] = o.status;
+                        if (!firstLoad && !window.lastKnownOrders[o.id]) {
+                            window.speakAlert("New order received");
+                            window.showStatusPopup("New Order Alert", `Order #${o.id.slice(-5).toUpperCase()} placed for ₹${o.total}`);
+                        }
+                    });
+                    
+                    window.lastKnownOrders = newOrderIds;
+                    
+                    document.getElementById('stat-rev').innerText = `₹${(revFood + revGrocery + revRide).toFixed(2)}`;
+                    document.getElementById('stat-rev-food').innerText = `₹${revFood.toFixed(0)}`;
+                    document.getElementById('stat-rev-grocery').innerText = `₹${revGrocery.toFixed(0)}`;
+                    document.getElementById('stat-rev-ride').innerText = `₹${revRide.toFixed(0)}`;
+                    document.getElementById('stat-ord').innerText = count;
+
+                    window.adminOrdersData = orders;
+                    if(window.renderAdminOrders) window.renderAdminOrders();
+                });
+                unsubscribeListeners.push(unsubOrders);
+
+                const unsubUsers = onSnapshot(getCol('users'), (snap) => {
+                    const allUsers = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                    document.getElementById('stat-users').innerText = allUsers.length;
+                    
+                    const partners = allUsers.filter(u => u.role === 'Partner' && u.approvalStatus === 'Approved');
+                    const promoSelect = document.getElementById('admin-promo-restaurant');
+                    if(promoSelect) {
+                        promoSelect.innerHTML = '<option value="Global">All Restaurants (Global)</option>' + partners.map(p => `<option value="${p.id}">${p.shopName || p.name}</option>`).join('');
+                    }
+
+                    window.adminUsersData = allUsers;
+                    if(window.renderAdminUsers) window.renderAdminUsers();
+                });
+                unsubscribeListeners.push(unsubUsers);
+
+                const unsubPromos = onSnapshot(getCol('promos'), (snap) => {
+                    const promoList = document.getElementById('admin-promo-list');
+                    if(!promoList) return;
+                    const promos = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                    if(promos.length === 0) {
+                        promoList.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-400">No promo codes active.</td></tr>';
+                        return;
+                    }
+                    promoList.innerHTML = promos.map(p => `
+                        <tr class="border-b border-gray-50">
+                            <td class="p-2 font-bold text-gray-900 uppercase">${p.code}</td>
+                            <td class="p-2 font-black text-red-600">${p.discount}%</td>
+                            <td class="p-2 text-gray-500 text-[10px] truncate max-w-[100px]">${p.restaurantName || 'All Restaurants'}</td>
+                            <td class="p-2 text-right">
+                                <button onclick="window.togglePromo('${p.id}', ${p.isActive})" class="px-2 py-1 rounded text-[10px] font-bold ${p.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'}">${p.isActive ? 'Active' : 'Disabled'}</button>
+                                <button onclick="window.deletePromo('${p.id}')" class="px-2 py-1 rounded text-[10px] font-bold bg-red-100 text-red-700 ml-1"><i class="fa-solid fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    `).join('');
+                });
+                unsubscribeListeners.push(unsubPromos);
+            }
             else if (currentUser.role === 'Partner') {
                 const orderUnsub = onSnapshot(getCol('orders'), (snap) => {
                     const orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
@@ -3668,6 +3720,7 @@
                                     </div>
                                 `;
                             }
+                            
                             trackingHtml = `
                             <div class="mt-4 bg-blue-50 border border-blue-100 rounded-xl p-3">
                                 <p class="text-[10px] font-black uppercase text-blue-600 mb-1">Assigned Cab Details</p>
