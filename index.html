@@ -2775,6 +2775,48 @@
         window.markOutForDelivery = async (orderId) => { try { await window.dbCall(updateDoc(getDocRef('orders', orderId), {status: 'Out for Delivery'}), 10000); window.showToast("Order is out for delivery!", "success"); } catch(e) {} };
         window.markDelivered = async (orderId) => { try { await window.dbCall(updateDoc(getDocRef('orders', orderId), {status: 'Delivered'}), 10000); window.showToast("Order Delivered Successfully!", "success"); } catch(e) {} };
 
+        window.markSelfDelivery = async (orderId) => {
+            try {
+                await window.dbCall(updateDoc(getDocRef('orders', orderId), {
+                    status: 'Out for Delivery',
+                    riderId: String(currentUser.phone || currentUser.docId).trim(),
+                    riderName: (currentUser.shopName || currentUser.name) + " (Self Delivery)",
+                    riderPhone: currentUser.phone || ''
+                }), 10000);
+                window.showToast("Marked for Self Delivery!", "success");
+            } catch(e) { window.showToast("Failed to update.", "error"); }
+        };
+
+        window.showOnlineRiders = async () => {
+            window.showToast("Fetching available riders...", "info");
+            try {
+                const snap = await window.dbCall(getDocs(getCol('users')), 5000);
+                const riders = snap.docs.map(d => d.data()).filter(u => ['Rider', 'Ride Partner'].includes(u.category) && u.shopStatus === 'Online' && u.approvalStatus === 'Approved');
+                
+                const titleEl = document.getElementById('info-modal-title');
+                const bodyEl = document.getElementById('info-modal-body');
+                
+                titleEl.innerText = "Available Delivery Partners";
+                
+                if(riders.length === 0) {
+                    bodyEl.innerHTML = '<div class="text-center py-6 text-gray-500 font-medium">No riders are currently online. You may need to self-deliver.</div>';
+                } else {
+                    bodyEl.innerHTML = '<div class="space-y-3">' + riders.map(r => `
+                        <div class="bg-blue-50 border border-blue-100 p-3 rounded-xl flex justify-between items-center">
+                            <div>
+                                <p class="font-bold text-sm text-gray-900">${r.name}</p>
+                                <p class="text-[10px] text-gray-500">${r.carModel || 'Delivery Vehicle'} - ${r.carNum || 'N/A'}</p>
+                            </div>
+                            <a href="tel:${r.phone}" class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone text-xs"></i></a>
+                        </div>
+                    `).join('') + '</div>';
+                }
+                document.getElementById('info-modal').classList.add('active');
+            } catch(e) {
+                window.showToast("Failed to fetch riders.", "error");
+            }
+        };
+
         window.updateRiderLocation = async () => {
             const locInput = document.getElementById('rider-current-loc-input').value.trim();
             if(!locInput) return window.showToast("Enter a location to broadcast.", "error");
@@ -3302,9 +3344,16 @@
                     } else if (o.status === 'Preparing') {
                         actionHtml = `<button onclick="window.markReady('${o.id}')" class="w-full bg-yellow-50 text-yellow-600 border border-yellow-200 py-2 rounded-xl text-[10px] font-black tracking-wide hover:bg-yellow-500 hover:text-white transition-colors">MARK READY</button>`;
                     } else if (o.status === 'Ready' && !o.riderId) {
-                        actionHtml = `<p class="text-[10px] font-bold text-gray-500 text-center w-full bg-gray-50 py-2 rounded-xl border border-gray-100 animate-pulse">Waiting for Delivery Partner...</p>`;
+                        actionHtml = `
+                            <button onclick="window.markSelfDelivery('${o.id}')" class="flex-1 bg-purple-50 text-purple-600 border border-purple-200 py-2 rounded-xl text-[10px] font-black tracking-wide hover:bg-purple-600 hover:text-white transition-colors">SELF DELIVERY</button>
+                            <button onclick="window.showOnlineRiders()" class="flex-[1.5] bg-gray-50 text-gray-600 border border-gray-200 py-2 rounded-xl text-[10px] font-black tracking-wide hover:bg-gray-200 transition-colors"><i class="fa-solid fa-motorcycle mr-1"></i> FIND RIDERS</button>
+                        `;
                     } else if (o.status === 'Ready' && o.riderId) {
                         actionHtml = `<p class="text-[10px] font-bold text-blue-600 text-center w-full bg-blue-50 py-2 rounded-xl border border-blue-100">Rider assigned: ${o.riderName}</p>`;
+                    } else if (o.status === 'Out for Delivery' && o.riderId === String(currentUser.phone || currentUser.docId).trim()) {
+                        actionHtml = `<button onclick="window.markDelivered('${o.id}')" class="w-full bg-emerald-50 text-emerald-600 border border-emerald-200 py-2 rounded-xl text-[10px] font-black tracking-wide hover:bg-emerald-600 hover:text-white transition-colors">MARK DELIVERED (SELF)</button>`;
+                    } else if (o.status === 'Out for Delivery') {
+                        actionHtml = `<p class="text-[10px] font-bold text-blue-600 text-center w-full bg-blue-50 py-2 rounded-xl border border-blue-100">Out for delivery by: ${o.riderName}</p>`;
                     }
                 } else if (['Rider', 'Ride Partner'].includes(currentUser.category)) {
                     if (o.type === 'Ride') {
