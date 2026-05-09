@@ -80,74 +80,7 @@
     
     <!-- jsPDF for Invoice Generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Righteous&display=swap');
-        @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap');
-        
-        :root {
-            --primary: #E23744;
-            --bg-color: #f8f9fa; 
-            --text-main: #1c1c1c;
-        }
-
-        body {
-            font-family: 'Outfit', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            -webkit-tap-highlight-color: transparent;
-            padding-bottom: 90px;
-        }
-
-        .font-logo { font-family: 'Righteous', cursive; }
-        .font-bengali { font-family: 'Hind Siliguri', sans-serif; }
-
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .glass-nav { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(16px); border-bottom: 1px solid #f0f0f0; }
-        
-        .view-section { display: none; animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .view-section.active { display: block; }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes marquee {
-            0% { transform: translateX(100vw); }
-            100% { transform: translateX(-100%); }
-        }
-        .animate-marquee {
-            display: inline-block;
-            white-space: nowrap;
-            animation: marquee 25s linear infinite;
-            will-change: transform;
-        }
-
-        .input-field {
-            @apply w-full px-5 py-4 bg-gray-50/80 rounded-2xl border border-gray-200 outline-none focus:bg-white focus:ring-2 ring-red-500/30 focus:border-red-500 transition-all text-sm font-medium text-gray-800;
-        }
-
-        .modal-overlay {
-            display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); z-index: 100; opacity: 0; transition: opacity 0.3s ease;
-        }
-        .modal-overlay.active { display: block; opacity: 1; }
-        
-        .modal-content {
-            position: absolute; top: 50%; left: 50%; right: auto; bottom: auto; background: white; border-radius: 2rem; padding: 2rem; transform: translate(-50%, -45%) scale(0.95); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); max-height: 90vh; overflow-y: auto; width: 90%; max-width: 28rem; opacity: 0;
-        }
-        .modal-overlay.active .modal-content { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-
-        .search-shadow { box-shadow: 0 4px 12px rgba(226, 55, 68, 0.08); }
-        .pac-container { border-radius: 1.5rem; border: 1px solid #e5e7eb; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); font-family: 'Outfit', sans-serif; z-index: 9999; padding: 0.5rem; }
-        .pac-item { padding: 12px; font-size: 14px; font-weight: 500; color: #374151; border-bottom: 1px solid #f3f4f6; cursor: pointer; }
-        .pac-item:hover { background-color: #f0fdf4; color: #E23744; }
-        select { -webkit-appearance: none; -moz-appearance: none; appearance: none; }
-        
-        .hide-scroll::-webkit-scrollbar { display: none; }
-        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-    </style>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
