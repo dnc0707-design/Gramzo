@@ -2730,6 +2730,10 @@
                 }
                 
                 window.showToast(`Status marked as ${newStatus}`, "success");
+                
+                // CRITICAL FIX: Force refresh the listener to instantly pull broadcasted rides the moment they go Online
+                if (window.initRoleListeners) window.initRoleListeners();
+                
             } catch(e) {
                 window.showToast("Error updating status", "error");
                 toggle.checked = !isOpen; 
@@ -3655,24 +3659,41 @@
                         const orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
                         
                         let relevantOrders = [];
-                        if (['Food Owner', 'Grocery Shop'].includes(currentUser.category)) {
-                            relevantOrders = orders.filter(o => o.restaurantId === currentUser.phone && o.type !== 'Ride');
-                        } else if (['Rider', 'Ride Partner'].includes(currentUser.category)) {
-                            let myMappedType = currentUser.vehicleType;
-                            if (myMappedType === 'Car') {
-                                myMappedType = parseInt(currentUser.seater) <= 6 ? 'Car_Mini' : 'Car_SUV';
-                            }
+                    if (['Food Owner', 'Grocery Shop'].includes(currentUser.category)) {
+                        relevantOrders = orders.filter(o => o.restaurantId === currentUser.phone && o.type !== 'Ride');
+                    } else if (['Rider', 'Ride Partner'].includes(currentUser.category)) {
+                        
+                        // VERY FORGIVING VEHICLE MAPPING TO PREVENT MISSING RIDES (Fixes older test accounts)
+                        let myType = currentUser.vehicleType || 'Bike'; // Default old riders to Bike
+                        let mySeater = parseInt(currentUser.seater) || 4; // Default to 4 seater
+                        
+                        let isCar = myType === 'Car' || myType.startsWith('Car');
+                        let myCarCat = mySeater <= 6 ? 'Car_Mini' : 'Car_SUV';
+                        let isOnline = currentUser.shopStatus === 'Online' || currentUser.shopStatus === 'Open';
+
+                        relevantOrders = orders.filter(o => {
+                            let orderVeh = o.vehicleType || 'Bike';
+                            let isIncomingRide = (o.status === 'Broadcasted' || o.status === 'Requested') && o.type === 'Ride';
                             
-                            relevantOrders = orders.filter(o => 
-                                (o.status === 'Ready' && !o.riderId && o.type !== 'Ride' && currentUser.vehicleType === 'Bike') || 
-                                (o.status === 'Placed' && !o.restaurantId && o.type !== 'Ride' && currentUser.vehicleType === 'Bike') || 
+                            // Check if the order matches the rider's vehicle type
+                            let vehicleMatch = false;
+                            if (isCar) {
+                                vehicleMatch = (orderVeh === myCarCat || orderVeh === 'Car' || orderVeh.startsWith('Car'));
+                            } else {
+                                vehicleMatch = (orderVeh === myType);
+                            }
+
+                            return (
+                                (o.status === 'Ready' && !o.riderId && o.type !== 'Ride' && myType === 'Bike') || 
+                                (o.status === 'Placed' && !o.restaurantId && o.type !== 'Ride' && myType === 'Bike') || 
                                 (o.riderId === currentUser.phone && ['Out for Delivery'].includes(o.status) && o.type !== 'Ride') ||
                                 (o.riderId === currentUser.phone && o.type === 'Ride') ||
-                                (o.status === 'Broadcasted' && o.type === 'Ride' && o.vehicleType === myMappedType)
+                                (isIncomingRide && vehicleMatch && isOnline) // MUST BE ONLINE & VEHICLE MUST MATCH
                             );
-                        }
-                        
-                        relevantOrders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0));
+                        });
+                    }
+                    
+                    relevantOrders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0));
 
                         let newOrderIds = {};
                         let firstLoad = Object.keys(window.lastKnownOrders || {}).length === 0;
