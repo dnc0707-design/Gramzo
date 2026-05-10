@@ -3276,15 +3276,33 @@
                     let paymentBadge = o.paymentMode === 'Prepaid' ? `<span class="bg-blue-100 text-blue-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">Prepaid</span>` : `<span class="bg-gray-100 text-gray-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">COD</span>`;
                     let screenshotHtml = o.paymentMode === 'Prepaid' && o.paymentScreenshot ? `<button type="button" onclick="window.viewImage('${o.paymentScreenshot}')" class="text-[10px] text-blue-600 bg-blue-50 px-2 py-1 rounded font-bold hover:bg-blue-100 transition mt-2 w-full text-left"><i class="fa-solid fa-image"></i> View Payment Screenshot</button>` : '';
                     
+                    let showPhone = true;
+                    if (['Rider', 'Ride Partner'].includes(currentUser.category)) {
+                        if (o.type === 'Ride') {
+                            showPhone = !['Broadcasted', 'Requested'].includes(o.status);
+                        } else {
+                            showPhone = o.riderId === currentUser.phone;
+                        }
+                    }
+                    
+                    let displayPhone = showPhone ? o.phone : '+91 ••••• •••••';
+                    let phoneLink = showPhone ? `tel:${o.phone}` : 'javascript:void(0)';
+                    let phoneClass = showPhone ? 'text-blue-600' : 'text-gray-400 cursor-not-allowed';
+
                     let customerInfo = `<div class="mb-3 bg-gray-50 p-2 rounded-xl border border-gray-100">
                         <p class="text-xs font-black text-gray-800"><i class="fa-solid fa-user text-gray-400 mr-1"></i> ${o.customer}</p>
-                        <p class="text-xs font-bold text-blue-600 mt-1"><a href="tel:${o.phone}"><i class="fa-solid fa-phone mr-1"></i> ${o.phone}</a></p>
+                        <p class="text-xs font-bold ${phoneClass} mt-1"><a href="${phoneLink}"><i class="fa-solid fa-phone mr-1"></i> ${displayPhone}</a></p>
                     </div>`;
 
                     if (['Rider', 'Ride Partner'].includes(currentUser.category)) {
                         if (o.type === 'Ride') {
                             if (o.status === 'Broadcasted' || o.status === 'Requested') {
-                                actionButtons = `<button type="button" onclick="window.driverAcceptRide('${o.id}')" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-check mr-1"></i> Accept Ride</button>`;
+                                actionButtons = `
+                                    <div class="flex gap-2">
+                                        <button type="button" onclick="window.driverAcceptRide('${o.id}')" class="flex-[1.5] bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-check mr-1"></i> Accept</button>
+                                        <button type="button" onclick="window.openRejectModal('${o.id}')" class="flex-1 bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm hover:bg-red-100 transition-colors active:scale-95"><i class="fa-solid fa-xmark"></i> Reject</button>
+                                    </div>
+                                `;
                             } else if (o.status === 'Confirmed') {
                                 actionButtons = `<button type="button" onclick="window.markRideStarted('${o.id}')" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-play mr-1"></i> Start Ride</button>`;
                             } else if (o.status === 'Started') {
@@ -3337,7 +3355,7 @@
                                             <span class="text-[9px] font-medium text-gray-400"><i class="fa-regular fa-clock"></i> ${timeStr}</span>
                                         </div>
                                         <h4 class="font-bold text-gray-900 text-sm mt-2"><i class="fa-solid fa-user text-gray-400 mr-1"></i> ${o.customer}</h4>
-                                        <a href="tel:${o.phone}" class="text-xs font-bold text-blue-600 block mt-0.5"><i class="fa-solid fa-phone mr-1"></i> ${o.phone}</a>
+                                        <a href="${phoneLink}" class="text-xs font-bold ${phoneClass} block mt-0.5"><i class="fa-solid fa-phone mr-1"></i> ${displayPhone}</a>
                                     </div>
                                     <span class="text-xl font-black text-emerald-600">${o.amount ? '₹'+o.amount : '...'}</span>
                                 </div>
@@ -3449,8 +3467,8 @@
                 unsubscribeListeners = [];
 
                 if (currentUser.role === 'Admin') {
-                    const unsubOrders = onSnapshot(getCol('orders'), (snap) => {
-                        let revFood = 0, revGrocery = 0, revRide = 0, count = 0;
+                const unsubOrders = onSnapshot(getCol('orders'), (snap) => {
+                    let revFood = 0, revGrocery = 0, revRide = 0, count = 0;
                         const orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
                         orders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0));
 
@@ -3472,59 +3490,10 @@
                                 window.showStatusPopup("New Order Alert", `Order #${o.id.slice(-5).toUpperCase()} placed for ₹${o.total}`);
                             }
                         });
-                        
-                        window.lastKnownOrders = newOrderIds;
-                        
-                        document.getElementById('stat-rev').innerText = `₹${(revFood + revGrocery + revRide).toFixed(2)}`;
-                        document.getElementById('stat-rev-food').innerText = `₹${revFood.toFixed(0)}`;
-                        document.getElementById('stat-rev-grocery').innerText = `₹${revGrocery.toFixed(0)}`;
-                        document.getElementById('stat-rev-ride').innerText = `₹${revRide.toFixed(0)}`;
-                        document.getElementById('stat-ord').innerText = count;
-
-                        window.adminOrdersData = orders;
-                        if(window.renderAdminOrders) window.renderAdminOrders();
-                    });
-                    unsubscribeListeners.push(unsubOrders);
-
-                    const unsubUsers = onSnapshot(getCol('users'), (snap) => {
-                        const allUsers = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                        document.getElementById('stat-users').innerText = allUsers.length;
-                        
-                        const partners = allUsers.filter(u => u.role === 'Partner' && u.approvalStatus === 'Approved');
-                        const promoSelect = document.getElementById('admin-promo-restaurant');
-                        if(promoSelect) {
-                            promoSelect.innerHTML = '<option value="Global">All Restaurants (Global)</option>' + partners.map(p => `<option value="${p.id}">${p.shopName || p.name}</option>`).join('');
-                        }
-
-                        window.adminUsersData = allUsers;
-                        if(window.renderAdminUsers) window.renderAdminUsers();
-                    });
-                    unsubscribeListeners.push(unsubUsers);
-
-                    const unsubPromos = onSnapshot(getCol('promos'), (snap) => {
-                        const promoList = document.getElementById('admin-promo-list');
-                        if(!promoList) return;
-                        const promos = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                        if(promos.length === 0) {
-                            promoList.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-400">No promo codes active.</td></tr>';
-                            return;
-                        }
-                        promoList.innerHTML = promos.map(p => `
-                            <tr class="border-b border-gray-50">
-                                <td class="p-2 font-bold text-gray-900 uppercase">${p.code}</td>
-                                <td class="p-2 font-black text-red-600">${p.discount}%</td>
-                                <td class="p-2 text-gray-500 text-[10px] truncate max-w-[100px]">${p.restaurantName || 'All Restaurants'}</td>
-                                <td class="p-2 text-right">
-                                    <button onclick="window.togglePromo('${p.id}', ${p.isActive})" class="px-2 py-1 rounded text-[10px] font-bold ${p.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'}">${p.isActive ? 'Active' : 'Disabled'}</button>
-                                    <button onclick="window.deletePromo('${p.id}')" class="px-2 py-1 rounded text-[10px] font-bold bg-red-100 text-red-700 ml-1"><i class="fa-solid fa-trash"></i></button>
-                                </td>
-                            </tr>
-                        `).join('');
-                    });
-                    unsubscribeListeners.push(unsubPromos);
-                } 
-                else if (currentUser.role === 'User') {
-                    const unsubUserOrders = onSnapshot(getCol('orders'), (snap) => {
+                unsubscribeListeners.push(unsubPromos);
+            } 
+            else if (currentUser.role === 'User') {
+                const unsubUserOrders = onSnapshot(getCol('orders'), (snap) => {
                         const listEl = document.getElementById('user-orders-list');
                         if(!listEl) return;
                         const myOrders = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(o => o.phone === currentUser.phone);
@@ -3652,11 +3621,33 @@
                         
                         window.lastKnownOrders = newOrderIds;
                     });
-                    unsubscribeListeners.push(unsubUserOrders);
-                }
-                else if (currentUser.role === 'Partner') {
-                    const orderUnsub = onSnapshot(getCol('orders'), (snap) => {
-                        const orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                unsubscribeListeners.push(unsubUserOrders);
+            }
+            else if (currentUser.role === 'Partner') {
+                // Live sync for Partner's own status to prevent toggle resetting to offline on refresh
+                const userUnsub = onSnapshot(getDocRef('users', currentUser.phone), (docSnap) => {
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        currentUser.shopStatus = data.shopStatus || 'Offline';
+                        const isCurrentlyOpen = ['Open', 'Online'].includes(currentUser.shopStatus);
+                        
+                        const statusToggleShop = document.getElementById('partner-status-toggle');
+                        const statusToggleRider = document.getElementById('rider-status-toggle');
+                        
+                        if (statusToggleShop) statusToggleShop.checked = isCurrentlyOpen;
+                        if (statusToggleRider) statusToggleRider.checked = isCurrentlyOpen;
+                        
+                        const shopStatusTxt = document.getElementById('shop-status-text');
+                        if(shopStatusTxt) shopStatusTxt.innerText = `Currently ${isCurrentlyOpen ? 'Open' : 'Closed'}`;
+                        
+                        const riderStatusTxt = document.getElementById('rider-status-text');
+                        if(riderStatusTxt) riderStatusTxt.innerText = isCurrentlyOpen ? 'You are ONLINE' : 'You are OFFLINE';
+                    }
+                });
+                unsubscribeListeners.push(userUnsub);
+
+                const orderUnsub = onSnapshot(getCol('orders'), (snap) => {
+                    const orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
                         
                         let relevantOrders = [];
                     if (['Food Owner', 'Grocery Shop'].includes(currentUser.category)) {
