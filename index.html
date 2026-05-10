@@ -1683,16 +1683,17 @@
         };
 
         window.completeRide = async (orderId) => {
-            const confirmed = await window.customConfirm("Complete Ride", "Are you sure you have completed the ride and collected payment? 20 Gramzo Points will be deducted.", "Complete Ride");
+            const deductPoints = ['Car', 'Car_Mini', 'Car_SUV'].includes(currentUser.vehicleType) ? 50 : 5;
+            
+            const confirmed = await window.customConfirm("Complete Ride", `Are you sure you have completed the ride and collected payment? ${deductPoints} Gramzo Points will be deducted.`, "Complete Ride");
             if (!confirmed) return;
 
-            if((currentUser.walletPoints || 0) < 20) {
-                return window.showToast("Insufficient Gramzo Points to complete this ride. Contact Admin.", "error");
+            if((currentUser.walletPoints || 0) < deductPoints) {
+                return window.showToast(`Insufficient Gramzo Points (${deductPoints} needed) to complete this ride. Contact Admin.`, "error");
             }
 
             try {
-                // Deduct 20 points
-                const newPoints = (currentUser.walletPoints || 0) - 20;
+                const newPoints = (currentUser.walletPoints || 0) - deductPoints;
                 
                 await window.dbCall(updateDoc(getDocRef('orders', orderId), { status: 'Completed' }), 10000);
                 await window.dbCall(updateDoc(getDocRef('users', currentUser.phone), { walletPoints: newPoints }), 10000);
@@ -2048,6 +2049,7 @@
                 if(currentUser.closeTime) document.getElementById('partner-close-time').value = currentUser.closeTime;
                 
                 if (isRide) {
+                    document.getElementById('shop-status-container').classList.add('hidden');
                     if(currentUser.vehicleType) {
                         document.getElementById('partner-vehicle-type').value = currentUser.vehicleType;
                         document.getElementById('partner-ride-seater').style.display = currentUser.vehicleType === 'Car' ? 'block' : 'none';
@@ -2056,6 +2058,8 @@
                     if(currentUser.carModel) document.getElementById('partner-ride-model').value = currentUser.carModel;
                     if(currentUser.seater) document.getElementById('partner-ride-seater').value = currentUser.seater;
                     if(currentUser.currentLocation) document.getElementById('partner-ride-location').value = currentUser.currentLocation;
+                } else {
+                    document.getElementById('shop-status-container').classList.remove('hidden');
                 }
 
                 const statusToggleShop = document.getElementById('partner-status-toggle');
@@ -3280,7 +3284,8 @@
                             } else if (o.status === 'Confirmed') {
                                 actionButtons = `<button type="button" onclick="window.markRideStarted('${o.id}')" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-play mr-1"></i> Start Ride</button>`;
                             } else if (o.status === 'Started') {
-                                actionButtons = `<button type="button" onclick="window.completeRide('${o.id}')" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-check-double mr-1"></i> End Ride & Collect ₹${o.amount}</button>`;
+                                const deduction = ['Car', 'Car_Mini', 'Car_SUV'].includes(currentUser.vehicleType) ? 50 : 5;
+                                actionButtons = `<button type="button" onclick="window.completeRide('${o.id}')" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-check-double mr-1"></i> End Ride & Collect ₹${o.amount} (-${deduction} Pts)</button>`;
                             } else if (o.status === 'Completed') {
                                 actionButtons = `<div class="w-full bg-gray-100 text-gray-500 py-3 rounded-xl font-bold text-sm text-center border border-gray-200"><i class="fa-solid fa-check mr-1"></i> Completed (₹${o.amount})</div>`;
                             }
@@ -3563,7 +3568,7 @@
                                         <div class="w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center text-blue-700"><i class="fa-solid fa-taxi"></i></div>
                                         <div class="flex-1">
                                             <p class="text-xs font-bold text-gray-900">${o.riderName || 'Waiting...'}</p>
-                                            <p class="text-[10px] text-gray-500">${o.riderId || ''}</p>
+                                            <p class="text-[10px] text-gray-500">${o.carModel ? o.carModel + ' • ' + (o.carNum || '') : (o.riderId || '')}</p>
                                         </div>
                                         ${o.riderId ? `<a href="tel:${o.riderId}" class="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone text-xs"></i></a>` : ''}
                                     </div>
@@ -3659,8 +3664,8 @@
                             }
                             
                             relevantOrders = orders.filter(o => 
-                                (o.status === 'Ready' && !o.riderId && o.type !== 'Ride') || 
-                                (o.status === 'Placed' && !o.restaurantId && o.type !== 'Ride') || 
+                                (o.status === 'Ready' && !o.riderId && o.type !== 'Ride' && currentUser.vehicleType === 'Bike') || 
+                                (o.status === 'Placed' && !o.restaurantId && o.type !== 'Ride' && currentUser.vehicleType === 'Bike') || 
                                 (o.riderId === currentUser.phone && ['Out for Delivery'].includes(o.status) && o.type !== 'Ride') ||
                                 (o.riderId === currentUser.phone && o.type === 'Ride') ||
                                 (o.status === 'Broadcasted' && o.type === 'Ride' && o.vehicleType === myMappedType)
