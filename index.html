@@ -1968,23 +1968,9 @@
         window.finalizeLoginSequence = () => {
             window.closeAuthModal();
             
-            // Request Notification Permission on Login and get FCM Token
-            if ("Notification" in window && messaging) {
-                Notification.requestPermission().then((permission) => {
-                    if (permission === 'granted') {
-                        // NOTE: You must generate a Web Push VAPID Key in Firebase Console -> Project Settings -> Cloud Messaging
-                        // Replace 'YOUR_VAPID_KEY_HERE' with your actual key
-                        getToken(messaging, { vapidKey: 'YOUR_VAPID_KEY_HERE' }).then((currentToken) => {
-                            if (currentToken) {
-                                // Save the token to the user's document so the backend knows where to send notifications
-                                window.dbCall(setDoc(getDocRef('users', currentUser.phone), { fcmToken: currentToken }, { merge: true }), 5000).catch(e=>{});
-                                currentUser.fcmToken = currentToken;
-                            }
-                        }).catch((err) => {
-                            console.log('An error occurred while retrieving token. ', err);
-                        });
-                    }
-                });
+            // Request Notification Permission on Login
+            if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
+                Notification.requestPermission();
             }
 
             window.showToast(`Welcome back, ${currentUser.name.split(' ')[0]}!`, "success");
