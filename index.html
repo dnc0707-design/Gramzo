@@ -11,24 +11,19 @@
 
     <title>Gramzo | Instant Delivery Super App</title>
 
-    <!-- AGGRESSIVE AUTO CACHE BUSTER SCRIPT (Updated for PWA Builder) -->
+    <!-- AGGRESSIVE AUTO CACHE BUSTER SCRIPT -->
     <script>
         (function() {
             const APP_VERSION = "11.27.0"; // Live Network Sync Update
             
-            // Register the Service Worker (Required for APK)
             if ('serviceWorker' in navigator) {
-                window.addEventListener('load', () => {
-                    navigator.serviceWorker.register('sw.js')
-                    .then(reg => {
-                        console.log('Service Worker Registered');
-                        window.swRegistration = reg; // <-- ADD THIS LINE
-                    })
-                    .catch(err => console.log('SW registration failed', err));
-                });
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                    for(let registration of registrations) {
+                        registration.unregister();
+                    }
+                }).catch(e => console.log(e));
             }
 
-            // Cache Busting Logic (Handles version mismatch without breaking PWA)
             const storedVersion = localStorage.getItem("gramzo_app_version");
             if (storedVersion !== APP_VERSION) {
                 localStorage.setItem("gramzo_app_version", APP_VERSION);
@@ -63,7 +58,7 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#E23744">
     <!-- NEW LOGO -->
-    <link rel="apple-touch-icon" href="logo-512.png">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/logo%20-512%20.png">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -1005,7 +1000,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, getDoc, getDocs, setDoc, onSnapshot, addDoc, updateDoc, deleteDoc, serverTimestamp, initializeFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-messaging.js"; 
 
         const IS_LIVE_WEBSITE = true;
 
@@ -1021,15 +1015,6 @@
         const app = initializeApp(liveFirebaseConfig);
         const auth = getAuth(app);
         const db = initializeFirestore(app, { experimentalForceLongPolling: true });
-        
-        let messaging = null;
-        try {
-            messaging = getMessaging(app);
-            onMessage(messaging, (payload) => {
-                console.log('Message received in foreground.', payload);
-                window.showStatusPopup(payload.notification.title, payload.notification.body);
-            });
-        } catch(e) { console.log("Messaging not supported/initialized", e); }
 
         // GLOBALS & STATE
         let currentUser = null;
@@ -1243,7 +1228,7 @@
             if ("Notification" in window && Notification.permission === "granted") {
                 new Notification(title, { 
                     body: body, 
-                    icon: 'logo-512.png' 
+                    icon: 'https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/New%20logo%20-Gramzo%20-%206%20may.png' 
                 });
             } else {
                 window.showToast(title + " - " + body, "info");
@@ -1347,7 +1332,7 @@
                 titleEl.innerText = "About Gramzo";
                 bodyEl.innerHTML = `
                     <div class="text-center mb-6">
-                        <img src="logo-512.png" alt="Gramzo Logo" class="h-16 object-contain mx-auto mb-4 rounded-2xl shadow-sm">
+                        <img src="https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/New%20logo%20-Gramzo%20-%206%20may.png" alt="Gramzo Logo" class="h-16 object-contain mx-auto mb-4 rounded-2xl shadow-sm">
                         <p class="font-bold text-lg text-gray-800">Welcome to Gramzo.in!</p>
                         <p class="mt-2 leading-relaxed">We are India's emerging instant delivery super app, specially tailored for rural and semi-urban communities.</p>
                     </div>
@@ -1980,27 +1965,12 @@
             } finally { btn.innerText = originalText; btn.disabled = false; }
         };
 
-         window.finalizeLoginSequence = () => {
+        window.finalizeLoginSequence = () => {
             window.closeAuthModal();
             
-            // Push Notifications & FCM Token Generation
-            if ("Notification" in window && messaging) {
-                Notification.requestPermission().then((permission) => {
-                    if (permission === 'granted') {
-                        // Using your exact VAPID Key!
-                         getToken(messaging, { 
-                            vapidKey: 'BM4kAcfdUnR_a3T_4akm1Y-VsebvaZ8kTCShHLFqoCxGjHIOfILQP0QhpYHLtNXXIOXAqF8RiE9iUZ8YuWSU7MU',
-                            serviceWorkerRegistration: window.swRegistration // <-- ADD THIS LINE
-                        }).then((currentToken) => {
-                            if (currentToken) {
-                                window.dbCall(setDoc(getDocRef('users', currentUser.phone), { fcmToken: currentToken }, { merge: true }), 5000).catch(e=>{});
-                                currentUser.fcmToken = currentToken;
-                            }
-                        }).catch((err) => {
-                            console.log('An error occurred while retrieving token. ', err);
-                        });
-                    }
-                });
+            // Request Notification Permission on Login
+            if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
+                Notification.requestPermission();
             }
 
             window.showToast(`Welcome back, ${currentUser.name.split(' ')[0]}!`, "success");
@@ -2709,7 +2679,7 @@
             try {
                 await window.dbCall(updateDoc(getDocRef('orders', orderId), {
                     status: 'Out for Delivery',
-                    riderId: currentUser.id || currentUser.phone || currentUser.docId, // Guaranteed strict match
+                    riderId: currentUser.id || currentUser.phone || currentUser.docId,
                     riderName: currentUser.name,
                     riderPhone: currentUser.phone
                 }), 10000);
@@ -3751,7 +3721,6 @@
 
                 const orderUnsub = onSnapshot(getCol('orders'), (snap) => {
                     const orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
-
                     
                     let relevantOrders = [];
                     if (['Food Owner', 'Grocery Shop'].includes(currentUser.category)) {
