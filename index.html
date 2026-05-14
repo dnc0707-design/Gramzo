@@ -1988,7 +1988,10 @@
                 Notification.requestPermission().then((permission) => {
                     if (permission === 'granted') {
                         // Using your exact VAPID Key!
-                        getToken(messaging, { vapidKey: 'BM4kAcfdUnR_a3T_4akm1Y-VsebvaZ8kTCShHLFqoCxGjHIOfILQP0QhpYHLtNXXIOXAqF8RiE9iUZ8YuWSU7MU' }).then((currentToken) => {
+                         getToken(messaging, { 
+                            vapidKey: 'BM4kAcfdUnR_a3T_4akm1Y-VsebvaZ8kTCShHLFqoCxGjHIOfILQP0QhpYHLtNXXIOXAqF8RiE9iUZ8YuWSU7MU',
+                            serviceWorkerRegistration: window.swRegistration // <-- ADD THIS LINE
+                        }).then((currentToken) => {
                             if (currentToken) {
                                 window.dbCall(setDoc(getDocRef('users', currentUser.phone), { fcmToken: currentToken }, { merge: true }), 5000).catch(e=>{});
                                 currentUser.fcmToken = currentToken;
