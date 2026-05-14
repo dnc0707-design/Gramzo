@@ -1000,6 +1000,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, getDoc, getDocs, setDoc, onSnapshot, addDoc, updateDoc, deleteDoc, serverTimestamp, initializeFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-messaging.js"; 
 
         const IS_LIVE_WEBSITE = true;
 
@@ -1015,6 +1016,15 @@
         const app = initializeApp(liveFirebaseConfig);
         const auth = getAuth(app);
         const db = initializeFirestore(app, { experimentalForceLongPolling: true });
+        
+        let messaging = null;
+        try {
+            messaging = getMessaging(app);
+            onMessage(messaging, (payload) => {
+                console.log('Message received in foreground.', payload);
+                window.showStatusPopup(payload.notification.title, payload.notification.body);
+            });
+        } catch(e) { console.log("Messaging not supported/initialized", e); }
 
         // GLOBALS & STATE
         let currentUser = null;
@@ -1965,15 +1975,27 @@
             } finally { btn.innerText = originalText; btn.disabled = false; }
         };
 
-        window.finalizeLoginSequence = () => {
-            window.closeAuthModal();
-            
-            // Request Notification Permission on Login
-            if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
-                Notification.requestPermission();
+         window.finalizeLoginSequence = () => {
+            window.closeAuthModal();
+            
+            // Push Notifications & FCM Token Generation
+            if ("Notification" in window && messaging) {
+                Notification.requestPermission().then((permission) => {
+                    if (permission === 'granted') {
+                        // Using your exact VAPID Key!
+                        getToken(messaging, { vapidKey: 'BM4kAcfdUnR_a3T_4akm1Y-VsebvaZ8kTCShHLFqoCxGjHIOfILQP0QhpYHLtNXXIOXAqF8RiE9iUZ8YuWSU7MU' }).then((currentToken) => {
+                            if (currentToken) {
+                                window.dbCall(setDoc(getDocRef('users', currentUser.phone), { fcmToken: currentToken }, { merge: true }), 5000).catch(e=>{});
+                                currentUser.fcmToken = currentToken;
+                            }
+                        }).catch((err) => {
+                            console.log('An error occurred while retrieving token. ', err);
+                        });
+                    }
+                });
             }
 
-            window.showToast(`Welcome back, ${currentUser.name.split(' ')[0]}!`, "success");
+            window.showToast(`Welcome back, ${currentUser.name.split(' ')[0]}!`, "success");
 
             document.getElementById('btn-partner-login-trigger').classList.add('hidden');
             document.getElementById('btn-login-trigger').classList.add('hidden');
@@ -2679,7 +2701,7 @@
             try {
                 await window.dbCall(updateDoc(getDocRef('orders', orderId), {
                     status: 'Out for Delivery',
-                    riderId: currentUser.id || currentUser.phone || currentUser.docId,
+                    riderId: currentUser.id || currentUser.phone || currentUser.docId, // Guaranteed strict match
                     riderName: currentUser.name,
                     riderPhone: currentUser.phone
                 }), 10000);
@@ -3767,72 +3789,72 @@
                     });
                     
                     window.lastKnownOrders = newOrderIds;
-                    window.partnerOrdersData = relevantOrders;
-                    if (window.renderPartnerOrders) window.renderPartnerOrders();
-                });
-                unsubscribeListeners.push(orderUnsub);
+                    window.partnerOrdersData = relevantOrders;
+                    if (window.renderPartnerOrders) window.renderPartnerOrders();
+                });
+                unsubscribeListeners.push(orderUnsub);
 
-                if (['Food Owner', 'Grocery Shop'].includes(currentUser.category)) {
-                    const catalogUnsub = onSnapshot(getCol('products'), (snap) => {
-                        const list = document.getElementById('partner-catalog-list');
-                        if (!list) return;
-                        const items = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(p => p.partnerId === currentUser.phone); 
-                        if (items.length === 0) { list.innerHTML = '<p class="text-sm text-gray-400 text-center py-4 bg-white rounded-2xl border border-gray-100">No items added to catalogue yet.</p>'; return; }
-                        list.innerHTML = items.map(p => {
-                            const variantsDisplay = p.variants ? p.variants.map(v => `${v.qty}: ₹${v.price}`).join(', ') : `${p.qty || ''}: ₹${p.price}`;
-                            const stockColor = p.inStock !== false ? 'text-emerald-600 border-emerald-200 bg-emerald-50' : 'text-red-500 border-red-200 bg-red-50';
-                            const stockText = p.inStock !== false ? 'In Stock' : 'Out of Stock';
-                            return `<div class="flex justify-between items-center bg-white border border-gray-100 p-4 rounded-2xl shadow-sm"><div class="flex-1 mr-4"><p class="font-black text-sm text-gray-900">${p.name}</p><p class="text-[10px] text-gray-500">${p.shopCategory || p.category}</p><p class="text-xs text-gray-700 font-bold mt-1">${variantsDisplay}</p></div><div class="flex items-center gap-2 shrink-0"><button type="button" onclick="window.editPartnerProduct('${p.id}')" class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-colors shrink-0" title="Edit Item"><i class="fa-solid fa-pen text-xs"></i></button><button type="button" onclick="window.togglePartnerStock('${p.id}', ${p.inStock !== false})" class="text-[10px] font-black uppercase tracking-wider ${stockColor} border px-2 py-1 rounded transition whitespace-nowrap">${stockText}</button><button type="button" onclick="window.deletePartnerProduct('${p.id}')" class="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors shrink-0"><i class="fa-solid fa-trash text-xs"></i></button></div></div>`;
-                        }).join('');
-                    });
-                    unsubscribeListeners.push(catalogUnsub);
-                }
-            }
-        };
+                if (['Food Owner', 'Grocery Shop'].includes(currentUser.category)) {
+                    const catalogUnsub = onSnapshot(getCol('products'), (snap) => {
+                        const list = document.getElementById('partner-catalog-list');
+                        if (!list) return;
+                        const items = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(p => p.partnerId === currentUser.phone); 
+                        if (items.length === 0) { list.innerHTML = '<p class="text-sm text-gray-400 text-center py-4 bg-white rounded-2xl border border-gray-100">No items added to catalogue yet.</p>'; return; }
+                        list.innerHTML = items.map(p => {
+                            const variantsDisplay = p.variants ? p.variants.map(v => `${v.qty}: ₹${v.price}`).join(', ') : `${p.qty || ''}: ₹${p.price}`;
+                            const stockColor = p.inStock !== false ? 'text-emerald-600 border-emerald-200 bg-emerald-50' : 'text-red-500 border-red-200 bg-red-50';
+                            const stockText = p.inStock !== false ? 'In Stock' : 'Out of Stock';
+                            return `<div class="flex justify-between items-center bg-white border border-gray-100 p-4 rounded-2xl shadow-sm"><div class="flex-1 mr-4"><p class="font-black text-sm text-gray-900">${p.name}</p><p class="text-[10px] text-gray-500">${p.shopCategory || p.category}</p><p class="text-xs text-gray-700 font-bold mt-1">${variantsDisplay}</p></div><div class="flex items-center gap-2 shrink-0"><button type="button" onclick="window.editPartnerProduct('${p.id}')" class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-colors shrink-0" title="Edit Item"><i class="fa-solid fa-pen text-xs"></i></button><button type="button" onclick="window.togglePartnerStock('${p.id}', ${p.inStock !== false})" class="text-[10px] font-black uppercase tracking-wider ${stockColor} border px-2 py-1 rounded transition whitespace-nowrap">${stockText}</button><button type="button" onclick="window.deletePartnerProduct('${p.id}')" class="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors shrink-0"><i class="fa-solid fa-trash text-xs"></i></button></div></div>`;
+                        }).join('');
+                    });
+                    unsubscribeListeners.push(catalogUnsub);
+                }
+            }
+        };
 
-        onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    if (!currentUser) {
-                        let sessionPhone = null;
-                        try {
-                            const sessionSnap = await window.dbCall(getDoc(getDocRef('sessions', user.uid)), 5000);
-                            if (sessionSnap && sessionSnap.exists()) {
-                                sessionPhone = sessionSnap.data().phone;
-                            }
-                        } catch(e) { console.warn("Session fetch delayed."); }
+        onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    if (!currentUser) {
+                        let sessionPhone = null;
+                        try {
+                            const sessionSnap = await window.dbCall(getDoc(getDocRef('sessions', user.uid)), 5000);
+                            if (sessionSnap && sessionSnap.exists()) {
+                                sessionPhone = sessionSnap.data().phone;
+                            }
+                        } catch(e) { console.warn("Session fetch delayed."); }
 
-                        if (!sessionPhone) {
-                            try {
-                                const usersSnap = await window.dbCall(getDocs(getCol('users')), 5000);
-                                const matchedUser = usersSnap.docs.find(d => d.data().uid === user.uid);
-                                if (matchedUser) {
-                                    sessionPhone = matchedUser.id;
-                                    setDoc(getDocRef('sessions', user.uid), { phone: sessionPhone }, { merge: true }).catch(()=>{});
-                                }
-                            } catch(e) { console.warn("Fallback fetch failed."); }
-                        }
+                        if (!sessionPhone) {
+                            try {
+                                const usersSnap = await window.dbCall(getDocs(getCol('users')), 5000);
+                                const matchedUser = usersSnap.docs.find(d => d.data().uid === user.uid);
+                                if (matchedUser) {
+                                    sessionPhone = matchedUser.id;
+                                    setDoc(getDocRef('sessions', user.uid), { phone: sessionPhone }, { merge: true }).catch(()=>{});
+                                }
+                            } catch(e) { console.warn("Fallback fetch failed."); }
+                        }
 
-                        if (sessionPhone) {
-                            if (sessionPhone === 'admin_session' || sessionPhone === 'Gramzo_admin') {
-                                currentUser = { name: 'Super Admin', role: 'Admin', phone: 'Admin', docId: 'admin_session', uid: user.uid };
-                                window.finalizeLoginSequence(true);
-                            } else {
-                                try {
-                                    const userSnap = await window.dbCall(getDoc(getDocRef('users', sessionPhone)), 5000);
-                                    if (userSnap && userSnap.exists()) {
-                                        currentUser = { ...userSnap.data(), docId: sessionPhone };
-                                        window.finalizeLoginSequence(true); 
-                                    }
-                                } catch(e) { console.warn("Profile fetch failed."); }
-                            }
-                        }
-                        window.loadMarketplaceData();
-                    }
-                } else {
-                    if(window.startApp) window.startApp(); 
-                }
-            });
+                        if (sessionPhone) {
+                            if (sessionPhone === 'admin_session' || sessionPhone === 'Gramzo_admin') {
+                                currentUser = { name: 'Super Admin', role: 'Admin', phone: 'Admin', docId: 'admin_session', uid: user.uid };
+                                window.finalizeLoginSequence(true);
+                            } else {
+                                try {
+                                    const userSnap = await window.dbCall(getDoc(getDocRef('users', sessionPhone)), 5000);
+                                    if (userSnap && userSnap.exists()) {
+                                        currentUser = { ...userSnap.data(), docId: sessionPhone };
+                                        window.finalizeLoginSequence(true); 
+                                    }
+                                } catch(e) { console.warn("Profile fetch failed."); }
+                            }
+                        }
+                        window.loadMarketplaceData();
+                    }
+                } else {
+                    if(window.startApp) window.startApp(); 
+                }
+            });
 
-        </script>
-    </body>
+        </script>
+    </body>
 </html>
