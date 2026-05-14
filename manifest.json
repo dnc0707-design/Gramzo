@@ -1,22 +1,22 @@
 {
-"id": "/gramzo-app",
+"id": "/",
 "name": "Gramzo | Instant Delivery Super App",
 "short_name": "Gramzo",
 "description": "Bringing convenience to every village. Food, Grocery, and Rides.",
-"start_url": "index.html",
+"start_url": "/",
 "display": "standalone",
 "background_color": "#f8f9fa",
 "theme_color": "#E23744",
 "orientation": "portrait-primary",
 "icons": [
 {
-"src": "https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/logo-512.png",
+"src": "logo-512.png",
 "sizes": "512x512",
 "type": "image/png",
 "purpose": "any maskable"
 },
 {
-"src": "https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/logo-512.png",
+"src": "logo-512.png",
 "sizes": "192x192",
 "type": "image/png",
 "purpose": "any"
@@ -24,13 +24,13 @@
 ],
 "screenshots": [
 {
-"src": "https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/logo-512.png",
+"src": "logo-512.png",
 "sizes": "512x512",
 "type": "image/png",
 "form_factor": "narrow"
 },
 {
-"src": "https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/logo-512.png",
+"src": "logo-512.png",
 "sizes": "512x512",
 "type": "image/png",
 "form_factor": "wide"
