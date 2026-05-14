@@ -16,15 +16,13 @@
         (function() {
             const APP_VERSION = "11.27.0"; // Live Network Sync Update
             
-           if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js').then(function(registration) {
-            console.log('ServiceWorker registration successful with scope: ', registration.scope);
-        }, function(err) {
-            console.log('ServiceWorker registration failed: ', err);
-        });
-    });
-}
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                    for(let registration of registrations) {
+                        registration.unregister();
+                    }
+                }).catch(e => console.log(e));
+            }
 
             const storedVersion = localStorage.getItem("gramzo_app_version");
             if (storedVersion !== APP_VERSION) {
@@ -60,7 +58,7 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#E23744">
     <!-- NEW LOGO -->
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/New%20logo%20-Gramzo%20-%206%20may.png">
+    <link rel="apple-touch-icon" href="logo-512.png">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -1240,7 +1238,7 @@
             if ("Notification" in window && Notification.permission === "granted") {
                 new Notification(title, { 
                     body: body, 
-                    icon: 'https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/New%20logo%20-Gramzo%20-%206%20may.png' 
+                    icon: 'logo-512.png' 
                 });
             } else {
                 window.showToast(title + " - " + body, "info");
@@ -1344,7 +1342,7 @@
                 titleEl.innerText = "About Gramzo";
                 bodyEl.innerHTML = `
                     <div class="text-center mb-6">
-                        <img src="https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/New%20logo%20-Gramzo%20-%206%20may.png" alt="Gramzo Logo" class="h-16 object-contain mx-auto mb-4 rounded-2xl shadow-sm">
+                        <img src="logo-512.png" alt="Gramzo Logo" class="h-16 object-contain mx-auto mb-4 rounded-2xl shadow-sm">
                         <p class="font-bold text-lg text-gray-800">Welcome to Gramzo.in!</p>
                         <p class="mt-2 leading-relaxed">We are India's emerging instant delivery super app, specially tailored for rural and semi-urban communities.</p>
                     </div>
@@ -1978,9 +1976,9 @@
         };
 
          window.finalizeLoginSequence = () => {
-            window.closeAuthModal();
-            
-            // Push Notifications & FCM Token Generation
+            window.closeAuthModal();
+            
+            // Push Notifications & FCM Token Generation
             if ("Notification" in window && messaging) {
                 Notification.requestPermission().then((permission) => {
                     if (permission === 'granted') {
@@ -1997,7 +1995,7 @@
                 });
             }
 
-            window.showToast(`Welcome back, ${currentUser.name.split(' ')[0]}!`, "success");
+            window.showToast(`Welcome back, ${currentUser.name.split(' ')[0]}!`, "success");
 
             document.getElementById('btn-partner-login-trigger').classList.add('hidden');
             document.getElementById('btn-login-trigger').classList.add('hidden');
@@ -3745,6 +3743,7 @@
 
                 const orderUnsub = onSnapshot(getCol('orders'), (snap) => {
                     const orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
+
                     
                     let relevantOrders = [];
                     if (['Food Owner', 'Grocery Shop'].includes(currentUser.category)) {
