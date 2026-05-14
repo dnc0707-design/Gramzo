@@ -1,72 +1,47 @@
-// 1. Firebase Messaging Logic
-importScripts('https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/11.6.1/firebase-messaging-compat.js');
-
-const liveFirebaseConfig = {
-    apiKey: "AIzaSyCA4U4jva7HHeMP-yk1VJy3l_BBct3Gohg",
-    authDomain: "gramzo.firebaseapp.com",
-    projectId: "gramzo",
-    storageBucket: "gramzo.firebasestorage.app",
-    messagingSenderId: "674262956986",
-    appId: "1:674262956986:web:772f68694c77e15bf3fb83"
-};
-
-firebase.initializeApp(liveFirebaseConfig);
-const messaging = firebase.messaging();
-
-messaging.onBackgroundMessage(function(payload) {
-  console.log('[sw.js] Received background message ', payload);
-  const notificationTitle = payload.notification.title || 'Gramzo Update';
-  const notificationOptions = {
-    body: payload.notification.body,
-    icon: 'logo-512.png',
-    badge: 'logo-512.png',
-    vibrate: [200, 100, 200]
-  };
-  self.registration.showNotification(notificationTitle, notificationOptions);
-});
-
-// 2. Standard PWA Caching Logic
-const CACHE_NAME = "gramzo-cache-v2";
+const CACHE_NAME = 'gramzo-cache-v1';
 const urlsToCache = [
-  "/",
-  "/index.html",
-  "/manifest.json"
+  '/',
+  '/index.html',
+  '/manifest.json'
 ];
 
-self.addEventListener("install", (event) => {
-  self.skipWaiting();
+// Install a service worker
+self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      // Use catch here so missing files (like logo) don't crash the whole PWA install
-      return cache.addAll(urlsToCache).catch(err => console.warn('Cache warning:', err));
-    })
+    caches.open(CACHE_NAME)
+      .then(cache => {
+        console.log('Opened cache');
+        return cache.addAll(urlsToCache);
+      })
   );
 });
 
-self.addEventListener("activate", (event) => {
+// Cache and return requests
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request)
+      .then(response => {
+        // Cache hit - return response
+        if (response) {
+          return response;
+        }
+        return fetch(event.request);
+      })
+  );
+});
+
+// Update a service worker
+self.addEventListener('activate', event => {
+  const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
+    caches.keys().then(cacheNames => {
       return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
+        cacheNames.map(cacheName => {
+          if (cacheWhitelist.indexOf(cacheName) === -1) {
             return caches.delete(cacheName);
           }
         })
       );
-    })
-  );
-});
-
-self.addEventListener("fetch", (event) => {
-  // Do NOT intercept Firebase or Google Maps API calls
-  if (event.request.url.includes('firestore') || event.request.url.includes('googleapis') || event.request.url.includes('firebase')) {
-      return;
-  }
-  
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
     })
   );
 });
