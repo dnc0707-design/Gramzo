@@ -1,5 +1,9 @@
-const CACHE_NAME = "gramzo-pwa-v1";
-const urlsToCache = ["/"];
+const CACHE_NAME = "gramzo-cache-v1";
+const urlsToCache = [
+  "/",
+  "index.html",
+  "manifest.json"
+];
 
 // Install the service worker
 self.addEventListener("install", (event) => {
