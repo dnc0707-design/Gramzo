@@ -2,7 +2,8 @@ const CACHE_NAME = "gramzo-cache-v1";
 const urlsToCache = [
   "/",
   "index.html",
-  "manifest.json"
+  "manifest.json",
+  "logo-512.png"
 ];
 
 // Install the service worker
