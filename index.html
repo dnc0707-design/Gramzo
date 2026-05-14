@@ -16,13 +16,15 @@
         (function() {
             const APP_VERSION = "11.27.0"; // Live Network Sync Update
             
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                    for(let registration of registrations) {
-                        registration.unregister();
-                    }
-                }).catch(e => console.log(e));
-            }
+           if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/sw.js').then(function(registration) {
+            console.log('ServiceWorker registration successful with scope: ', registration.scope);
+        }, function(err) {
+            console.log('ServiceWorker registration failed: ', err);
+        });
+    });
+}
 
             const storedVersion = localStorage.getItem("gramzo_app_version");
             if (storedVersion !== APP_VERSION) {
