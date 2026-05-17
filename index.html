@@ -11,48 +11,62 @@
 
     <title>Gramzo | Instant Delivery Super App</title>
 
-    <!-- AGGRESSIVE AUTO CACHE BUSTER SCRIPT -->
+    <!-- AGGRESSIVE AUTO CACHE BUSTER SCRIPT (UPDATED) -->
     <script>
         (function() {
-            const APP_VERSION = "11.28.0"; // Live Network Sync Update
-            
-            const storedVersion = localStorage.getItem("gramzo_app_version");
-            if (storedVersion !== APP_VERSION) {
-                // ONLY unregister service workers if there is a NEW version.
-                // Doing this every load kills background push notifications!
+            const APP_VERSION = "11.28.1"; // Bumped version to force live sync
+
+            const clearCachesAndReload = () => {
+                console.log("Forcing core app update...");
+                
+                // 1. Unregister Service Workers FIRST to prevent cache interception
                 if ('serviceWorker' in navigator) {
                     navigator.serviceWorker.getRegistrations().then(function(registrations) {
                         for(let registration of registrations) {
                             registration.unregister();
                         }
-                    }).catch(e => console.log(e));
+                    }).catch(e => console.log("SW Unregister Error:", e));
                 }
 
-                localStorage.setItem("gramzo_app_version", APP_VERSION);
+                // 2. Clear all cache storages
                 if ('caches' in window) {
-                    caches.keys().then(names => { names.forEach(name => caches.delete(name)) });
+                    caches.keys().then(names => { 
+                        Promise.all(names.map(name => caches.delete(name)))
+                        .then(() => {
+                            // 3. Set new version and Hard Reload
+                            localStorage.setItem("gramzo_app_version", APP_VERSION);
+                            window.location.href = window.location.pathname + '?v=' + new Date().getTime();
+                        });
+                    });
+                } else {
+                    localStorage.setItem("gramzo_app_version", APP_VERSION);
+                    window.location.href = window.location.pathname + '?v=' + new Date().getTime();
                 }
-                let newUrl = new URL(window.location.href);
-                newUrl.searchParams.set('v', new Date().getTime());
-                window.location.replace(newUrl.toString());
+            };
+
+            const storedVersion = localStorage.getItem("gramzo_app_version");
+            if (storedVersion !== APP_VERSION) {
+                clearCachesAndReload();
+                return; // Stop further execution while reloading
             }
 
+            // Background check for newer version on the live server
             setTimeout(() => {
-                fetch(window.location.pathname + '?nocache=' + new Date().getTime(), { cache: "no-store" })
-                    .then(res => res.text())
-                    .then(html => {
-                        if (!html.includes('const APP_VERSION = "' + APP_VERSION + '"')) {
-                            console.log("Newer version found. Force reloading...");
-                            localStorage.removeItem("gramzo_app_version");
-                            if ('caches' in window) {
-                                caches.keys().then(names => { names.forEach(name => caches.delete(name)) });
-                            }
-                            let newUrl = new URL(window.location.href);
-                            newUrl.searchParams.set('v', new Date().getTime());
-                            window.location.replace(newUrl.toString());
-                        }
-                    }).catch(e => console.log("Offline mode active."));
-            }, 2000);
+                fetch(window.location.pathname + '?nocache=' + new Date().getTime(), { 
+                    cache: "no-store",
+                    headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+                })
+                .then(res => res.text())
+                .then(html => {
+                    // Extract version explicitly to avoid looping
+                    const versionMatch = html.match(/const APP_VERSION = ["']([^"']+)["']/);
+                    if (versionMatch && versionMatch[1] && versionMatch[1] !== APP_VERSION) {
+                        console.log("Newer version (" + versionMatch[1] + ") found on server. Applying...");
+                        localStorage.removeItem("gramzo_app_version");
+                        clearCachesAndReload();
+                    }
+                }).catch(e => console.log("Offline mode or update check bypassed."));
+            }, 3000); // Wait 3 seconds to not block initial render
         })();
     </script>
     
@@ -325,7 +339,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-emerald-700 font-bold mt-2 bg-emerald-50 border border-emerald-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.28.0 - Zomato UI Sync</p>
+                            <p class="text-[10px] text-emerald-700 font-bold mt-2 bg-emerald-50 border border-emerald-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.28.1 - Core Sync Enabled</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right">
                             <button type="button" onclick="window.openAdminModal()" class="bg-gray-100 text-gray-700 hover:bg-gray-200 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
@@ -1393,6 +1407,7 @@
             if ("serviceWorker" in navigator) {
                 navigator.serviceWorker.register('/sw.js').then((reg) => {
                     console.log('SW Registered securely.');
+                    reg.update(); // FORCE CHECK FOR SW UPDATE UPON LOGIN
                 }).catch(e => console.log('SW error', e));
             }
 
@@ -2705,7 +2720,7 @@
                     </div>`;
 
                     if (['Rider', 'Ride Partner'].includes(currentUser.category)) {
-                        // Rider specific logic removed as this is index.html
+                        // Rider specific logic
                     } else {
                         if (o.status === 'Placed') actionButtons = `<div class="flex gap-2"><button type="button" onclick="window.acceptFoodOrder('${o.id}')" class="flex-1 bg-black text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-gray-800 transition-colors active:scale-95"><i class="fa-solid fa-check"></i> Accept</button><button type="button" onclick="window.openRejectModal('${o.id}')" class="flex-1 bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm hover:bg-red-100 transition-colors active:scale-95"><i class="fa-solid fa-xmark"></i> Reject</button></div>`;
                         else if (o.status === 'Accepted') { cardStyle = 'border-blue-200 bg-blue-50/30'; actionButtons = `<button type="button" onclick="window.markPreparing('${o.id}')" class="w-full bg-blue-600 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-blue-700 active:scale-95">Start Preparing</button>`; }
