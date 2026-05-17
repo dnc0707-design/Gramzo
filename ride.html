@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gramzo Rides | Book Cab & Moto</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#3B82F6"> <!-- Blue theme for rides -->
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDTwDel0JxkWaXuXSHf-whhxJTkqlNlxa0&libraries=places" async defer></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+        body { font-family: 'Outfit', sans-serif; background-color: #f8f9fa; -webkit-tap-highlight-color: transparent; padding-bottom: 90px; }
+        .input-field { @apply w-full px-5 py-4 bg-gray-50/80 rounded-2xl border border-gray-200 outline-none focus:bg-white focus:ring-2 ring-blue-500/30 focus:border-blue-500 transition-all text-sm font-medium text-gray-800; }
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); z-index: 100; opacity: 0; transition: opacity 0.3s ease; }
+        .modal-overlay.active { display: block; opacity: 1; }
+        .modal-content { position: absolute; top: 50%; left: 50%; background: white; border-radius: 2rem; padding: 2rem; transform: translate(-50%, -50%); width: 90%; max-width: 28rem; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    </style>
+</head>
+<body>
+
+    <div class="fixed top-0 w-full z-50 bg-white/95 backdrop-blur shadow-sm h-[60px] flex justify-between items-center px-4 border-b border-gray-100">
+        <button type="button" onclick="location.href='index.html'" class="text-blue-600 font-bold bg-blue-50 px-3 py-1.5 rounded-lg active:scale-95 transition"><i class="fa-solid fa-arrow-left mr-1"></i> Back</button>
+        <div class="font-black text-xl italic text-blue-600 absolute left-1/2 transform -translate-x-1/2 flex items-center gap-1">
+            <i class="fa-solid fa-taxi"></i> Gramzo Ride
+        </div>
+        <div id="auth-container" class="flex items-center">
+            <div id="profile-trigger" class="flex items-center gap-2 bg-gray-50 border border-gray-200 py-1.5 px-3 rounded-full shadow-sm">
+                <div class="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-black text-xs"><i class="fa-solid fa-user"></i></div>
+                <span id="nav-name" class="text-xs font-bold text-gray-900 hidden sm:block">Guest</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="pt-[70px]">
+        <main id="main-content" class="px-4 pb-24 max-w-md mx-auto sm:max-w-4xl sm:px-6">
+            
+            <!-- Global Category Navigation -->
+            <div class="flex gap-2 bg-gray-100 p-1.5 rounded-xl w-full mb-6 border border-gray-200 shadow-inner mt-2">
+                <a href="index.html" class="flex-1 text-center py-2.5 rounded-lg text-sm text-gray-500 font-bold hover:text-gray-900 transition-all border border-transparent">🍔 Food</a>
+                <a href="index.html" class="flex-1 text-center py-2.5 rounded-lg text-sm text-gray-500 font-bold hover:text-gray-900 transition-all border border-transparent">🛒 Grocery</a>
+                <button class="flex-1 bg-blue-600 text-white font-black py-2.5 rounded-lg text-sm shadow-md transition-all">🚕 Ride</button>
+            </div>
+
+            <!-- Ride Specific Tabs (Book vs Scheduled) -->
+            <div class="flex gap-2 mb-4">
+                <button id="tab-book-now" onclick="window.switchRideTab('Now')" class="flex-1 bg-gray-900 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition-colors">Book Ride</button>
+                <button id="tab-sched-trips" onclick="window.switchRideTab('Sched')" class="flex-1 bg-white text-gray-600 font-bold py-2.5 rounded-xl text-xs border border-gray-200 shadow-sm transition-colors">Scheduled Trips</button>
+            </div>
+
+            <div id="view-ride-now" class="space-y-4 animate-fadeIn">
+                <div class="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm">
+                    <div class="relative">
+                        <div class="absolute top-5 left-3.5 w-2 h-2 rounded-full bg-emerald-500 z-10"></div>
+                        <div class="absolute top-8 left-4 w-0.5 h-8 bg-gray-200 z-10"></div>
+                        <div class="absolute top-16 left-3.5 w-2 h-2 rounded-full bg-red-500 z-10"></div>
+                        
+                        <input type="text" id="ride-pickup" oninput="window.resetRideCalc()" class="w-full bg-gray-50 border border-gray-100 rounded-xl py-3 pl-10 pr-4 text-sm outline-none focus:ring-1 focus:ring-blue-400 mb-3" placeholder="Enter Pickup Location">
+                        <input type="text" id="ride-drop" oninput="window.resetRideCalc()" class="w-full bg-gray-50 border border-gray-100 rounded-xl py-3 pl-10 pr-4 text-sm outline-none focus:ring-1 focus:ring-blue-400" placeholder="Where are you going?">
+                    </div>
+                    
+                    <div class="mt-3">
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 ml-1">Vehicle Type</label>
+                        <select id="ride-search-type" class="w-full bg-gray-50 border border-gray-100 rounded-xl py-3 px-4 text-sm outline-none font-bold text-gray-700" onchange="window.handleRideTypeChange(); window.resetRideCalc();">
+                            <option value="Car_Mini" selected>🚕 Mini/Sedan (4-6 Seater)</option>
+                            <option value="Car_SUV">🚙 SUV (7-13 Seater)</option>
+                            <option value="Bike">🏍️ Bike (Max 1 Person)</option>
+                            <option value="Toto">🛺 Toto / Auto</option>
+                        </select>
+                    </div>
+
+                    <!-- Bike & Toto Round Trip Checkbox Unlocked -->
+                    <label class="flex items-center gap-2 text-xs font-bold text-gray-700 mt-3 p-2 bg-gray-50 rounded-lg border border-gray-100 cursor-pointer" id="round-trip-container">
+                        <input type="checkbox" id="ride-round-trip" onchange="window.resetRideCalc()" class="w-4 h-4 text-blue-600 focus:ring-blue-500 rounded border-gray-300 disabled:opacity-50" checked disabled>
+                        <span id="round-trip-label-text" class="text-blue-600">Round Trip (Mandatory for Car)</span>
+                    </label>
+
+                    <button type="button" id="btn-calc-fare" onclick="window.calculateRideFares()" class="w-full bg-gray-900 hover:bg-gray-800 text-white font-bold py-3.5 rounded-xl mt-4 text-sm shadow-md transition-colors active:scale-95">Calculate Fare</button>
+                    
+                    <div id="ride-distance-display" class="hidden mt-4 text-center py-3 px-4 bg-blue-50 border border-blue-100 rounded-xl animate-fadeIn"></div>
+
+                    <!-- Dispatch Options (Now vs Later) -->
+                    <div id="dispatch-options" class="hidden gap-2 mt-4 animate-fadeIn flex-col sm:flex-row">
+                        <button type="button" onclick="window.requestBroadcastRide(false)" class="flex-1 bg-yellow-400 text-gray-900 font-bold py-3.5 rounded-xl shadow-md active:scale-95 text-sm border border-yellow-500"><i class="fa-solid fa-bolt mr-1"></i> Ride Now</button>
+                        <button type="button" onclick="window.customPrompt('Schedule Ride', 'When do you need the ride? (e.g. 5:00 PM Tomorrow)').then(t => { if(t) window.requestBroadcastRide(true, t) })" class="flex-1 bg-white text-blue-600 font-bold py-3.5 rounded-xl border-2 border-blue-600 text-sm active:scale-95 hover:bg-blue-50"><i class="fa-solid fa-clock mr-1"></i> Ride Later</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-sched-trips" class="hidden space-y-4 animate-fadeIn">
+                <!-- Rider Reverse Request Form -->
+                <div id="rider-post-trip-section" class="hidden bg-blue-600 p-5 rounded-3xl text-white shadow-lg mb-6 relative overflow-hidden">
+                    <div class="relative z-10">
+                        <h3 class="font-black text-lg mb-1"><i class="fa-solid fa-route"></i> Post an Upcoming Trip</h3>
+                        <p class="text-[10px] text-blue-100 mb-4 font-medium">Let users book seats in your vehicle along your route.</p>
+                        <div class="space-y-2.5">
+                            <input type="text" id="sched-from" class="w-full bg-white/20 border border-white/30 rounded-xl py-2 px-3 text-sm text-white placeholder-blue-200 outline-none focus:ring-1 ring-white" placeholder="From Location">
+                            <input type="text" id="sched-to" class="w-full bg-white/20 border border-white/30 rounded-xl py-2 px-3 text-sm text-white placeholder-blue-200 outline-none focus:ring-1 ring-white" placeholder="To Location">
+                            <div class="flex flex-col sm:flex-row gap-2">
+                                <input type="datetime-local" id="sched-time" class="flex-[2] bg-white/20 border border-white/30 rounded-xl py-2 px-3 text-sm text-white outline-none">
+                                <input type="number" id="sched-price" placeholder="₹ per seat" class="flex-1 bg-white/20 border border-white/30 rounded-xl py-2 px-3 text-sm text-white outline-none">
+                            </div>
+                            <button onclick="window.postScheduledTrip()" class="w-full bg-white text-blue-600 font-black py-3 rounded-xl shadow-md mt-2 text-sm hover:bg-gray-50 active:scale-95 transition-transform">Post Journey</button>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-car-side absolute -right-4 -bottom-4 text-7xl text-white/10 rotate-[-15deg]"></i>
+                </div>
+
+                <!-- Available Scheduled Rides List -->
+                <h3 class="font-black text-xl text-gray-900 tracking-tight">Available Scheduled Rides</h3>
+                <div id="scheduled-list" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="col-span-full text-center py-10 bg-white rounded-3xl border border-gray-100"><i class="fa-solid fa-spinner fa-spin text-gray-400 text-2xl mb-2"></i><p class="text-sm text-gray-400 font-medium">Loading trips...</p></div>
+                </div>
+            </div>
+
+            <!-- Partner Dashboard for Rides -->
+            <div id="partner-dashboard-ride" class="hidden mt-6 bg-gray-900 p-5 rounded-3xl text-white shadow-xl">
+                <div class="flex justify-between items-center mb-4 border-b border-gray-700 pb-2">
+                    <h3 class="font-black text-lg text-emerald-400 flex items-center gap-2"><i class="fa-solid fa-satellite-dish animate-pulse"></i> Live Requests</h3>
+                    <span class="bg-gray-800 text-xs px-2 py-1 rounded font-bold border border-gray-700" id="partner-online-indicator">Offline</span>
+                </div>
+                <div id="live-requests-list" class="space-y-3">
+                    <p class="text-xs text-gray-500 text-center py-4">Waiting for ride requests...</p>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Status Popup Modal -->
+    <div id="status-popup-modal" class="modal-overlay z-[500]">
+        <div class="modal-content !max-w-xs text-center border-t-8 border-blue-500">
+            <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
+                <i class="fa-solid fa-bell text-3xl text-blue-500"></i>
+            </div>
+            <h3 id="status-popup-title" class="font-black text-2xl text-gray-900 mb-2">Update</h3>
+            <p id="status-popup-desc" class="text-sm text-gray-600 mb-6 font-medium">Details</p>
+            <button onclick="document.getElementById('status-popup-modal').classList.remove('active')" class="w-full bg-gray-900 hover:bg-gray-800 text-white py-3.5 rounded-xl font-bold shadow-md active:scale-95 transition-all">Acknowledge</button>
+        </div>
+    </div>
+    
+    <!-- Custom Prompt Modal -->
+    <div id="custom-prompt-modal" class="modal-overlay z-[600]">
+        <div class="modal-content !max-w-xs">
+            <h3 class="font-black text-xl text-gray-900 mb-2" id="prompt-title">Prompt</h3>
+            <p class="text-xs text-gray-500 mb-4" id="prompt-desc">Enter value:</p>
+            <input type="text" id="prompt-input" class="input-field mb-4" placeholder="...">
+            <div class="flex gap-2">
+                <button onclick="window.cancelCustomPrompt()" class="flex-1 bg-gray-100 hover:bg-gray-200 py-3 rounded-xl font-bold text-sm text-gray-600 transition-colors">Cancel</button>
+                <button onclick="window.submitCustomPrompt()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold text-sm transition-colors shadow-md">Submit</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Custom Confirm Modal -->
+    <div id="custom-confirm-modal" class="modal-overlay z-[600]">
+        <div class="modal-content !max-w-xs">
+            <div class="w-12 h-12 bg-yellow-50 rounded-full flex items-center justify-center mb-3">
+                <i class="fa-solid fa-triangle-exclamation text-xl text-yellow-500"></i>
+            </div>
+            <h3 class="font-black text-xl text-gray-900 mb-2" id="confirm-title">Confirm Action</h3>
+            <p class="text-sm text-gray-600 mb-6 font-medium" id="confirm-desc">Are you sure you want to do this?</p>
+            <div class="flex gap-2">
+                <button onclick="window.cancelCustomConfirm()" class="flex-1 bg-gray-100 text-gray-600 py-3 rounded-xl font-bold text-sm hover:bg-gray-200">Cancel</button>
+                <button id="btn-confirm-yes" onclick="window.submitCustomConfirm()" class="flex-[1.5] bg-red-600 text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-red-700">Yes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast-msg" class="fixed top-24 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full text-sm font-bold z-[300] shadow-2xl transition-all duration-300 transform -translate-y-10 opacity-0 pointer-events-none flex items-center gap-2">
+        <i class="fa-solid fa-circle-info text-blue-400"></i><span id="toast-text">Message</span>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, getDoc, setDoc, onSnapshot, addDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Same exact config used in index.html
+        const liveFirebaseConfig = {
+            apiKey: "AIzaSyCA4U4jva7HHeMP-yk1VJy3l_BBct3Gohg",
+            authDomain: "gramzo.firebaseapp.com",
+            projectId: "gramzo",
+            storageBucket: "gramzo.firebasestorage.app",
+            messagingSenderId: "674262956986",
+            appId: "1:674262956986:web:772f68694c77e15bf3fb83"
+        };
+        
+        const app = initializeApp(liveFirebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        // App State Variables
+        let currentUser = null;
+        window.currentSelectedRideType = null;
+        window.currentRideDistanceKm = null;
+        window.currentRideFares = { Bike: 0, Toto: 0, Car_Mini: 0, Car_SUV: 0 };
+
+        let promptResolve = null;
+        let customConfirmResolve = null;
+
+        window.customPrompt = (title, desc, type="text") => {
+            return new Promise(resolve => {
+                document.getElementById('prompt-title').innerText = title; 
+                document.getElementById('prompt-desc').innerText = desc;
+                const input = document.getElementById('prompt-input');
+                input.type = type; input.value = '';
+                document.getElementById('custom-prompt-modal').classList.add('active'); 
+                promptResolve = resolve;
+                input.focus();
+            });
+        };
+        window.submitCustomPrompt = () => { if(promptResolve) promptResolve(document.getElementById('prompt-input').value); document.getElementById('custom-prompt-modal').classList.remove('active'); };
+        window.cancelCustomPrompt = () => { if(promptResolve) promptResolve(null); document.getElementById('custom-prompt-modal').classList.remove('active'); };
+        
+        window.customConfirm = (title, desc, confirmBtnText = "Yes") => {
+            return new Promise((resolve) => {
+                document.getElementById('confirm-title').innerText = title;
+                document.getElementById('confirm-desc').innerText = desc;
+                document.getElementById('btn-confirm-yes').innerText = confirmBtnText;
+                document.getElementById('custom-confirm-modal').classList.add('active');
+                customConfirmResolve = resolve;
+            });
+        };
+        window.submitCustomConfirm = () => { if (customConfirmResolve) customConfirmResolve(true); document.getElementById('custom-confirm-modal').classList.remove('active'); customConfirmResolve = null; };
+        window.cancelCustomConfirm = () => { if (customConfirmResolve) customConfirmResolve(false); document.getElementById('custom-confirm-modal').classList.remove('active'); customConfirmResolve = null; };
+        
+        window.showStatusPopup = (t, d) => { document.getElementById('status-popup-title').innerText = t; document.getElementById('status-popup-desc').innerText = d; document.getElementById('status-popup-modal').classList.add('active'); };
+        
+        window.showToast = (text, type = "info") => {
+            const toast = document.getElementById('toast-msg'); const icon = toast.querySelector('i'); toast.querySelector('span').innerText = text;
+            if (type === 'error') icon.className = "fa-solid fa-circle-exclamation text-red-400"; else if (type === 'success') icon.className = "fa-solid fa-circle-check text-emerald-400"; else icon.className = "fa-solid fa-circle-info text-blue-400";
+            toast.classList.remove('opacity-0', '-translate-y-10', 'pointer-events-none'); toast.classList.add('opacity-100', 'translate-y-0');
+            setTimeout(() => { toast.classList.remove('opacity-100', 'translate-y-0'); toast.classList.add('opacity-0', '-translate-y-10', 'pointer-events-none'); }, 3000);
+        };
+
+        window.dbCall = (promise, ms = 8000) => {
+            return new Promise((resolve, reject) => {
+                const timer = setTimeout(() => { reject(new Error("Timeout")); }, ms);
+                promise.then(res => { clearTimeout(timer); resolve(res); }).catch(err => { clearTimeout(timer); reject(err); });
+            });
+        };
+
+        window.switchRideTab = (tab) => {
+            if(tab === 'Now') {
+                document.getElementById('view-ride-now').classList.remove('hidden');
+                document.getElementById('view-sched-trips').classList.add('hidden');
+                document.getElementById('tab-book-now').className = 'flex-1 bg-gray-900 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition-colors';
+                document.getElementById('tab-sched-trips').className = 'flex-1 bg-white text-gray-600 font-bold py-2.5 rounded-xl text-xs border border-gray-200 shadow-sm transition-colors';
+            } else {
+                document.getElementById('view-ride-now').classList.add('hidden');
+                document.getElementById('view-sched-trips').classList.remove('hidden');
+                document.getElementById('tab-book-now').className = 'flex-1 bg-white text-gray-600 font-bold py-2.5 rounded-xl text-xs border border-gray-200 shadow-sm transition-colors';
+                document.getElementById('tab-sched-trips').className = 'flex-1 bg-gray-900 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition-colors';
+            }
+        };
+
+        window.handleRideTypeChange = () => {
+            const searchType = document.getElementById('ride-search-type').value;
+            const roundTripCheckbox = document.getElementById('ride-round-trip');
+            const roundTripLabelText = document.getElementById('round-trip-label-text');
+
+            // Car logic: Mandatory Round Trip
+            if (searchType.startsWith('Car')) {
+                roundTripCheckbox.checked = true;
+                roundTripCheckbox.disabled = true;
+                roundTripLabelText.innerText = "Round Trip (Mandatory for Car)";
+                roundTripLabelText.classList.add('text-blue-600');
+            } else {
+                // Bike and Toto: Optional Round Trip
+                roundTripCheckbox.disabled = false;
+                roundTripLabelText.innerText = "Round Trip (Optional)";
+                roundTripLabelText.classList.remove('text-blue-600');
+            }
+        };
+
+        window.resetRideCalc = () => {
+            document.getElementById('btn-calc-fare').classList.remove('hidden');
+            document.getElementById('dispatch-options').classList.add('hidden');
+            document.getElementById('ride-distance-display').classList.add('hidden');
+        };
+
+        window.calculateDistance = (origin, dest) => {
+            return new Promise((resolve) => {
+                if(!window.google || !window.google.maps) resolve(null);
+                const service = new google.maps.DistanceMatrixService();
+                service.getDistanceMatrix({ origins: [origin], destinations: [dest], travelMode: 'DRIVING', unitSystem: google.maps.UnitSystem.METRIC }, (res, status) => {
+                    if(status === 'OK' && res.rows[0].elements[0].status === 'OK') {
+                        resolve({ text: res.rows[0].elements[0].distance.text, value: res.rows[0].elements[0].distance.value });
+                    } else resolve(null);
+                });
+            });
+        };
+
+        window.calculateRideFares = async () => {
+            const pickup = document.getElementById('ride-pickup').value.trim();
+            const drop = document.getElementById('ride-drop').value.trim();
+            const searchType = document.getElementById('ride-search-type').value;
+            const isRoundTrip = document.getElementById('ride-round-trip').checked;
+
+            if(!pickup || !drop) return window.showToast("Enter Pickup and Drop locations.", "error");
+
+            const btnCalc = document.getElementById('btn-calc-fare');
+            const origText = btnCalc.innerText;
+            btnCalc.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Calculating...';
+            btnCalc.disabled = true;
+
+            let distanceData = await window.calculateDistance(pickup, drop);
+            
+            // Fallback if Maps API fails
+            if (!distanceData) {
+                btnCalc.innerText = origText; btnCalc.disabled = false;
+                const manualDistStr = await window.customPrompt("Calculation Failed", "Enter estimated distance in KM (e.g. 5.5):", "number");
+                if (!manualDistStr) return;
+                const manualDist = parseFloat(manualDistStr);
+                if (isNaN(manualDist) || manualDist <= 0) return window.showToast("Invalid distance.", "error");
+                distanceData = { value: manualDist * 1000, text: `${manualDist} km` };
+            }
+
+            btnCalc.innerText = origText; btnCalc.disabled = false;
+            
+            let baseKm = (distanceData.value / 1000);
+            let distKm = baseKm;
+            let isDouble = searchType.startsWith('Car') || isRoundTrip;
+            
+            if (isDouble) distKm = baseKm * 2;
+            window.currentRideDistanceKm = distKm;
+
+            let estFare = 0;
+            let breakdownStr = "";
+            if (searchType === 'Car_Mini') { estFare = 200 + (distKm * 15); breakdownStr = "Base ₹200 + ₹15/km"; } 
+            else if (searchType === 'Car_SUV') { estFare = 200 + (distKm * 20); breakdownStr = "Base ₹200 + ₹20/km"; } 
+            else if (searchType === 'Bike') { estFare = distKm <= 5 ? 20 : 20 + ((distKm - 5) * 5); breakdownStr = "Base ₹20 (5km) + ₹5/km"; } 
+            else if (searchType === 'Toto') { estFare = distKm <= 5 ? 100 : 100 + ((distKm - 5) * 10); breakdownStr = "Base ₹100 (5km) + ₹10/km"; }
+            
+            estFare = Math.max(20, Math.round(estFare));
+            window.currentRideFares[searchType] = estFare;
+            window.currentSelectedRideType = searchType;
+
+            let displayKm = distKm.toFixed(1);
+            let distanceHtml = isDouble ? `Dist: <b>${baseKm.toFixed(1)}km × 2 = ${displayKm}km</b> (Round Trip)` : `Distance: <b>${displayKm} km</b>`;
+
+            const distDisplay = document.getElementById('ride-distance-display');
+            distDisplay.innerHTML = `
+                <div class="text-[11px] text-blue-700 font-bold mb-1">${distanceHtml}</div>
+                <div class="text-xl font-black text-gray-900 mb-1">Est. Fare: <span class="text-emerald-600">₹${estFare}</span></div>
+                <div class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">${breakdownStr}</div>
+            `;
+            distDisplay.classList.remove('hidden');
+            document.getElementById('btn-calc-fare').classList.add('hidden');
+            document.getElementById('dispatch-options').classList.remove('hidden');
+            document.getElementById('dispatch-options').style.display = 'flex';
+        };
+
+        window.requestBroadcastRide = async (isScheduled, scheduleTime = null) => {
+            if(!currentUser) { window.showToast("Must be logged in to ride!", "error"); return; }
+            
+            const pickup = document.getElementById('ride-pickup').value.trim();
+            const drop = document.getElementById('ride-drop').value.trim();
+            const searchType = window.currentSelectedRideType;
+            const fare = window.currentRideFares[searchType];
+
+            const btn1 = document.querySelector('#dispatch-options button:first-child');
+            const btn2 = document.querySelector('#dispatch-options button:last-child');
+            btn1.disabled = true; btn2.disabled = true;
+
+            try {
+                const docRef = await window.dbCall(addDoc(collection(db, 'orders'), {
+                    type: 'Ride', customer: currentUser.name, phone: currentUser.phone, pickup: pickup, address: drop,
+                    vehicleType: searchType, amount: fare, total: fare, status: 'Broadcasted', 
+                    scheduledFor: scheduleTime, time: serverTimestamp()
+                }), 10000);
+
+                window.showStatusPopup("Request Sent!", isScheduled ? `Your ride is scheduled for ${scheduleTime}` : "Searching for nearby drivers...");
+                window.resetRideCalc();
+                document.getElementById('ride-pickup').value = ''; document.getElementById('ride-drop').value = '';
+
+                // AUTO ARCHIVE LOGIC (1 Minute Timeout)
+                if (!isScheduled) {
+                    setTimeout(async () => {
+                        try {
+                            const snap = await getDoc(docRef);
+                            if (snap.exists() && snap.data().status === 'Broadcasted') {
+                                await updateDoc(docRef, { status: 'Archived' });
+                                window.showStatusPopup("No Riders Available", "No drivers accepted within 1 minute. The request has been archived. Please try searching again.");
+                            }
+                        } catch(e) { console.log("Auto-archive check failed", e); }
+                    }, 60000); // 60 seconds
+                }
+            } catch(e) { window.showToast("Failed to request ride.", "error"); }
+            finally { btn1.disabled = false; btn2.disabled = false; }
+        };
+
+        window.postScheduledTrip = async () => {
+            const from = document.getElementById('sched-from').value.trim();
+            const to = document.getElementById('sched-to').value.trim();
+            const time = document.getElementById('sched-time').value;
+            const price = parseFloat(document.getElementById('sched-price').value);
+            
+            if(!from || !to || !time || isNaN(price)) return window.showToast("Fill all fields correctly.", "error");
+
+            try {
+                await window.dbCall(addDoc(collection(db, 'scheduled_trips'), {
+                    riderName: currentUser.name, riderPhone: currentUser.phone,
+                    vehicle: currentUser.carModel || 'Vehicle', carNum: currentUser.carNum || '',
+                    from, to, time, price, seatsAvailable: currentUser.seater || 4, status: 'Active',
+                    createdAt: serverTimestamp()
+                }), 10000);
+                window.showStatusPopup("Journey Posted!", "Users can now see and book your trip!");
+                document.getElementById('sched-from').value = ''; document.getElementById('sched-to').value = '';
+                document.getElementById('sched-time').value = ''; document.getElementById('sched-price').value = '';
+            } catch(e) { window.showToast("Error posting trip.", "error"); }
+        };
+
+        window.bookScheduledSeat = async (tripId, price, from, to) => {
+            if(!currentUser) return window.showToast("Please log in to book a seat.", "error");
+            const confirmed = await window.customConfirm("Book Seat", `Book a seat from ${from} to ${to} for ₹${price}?`, "Confirm Booking");
+            if (!confirmed) return;
+            
+            try {
+                const tripRef = doc(db, 'scheduled_trips', tripId);
+                const snap = await window.dbCall(getDoc(tripRef), 5000);
+                if(snap.exists() && snap.data().seatsAvailable > 0) {
+                    await window.dbCall(updateDoc(tripRef, { seatsAvailable: snap.data().seatsAvailable - 1 }), 5000);
+                    await window.dbCall(addDoc(collection(db, 'orders'), {
+                        type: 'Ride', customer: currentUser.name, phone: currentUser.phone, pickup: from, address: to,
+                        amount: price, total: price, status: 'Confirmed', scheduledTripId: tripId, time: serverTimestamp(),
+                        riderName: snap.data().riderName, riderPhone: snap.data().riderPhone
+                    }), 5000);
+                    window.showStatusPopup("Seat Confirmed!", "Your seat has been booked successfully.");
+                } else { window.showToast("No seats left!", "error"); }
+            } catch(e) { window.showToast("Error booking seat.", "error"); }
+        };
+
+        const loadScheduledTrips = () => {
+            onSnapshot(collection(db, 'scheduled_trips'), (snap) => {
+                const list = document.getElementById('scheduled-list');
+                const trips = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(t => t.status === 'Active' && t.seatsAvailable > 0);
+                
+                if(trips.length === 0) { list.innerHTML = '<div class="col-span-full text-center py-10 bg-white rounded-3xl border border-gray-100"><p class="text-sm text-gray-400">No upcoming trips available.</p></div>'; return; }
+                
+                list.innerHTML = trips.map(t => {
+                    const tDate = new Date(t.time).toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
+                    return `
+                    <div class="bg-white p-5 rounded-3xl shadow-sm border border-blue-100 relative overflow-hidden transition-all hover:shadow-md">
+                        <div class="absolute top-0 right-0 bg-blue-50 text-blue-600 text-[10px] font-black px-3 py-1.5 rounded-bl-xl uppercase tracking-widest border-b border-l border-blue-100"><i class="fa-solid fa-taxi"></i> ${t.vehicle}</div>
+                        <p class="text-xs font-black text-gray-400 mb-2 uppercase tracking-widest"><i class="fa-regular fa-calendar-check text-blue-400"></i> ${tDate}</p>
+                        <div class="relative pl-6 mb-4">
+                            <div class="absolute top-1.5 left-1 w-2 h-2 rounded-full bg-emerald-500 z-10"></div>
+                            <div class="absolute top-4 left-1.5 w-0.5 h-6 bg-gray-200 z-10"></div>
+                            <div class="absolute top-10 left-1 w-2 h-2 rounded-full bg-red-500 z-10"></div>
+                            <p class="text-sm font-bold text-gray-900 leading-tight mb-2">From: ${t.from}</p>
+                            <p class="text-sm font-bold text-gray-900 leading-tight">To: ${t.to}</p>
+                        </div>
+                        <div class="flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-100">
+                            <div>
+                                <span class="text-xl font-black text-emerald-600 leading-none block">₹${t.price}</span>
+                                <span class="text-[9px] font-bold text-gray-500 uppercase">${t.seatsAvailable} Seats Left</span>
+                            </div>
+                            <button onclick="window.bookScheduledSeat('${t.id}', ${t.price}, '${t.from.replace(/'/g, "\\'")}', '${t.to.replace(/'/g, "\\'")}')" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-black uppercase tracking-widest rounded-xl shadow-md transition-colors active:scale-95">Book Seat</button>
+                        </div>
+                    </div>
+                `}).join('');
+            });
+        };
+
+        const loadPartnerLiveRequests = () => {
+            if (!currentUser || !['Rider', 'Ride Partner'].includes(currentUser.category)) return;
+
+            const isOnline = currentUser.shopStatus === 'Online' || currentUser.shopStatus === 'Open';
+            document.getElementById('partner-online-indicator').innerText = isOnline ? 'ONLINE' : 'OFFLINE';
+            document.getElementById('partner-online-indicator').className = isOnline ? 'bg-emerald-100 text-emerald-700 text-[10px] uppercase tracking-widest px-2 py-1 rounded font-black border border-emerald-200' : 'bg-gray-800 text-gray-400 text-[10px] uppercase tracking-widest px-2 py-1 rounded font-black border border-gray-700';
+
+            onSnapshot(collection(db, 'orders'), (snap) => {
+                const list = document.getElementById('live-requests-list');
+                const orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                
+                let myType = currentUser.vehicleType || 'Bike';
+                let isCar = myType.startsWith('Car');
+
+                let liveRequests = orders.filter(o => {
+                    if(o.type !== 'Ride') return false;
+                    if(o.status === 'Confirmed' || o.status === 'Started') return o.riderId === currentUser.phone; // Show my active rides
+                    if(o.status !== 'Broadcasted' && o.status !== 'Requested') return false; // Hide archived/completed
+                    if(!isOnline) return false; // Must be online to see broadcasts
+                    
+                    let orderVeh = o.vehicleType || 'Bike';
+                    return isCar ? orderVeh.startsWith('Car') : orderVeh === myType;
+                });
+
+                if(liveRequests.length === 0) { list.innerHTML = `<div class="text-center py-6 border border-gray-700 rounded-2xl bg-gray-800/50"><i class="fa-solid fa-radar text-2xl text-gray-600 mb-2"></i><p class="text-xs text-gray-400 font-medium">${isOnline ? 'Scanning for nearby requests...' : 'Go Online to receive requests.'}</p></div>`; return; }
+
+                list.innerHTML = liveRequests.map(o => {
+                    const isMine = o.riderId === currentUser.phone;
+                    let actionHtml = '';
+                    if (o.status === 'Broadcasted' || o.status === 'Requested') {
+                        actionHtml = `<button onclick="window.driverAcceptRide('${o.id}')" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black py-3 rounded-xl shadow-md transition-colors active:scale-95 text-sm uppercase tracking-widest"><i class="fa-solid fa-check mr-1"></i> Accept Ride</button>`;
+                    } else if (isMine && o.status === 'Confirmed') {
+                        actionHtml = `<button onclick="window.markRideStarted('${o.id}')" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-black py-3 rounded-xl shadow-md transition-colors active:scale-95 text-sm uppercase tracking-widest"><i class="fa-solid fa-play mr-1"></i> Start Ride</button>`;
+                    } else if (isMine && o.status === 'Started') {
+                        actionHtml = `<button onclick="window.completeRide('${o.id}', ${o.amount})" class="w-full bg-gray-100 text-gray-900 font-black py-3 rounded-xl shadow-md active:scale-95 text-sm uppercase tracking-widest"><i class="fa-solid fa-flag-checkered mr-1"></i> End & Collect ₹${o.amount}</button>`;
+                    }
+
+                    return `
+                        <div class="bg-gray-800 border border-gray-700 p-4 rounded-2xl relative overflow-hidden">
+                            ${o.scheduledFor ? `<span class="absolute top-0 right-0 bg-yellow-400 text-gray-900 text-[9px] font-black px-2 py-1 rounded-bl-lg uppercase tracking-widest"><i class="fa-solid fa-clock"></i> Sched: ${o.scheduledFor}</span>` : ''}
+                            <p class="text-xs font-bold text-gray-300 mb-1"><i class="fa-solid fa-user text-gray-500 mr-1"></i> ${o.customer}</p>
+                            <p class="text-sm font-medium text-white mb-1 pl-4 relative"><span class="absolute left-0 top-1.5 w-2 h-2 rounded-full bg-emerald-400"></span>${o.pickup}</p>
+                            <p class="text-sm font-medium text-white mb-3 pl-4 relative"><span class="absolute left-0 top-1.5 w-2 h-2 rounded-full bg-red-400"></span>${o.address}</p>
+                            <div class="flex justify-between items-center mb-4 bg-gray-900 p-3 rounded-xl border border-gray-700">
+                                <span class="text-lg font-black text-emerald-400">₹${o.amount}</span>
+                                <span class="text-[10px] font-black uppercase text-gray-400 tracking-wider">${o.status}</span>
+                            </div>
+                            ${actionHtml}
+                        </div>
+                    `;
+                }).join('');
+            });
+        };
+
+        window.driverAcceptRide = async (orderId) => {
+            if (!currentUser) return;
+            const confirmed = await window.customConfirm("Accept Ride", "Accept this ride and proceed to pickup?", "Accept");
+            if(!confirmed) return;
+            try {
+                await window.dbCall(updateDoc(doc(db, 'orders', orderId), { 
+                    status: 'Confirmed', riderId: currentUser.phone, riderName: currentUser.name, 
+                    riderPhone: currentUser.phone, carModel: currentUser.carModel || '', carNum: currentUser.carNum || '' 
+                }), 10000);
+                window.showToast("Ride Accepted!", "success");
+            } catch(e) { window.showToast("Failed to accept. It may have been taken.", "error"); }
+        };
+
+        window.markRideStarted = async (orderId) => {
+            try { await window.dbCall(updateDoc(doc(db, 'orders', orderId), { status: 'Started' }), 10000); window.showToast("Ride Started!", "success"); } catch(e) {}
+        };
+        
+        window.completeRide = async (orderId, amount) => {
+            const deductPoints = ['Car', 'Car_Mini', 'Car_SUV'].includes(currentUser.vehicleType) ? 50 : 5;
+            const confirmed = await window.customConfirm("Complete Ride", `Confirm completion and payment collection of ₹${amount}? (-${deductPoints} Pts)`, "Complete");
+            if(!confirmed) return;
+            
+            if((currentUser.walletPoints || 0) < deductPoints) {
+                return window.showToast(`Insufficient Gramzo Points (${deductPoints} needed) to complete this ride. Contact Admin.`, "error");
+            }
+            
+            try {
+                const newPoints = (currentUser.walletPoints || 0) - deductPoints;
+                await window.dbCall(updateDoc(doc(db, 'orders', orderId), { status: 'Completed' }), 10000);
+                await window.dbCall(updateDoc(doc(db, 'users', currentUser.phone), { walletPoints: newPoints }), 10000);
+                currentUser.walletPoints = newPoints;
+                window.showToast("Ride Completed!", "success");
+            } catch(e) { window.showToast("Failed to complete ride.", "error"); }
+        };
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // Same dual-check session matching as index.html
+                const snap = await window.dbCall(getDoc(doc(db, 'sessions', user.uid)), 5000).catch(()=>null);
+                if (snap && snap.exists()) {
+                    const sessionPhone = snap.data().phone;
+                    if(sessionPhone === 'admin_session') {
+                        currentUser = { name: 'Super Admin', role: 'Admin', phone: 'Admin' };
+                    } else {
+                        const uSnap = await window.dbCall(getDoc(doc(db, 'users', sessionPhone)), 5000).catch(()=>null);
+                        if (uSnap && uSnap.exists()) {
+                            currentUser = uSnap.data();
+                            document.getElementById('nav-name').innerText = currentUser.name.split(' ')[0];
+                            
+                            if(['Rider', 'Ride Partner'].includes(currentUser.category)) {
+                                document.getElementById('rider-post-trip-section').classList.remove('hidden');
+                                document.getElementById('partner-dashboard-ride').classList.remove('hidden');
+                                loadPartnerLiveRequests();
+                            }
+                        }
+                    }
+                }
+            } else { signInAnonymously(auth); }
+            loadScheduledTrips();
+        });
+        
+        // Auto-run Maps initialization if it didn't attach via callback properly yet
+        window.onload = function() {
+            setTimeout(() => {
+                if(window.google && window.google.maps && !document.getElementById('ride-pickup').dataset.mapsInit) {
+                    const initInput = (id) => {
+                        const el = document.getElementById(id);
+                        if(el) {
+                            const autocomplete = new google.maps.places.Autocomplete(el, { componentRestrictions: { country: "in" } });
+                            autocomplete.addListener('place_changed', () => { if(autocomplete.getPlace().formatted_address) el.value = autocomplete.getPlace().formatted_address; });
+                            el.dataset.mapsInit = 'true';
+                        }
+                    };
+                    initInput('ride-pickup'); initInput('ride-drop');
+                }
+            }, 1500);
+        }
+    </script>
+</body>
+</html>
