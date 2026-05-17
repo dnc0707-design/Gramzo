@@ -924,8 +924,8 @@
 
         // GLOBALS & STATE
         let currentUser = null;
-        let currentRestaurantFilter = null;
-        let currentFoodCategoryFilter = null;
+        window.currentRestaurantFilter = null;
+        window.currentFoodCategoryFilter = null;
         window.cart = [];
         window.appliedPromo = null; // Object to hold full promo details
         window.promoCode = '';
@@ -1043,8 +1043,8 @@
             document.getElementById('tab-cat-Food').className = cat === 'Food Owner' ? activeClass : inactiveClass;
             document.getElementById('tab-cat-Grocery').className = cat === 'Grocery Shop' ? activeClass : inactiveClass;
 
-            currentRestaurantFilter = null; 
-            currentFoodCategoryFilter = null;
+            window.currentRestaurantFilter = null; 
+            window.currentFoodCategoryFilter = null;
             document.getElementById('food-category-chips').innerHTML = '';
             document.getElementById('shops-grid-title').innerText = cat === 'Food Owner' ? 'Search by Restaurants' : 'Search by Grocery Stores';
             
@@ -1523,19 +1523,19 @@
             
             if (!listEl) return;
             
-            const isMenuListView = !!currentRestaurantFilter;
+            const isMenuListView = !!window.currentRestaurantFilter;
 
             // Sub-Category Filter Chips
             if (isMenuListView && window.currentUserMainCategory === 'Food Owner' && chipsEl) {
-                const restaurantItems = items.filter(i => i.partnerId === currentRestaurantFilter);
+                const restaurantItems = items.filter(i => i.partnerId === window.currentRestaurantFilter);
                 const uniqueCategories = [...new Set(restaurantItems.map(i => i.category || 'Others'))];
                 
                 if (uniqueCategories.length > 0) {
                     chipsEl.classList.remove('hidden');
                     chipsEl.innerHTML = `
-                        <button onclick="window.filterFoodCategory(null)" class="px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors border ${!currentFoodCategoryFilter ? 'bg-emerald-500 text-white border-emerald-500' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}">All Items</button>
+                        <button onclick="window.filterFoodCategory(null)" class="px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors border ${!window.currentFoodCategoryFilter ? 'bg-emerald-500 text-white border-emerald-500' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}">All Items</button>
                         ${uniqueCategories.map(cat => `
-                            <button onclick="window.filterFoodCategory('${cat}')" class="px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors border ${currentFoodCategoryFilter === cat ? 'bg-emerald-500 text-white border-emerald-500' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}">${cat}</button>
+                            <button onclick="window.filterFoodCategory('${cat}')" class="px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors border ${window.currentFoodCategoryFilter === cat ? 'bg-emerald-500 text-white border-emerald-500' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}">${cat}</button>
                         `).join('')}
                     `;
                 } else {
@@ -1548,8 +1548,8 @@
             const filtered = items.filter(i => {
                 const pShopCat = i.shopCategory || 'Food Owner';
                 if (pShopCat !== window.currentUserMainCategory) return false;
-                if (currentRestaurantFilter && i.partnerId !== currentRestaurantFilter) return false;
-                if (currentFoodCategoryFilter && i.category !== currentFoodCategoryFilter) return false;
+                if (window.currentRestaurantFilter && i.partnerId !== window.currentRestaurantFilter) return false;
+                if (window.currentFoodCategoryFilter && i.category !== window.currentFoodCategoryFilter) return false;
                 
                 if (window.currentSearchQuery) {
                     const q = window.currentSearchQuery.toLowerCase();
