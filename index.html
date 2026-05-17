@@ -401,17 +401,17 @@
                         <div id="partner-setup-form" class="space-y-3 mt-4 border-t border-gray-200 pt-4 hidden">
                             <label class="block text-xs font-bold text-gray-600 mb-1 ml-1">Business Name</label>
                             <input id="partner-shop-name" class="input-field" placeholder="Enter Name">
-                            
+
                             <label class="block text-xs font-bold text-gray-600 mb-1 ml-1 mt-3">Exact Business Address (Used for distance)</label>
-                            <div class="relative">
-                                <input id="partner-shop-address" class="input-field pr-12" placeholder="Enter full address or GPS location">
-                                <button type="button" onclick="window.getCurrentLocation('partner-shop-address')" class="absolute right-3 top-3.5 text-gray-400 hover:text-red-600"><i class="fa-solid fa-location-crosshairs text-lg"></i></button>
+                            <div class="flex gap-2">
+                                <input id="partner-shop-address" class="input-field flex-1" placeholder="Enter full address">
+                                <button type="button" onclick="window.getCurrentLocation('partner-shop-address')" class="bg-red-50 text-red-600 px-4 rounded-xl border border-red-100 hover:bg-red-100 transition whitespace-nowrap font-bold text-xs shadow-sm flex items-center justify-center shrink-0">
+                                    <i class="fa-solid fa-location-crosshairs mr-1"></i> GPS
+                                </button>
                             </div>
 
                             <div class="flex gap-3 mt-3">
-                                <div class="flex-1"><label class="block text-xs font-bold text-gray-600 mb-1 ml-1">Opening Time</label><input type="time" id="partner-open-time" class="input-field px-3"></div>
-                                <div class="flex-1"><label class="block text-xs font-bold text-gray-600 mb-1 ml-1">Closing Time</label><input type="time" id="partner-close-time" class="input-field px-3"></div>
-                            </div>
+                                <div class="flex-1">
                             
                             <div id="partner-food-settings" class="mt-4 p-4 bg-red-50/30 border border-red-100 rounded-xl space-y-4">
                                 <p class="text-[10px] font-black uppercase text-red-600 tracking-wider">Payment Options (Can enable both)</p>
@@ -1164,26 +1164,12 @@
         };
 
         window.renderRestaurants = (restaurants) => {
-            const grid = document.getElementById('restaurant-list-grid');
-            if (!grid) return;
-            if(restaurants.length === 0) { grid.innerHTML = '<div class="col-span-full py-8 text-center text-gray-400 font-medium text-sm border border-gray-100 rounded-3xl w-full bg-white">No stores found nearby.</div>'; return; }
-            
-            grid.innerHTML = restaurants.map(r => {
-                const isOffline = r.shopStatus === 'Closed' || r.shopStatus === 'Offline';
-                const distText = r.distanceText ? `<p class="text-[9px] text-gray-500 font-medium mt-0.5"><i class="fa-solid fa-route text-gray-400"></i> ${r.distanceText}</p>` : '';
-                
-                return `
-                <div class="cursor-pointer group flex flex-col items-center w-full relative bg-white p-2 rounded-2xl border border-transparent hover:border-gray-200 transition-all hover:shadow-sm" onclick="window.filterRestaurant('${r.partnerId}', '${r.shopName.replace(/'/g, "\\'")}', ${isOffline})">
-                    <div class="w-20 h-20 sm:w-28 sm:h-28 rounded-2xl flex items-center justify-center overflow-hidden mb-2 shadow-sm border border-gray-200 transition-all bg-gray-50 group-hover:border-red-400 group-hover:shadow-md ${isOffline ? 'grayscale opacity-60' : ''}">
-                        <img src="${r.image}" class="w-full h-full object-cover" alt="${r.shopName}">
-                    </div>
-                    ${isOffline ? `<span class="absolute top-0 right-0 bg-red-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded uppercase shadow-sm z-10 border border-white">Closed</span>` : ''}
-                    <p class="text-center text-xs sm:text-sm font-bold ${isOffline ? 'text-gray-400' : 'text-gray-800 group-hover:text-red-600'} leading-tight w-full px-1 whitespace-normal break-words">${r.shopName}</p>
-                    ${distText}
-                </div>`;
-            }).join('');
-        };
-
+            const carousel = document.getElementById('restaurant-list-grid');
+            if (!carousel) return;
+            if(restaurants.length === 0) {
+                carousel.innerHTML = '<div class="col-span-full py-8 text-center text-gray-400 font-medium text-sm border border-gray-100 rounded-3xl w-full bg-white">No stores found nearby. (Partners must be Approved by Admin)</div>';
+                return;
+            }
         const extractRestaurants = async () => {
             try {
                 const snap = await window.dbCall(getDocs(getCol('users')), 5000);
@@ -1197,14 +1183,28 @@
                     let displayImage = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&q=80';
                     if (window.currentUserMainCategory === 'Grocery Shop') displayImage = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=200&q=80';
                     if (shopProducts.length > 0 && shopProducts[0].image) displayImage = shopProducts[0].image;
-                    return { partnerId: p.id, shopName: p.shopName || p.name, shopAddress: p.shopAddress || '', shopStatus: p.shopStatus || 'Closed', image: displayImage, openTime: p.openTime, closeTime: p.closeTime, distanceVal: Infinity, distanceText: '' };
+
+                    return {
+                        partnerId: p.id, 
+                        shopName: p.shopName || p.name, 
+                        shopAddress: p.shopAddress || '',
+                        shopStatus: p.shopStatus || 'Closed',
+                        image: displayImage,
+                        openTime: p.openTime,
+                        closeTime: p.closeTime,
+                        distanceVal: Infinity,
+                        distanceText: ''
+                    };
                 });
                 
                 const locInput = document.getElementById('user-location-input');
                 const userLoc = locInput ? locInput.value.trim() : '';
                 
                 if (userLoc && window.google && window.google.maps && uniqueRestaurants.length > 0) {
-                    const dests = uniqueRestaurants.map(r => r.shopAddress || r.shopName);
+                    const dests = uniqueRestaurants.map(r => {
+                        const addr = r.shopAddress ? r.shopAddress.trim() : '';
+                        return addr ? addr : (r.shopName ? r.shopName + ', India' : 'India');
+                    });
                     const service = new google.maps.DistanceMatrixService();
                     try {
                         const res = await new Promise((resolve, reject) => {
@@ -1240,48 +1240,48 @@
             }, (err) => console.error(err));
 
             onSnapshot(getCol('promos'), (snap) => { window.allPromos = snap.docs.map(d => ({id: d.id, ...d.data()})); if(window.lastItems) renderProducts(window.lastItems); });
-
-            onSnapshot(getCol('products'), (snap) => {
-                let items = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
-                
-                // Global Filters
-                if (!window.currentRestaurantFilter) {
-                    extractRestaurants();
-                    const offeredItems = items.filter(i => i.isOffered && i.inStock !== false && i.shopStatus !== 'Closed' && (i.shopCategory || 'Food Owner') === window.currentUserMainCategory);
-                    renderGlobalItems(offeredItems, 'global-offered-items');
-                    
-                    const favItems = items.filter(i => i.isFavourite && i.inStock !== false && i.shopStatus !== 'Closed' && (i.shopCategory || 'Food Owner') === window.currentUserMainCategory);
-                    renderGlobalItems(favItems, 'global-favourite-items');
-                }
-                
-                renderProducts(items);
-            }, (err) => { if (err.code === 'permission-denied') window.showToast("Firebase Permissions Denied! Check rules.", "error"); });
-        };
-
-        window.filterRestaurant = (partnerId, shopName, isOffline = false) => {
-            if (isOffline) { window.showToast(`${shopName} is currently closed.`, 'error'); return; }
-            window.currentRestaurantFilter = partnerId; window.currentFoodCategoryFilter = null;
+        window.getCurrentLocation = (inputId) => {
+            const inputEl = document.getElementById(inputId);
+            let locationFound = false;
+            const originalPlaceholder = inputEl.placeholder;
+            inputEl.placeholder = "Fetching GPS...";
+            inputEl.value = "";
             
-            const gridContainer = document.getElementById('restaurants-grid-container'); const menuContainer = document.getElementById('food-menu-container'); const globalSearch = document.getElementById('global-search');
-
-            if (partnerId) {
-                gridContainer.classList.add('hidden'); menuContainer.classList.remove('hidden');
-                if(globalSearch) globalSearch.value = ''; window.currentSearchQuery = '';
-                
-                const pData = window.knownPartners ? window.knownPartners.find(p => p.partnerId === partnerId) : null;
-                const addr = pData && pData.shopAddress ? pData.shopAddress : '';
-                const timeStr = (pData && pData.openTime && pData.closeTime) ? `${window.formatTime12(pData.openTime)} - ${window.formatTime12(pData.closeTime)}` : '';
-                const distStr = pData && pData.distanceText ? `<p class="text-[10px] text-emerald-600 font-bold bg-emerald-50 inline-block px-2 py-0.5 rounded ml-2"><i class="fa-solid fa-route mr-1"></i> ${pData.distanceText}</p>` : '';
-                
-                document.getElementById('active-shop-header').innerHTML = `
-                    <h2 class="font-black text-3xl text-gray-900 tracking-tight leading-none mb-2">${shopName}</h2>
-                    ${addr ? `<p class="text-xs text-gray-500 font-medium mb-1"><i class="fa-solid fa-location-dot mr-1"></i> ${addr}</p>` : ''}
-                    ${timeStr ? `<p class="text-[10px] text-blue-600 font-bold bg-blue-50 inline-block px-2 py-0.5 rounded"><i class="fa-regular fa-clock mr-1"></i> ${timeStr}</p>` : ''}
-                    ${distStr}
-                `;
-                window.loadMarketplaceData(); 
-            } else {
-                gridContainer.classList.remove('hidden'); menuContainer.classList.add('hidden');
+            const fallbackTimer = setTimeout(() => {
+                if (locationFound) return;
+                inputEl.placeholder = originalPlaceholder;
+                if(inputId !== 'user-location-input') window.showToast("Could not access Maps API. Please type your address.", "error");
+            }, 6000);
+            
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(async (pos) => {
+                    locationFound = true; clearTimeout(fallbackTimer);
+                    try {
+                        const geocoder = new google.maps.Geocoder();
+                        geocoder.geocode({ location: { lat: pos.coords.latitude, lng: pos.coords.longitude } }, (results, status) => {
+                            if (status === "OK" && results[0]) {
+                                inputEl.value = results[0].formatted_address;
+                                if(inputId !== 'user-location-input') window.showToast("Location detected successfully!", "success");
+                                if(inputId === 'user-location-input') window.loadMarketplaceData(); // Auto fetch distance
+                            } else {
+                                inputEl.placeholder = originalPlaceholder;
+                                if(inputId !== 'user-location-input') window.showToast("Location text unreadable. Please type it.", "error");
+                            }
+                        });
+                    } catch(e) { 
+                        inputEl.placeholder = originalPlaceholder;
+                        if(inputId !== 'user-location-input') window.showToast("Google Maps failed to load. Please type address.", "error"); 
+                    }
+                }, (error) => {
+                    locationFound = true; clearTimeout(fallbackTimer);
+                    inputEl.placeholder = originalPlaceholder;
+                    let msg = "Failed to get location."; if (error.code == error.PERMISSION_DENIED) msg = "Location permission denied by user.";
+                    if(inputId !== 'user-location-input') window.showToast(msg, "error");
+                }, { timeout: 10000, enableHighAccuracy: true });
+            } else { 
+                clearTimeout(fallbackTimer);
+                inputEl.placeholder = originalPlaceholder;
+                if(inputId !== 'user-location-input') window.showToast("Geolocation not supported by browser.", "error"); 
             }
         };
 
