@@ -4,15 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
+    <!-- Aggressive Cache Busting Meta Tags -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
 
     <title>Gramzo | Instant Delivery Super App</title>
 
+    <!-- AGGRESSIVE AUTO CACHE BUSTER SCRIPT -->
     <script>
         (function() {
-            const APP_VERSION = "11.28.2"; // Live Network Sync Update
+            const APP_VERSION = "11.28.4"; // Live Network Sync Update
             
             const storedVersion = localStorage.getItem("gramzo_app_version");
             if (storedVersion !== APP_VERSION) {
@@ -60,8 +62,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
+    <!-- Google Maps API Setup -->
     <script>
         window.initGoogleMap = function() {
+            console.log("Google Maps API loaded.");
             window.isGoogleMapsLoaded = true;
             if (typeof window.setupMapsFeatures === 'function') {
                 window.setupMapsFeatures();
@@ -127,6 +131,13 @@
             position: absolute; top: 50%; left: 50%; right: auto; bottom: auto; background: white; border-radius: 2rem; padding: 2rem; transform: translate(-50%, -45%) scale(0.95); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); max-height: 90vh; overflow-y: auto; width: 90%; max-width: 28rem; opacity: 0;
         }
         .modal-overlay.active .modal-content { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+
+        .search-shadow { box-shadow: 0 4px 12px rgba(16, 185, 129, 0.08); }
+        .pac-container { border-radius: 1.5rem; border: 1px solid #e5e7eb; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); font-family: 'Outfit', sans-serif; z-index: 9999; padding: 0.5rem; }
+        .pac-item { padding: 12px; font-size: 14px; font-weight: 500; color: #374151; border-bottom: 1px solid #f3f4f6; cursor: pointer; }
+        .pac-item:hover { background-color: #f0fdf4; color: #10b981; }
+        select { -webkit-appearance: none; -moz-appearance: none; appearance: none; }
+        
         .hide-scroll::-webkit-scrollbar { display: none; }
         .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
@@ -135,14 +146,18 @@
 
     <!-- Tall Top Bar for Auth -->
     <div class="fixed top-0 w-full z-50 bg-white/95 backdrop-blur shadow-sm h-[60px] flex justify-between items-center px-2 sm:px-4">
+        
+        <!-- Left Side: Partner Login -->
         <button type="button" id="btn-partner-login-trigger" onclick="window.openAuthModal('Partner')" class="bg-gray-900 text-white px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl text-[10px] sm:text-xs font-black shadow-md hover:bg-gray-800 transition-colors active:scale-95 flex items-center gap-2 whitespace-nowrap">
             <i class="fa-solid fa-handshake text-sm sm:text-base"></i> <span class="tracking-wide">Partner</span>
         </button>
 
+        <!-- Center: App Icon / Logo (Clean Text) -->
         <div class="font-logo font-black text-3xl italic cursor-pointer absolute left-1/2 transform -translate-x-1/2 flex items-center justify-center gap-[1px] tracking-tight" onclick="location.reload()">
             <span class="text-emerald-500">Gram</span><span class="text-orange-500">Zo</span>
         </div>
 
+        <!-- Right Side: User Login / Profile -->
         <div id="auth-container" class="flex items-center shrink-0 h-full">
             <button type="button" id="btn-login-trigger" onclick="window.openAuthModal('User')" class="bg-emerald-500 text-white px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl text-[10px] sm:text-xs font-bold shadow-md hover:bg-emerald-600 transition-colors active:scale-95 flex items-center gap-2 whitespace-nowrap">
                 <i class="fa-solid fa-user text-sm sm:text-base"></i> <span class="tracking-wide uppercase">LOGIN</span>
@@ -173,14 +188,23 @@
         </div>
     </div>
 
+    <!-- Scrollable Content Starts Here -->
     <div class="pt-[60px]">
+        
+        <!-- Marquee below nav -->
         <div id="marquee-container" class="w-full bg-gray-900 border-b border-gray-800 z-30 overflow-hidden h-10 flex items-center shadow-lg relative hidden">
-            <div id="dynamic-marquee" class="animate-marquee inline-block whitespace-nowrap text-sm sm:text-base font-black font-bengali text-yellow-300 tracking-wide drop-shadow-md"></div>
+            <div id="dynamic-marquee" class="animate-marquee inline-block whitespace-nowrap text-sm sm:text-base font-black font-bengali text-yellow-300 tracking-wide drop-shadow-md">
+                🚀 খাবার অর্ডার করুন ঘরে বসেই - সার্ভিস অ্যাভেইলেবল অ্যাট কোটালডিহ, কিনাইডিহ, লালগড়, কৃষ্ণপুর, রামচন্দ্রপুর, মুরাডি, গাংপুর, যশপুর এবং বড়ন্তি এলাকা 🚀
+            </div>
         </div>
 
         <main id="main-content" class="px-4 pb-24 max-w-md mx-auto sm:max-w-4xl sm:px-6 pt-4">
             
+            <!-- ========================================== -->
+            <!-- VIEW: USER                                 -->
+            <!-- ========================================== -->
             <div id="view-User" class="view-section active space-y-6">
+                
                 <div class="flex items-center gap-3">
                     <i class="fa-solid fa-location-dot text-emerald-500 text-xl mt-1"></i>
                     <div class="flex-1 border-b border-gray-200 pb-1 relative pr-6">
@@ -192,43 +216,59 @@
                     </div>
                 </div>
 
+                <!-- 3 Distinct TABS -->
                 <div class="flex gap-2 bg-gray-100 p-1.5 rounded-xl w-full mt-4 border border-gray-200 shadow-inner">
-                    <button type="button" id="tab-cat-Food" onclick="window.switchMainCategory('Food Owner')" class="flex-1 bg-emerald-500 text-white font-black py-2.5 rounded-lg text-sm shadow-md transition-all">🍔 Food</button>
-                    <button type="button" id="tab-cat-Grocery" onclick="window.switchMainCategory('Grocery Shop')" class="flex-1 text-gray-500 font-bold py-2.5 rounded-lg text-sm hover:text-gray-900 transition-all border border-transparent hover:border-gray-300">🛒 Grocery</button>
-                    <a href="ride.html" class="flex-1 text-center text-gray-500 font-bold py-2.5 rounded-lg text-sm hover:text-gray-900 transition-all border border-transparent hover:border-gray-300 block">🚕 Ride</a>
+                    <button type="button" id="tab-cat-Food" onclick="window.switchMainCategory('Food Owner')" class="flex-1 bg-emerald-500 text-white font-black py-2.5 rounded-lg text-sm shadow-md transition-all">
+                        🍔 Food
+                    </button>
+                    <button type="button" id="tab-cat-Grocery" onclick="window.switchMainCategory('Grocery Shop')" class="flex-1 text-gray-500 font-bold py-2.5 rounded-lg text-sm hover:text-gray-900 transition-all border border-transparent hover:border-gray-300">
+                        🛒 Grocery
+                    </button>
+                    <a href="ride.html" class="flex-1 text-center text-gray-500 font-bold py-2.5 rounded-lg text-sm hover:text-gray-900 transition-all border border-transparent hover:border-gray-300 block">
+                        🚕 Ride
+                    </a>
                 </div>
 
+                <!-- FOOD & GROCERY SECTION (Zomato Style) -->
                 <div id="food-grocery-section">
                     <div class="relative w-full shadow-sm rounded-2xl bg-white border border-gray-100 flex items-center px-4 py-3.5 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all mt-4 mb-4">
                         <i class="fa-solid fa-magnifying-glass text-gray-400"></i>
                         <input type="text" id="global-search" onkeyup="window.handleSearchInput()" placeholder="Search..." class="w-full bg-transparent outline-none text-sm font-medium text-gray-800 placeholder-gray-400 ml-3">
                     </div>
 
-                    <!-- COMBINED HIGHLIGHTS TAB (Offers & Favourites) -->
-                    <div id="global-highlights-container" class="hidden animate-fadeIn mb-6">
-                        <div class="flex justify-between items-center mb-3">
-                            <h3 class="font-black text-lg text-gray-900 tracking-tight">Highlights 🔥❤️</h3>
-                        </div>
-                        <div id="highlights-carousel" class="flex gap-4 overflow-x-auto pb-4 no-scrollbar px-1 snap-x"></div>
+                    <!-- Global Tagged Items (Offers & Favourites) -->
+                    <div id="global-specials-container" class="hidden animate-fadeIn mb-6">
+                        <h3 class="font-black text-lg text-gray-900 tracking-tight mb-3">Highlights 🔥❤️</h3>
+                        <div id="special-offers-carousel" class="flex gap-4 overflow-x-auto pb-4 no-scrollbar px-1 snap-x"></div>
                     </div>
 
+                    <!-- 1. GRID VIEW (Shows by default) -->
                     <div id="restaurants-grid-container" class="animate-fadeIn">
                         <h3 class="font-black text-xl text-gray-900 tracking-tight mb-4" id="shops-grid-title">Search by Restaurants</h3>
-                        <div id="restaurant-list-grid" class="grid grid-cols-4 sm:grid-cols-6 gap-3 sm:gap-6 gap-y-6">
+                        <div id="restaurant-list-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-4 gap-y-6">
+                            <!-- Big Shop Icons Injected Here -->
                             <div class="col-span-full py-8 text-center text-gray-400 font-medium text-sm animate-pulse border border-gray-200 rounded-3xl bg-white">Discovering nearby stores...</div>
                         </div>
                     </div>
 
+                    <!-- 2. MENU VIEW (Hidden until shop clicked) -->
                     <div id="food-menu-container" class="hidden animate-fadeIn mt-2">
                         <button type="button" onclick="window.filterRestaurant(null, '')" class="mb-4 text-xs font-bold text-gray-600 bg-gray-100 px-3 py-1.5 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-1 shadow-sm border border-gray-200 w-fit">
                             <i class="fa-solid fa-arrow-left"></i> Back to Shops
                         </button>
+
+                        <!-- Shop Header inserted here -->
                         <div id="active-shop-header" class="mb-4 pb-4 border-b border-gray-200"></div>
+
                         <div class="flex justify-between items-center mb-4">
-                            <h3 class="font-black text-xl text-gray-900 tracking-tight" id="food-menu-title">Menu</h3>
+                            <h3 class="font-black text-xl text-gray-900 tracking-tight" id="food-menu-title">Food Menu</h3>
                         </div>
+                        
                         <div id="food-category-chips" class="flex gap-2 overflow-x-auto hide-scroll pb-2 mb-4"></div>
-                        <div id="market-list" class="flex flex-col gap-4 pb-6"></div>
+                        
+                        <div id="market-list" class="flex flex-col gap-4 pb-6">
+                            <!-- Menu List Items (Horizontal format) -->
+                        </div>
                     </div>
                 </div>
 
@@ -236,7 +276,9 @@
                     <div class="relative z-10">
                         <h3 class="text-xl font-black mb-1">Partner with us</h3>
                         <p class="text-gray-300 text-xs mb-3 font-medium">List your restaurant, grocery shop, or ride.</p>
-                        <button type="button" onclick="window.openAuthModal('Partner')" class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-xl text-xs font-black shadow-sm active:scale-95 uppercase tracking-widest">Register Partner</button>
+                        <button type="button" onclick="window.openAuthModal('Partner')" class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-xl text-xs font-black shadow-sm active:scale-95 uppercase tracking-widest">
+                            Register Partner
+                        </button>
                     </div>
                     <i class="fa-solid fa-store text-6xl text-gray-800 absolute right-0 bottom-[-10px] rotate-[15deg]"></i>
                 </div>
@@ -250,7 +292,9 @@
                     
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-8 mb-8 mt-6">
                         <div class="col-span-2 sm:col-span-2">
-                            <p class="text-xs text-gray-500 font-medium leading-relaxed max-w-xs mb-4">Bringing convenience to every village. Connect directly with your favorite local businesses.</p>
+                            <p class="text-xs text-gray-500 font-medium leading-relaxed max-w-xs mb-4">
+                                Bringing convenience to every village. Connect directly with your favorite local businesses.
+                            </p>
                             <div class="text-xs text-gray-600 font-bold space-y-2">
                                 <p><i class="fa-solid fa-location-dot w-4 text-center text-emerald-500"></i> Kotaldi, Near Oriya baba Ashram, Pin: 723156, Purulia</p>
                                 <p><i class="fa-solid fa-phone w-4 text-center text-emerald-500"></i> +91 7980230656</p>
@@ -275,7 +319,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-emerald-700 font-bold mt-2 bg-emerald-50 border border-emerald-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.28.2 - Zomato UI Sync</p>
+                            <p class="text-[10px] text-emerald-700 font-bold mt-2 bg-emerald-50 border border-emerald-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.28.4 - Zomato UI Sync</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right">
                             <button type="button" onclick="window.openAdminModal()" class="bg-gray-100 text-gray-700 hover:bg-gray-200 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
@@ -286,6 +330,9 @@
                 </footer>
             </div>
 
+            <!-- ========================================== -->
+            <!-- VIEW: CART                                 -->
+            <!-- ========================================== -->
             <div id="view-Cart" class="view-section space-y-6">
                 <div class="flex items-center gap-3">
                     <button onclick="window.switchMainView('User')" class="w-8 h-8 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-600 shadow-sm active:scale-90 transition"><i class="fa-solid fa-arrow-left"></i></button>
@@ -296,6 +343,8 @@
                     <div id="cart-items-list" class="space-y-4 mb-6"></div>
                     
                     <div class="space-y-5 pt-6 border-t border-gray-100" id="checkout-details-section" style="display:none;">
+                        
+                        <!-- VILLAGE SELECTION AREA -->
                         <div>
                             <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2 ml-2">Select Village *</label>
                             <select id="cart-village" class="input-field !py-3 !rounded-xl mb-3 bg-white" onchange="window.handleVillageChange()">
@@ -315,7 +364,9 @@
                             <input type="text" id="cart-other-village" class="input-field !py-3 !rounded-xl mb-3 hidden" placeholder="Type your village name...">
                             
                             <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2 ml-2">Detailed Delivery Address</label>
-                            <textarea id="cart-address" rows="3" class="input-field !py-3 resize-none !rounded-xl" placeholder="E.g. House No, Landmark..."></textarea>
+                            <div class="relative">
+                                <textarea id="cart-address" rows="3" class="input-field !py-3 resize-none !rounded-xl pr-20" placeholder="E.g. House No, Landmark..."></textarea>
+                            </div>
                         </div>
 
                         <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100 mt-4">
@@ -346,46 +397,32 @@
                 </div>
             </div>
 
+            <!-- ========================================== -->
+            <!-- VIEW: ORDERS                               -->
+            <!-- ========================================== -->
             <div id="view-Orders" class="view-section space-y-6">
                 <h2 class="text-2xl font-black text-gray-900">My Orders & Rides</h2>
                 <div id="user-orders-list" class="space-y-4"></div>
             </div>
 
+            <!-- ========================================== -->
+            <!-- VIEW: PARTNER DASHBOARD (Tasks)            -->
+            <!-- ========================================== -->
             <div id="view-Partner" class="view-section space-y-6">
-                <!-- UPDATED FINANCIAL DASHBOARD -->
-                <div id="shop-top-dashboard" class="hidden bg-gray-900 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden">
-                    <div class="relative z-10 flex justify-between items-start">
-                        <div class="w-full">
-                            <p class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">Partner Dashboard</p>
-                            <h2 class="text-2xl font-black mb-4" id="partner-welcome">Welcome, Partner!</h2>
-                            
-                            <div class="grid grid-cols-2 gap-3 mt-4 w-full relative z-10" id="partner-finance-board">
-                                <div class="bg-gray-800/80 border border-gray-700 p-3 rounded-xl">
-                                    <p class="text-[9px] text-gray-400 font-bold uppercase">Total Order Value</p>
-                                    <p class="text-lg font-black text-white" id="p-fin-sales">₹0</p>
-                                </div>
-                                <div class="bg-gray-800/80 border border-gray-700 p-3 rounded-xl">
-                                    <p class="text-[9px] text-gray-400 font-bold uppercase">Total Orders</p>
-                                    <p class="text-lg font-black text-white" id="p-fin-count">0</p>
-                                </div>
-                                <div class="bg-gray-800/80 border border-gray-700 p-3 rounded-xl col-span-2">
-                                    <p class="text-[9px] text-gray-400 font-bold uppercase mb-1">Deductions</p>
-                                    <div class="flex justify-between text-xs mb-1"><span class="text-gray-500">Platform Fee (10%)</span><span class="text-red-400 font-medium" id="p-fin-plat-fee">-₹0</span></div>
-                                    <div class="flex justify-between text-xs"><span class="text-gray-500">Delivery & Handling</span><span class="text-red-400 font-medium" id="p-fin-del-fee">-₹0</span></div>
-                                </div>
-                                <div class="bg-emerald-500 border border-emerald-400 p-4 rounded-xl col-span-2 text-center shadow-lg">
-                                    <p class="text-[10px] text-emerald-100 font-black uppercase tracking-widest">Net Revenue</p>
-                                    <p class="text-3xl font-black text-white drop-shadow-sm" id="p-fin-net">₹0</p>
-                                </div>
-                            </div>
-
-                        </div>
+                <!-- LIVE ORDER DASHBOARD HEADER -->
+                <div class="flex items-center gap-3 mb-4 bg-white p-4 rounded-3xl shadow-sm border border-gray-100">
+                    <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center animate-pulse shrink-0">
+                        <i class="fa-solid fa-satellite-dish text-xl text-red-600"></i>
                     </div>
-                    <i class="fa-solid fa-store absolute right-[-20px] top-4 text-8xl text-gray-800 opacity-20"></i>
+                    <div>
+                        <h2 class="text-2xl font-black text-gray-900 tracking-tight leading-none mb-1">Live Dashboard</h2>
+                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wide">Manage Incoming Tasks</p>
+                    </div>
                 </div>
                 
+                <!-- Partner Tasks Tabs -->
                 <div class="flex justify-between items-center border-b border-gray-200 pb-2">
-                    <h3 class="font-black text-xl text-gray-800">Task Management</h3>
+                    <h3 class="font-black text-lg text-gray-800">Tasks</h3>
                     <div class="flex bg-gray-100 rounded-lg p-1">
                         <button id="tab-partner-order-Live" onclick="window.switchPartnerOrderTab('Live')" class="partner-order-tab bg-gray-200 text-gray-900 px-3 py-1 rounded-md text-[10px] font-bold transition">Active</button>
                         <button id="tab-partner-order-Completed" onclick="window.switchPartnerOrderTab('Completed')" class="partner-order-tab text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold transition">Completed</button>
@@ -396,9 +433,54 @@
                 <div id="partner-orders-list" class="space-y-4"></div>
             </div>
 
+            <!-- ========================================== -->
+            <!-- VIEW: PARTNER HUB (Profile & Shop Setup)   -->
+            <!-- ========================================== -->
             <div id="view-Partner-Profile" class="view-section space-y-6">
                 <h2 class="text-2xl font-black text-gray-900">Partner Settings</h2>
-                <div id="partner-pending-warning" class="hidden bg-orange-50 border-2 border-orange-200 rounded-2xl p-5 text-center">
+                
+                <!-- FINANCIAL DASHBOARD FOR PARTNERS (Relocated Here) -->
+                <div id="shop-top-dashboard" class="hidden bg-gray-900 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden mb-6">
+                    <div class="relative z-10 flex justify-between items-start">
+                        <div class="w-full">
+                            <div class="flex items-center gap-2 mb-2">
+                                <i class="fa-solid fa-chart-pie text-emerald-400"></i>
+                                <p class="text-emerald-400 text-xs font-bold uppercase tracking-widest">Financial Overview</p>
+                            </div>
+                            <h2 class="text-2xl font-black mb-4" id="partner-welcome">Welcome, Partner!</h2>
+                            
+                            <div class="grid grid-cols-2 gap-3 mt-4 w-full relative z-10" id="partner-finance-board">
+                                <div class="bg-gray-800/80 border border-gray-700 p-3 rounded-xl">
+                                    <p class="text-[9px] text-gray-400 font-bold uppercase">Total Order Value</p>
+                                    <p class="text-xl font-black text-white" id="p-fin-sales">₹0</p>
+                                </div>
+                                <div class="bg-gray-800/80 border border-gray-700 p-3 rounded-xl">
+                                    <p class="text-[9px] text-gray-400 font-bold uppercase">Total Orders</p>
+                                    <p class="text-xl font-black text-white" id="p-fin-count">0</p>
+                                </div>
+                                <div class="bg-gray-800/80 border border-gray-700 p-3 rounded-xl col-span-2">
+                                    <p class="text-[9px] text-gray-400 font-bold uppercase mb-2 border-b border-gray-700 pb-1">Deductions</p>
+                                    <div class="flex justify-between text-xs mb-1.5">
+                                        <span class="text-gray-400 font-medium">Platform Fee <span class="text-[9px] bg-gray-700 px-1 rounded">(Flat ₹5/order)</span></span>
+                                        <span class="text-red-400 font-bold" id="p-fin-plat-fee">-₹0</span>
+                                    </div>
+                                    <div class="flex justify-between text-xs">
+                                        <span class="text-gray-400 font-medium">Delivery Fee</span>
+                                        <span class="text-red-400 font-bold" id="p-fin-del-fee">-₹0</span>
+                                    </div>
+                                </div>
+                                <div class="bg-emerald-500 border border-emerald-400 p-5 rounded-2xl col-span-2 text-center shadow-[0_10px_20px_rgba(16,185,129,0.3)] mt-2">
+                                    <p class="text-[10px] text-emerald-100 font-black uppercase tracking-widest mb-1">Net Revenue</p>
+                                    <p class="text-4xl font-black text-white drop-shadow-sm" id="p-fin-net">₹0</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-sack-dollar absolute right-[-20px] bottom-[-20px] text-8xl text-gray-800 opacity-30 rotate-[-15deg]"></i>
+                </div>
+
+                <!-- Registration Pending Warning -->
+                <div id="partner-pending-warning" class="hidden bg-orange-50 border-2 border-orange-200 rounded-2xl p-5 text-center mb-6">
                     <i class="fa-solid fa-clock text-4xl text-orange-400 mb-3"></i>
                     <h3 class="font-black text-lg text-orange-800 mb-1">Account Under Review</h3>
                     <p class="text-xs text-orange-700 font-medium">Your account is pending approval by the Admin. You cannot receive orders until approved.</p>
@@ -415,6 +497,8 @@
                             <p><strong>Name:</strong> <span id="hub-name-val"></span></p>
                             <p id="hub-address-row" class="hidden"><strong>Location:</strong> <span id="hub-address-val"></span></p>
                         </div>
+
+                        <!-- FOOD / GROCERY SETTINGS -->
                         <div id="partner-setup-form" class="space-y-3 mt-4 border-t border-gray-200 pt-4 hidden">
                             <label class="block text-xs font-bold text-gray-600 mb-1 ml-1">Business Name</label>
                             <input id="partner-shop-name" class="input-field" placeholder="Enter Name">
@@ -435,23 +519,28 @@
                             
                             <div id="partner-food-settings" class="mt-4 p-4 bg-gray-50/30 border border-gray-200 rounded-xl space-y-4">
                                 <p class="text-[10px] font-black uppercase text-gray-600 tracking-wider">Payment Options (Can enable both)</p>
+                                
                                 <div class="flex items-center justify-between pb-3 border-b border-gray-200">
                                     <div><p class="text-xs font-bold">Enable Pay on Delivery (COD)</p></div>
                                     <input type="checkbox" id="partner-cod-toggle-setup" checked class="w-4 h-4 text-emerald-500">
                                 </div>
+                                
                                 <div class="flex items-center justify-between pt-1">
                                     <div><p class="text-xs font-bold">Enable Online Payment (Prepaid)</p></div>
                                     <input type="checkbox" id="partner-online-toggle-setup" class="w-4 h-4 text-emerald-500" onchange="document.getElementById('qr-upload-section').classList.toggle('hidden', !this.checked)">
                                 </div>
+                                
                                 <div id="qr-upload-section" class="hidden mt-2 pt-2">
                                     <label class="block text-xs font-bold text-gray-800 mb-1 ml-1">Upload Payment QR Code</label>
                                     <input type="file" id="partner-qr-upload" accept="image/*" class="w-full text-xs text-gray-500 border border-gray-200 rounded-xl p-1.5 bg-white">
                                     <img id="partner-qr-preview" class="hidden w-24 h-24 mt-2 border border-gray-200 rounded-lg object-contain bg-white">
                                 </div>
                             </div>
-                            <button type="button" onclick="window.submitPartnerProfile()" id="btn-submit-profile" class="w-full bg-gray-900 text-white px-6 py-4 rounded-2xl font-bold mt-4">Save Config</button>
+                            <button type="button" onclick="window.submitPartnerProfile()" id="btn-submit-profile" class="w-full bg-gray-900 text-white px-6 py-4 rounded-2xl font-bold mt-4 shadow-md">Save Config</button>
                         </div>
                     </div>
+
+                    <!-- Shop Status Toggle -->
                     <div id="shop-status-container" class="mt-6 flex items-center justify-between p-5 bg-white rounded-2xl border-2 border-emerald-100 shadow-sm">
                         <div>
                             <p class="font-black text-base text-gray-900" id="status-toggle-title">Accepting Orders</p>
@@ -467,7 +556,11 @@
                 <div id="add-product-container" class="bg-white rounded-3xl p-6 border border-gray-200 shadow-sm relative hidden mt-6">
                     <h3 class="font-black text-gray-900 mb-4" id="add-product-title">Add Menu Item</h3>
                     <div class="space-y-4 relative z-10">
-                        <div><label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Item Name</label><input id="prod-name" class="input-field mt-1" placeholder="E.g. Item Name"></div>
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Item Name</label>
+                            <input id="prod-name" class="input-field mt-1" placeholder="E.g. Item Name">
+                        </div>
+                        
                         <div>
                             <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Item Tags</label>
                             <div class="flex gap-4 mt-1 p-3 bg-gray-50 rounded-xl border border-gray-200">
@@ -475,6 +568,8 @@
                                 <label class="flex items-center gap-2 text-xs font-bold text-gray-700 cursor-pointer"><input type="checkbox" id="prod-is-fav" class="w-4 h-4 text-red-600 rounded"> Favourite</label>
                             </div>
                         </div>
+                        
+                        <!-- Item Category Dropdown -->
                         <div class="mt-3">
                             <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Category</label>
                             <select id="prod-item-category" class="input-field mt-1 bg-white">
@@ -488,6 +583,7 @@
                                 <option value="Others">Others</option>
                             </select>
                         </div>
+
                         <div class="flex gap-3">
                             <div class="flex-1">
                                 <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Prep Time (Mins)</label>
@@ -516,8 +612,10 @@
                 </div>
             </div>
 
+            <!-- ========================================== -->
+            <!-- VIEW: ADMIN DASHBOARD                      -->
+            <!-- ========================================== -->
             <div id="view-Admin" class="view-section space-y-6">
-                <!-- Keep existing Admin View exactly as is to save tokens, functionally it remains correct -->
                 <div class="flex justify-between items-center">
                     <h2 class="text-2xl font-black text-gray-900">Admin Control</h2>
                     <div class="flex gap-2">
@@ -530,6 +628,7 @@
                     <div class="bg-white p-4 rounded-2xl border border-gray-100 text-center col-span-2 shadow-sm">
                         <p class="text-[10px] font-bold text-gray-400 uppercase">Total Sales Value</p>
                         <h4 id="stat-rev" class="text-2xl font-black text-emerald-600">₹0</h4>
+                        
                         <div class="mt-3 grid grid-cols-3 gap-1 border-t border-gray-100 pt-3">
                             <div><p class="text-[8px] font-bold text-gray-400 uppercase">Food</p><p id="stat-rev-food" class="text-sm font-black text-gray-800">₹0</p></div>
                             <div class="border-l border-gray-100"><p class="text-[8px] font-bold text-gray-400 uppercase">Grocery</p><p id="stat-rev-grocery" class="text-sm font-black text-gray-800">₹0</p></div>
@@ -546,6 +645,7 @@
                     </div>
                 </div>
 
+                <!-- ADMIN ORDERS TABS -->
                 <div class="bg-white rounded-3xl border border-gray-100 overflow-hidden mt-6 shadow-sm">
                     <div class="p-4 bg-gray-50 border-b border-gray-100 flex justify-between items-center overflow-x-auto no-scrollbar">
                         <span class="font-bold text-sm shrink-0 mr-4">Transaction Control</span>
@@ -558,6 +658,7 @@
                     <div class="overflow-x-auto"><table class="w-full text-left text-xs"><tbody id="admin-log-body"></tbody></table></div>
                 </div>
 
+                <!-- ADMIN USERS TABS -->
                 <div class="bg-white rounded-3xl border border-gray-100 overflow-hidden mt-6 shadow-sm">
                     <div class="p-4 bg-gray-50 border-b border-gray-100 flex justify-between items-center overflow-x-auto no-scrollbar">
                         <span class="font-bold text-sm shrink-0 mr-4">Directory</span>
@@ -572,6 +673,7 @@
                     <div class="overflow-x-auto"><table class="w-full text-left text-xs"><tbody id="admin-users-body"></tbody></table></div>
                 </div>
 
+                <!-- ADMIN PROMO MANAGEMENT -->
                 <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden mt-6 p-5">
                     <h3 class="font-bold text-gray-900 mb-2 border-b border-gray-100 pb-2">Manage Promo Codes</h3>
                     <div class="space-y-3 mt-3">
@@ -581,8 +683,12 @@
                                 <input type="number" id="admin-promo-discount" class="w-full bg-transparent outline-none px-2 text-sm font-bold" placeholder="Amt">
                                 <select id="admin-promo-type" class="bg-white border border-gray-200 rounded-xl text-xs font-bold px-1 outline-none"><option value="percentage">%</option><option value="flat">₹</option></select>
                             </div>
-                            <select id="admin-promo-restaurant" class="input-field !py-2 bg-white" onchange="window.loadPromoItems(this.value)"><option value="Global">All Restaurants</option></select>
-                            <select id="admin-promo-item" class="input-field !py-2 bg-white"><option value="All">All Items</option></select>
+                            <select id="admin-promo-restaurant" class="input-field !py-2 bg-white" onchange="window.loadPromoItems(this.value)">
+                                <option value="Global">All Restaurants</option>
+                            </select>
+                            <select id="admin-promo-item" class="input-field !py-2 bg-white">
+                                <option value="All">All Items</option>
+                            </select>
                         </div>
                         <button type="button" onclick="window.adminCreatePromo()" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold shadow-md hover:bg-emerald-600 active:scale-95 transition text-sm">Create Promo Code</button>
                     </div>
@@ -591,7 +697,9 @@
                             <thead class="bg-gray-50 border-b border-gray-100 text-gray-400 text-[10px] uppercase">
                                 <tr><th class="p-2">Code</th><th class="p-2">Discount</th><th class="p-2">Assigned To</th><th class="p-2 text-right">Actions</th></tr>
                             </thead>
-                            <tbody id="admin-promo-list"><tr><td colspan="4" class="p-4 text-center text-gray-400">Loading promos...</td></tr></tbody>
+                            <tbody id="admin-promo-list">
+                                <tr><td colspan="4" class="p-4 text-center text-gray-400">Loading promos...</td></tr>
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -603,6 +711,7 @@
                         <button type="button" onclick="window.adminUpdateMarquee()" id="btn-update-marquee" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm">Publish Marquee</button>
                     </div>
                 </div>
+
             </div>
         </main>
     </div> <!-- End Scrollable Area -->
@@ -612,17 +721,20 @@
         <div class="max-w-md mx-auto flex justify-between items-center sm:max-w-4xl px-4"></div>
     </div>
 
-    <!-- Modals -->
+    <!-- Static Info Modal (About, T&C, Contact) -->
     <div id="info-modal" class="modal-overlay z-[200]">
         <div class="modal-content !max-w-2xl">
             <div class="flex justify-between items-center mb-4 border-b pb-2">
                 <h3 class="font-black text-2xl text-gray-900" id="info-modal-title">Title</h3>
                 <button type="button" onclick="document.getElementById('info-modal').classList.remove('active')" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div id="info-modal-body" class="text-sm text-gray-600 space-y-4 max-h-[60vh] overflow-y-auto pr-2"></div>
+            <div id="info-modal-body" class="text-sm text-gray-600 space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+                <!-- Content injected via JS -->
+            </div>
         </div>
     </div>
 
+    <!-- Auth Modal -->
     <div id="auth-overlay" class="modal-overlay z-[150]">
         <div class="modal-content">
             <div class="flex justify-between items-center mb-6">
@@ -662,6 +774,7 @@
         </div>
     </div>
 
+    <!-- Admin Edit User Modal -->
     <div id="admin-edit-user-modal" class="modal-overlay z-[200]">
         <div class="modal-content !max-w-xs">
             <h3 class="font-black text-xl text-gray-900 mb-4 border-b pb-2">Edit Profile</h3>
@@ -677,6 +790,7 @@
         </div>
     </div>
 
+    <!-- Custom Prompt Modal -->
     <div id="custom-prompt-modal" class="modal-overlay z-[600]">
         <div class="modal-content !max-w-xs">
             <h3 class="font-black text-xl text-gray-900 mb-2" id="prompt-title">Prompt</h3>
@@ -689,6 +803,7 @@
         </div>
     </div>
 
+    <!-- Custom Confirm Modal -->
     <div id="custom-confirm-modal" class="modal-overlay z-[600]">
         <div class="modal-content !max-w-xs">
             <div class="w-12 h-12 bg-yellow-50 rounded-full flex items-center justify-center mb-3">
@@ -703,6 +818,7 @@
         </div>
     </div>
 
+    <!-- Global Status Popup Modal -->
     <div id="status-popup-modal" class="modal-overlay z-[500]">
         <div class="modal-content !max-w-xs text-center border-t-8 border-emerald-500">
             <div class="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
@@ -714,6 +830,7 @@
         </div>
     </div>
 
+    <!-- Admin Modal -->
     <div id="admin-auth-overlay" class="modal-overlay z-[150]">
         <div class="modal-content !bg-gray-900 border border-gray-800">
             <div class="flex justify-between items-center mb-4">
@@ -728,6 +845,7 @@
         </div>
     </div>
 
+    <!-- Image View Modal -->
     <div id="image-view-modal" class="modal-overlay z-[200]">
         <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-md bg-white p-2 rounded-2xl shadow-2xl">
             <div class="flex justify-between items-center px-2 py-1 mb-2 border-b">
@@ -738,6 +856,7 @@
         </div>
     </div>
 
+    <!-- Reject Reason Modal -->
     <div id="reject-modal" class="modal-overlay z-[200]">
         <div class="modal-content !max-w-xs">
             <h3 class="font-black text-xl text-gray-900 mb-2">Reject Order</h3>
@@ -758,6 +877,7 @@
         </div>
     </div>
 
+    <!-- Rating Modal -->
     <div id="rating-modal" class="modal-overlay z-[200]">
         <div class="modal-content !max-w-xs text-center">
             <h3 class="font-black text-xl text-gray-900 mb-2">Rate Your Experience</h3>
@@ -787,6 +907,8 @@
         import { getAuth, signInAnonymously, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, getDoc, getDocs, setDoc, onSnapshot, addDoc, updateDoc, deleteDoc, serverTimestamp, initializeFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        const IS_LIVE_WEBSITE = true;
+
         const liveFirebaseConfig = {
             apiKey: "AIzaSyCA4U4jva7HHeMP-yk1VJy3l_BBct3Gohg",
             authDomain: "gramzo.firebaseapp.com",
@@ -800,11 +922,12 @@
         const auth = getAuth(app);
         const db = initializeFirestore(app, { experimentalForceLongPolling: true });
 
+        // GLOBALS & STATE
         let currentUser = null;
         let currentRestaurantFilter = null;
         let currentFoodCategoryFilter = null;
         window.cart = [];
-        window.appliedPromo = null; 
+        window.appliedPromo = null; // Object to hold full promo details
         window.promoCode = '';
         window.currentSearchQuery = '';
         window.currentRejectOrderId = null;
@@ -813,34 +936,45 @@
         let currentAuthRole = 'User'; 
         window.currentUserMainCategory = 'Food Owner';
 
+        // RATING STATE
         window.currentRatingOrderId = null;
         window.currentRatingPartnerId = null;
         window.selectedRating = 0;
         window.editingProductId = null;
 
+        // ADMIN TABS STATE
         window.adminCurrentUserTab = 'All';
         window.adminUsersLoaded = false;
         window.adminCurrentOrderTab = 'Live';
         window.adminUsersData = [];
         window.adminOrdersData = [];
 
+        // PARTNER TABS STATE
         window.partnerCurrentOrderTab = 'Live';
         window.partnerOrdersData = [];
 
+        // WAKE LOCK STATE
         window.wakeLockRef = null;
         window.requestWakeLock = async () => {
             if ('wakeLock' in navigator) {
-                try { window.wakeLockRef = await navigator.wakeLock.request('screen'); } catch (err) { }
+                try {
+                    window.wakeLockRef = await navigator.wakeLock.request('screen');
+                } catch (err) { }
             }
         };
 
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible') {
-                if (currentUser && ['Partner', 'Admin'].includes(currentUser.role)) window.requestWakeLock();
-                if (document.getElementById('status-popup-modal').classList.contains('active')) window.speakAlert(document.getElementById('status-popup-desc').innerText);
+                if (currentUser && ['Partner', 'Admin'].includes(currentUser.role)) {
+                    window.requestWakeLock();
+                }
+                if (document.getElementById('status-popup-modal').classList.contains('active')) {
+                    window.speakAlert(document.getElementById('status-popup-desc').innerText);
+                }
             }
         });
 
+        // CUSTOM PROMPT/CONFIRM STATE
         let customPromptResolve = null;
         let customConfirmResolve = null;
 
@@ -855,8 +989,19 @@
                 customPromptResolve = resolve;
             });
         };
-        window.submitCustomPrompt = () => { if (customPromptResolve) customPromptResolve(document.getElementById('prompt-input').value); document.getElementById('custom-prompt-modal').classList.remove('active'); customPromptResolve = null; };
-        window.cancelCustomPrompt = () => { if (customPromptResolve) customPromptResolve(null); document.getElementById('custom-prompt-modal').classList.remove('active'); customPromptResolve = null; };
+
+        window.submitCustomPrompt = () => {
+            if (customPromptResolve) customPromptResolve(document.getElementById('prompt-input').value);
+            document.getElementById('custom-prompt-modal').classList.remove('active');
+            customPromptResolve = null;
+        };
+
+        window.cancelCustomPrompt = () => {
+            if (customPromptResolve) customPromptResolve(null);
+            document.getElementById('custom-prompt-modal').classList.remove('active');
+            customPromptResolve = null;
+        };
+
         window.customConfirm = (title, desc, confirmBtnText = "Yes") => {
             return new Promise((resolve) => {
                 document.getElementById('confirm-title').innerText = title;
@@ -866,14 +1011,27 @@
                 customConfirmResolve = resolve;
             });
         };
-        window.submitCustomConfirm = () => { if (customConfirmResolve) customConfirmResolve(true); document.getElementById('custom-confirm-modal').classList.remove('active'); customConfirmResolve = null; };
-        window.cancelCustomConfirm = () => { if (customConfirmResolve) customConfirmResolve(false); document.getElementById('custom-confirm-modal').classList.remove('active'); customConfirmResolve = null; };
+
+        window.submitCustomConfirm = () => {
+            if (customConfirmResolve) customConfirmResolve(true);
+            document.getElementById('custom-confirm-modal').classList.remove('active');
+            customConfirmResolve = null;
+        };
+
+        window.cancelCustomConfirm = () => {
+            if (customConfirmResolve) customConfirmResolve(false);
+            document.getElementById('custom-confirm-modal').classList.remove('active');
+            customConfirmResolve = null;
+        };
 
         window.handleVillageChange = () => {
             const village = document.getElementById('cart-village').value;
             const otherInput = document.getElementById('cart-other-village');
-            if (village === 'Others') otherInput.classList.remove('hidden');
-            else otherInput.classList.add('hidden');
+            if (village === 'Others') {
+                otherInput.classList.remove('hidden');
+            } else {
+                otherInput.classList.add('hidden');
+            }
             window.renderCartUI(); 
         };
 
@@ -937,7 +1095,12 @@
                 window.alertAudio.play().catch(e => console.log("Audio blocked until user clicks on screen."));
             } catch(e) {}
         };
-        window.stopAlertSound = () => { window.alertAudio.pause(); window.alertAudio.currentTime = 0; };
+
+        window.stopAlertSound = () => {
+            window.alertAudio.pause();
+            window.alertAudio.currentTime = 0;
+        };
+
         window.showStatusPopup = (title, desc) => {
             document.getElementById('status-popup-title').innerText = title;
             document.getElementById('status-popup-desc').innerText = desc;
@@ -959,8 +1122,13 @@
             window.selectedRating = stars;
             const starEls = document.getElementById('star-container').children;
             for(let i = 0; i < 5; i++) {
-                if(i < stars) { starEls[i].classList.remove('text-gray-300'); starEls[i].classList.add('text-yellow-400'); } 
-                else { starEls[i].classList.add('text-gray-300'); starEls[i].classList.remove('text-yellow-400'); }
+                if(i < stars) {
+                    starEls[i].classList.remove('text-gray-300');
+                    starEls[i].classList.add('text-yellow-400');
+                } else {
+                    starEls[i].classList.add('text-gray-300');
+                    starEls[i].classList.remove('text-yellow-400');
+                }
             }
         };
 
@@ -970,14 +1138,21 @@
             
             const reviewText = document.getElementById('rating-review-text').value.trim();
             const btn = document.querySelector('#rating-modal button:last-child');
-            const origTxt = btn.innerText; btn.innerText = "Saving..."; btn.disabled = true;
+            const origTxt = btn.innerText;
+            btn.innerText = "Saving..."; btn.disabled = true;
             
             try {
-                await window.dbCall(updateDoc(getDocRef('orders', window.currentRatingOrderId), { rating: window.selectedRating, review: reviewText }), 10000);
+                await window.dbCall(updateDoc(getDocRef('orders', window.currentRatingOrderId), {
+                    rating: window.selectedRating,
+                    review: reviewText
+                }), 10000);
                 window.showToast("Thank you for your feedback!", "success");
                 document.getElementById('rating-modal').classList.remove('active');
-            } catch(e) { window.showToast("Failed to submit rating.", "error");
-            } finally { btn.innerText = origTxt; btn.disabled = false; }
+            } catch(e) {
+                window.showToast("Failed to submit rating.", "error");
+            } finally {
+                btn.innerText = origTxt; btn.disabled = false;
+            }
         };
 
         window.resizeImage = (file, maxSize) => {
@@ -1015,6 +1190,7 @@
 
             toast.classList.remove('opacity-0', '-translate-y-10', 'pointer-events-none');
             toast.classList.add('opacity-100', 'translate-y-0');
+
             setTimeout(() => {
                 toast.classList.remove('opacity-100', 'translate-y-0');
                 toast.classList.add('opacity-0', '-translate-y-10', 'pointer-events-none');
@@ -1024,12 +1200,26 @@
         window.openStaticPage = (page) => {
             const titleEl = document.getElementById('info-modal-title');
             const bodyEl = document.getElementById('info-modal-body');
+            
             if (page === 'about') {
                 titleEl.innerText = "About Gramzo";
-                bodyEl.innerHTML = `<div class="text-center mb-6"><div class="font-logo font-black text-3xl italic mx-auto mb-4 tracking-tight"><span class="text-emerald-500">Gram</span><span class="text-orange-500">Zo</span></div><p class="font-bold text-lg text-gray-800">Welcome to Gramzo.in!</p><p class="mt-2 leading-relaxed">We are India's emerging instant delivery super app, specially tailored for rural and semi-urban communities.</p></div>`;
+                bodyEl.innerHTML = `
+                    <div class="text-center mb-6">
+                        <div class="font-logo font-black text-3xl italic mx-auto mb-4 tracking-tight"><span class="text-emerald-500">Gram</span><span class="text-orange-500">Zo</span></div>
+                        <p class="font-bold text-lg text-gray-800">Welcome to Gramzo.in!</p>
+                        <p class="mt-2 leading-relaxed">We are India's emerging instant delivery super app, specially tailored for rural and semi-urban communities.</p>
+                    </div>
+                `;
             } else if (page === 'contact') {
                 titleEl.innerText = "Contact Us";
-                bodyEl.innerHTML = `<div class="bg-gray-50 p-6 rounded-2xl border border-gray-100 text-center"><i class="fa-solid fa-headset text-4xl text-emerald-500 mb-4"></i><h4 class="font-black text-xl text-gray-900 mb-2">We'd love to hear from you!</h4><p class="text-gray-600 mb-6">Have any questions, suggestions, or need help with your order? Our support team is always ready.</p><a href="tel:7980230656" class="inline-block bg-emerald-500 text-white font-black px-6 py-3 rounded-xl shadow-md hover:bg-emerald-600 transition active:scale-95 mb-6 text-lg"><i class="fa-solid fa-phone mr-2"></i> +91 7980230656</a></div>`;
+                bodyEl.innerHTML = `
+                    <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100 text-center">
+                        <i class="fa-solid fa-headset text-4xl text-emerald-500 mb-4"></i>
+                        <h4 class="font-black text-xl text-gray-900 mb-2">We'd love to hear from you!</h4>
+                        <p class="text-gray-600 mb-6">Have any questions, suggestions, or need help with your order? Our support team is always ready.</p>
+                        <a href="tel:7980230656" class="inline-block bg-emerald-500 text-white font-black px-6 py-3 rounded-xl shadow-md hover:bg-emerald-600 transition active:scale-95 mb-6 text-lg"><i class="fa-solid fa-phone mr-2"></i> +91 7980230656</a>
+                    </div>
+                `;
             } else if (page === 'terms') {
                 titleEl.innerText = "Terms & Conditions";
                 bodyEl.innerHTML = `<p class="text-xs text-gray-400 mb-4 italic">Last Updated: May 2026</p><p class="text-gray-600 mb-4 leading-relaxed">By accessing and using the Gramzo app and website, you agree to be bound by these Terms of Service. Gramzo acts as a technology platform connecting independent local restaurants, delivery partners, and consumers.</p>`;
@@ -1043,7 +1233,9 @@
         };
 
         window.startApp = async () => {
-            if (!auth.currentUser) { try { await window.dbCall(signInAnonymously(auth), 10000); } catch (e) {} }
+            if (!auth.currentUser) {
+                try { await window.dbCall(signInAnonymously(auth), 10000); } catch (e) {}
+            }
         };
 
         window.setupMapsFeatures = () => {
@@ -1061,10 +1253,15 @@
             };
             initInput('user-location-input');
         };
+
         if (window.isGoogleMapsLoaded) window.setupMapsFeatures();
 
         // --- AUTH UI ---
-        window.openAuthModal = (role = 'User') => { currentAuthRole = role; document.getElementById('auth-overlay').classList.add('active'); window.switchAuthView('login'); };
+        window.openAuthModal = (role = 'User') => {
+            currentAuthRole = role;
+            document.getElementById('auth-overlay').classList.add('active');
+            window.switchAuthView('login'); 
+        };
         window.closeAuthModal = () => document.getElementById('auth-overlay').classList.remove('active');
         window.openAdminModal = () => document.getElementById('admin-auth-overlay').classList.add('active');
         window.closeAdminModal = () => document.getElementById('admin-auth-overlay').classList.remove('active');
@@ -1114,7 +1311,8 @@
                 try { await window.dbCall(deleteDoc(getDocRef('sessions', auth.currentUser.uid)), 5000); } catch(e) {}
                 try { await signOut(auth); } catch(e) {}
             }
-            currentUser = null; window.cart = []; window.appliedPromo = null; window.promoCode = ''; window.lastKnownOrders = {};
+            currentUser = null;
+            window.cart = []; window.appliedPromo = null; window.promoCode = ''; window.lastKnownOrders = {};
             window.showToast("Signing out...", "info");
             setTimeout(() => window.location.reload(), 800);
         };
@@ -1122,10 +1320,12 @@
         window.handleAdminLogin = async () => {
             const btn = document.querySelector('#admin-auth-overlay button');
             const orig = btn.innerText; btn.innerText = "Verifying..."; btn.disabled = true;
+
             try {
                 if (!auth.currentUser) await window.dbCall(signInAnonymously(auth), 4000);
                 const id = document.getElementById('admin-id-input').value.trim();
                 const pass = document.getElementById('admin-pass-input').value.trim();
+
                 if (id === 'Gramzo_admin' && pass === '1234') {
                     currentUser = { name: 'Super Admin', role: 'Admin', phone: 'Admin', docId: 'admin_session', uid: auth.currentUser?.uid || 'admin' };
                     if(auth.currentUser) window.dbCall(setDoc(getDocRef('sessions', auth.currentUser.uid), { phone: 'admin_session' }, { merge: true }), 3000).catch(e=>{});
@@ -1167,6 +1367,7 @@
                     if (currentAuthRole === 'Partner') {
                         const catEl = document.getElementById('reg-partner-category');
                         partnerCategory = catEl ? catEl.value : 'Food Owner';
+                        
                         if (['Food Owner', 'Grocery Shop'].includes(partnerCategory)) {
                             shopName = document.getElementById('reg-shop-name').value.trim();
                             shopAddress = document.getElementById('reg-shop-address').value.trim();
@@ -1194,6 +1395,7 @@
                 } else if (type === 'login') {
                     const phone = document.getElementById('login-phone').value.trim();
                     const pass = document.getElementById('login-pass').value.trim();
+
                     if (!/^\d{10}$/.test(phone)) throw new Error("Please enter a valid 10-digit mobile number.");
                     if (!pass) throw new Error("Please enter your password.");
 
@@ -1239,7 +1441,9 @@
             window.setupBottomNav(currentUser.role);
             window.switchMainView(currentUser.role === 'Admin' ? 'Admin' : currentUser.role === 'Partner' ? 'Partner' : 'User');
 
-            if (['Partner', 'Admin'].includes(currentUser.role)) window.requestWakeLock();
+            if (['Partner', 'Admin'].includes(currentUser.role)) {
+                window.requestWakeLock();
+            }
 
             if (currentUser.role === 'Partner') {
                 const isShop = ['Food Owner', 'Grocery Shop'].includes(currentUser.category);
@@ -1251,8 +1455,11 @@
                 document.getElementById('shop-top-dashboard').classList.add('hidden');
 
                 const warningBanner = document.getElementById('partner-pending-warning');
-                if (!isApproved) warningBanner.classList.remove('hidden');
-                else warningBanner.classList.add('hidden');
+                if (!isApproved) {
+                    warningBanner.classList.remove('hidden');
+                } else {
+                    warningBanner.classList.add('hidden');
+                }
 
                 if(isShop) {
                     document.getElementById('shop-top-dashboard').classList.remove('hidden');
@@ -1281,6 +1488,7 @@
 
                 const statusToggleShop = document.getElementById('partner-status-toggle');
                 const isCurrentlyOpen = ['Open', 'Online'].includes(currentUser.shopStatus);
+
                 if (statusToggleShop) statusToggleShop.checked = isCurrentlyOpen;
                 
                 const shopStatusTxt = document.getElementById('shop-status-text');
@@ -1310,13 +1518,14 @@
         const renderProducts = (items) => {
             const listEl = document.getElementById('market-list');
             const chipsEl = document.getElementById('food-category-chips');
-            const highlightsContainer = document.getElementById('global-highlights-container');
-            const highlightsCarousel = document.getElementById('highlights-carousel');
+            const offersContainer = document.getElementById('special-offers-carousel');
+            const globalSpecials = document.getElementById('global-specials-container');
             
             if (!listEl) return;
             
             const isMenuListView = !!currentRestaurantFilter;
 
+            // Sub-Category Filter Chips
             if (isMenuListView && window.currentUserMainCategory === 'Food Owner' && chipsEl) {
                 const restaurantItems = items.filter(i => i.partnerId === currentRestaurantFilter);
                 const uniqueCategories = [...new Set(restaurantItems.map(i => i.category || 'Others'))];
@@ -1329,8 +1538,12 @@
                             <button onclick="window.filterFoodCategory('${cat}')" class="px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors border ${currentFoodCategoryFilter === cat ? 'bg-emerald-500 text-white border-emerald-500' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}">${cat}</button>
                         `).join('')}
                     `;
-                } else { chipsEl.classList.add('hidden'); }
-            } else if (chipsEl) { chipsEl.classList.add('hidden'); }
+                } else {
+                    chipsEl.classList.add('hidden');
+                }
+            } else if (chipsEl) {
+                chipsEl.classList.add('hidden');
+            }
             
             const filtered = items.filter(i => {
                 const pShopCat = i.shopCategory || 'Food Owner';
@@ -1431,18 +1644,20 @@
                 `;
             };
 
+            // Only show highlights if we are NOT viewing a specific restaurant menu
             if (!isMenuListView && window.currentUserMainCategory === 'Food Owner') {
-                const highlights = filtered.filter(i => i.isOffer || i.isFavourite);
-                if (highlightsContainer && highlightsCarousel) {
-                    if (highlights.length > 0) {
-                        highlightsContainer.classList.remove('hidden');
-                        highlightsCarousel.innerHTML = highlights.map(p => createCard(p, true)).join('');
+                const offersAndFavs = filtered.filter(i => i.isOffer || i.isFavourite);
+
+                if (globalSpecials && offersContainer) {
+                    if (offersAndFavs.length > 0) {
+                        globalSpecials.classList.remove('hidden');
+                        offersContainer.innerHTML = offersAndFavs.map(p => createCard(p)).join('');
                     } else {
-                        highlightsContainer.classList.add('hidden');
+                        globalSpecials.classList.add('hidden');
                     }
                 }
             } else {
-                if (highlightsContainer) highlightsContainer.classList.add('hidden');
+                if (globalSpecials) globalSpecials.classList.add('hidden');
             }
 
             if (isMenuListView) {
@@ -1471,11 +1686,11 @@
                 const isOffline = r.shopStatus === 'Closed' || r.shopStatus === 'Offline';
                 return `
                 <div class="cursor-pointer group flex flex-col items-center w-full relative" onclick="window.filterRestaurant('${r.partnerId}', '${r.shopName.replace(/'/g, "\\'")}', ${isOffline})">
-                    <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center overflow-hidden mb-2 shadow-sm border border-gray-100 transition-all bg-white p-[2px] group-hover:border-emerald-400 group-hover:shadow-md group-hover:scale-105 ${isOffline ? 'grayscale opacity-60' : ''}">
+                    <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center overflow-hidden mb-2 shadow-sm border border-gray-200 transition-all bg-white p-[2px] group-hover:border-emerald-400 group-hover:shadow-md ${isOffline ? 'grayscale opacity-60' : ''}">
                         <img src="${r.image}" class="w-full h-full object-cover rounded-full" alt="${r.shopName}">
                     </div>
-                    ${isOffline ? `<span class="absolute top-[-5px] right-0 sm:right-2 bg-red-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase shadow-sm z-10 border border-white">Closed</span>` : ''}
-                    <p class="text-center text-[10px] sm:text-xs font-bold ${isOffline ? 'text-gray-400' : 'text-gray-800 group-hover:text-emerald-600'} leading-tight w-full px-1 truncate break-words">${r.shopName}</p>
+                    ${isOffline ? `<span class="absolute top-[-5px] right-0 bg-red-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase shadow-sm z-10 border border-white">Closed</span>` : ''}
+                    <p class="text-center text-xs font-bold ${isOffline ? 'text-gray-400' : 'text-gray-800 group-hover:text-emerald-600'} leading-tight w-full px-1 whitespace-normal break-words">${r.shopName}</p>
                 </div>`;
             }).join('');
         };
@@ -1516,6 +1731,7 @@
             onSnapshot(getDocRef('settings', 'app_config'), (snap) => {
                 const marqueeContainer = document.getElementById('marquee-container');
                 const marqueeEl = document.getElementById('dynamic-marquee');
+                
                 if (snap.exists()) {
                     const data = snap.data();
                     if (data.marqueeText && data.marqueeText.trim() !== '') {
@@ -1541,7 +1757,10 @@
         };
 
         window.filterRestaurant = (partnerId, shopName, isOffline = false) => {
-            if (isOffline) { window.showToast(`${shopName} is currently closed.`, 'error'); return; }
+            if (isOffline) {
+                window.showToast(`${shopName} is currently closed.`, 'error');
+                return;
+            }
 
             window.currentRestaurantFilter = partnerId;
             window.currentFoodCategoryFilter = null;
@@ -1549,10 +1768,13 @@
             const gridContainer = document.getElementById('restaurants-grid-container');
             const menuContainer = document.getElementById('food-menu-container');
             const globalSearch = document.getElementById('global-search');
+            const highlightsContainer = document.getElementById('global-specials-container');
 
             if (partnerId) {
                 gridContainer.classList.add('hidden');
                 menuContainer.classList.remove('hidden');
+                if(highlightsContainer) highlightsContainer.classList.add('hidden'); // Force hide highlights
+                
                 if(globalSearch) globalSearch.value = ''; window.currentSearchQuery = '';
                 
                 const pData = window.knownPartners ? window.knownPartners.find(p => p.partnerId === partnerId) : null;
@@ -1569,7 +1791,8 @@
             } else {
                 gridContainer.classList.remove('hidden');
                 menuContainer.classList.add('hidden');
-                window.loadMarketplaceData(); // Refresh to reset layout
+                // Don't force show highlights here, let loadMarketplaceData handle if they exist
+                window.loadMarketplaceData(); 
             }
         };
 
@@ -1624,22 +1847,39 @@
             if(!code) return;
 
             const btn = codeInput.nextElementSibling;
-            const origText = btn.innerText; btn.innerText = '...'; btn.disabled = true;
+            const origText = btn.innerText;
+            btn.innerText = '...'; btn.disabled = true;
 
             try {
                 const snap = await window.dbCall(getDocs(getCol('promos')), 10000);
                 const promos = snap.docs.map(d => d.data());
                 
                 const matchedPromo = promos.find(p => p.code === code);
-                if(!matchedPromo) { window.showToast("Invalid Promo Code", "error"); window.appliedPromo = null; window.promoCode = ''; } 
-                else if (!matchedPromo.isActive) { window.showToast("Promo code is disabled", "error"); window.appliedPromo = null; window.promoCode = ''; } 
-                else if (matchedPromo.restaurantId !== 'Global' && window.cart.length > 0 && window.cart[0].partnerId !== matchedPromo.restaurantId) { window.showToast("Promo not valid for this restaurant", "error"); window.appliedPromo = null; window.promoCode = ''; } 
-                else { window.appliedPromo = matchedPromo; window.promoCode = matchedPromo.code; window.showToast(`Discount Applied!`, "success"); }
+                if(!matchedPromo) {
+                    window.showToast("Invalid Promo Code", "error");
+                    window.appliedPromo = null; window.promoCode = '';
+                } else if (!matchedPromo.isActive) {
+                    window.showToast("Promo code is disabled", "error");
+                    window.appliedPromo = null; window.promoCode = '';
+                } else if (matchedPromo.restaurantId !== 'Global' && window.cart.length > 0 && window.cart[0].partnerId !== matchedPromo.restaurantId) {
+                    window.showToast("Promo not valid for this restaurant", "error");
+                    window.appliedPromo = null; window.promoCode = '';
+                } else {
+                    window.appliedPromo = matchedPromo;
+                    window.promoCode = matchedPromo.code;
+                    window.showToast(`Discount Applied!`, "success");
+                }
                 window.renderCartUI();
-            } catch(e) { window.showToast("Network Error verifying promo", "error"); } finally { btn.innerText = origText; btn.disabled = false; }
+            } catch(e) {
+                window.showToast("Network Error verifying promo", "error");
+            } finally {
+                btn.innerText = origText; btn.disabled = false;
+            }
         };
 
-        window.addToCartStandard = (id, name, price, partnerId, shopName) => { window.addToCartActual(id, name, price, partnerId, shopName); };
+        window.addToCartStandard = (id, name, price, partnerId, shopName) => {
+            window.addToCartActual(id, name, price, partnerId, shopName);
+        };
 
         window.addToCartVariant = (id, name, partnerId, shopName) => {
             const selectEl = document.getElementById(`sel-${id}`);
@@ -1653,10 +1893,16 @@
         window.addToCartActual = (id, name, price, partnerId, shopName) => {
             if(!currentUser) { window.openAuthModal('User'); return; }
             if(currentUser.role !== 'User') { window.showToast("Log in as User to order.", "error"); return; }
-            if (window.cart.length > 0 && window.cart[0].partnerId !== partnerId && partnerId !== '') { window.showToast("You can only order from one restaurant at a time. Clear cart first.", "error"); return; }
+            
+            if (window.cart.length > 0 && window.cart[0].partnerId !== partnerId && partnerId !== '') {
+                window.showToast("You can only order from one restaurant at a time. Clear cart first.", "error");
+                return;
+            }
 
             window.cart.push({id, name, price, partnerId, shopName});
-            window.renderCartUI(); window.showToast(`${name} added!`, "success"); window.setupBottomNav(currentUser.role);
+            window.renderCartUI();
+            window.showToast(`${name} added!`, "success");
+            window.setupBottomNav(currentUser.role);
         };
 
         window.renderCartUI = async () => {
@@ -1668,7 +1914,7 @@
             const deliveryFee = (selectedVillage === 'Others') ? 30 : 0;
 
             const sub = window.cart.reduce((s, i) => s + i.price, 0);
-            const handlingFee = window.cart.length > 0 ? 5 : 0;
+            const handlingFee = window.cart.length > 0 ? 5 : 0; // The Platform Fee
             
             let discountAmt = 0;
             if (window.appliedPromo) {
@@ -1677,20 +1923,32 @@
                     let applies = false;
                     if (promo.itemId === 'All' || !promo.itemId) applies = true;
                     else if (promo.itemId === item.id) applies = true;
-                    if (applies) { if (promo.type === 'flat') discountAmt += promo.discount; else discountAmt += (item.price * promo.discount) / 100; }
+
+                    if (applies) {
+                        if (promo.type === 'flat') discountAmt += promo.discount;
+                        else discountAmt += (item.price * promo.discount) / 100;
+                    }
                 });
             }
             if (discountAmt > sub) discountAmt = sub; 
+
             const total = sub - discountAmt + handlingFee + deliveryFee;
 
             if (summaryTotals) {
-                const discountHtml = window.appliedPromo ? `<div class="flex justify-between text-sm text-emerald-600 font-bold"><span>Promo Applied (${window.appliedPromo.code})</span><span>-₹${discountAmt.toFixed(2)}</span></div>` : '';
+                const discountHtml = window.appliedPromo 
+                    ? `<div class="flex justify-between text-sm text-emerald-600 font-bold"><span>Promo Applied (${window.appliedPromo.code})</span><span>-₹${discountAmt.toFixed(2)}</span></div>` 
+                    : '';
+                
                 summaryTotals.innerHTML = `
                     <div class="flex justify-between text-sm text-gray-600 font-medium"><span>Item Subtotal</span><span id="cart-subtotal">₹${sub.toFixed(2)}</span></div>
                     ${discountHtml}
-                    <div class="flex justify-between text-sm text-red-600 font-bold"><span>Delivery Fee</span><span>${deliveryFee === 0 ? 'FREE' : '₹30.00'}</span></div>
+                    <div class="flex justify-between text-sm text-red-600 font-bold"><span>Delivery Fee</span><span>${deliveryFee === 0 ? 'FREE' : '₹' + deliveryFee.toFixed(2)}</span></div>
                     <div class="flex justify-between text-sm text-gray-600 font-medium"><span>Platform Fee</span><span id="cart-handling">₹${handlingFee.toFixed(2)}</span></div>
-                    <div class="pt-3 mt-3 border-t border-gray-200 border-dashed flex justify-between items-center"><span class="text-sm font-black text-gray-900">Grand Total</span><span id="cart-total" class="text-2xl font-black text-gray-900 tracking-tight">₹${total.toFixed(2)}</span></div>
+                    
+                    <div class="pt-3 mt-3 border-t border-gray-200 border-dashed flex justify-between items-center">
+                        <span class="text-sm font-black text-gray-900">Grand Total</span>
+                        <span id="cart-total" class="text-2xl font-black text-gray-900 tracking-tight">₹${total.toFixed(2)}</span>
+                    </div>
                 `;
             }
 
@@ -1698,19 +1956,34 @@
             const detailsSection = document.getElementById('checkout-details-section');
 
             if (!window.cart.length) {
-                list.innerHTML = `<div class="text-center py-10"><img src="https://cdn-icons-png.flaticon.com/512/1161/1161388.png" class="w-16 h-16 mx-auto mb-3 opacity-20 grayscale"><p class="text-gray-400 font-medium text-sm">Your basket is empty!</p></div>`;
-                btn.disabled = true; detailsSection.style.display = 'none'; return;
+                list.innerHTML = `
+                    <div class="text-center py-10">
+                        <img src="https://cdn-icons-png.flaticon.com/512/1161/1161388.png" class="w-16 h-16 mx-auto mb-3 opacity-20 grayscale">
+                        <p class="text-gray-400 font-medium text-sm">Your basket is empty!</p>
+                    </div>`;
+                btn.disabled = true;
+                detailsSection.style.display = 'none';
+                return;
             }
             
-            btn.disabled = false; detailsSection.style.display = 'block';
+            btn.disabled = false;
+            detailsSection.style.display = 'block';
 
             list.innerHTML = window.cart.map((i, idx) => `
                 <div class="flex justify-between items-center py-3 border-b border-gray-50 last:border-0 group">
                     <div class="flex items-center gap-3">
                         <i class="fa-regular fa-square-caret-up text-emerald-500 mt-0.5 self-start"></i>
-                        <div><p class="text-sm font-bold text-gray-800 leading-tight">${i.name}</p><p class="text-[9px] font-bold text-gray-500 mt-0.5 uppercase tracking-wider"><i class="fa-solid fa-store text-emerald-400 mr-1"></i> ${i.shopName || 'Gramzo Partner'}</p></div>
+                        <div>
+                            <p class="text-sm font-bold text-gray-800 leading-tight">${i.name}</p>
+                            <p class="text-[9px] font-bold text-gray-500 mt-0.5 uppercase tracking-wider"><i class="fa-solid fa-store text-emerald-400 mr-1"></i> ${i.shopName || 'Gramzo Partner'}</p>
+                        </div>
                     </div>
-                    <div class="flex items-center gap-4"><span class="text-sm font-black text-gray-900">₹${i.price}</span><button type="button" onclick="window.removeFromCart(${idx})" class="w-6 h-6 rounded bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors"><i class="fa-solid fa-minus text-[10px]"></i></button></div>
+                    <div class="flex items-center gap-4">
+                        <span class="text-sm font-black text-gray-900">₹${i.price}</span>
+                        <button type="button" onclick="window.removeFromCart(${idx})" class="w-6 h-6 rounded bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors">
+                            <i class="fa-solid fa-minus text-[10px]"></i>
+                        </button>
+                    </div>
                 </div>`).join('');
 
             const partnerId = window.cart[0].partnerId;
@@ -1720,32 +1993,57 @@
                 const paymentSection = document.getElementById('payment-section');
                 
                 if(partnerSnap && partnerSnap.exists()) {
-                    const pData = partnerSnap.data(); window.currentCartPartner = pData; paymentSection.classList.remove('hidden');
+                    const pData = partnerSnap.data();
+                    window.currentCartPartner = pData;
+                    paymentSection.classList.remove('hidden');
+                    
                     let html = '';
                     if(pData.codEnabled !== false) {
-                        html += `<label class="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition"><input type="radio" name="payment_mode" value="COD" checked onchange="document.getElementById('qr-payment-box').classList.add('hidden')" class="w-4 h-4 text-emerald-600 focus:ring-emerald-500 border-gray-300"><span class="text-sm font-bold text-gray-800"><i class="fa-solid fa-money-bill-1-wave text-emerald-600 w-5"></i> Pay on Delivery</span></label>`;
+                        html += `
+                            <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition">
+                                <input type="radio" name="payment_mode" value="COD" checked onchange="document.getElementById('qr-payment-box').classList.add('hidden')" class="w-4 h-4 text-emerald-600 focus:ring-emerald-500 border-gray-300">
+                                <span class="text-sm font-bold text-gray-800"><i class="fa-solid fa-money-bill-1-wave text-emerald-600 w-5"></i> Pay on Delivery</span>
+                            </label>
+                        `;
                     }
                     if(pData.onlineEnabled) {
                         const isPrepaidChecked = (pData.codEnabled === false) ? 'checked' : '';
                         if (pData.codEnabled === false) document.getElementById('qr-payment-box').classList.remove('hidden');
-                        html += `<label class="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition"><input type="radio" name="payment_mode" value="Prepaid" ${isPrepaidChecked} onchange="document.getElementById('qr-payment-box').classList.remove('hidden')" class="w-4 h-4 text-emerald-600 focus:ring-emerald-500 border-gray-300"><span class="text-sm font-bold text-gray-800"><i class="fa-solid fa-qrcode text-blue-600 w-5"></i> Pay Online</span></label>`;
+                        
+                        html += `
+                            <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition">
+                                <input type="radio" name="payment_mode" value="Prepaid" ${isPrepaidChecked} onchange="document.getElementById('qr-payment-box').classList.remove('hidden')" class="w-4 h-4 text-emerald-600 focus:ring-emerald-500 border-gray-300">
+                                <span class="text-sm font-bold text-gray-800"><i class="fa-solid fa-qrcode text-blue-600 w-5"></i> Pay Online</span>
+                            </label>
+                        `;
                         if(pData.qrCode) document.getElementById('partner-qr-display').src = pData.qrCode;
                     }
+                    
                     if(!html) html = '<p class="text-xs text-red-500 font-bold">No payment methods configured by restaurant.</p>';
                     paymentContainer.innerHTML = html;
-                } else { paymentSection.classList.add('hidden'); }
+                } else {
+                    paymentSection.classList.add('hidden');
+                }
             }
         };
 
         window.removeFromCart = (idx) => { 
             window.cart.splice(idx, 1);
             if(window.cart.length === 0) {
-                window.appliedPromo = null; window.promoCode = '';
-                if(document.getElementById('promo-code-input')) document.getElementById('promo-code-input').value = '';
-                if(document.getElementById('cart-village')) document.getElementById('cart-village').value = '';
-                if(document.getElementById('cart-other-village')) { document.getElementById('cart-other-village').value = ''; document.getElementById('cart-other-village').classList.add('hidden'); }
+                window.appliedPromo = null;
+                window.promoCode = '';
+                const promoInput = document.getElementById('promo-code-input');
+                if(promoInput) promoInput.value = '';
+                const villageSelect = document.getElementById('cart-village');
+                if(villageSelect) villageSelect.value = '';
+                const otherInput = document.getElementById('cart-other-village');
+                if(otherInput) {
+                    otherInput.value = '';
+                    otherInput.classList.add('hidden');
+                }
             }
-            window.renderCartUI(); window.setupBottomNav(currentUser?.role);
+            window.renderCartUI(); 
+            window.setupBottomNav(currentUser?.role);
         };
 
         window.placeOrder = async () => {
@@ -1779,7 +2077,7 @@
 
             const deliveryFee = (village === 'Others') ? 30 : 0;
             const sub = window.cart.reduce((s,i) => s + i.price, 0);
-            const handlingFee = window.cart.length > 0 ? 5 : 0;
+            const handlingFee = window.cart.length > 0 ? 5 : 0; // Flat Platform fee
             
             let discountAmt = 0;
             if (window.appliedPromo) {
@@ -1788,7 +2086,10 @@
                     let applies = false;
                     if (promo.itemId === 'All' || !promo.itemId) applies = true;
                     else if (promo.itemId === item.id) applies = true;
-                    if (applies) { if (promo.type === 'flat') discountAmt += promo.discount; else discountAmt += (item.price * promo.discount) / 100; }
+                    if (applies) {
+                        if (promo.type === 'flat') discountAmt += promo.discount;
+                        else discountAmt += (item.price * promo.discount) / 100;
+                    }
                 });
             }
             if (discountAmt > sub) discountAmt = sub;
@@ -1799,43 +2100,99 @@
             const restaurantAddress = (window.currentCartPartner && window.currentCartPartner.shopAddress) ? window.currentCartPartner.shopAddress : null;
 
             const btn = document.getElementById('btn-place-order');
-            const originalText = btn.innerText; btn.innerText = "PLACING ORDER..."; btn.disabled = true;
+            const originalText = btn.innerText;
+            btn.innerText = "PLACING ORDER..."; btn.disabled = true;
 
             try {
+                // EXPLICITLY save deliveryFee and platformFee to the order document
                 await window.dbCall(addDoc(getCol('orders'), { 
-                    customer: currentUser.name || 'Unknown', phone: currentUser.phone || '', 
-                    items: window.cart.map(item => ({ id: item.id || '', name: item.name || '', price: item.price || 0, partnerId: item.partnerId || null, shopName: item.shopName || null })), 
-                    subtotal: sub || 0, discount: discountAmt || 0, promoCode: window.promoCode || null, total: total || 0, 
-                    address: fullAddress || '', status: 'Placed', restaurantId: restaurantId, restaurantName: restaurantName, restaurantAddress: restaurantAddress,
-                    paymentMode: paymentMode, paymentScreenshot: paymentScreenshot, time: serverTimestamp() 
+                    customer: currentUser.name || 'Unknown', 
+                    phone: currentUser.phone || '', 
+                    items: window.cart.map(item => ({
+                        id: item.id || '',
+                        name: item.name || '',
+                        price: item.price || 0,
+                        partnerId: item.partnerId || null,
+                        shopName: item.shopName || null
+                    })), 
+                    subtotal: sub || 0, 
+                    discount: discountAmt || 0, 
+                    promoCode: window.promoCode || null,
+                    deliveryFee: deliveryFee, // New
+                    platformFee: handlingFee, // New
+                    total: total || 0, 
+                    address: fullAddress || '', 
+                    status: 'Placed', 
+                    restaurantId: restaurantId, 
+                    restaurantName: restaurantName, 
+                    restaurantAddress: restaurantAddress,
+                    paymentMode: paymentMode, 
+                    paymentScreenshot: paymentScreenshot,
+                    time: serverTimestamp() 
                 }), 15000);
                 
                 window.cart = []; window.appliedPromo = null; window.promoCode = '';
-                document.getElementById('cart-address').value = ''; document.getElementById('cart-village').value = '';
-                document.getElementById('cart-other-village').value = ''; document.getElementById('cart-other-village').classList.add('hidden');
+                document.getElementById('cart-address').value = '';
+                document.getElementById('cart-village').value = '';
+                document.getElementById('cart-other-village').value = '';
+                document.getElementById('cart-other-village').classList.add('hidden');
                 if(document.getElementById('promo-code-input')) document.getElementById('promo-code-input').value = '';
                 if(document.getElementById('payment-screenshot')) document.getElementById('payment-screenshot').value = '';
                 
                 window.renderCartUI(); window.setupBottomNav(currentUser?.role);
-                window.showToast("Order Placed Successfully!", "success"); window.switchMainView('Orders'); 
-            } catch(e) { window.showToast(e.message || "Network Error. Try Again.", "error"); } finally { btn.innerText = originalText; btn.disabled = false; }
+                window.showToast("Order Placed Successfully!", "success");
+                window.switchMainView('Orders'); 
+            } catch(e) {
+                console.error("Order Placement Error:", e);
+                window.showToast(e.message || "Network Error. Try Again.", "error");
+            } finally {
+                btn.innerText = originalText; btn.disabled = false;
+            }
         };
 
         window.openRejectModal = (id) => {
             window.currentRejectOrderId = id;
-            document.getElementById('reject-reason').value = ''; document.getElementById('reject-reason-custom').value = '';
-            document.getElementById('reject-reason-custom').classList.add('hidden'); document.getElementById('reject-modal').classList.add('active');
+            document.getElementById('reject-reason').value = '';
+            document.getElementById('reject-reason-custom').value = '';
+            document.getElementById('reject-reason-custom').classList.add('hidden');
+            document.getElementById('reject-modal').classList.add('active');
         };
 
         window.confirmRejectOrder = async () => {
             let reason = document.getElementById('reject-reason').value;
-            if (reason === 'Other') { reason = document.getElementById('reject-reason-custom').value.trim(); if (!reason) return window.showToast("Please type the exact reason.", "error"); } 
-            else if (!reason) { return window.showToast("Please select a reason.", "error"); }
+            
+            if (reason === 'Other') {
+                reason = document.getElementById('reject-reason-custom').value.trim();
+                if (!reason) return window.showToast("Please type the exact reason.", "error");
+            } else if (!reason) {
+                return window.showToast("Please select a reason.", "error");
+            }
+
             if (!window.currentRejectOrderId) return;
-            try { await window.dbCall(updateDoc(getDocRef('orders', window.currentRejectOrderId), { status: 'Rejected', rejectReason: reason }), 10000); window.showToast("Order Rejected.", "success"); document.getElementById('reject-modal').classList.remove('active'); } catch(e) { window.showToast("Failed to update.", "error"); }
+
+            try {
+                await window.dbCall(updateDoc(getDocRef('orders', window.currentRejectOrderId), {
+                    status: 'Rejected',
+                    rejectReason: reason
+                }), 10000);
+                window.showToast("Order Rejected.", "success");
+                document.getElementById('reject-modal').classList.remove('active');
+            } catch(e) { window.showToast("Failed to update.", "error"); }
         };
 
-        window.acceptDelivery = async (orderId) => { if(!currentUser) return; try { await window.dbCall(updateDoc(getDocRef('orders', orderId), { status: 'Out for Delivery', riderId: currentUser.id || currentUser.phone || currentUser.docId, riderName: currentUser.name, riderPhone: currentUser.phone }), 10000); window.showToast("Delivery Accepted!", "success"); } catch(e) { window.showToast("Failed to update.", "error"); } };
+        window.acceptDelivery = async (orderId) => {
+            if(!currentUser) return;
+            try {
+                await window.dbCall(updateDoc(getDocRef('orders', orderId), {
+                    status: 'Out for Delivery',
+                    riderId: currentUser.id || currentUser.phone || currentUser.docId,
+                    riderName: currentUser.name,
+                    riderPhone: currentUser.phone
+                }), 10000);
+                window.showToast("Delivery Accepted!", "success");
+            } catch(e) { window.showToast("Failed to update.", "error"); }
+        };
+
         window.acceptFoodOrder = async (orderId) => { try { await window.dbCall(updateDoc(getDocRef('orders', orderId), {status: 'Accepted'}), 10000); window.showToast("Order Accepted!", "success"); } catch(e) {} };
         window.markPreparing = async (orderId) => { try { await window.dbCall(updateDoc(getDocRef('orders', orderId), {status: 'Preparing'}), 10000); window.showToast("Order is Preparing!", "success"); } catch(e) {} };
         window.markReady = async (orderId) => { try { await window.dbCall(updateDoc(getDocRef('orders', orderId), {status: 'Ready'}), 10000); window.showToast("Marked as Ready!", "success"); } catch(e) {} };
@@ -1844,47 +2201,90 @@
 
         window.toggleShopStatus = async () => {
             const toggle = document.getElementById('partner-status-toggle');
-            const isOpen = toggle.checked; const newStatus = isOpen ? 'Open' : 'Closed';
+            const isOpen = toggle.checked;
+            const newStatus = isOpen ? 'Open' : 'Closed';
+            
             try {
                 await window.dbCall(setDoc(getDocRef('users', currentUser.phone), { shopStatus: newStatus }, { merge: true }), 10000);
                 currentUser.shopStatus = newStatus;
+                
                 if (['Food Owner', 'Grocery Shop'].includes(currentUser.category)) {
                     const snap = await window.dbCall(getDocs(getCol('products')), 10000);
                     const myProducts = snap.docs.filter(d => d.data().partnerId === currentUser.phone);
-                    myProducts.forEach(d => { updateDoc(getDocRef('products', d.id), { shopStatus: newStatus }); });
+                    
+                    myProducts.forEach(d => {
+                        updateDoc(getDocRef('products', d.id), { shopStatus: newStatus });
+                    });
+                    
                     const shopStatusTxt = document.getElementById('shop-status-text');
                     if(shopStatusTxt) shopStatusTxt.innerText = `Currently ${isOpen ? 'Open' : 'Closed'}`;
                 }
                 window.showToast(`Status marked as ${newStatus}`, "success");
-            } catch(e) { window.showToast("Error updating status", "error"); toggle.checked = !isOpen; }
+            } catch(e) {
+                window.showToast("Error updating status", "error");
+                toggle.checked = !isOpen; 
+            }
         };
 
-        window.togglePartnerStock = async (productId, currentInStock) => { try { await window.dbCall(updateDoc(getDocRef('products', productId), { inStock: !currentInStock }), 10000); window.showToast(currentInStock ? "Marked Out of Stock" : "Marked In Stock", "success"); } catch(e) { window.showToast("Error updating stock", "error"); } };
+        window.togglePartnerStock = async (productId, currentInStock) => {
+            try {
+                await window.dbCall(updateDoc(getDocRef('products', productId), { inStock: !currentInStock }), 10000);
+                window.showToast(currentInStock ? "Marked Out of Stock" : "Marked In Stock", "success");
+            } catch(e) {
+                window.showToast("Error updating stock", "error");
+            }
+        };
 
         window.addVariantRow = () => {
             const container = document.getElementById('variant-container');
-            const row = document.createElement('div'); row.className = "flex gap-2 variant-row mt-3";
-            row.innerHTML = `<input class="input-field w-1/2 var-qty" placeholder="Size (e.g. Half)"><input type="number" class="input-field w-1/2 var-price" placeholder="Price (₹)"><button type="button" onclick="this.parentElement.remove()" class="w-12 shrink-0 bg-gray-100 text-gray-500 rounded-xl flex justify-center items-center hover:bg-red-50 hover:text-red-500 transition border border-gray-200"><i class="fa-solid fa-xmark"></i></button>`;
+            const row = document.createElement('div');
+            row.className = "flex gap-2 variant-row mt-3";
+            row.innerHTML = `
+                <input class="input-field w-1/2 var-qty" placeholder="Size (e.g. Half)">
+                <input type="number" class="input-field w-1/2 var-price" placeholder="Price (₹)">
+                <button type="button" onclick="this.parentElement.remove()" class="w-12 shrink-0 bg-gray-100 text-gray-500 rounded-xl flex justify-center items-center hover:bg-red-50 hover:text-red-500 transition border border-gray-200"><i class="fa-solid fa-xmark"></i></button>
+            `;
             container.appendChild(row);
         };
 
-        window.deletePartnerProduct = async (id) => { const confirmed = await window.customConfirm("Delete Item", "Are you sure you want to delete this menu item?", "Delete"); if (!confirmed) return; try { await window.dbCall(deleteDoc(getDocRef('products', id)), 10000); window.showToast("Product deleted.", "success"); } catch(e) { window.showToast("Failed to delete.", "error"); } };
+        window.deletePartnerProduct = async (id) => {
+            const confirmed = await window.customConfirm("Delete Item", "Are you sure you want to delete this menu item?", "Delete");
+            if (!confirmed) return;
+            try {
+                await window.dbCall(deleteDoc(getDocRef('products', id)), 10000);
+                window.showToast("Product deleted.", "success");
+            } catch(e) { window.showToast("Failed to delete.", "error"); }
+        };
 
         window.editPartnerProduct = async (id) => {
             try {
-                const snap = await window.dbCall(getDoc(getDocRef('products', id)), 5000); if(!snap.exists()) return;
-                const p = snap.data(); window.editingProductId = id;
-                document.getElementById('prod-name').value = p.name || ''; document.getElementById('prod-prep-time').value = p.prepTime || '';
-                if(p.category && document.getElementById('prod-item-category')) { document.getElementById('prod-item-category').value = p.category; }
-                document.getElementById('prod-is-offer').checked = p.isOffer || false; document.getElementById('prod-is-fav').checked = p.isFavourite || false;
+                const snap = await window.dbCall(getDoc(getDocRef('products', id)), 5000);
+                if(!snap.exists()) return;
+                const p = snap.data();
+                
+                window.editingProductId = id;
+                document.getElementById('prod-name').value = p.name || '';
+                document.getElementById('prod-prep-time').value = p.prepTime || '';
+                if(p.category && document.getElementById('prod-item-category')) {
+                    document.getElementById('prod-item-category').value = p.category;
+                }
+                
+                document.getElementById('prod-is-offer').checked = p.isOffer || false;
+                document.getElementById('prod-is-fav').checked = p.isFavourite || false;
                 
                 const container = document.getElementById('variant-container');
                 container.innerHTML = '<label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Portion & Price</label>';
+                
                 let variants = p.variants && p.variants.length > 0 ? p.variants : [{qty: p.qty || 'Full', price: p.price || 0}];
                 
                 variants.forEach((v, index) => {
-                    const row = document.createElement('div'); row.className = "flex gap-2 variant-row" + (index > 0 ? " mt-3" : "");
-                    row.innerHTML = `<input class="input-field w-1/2 var-qty" placeholder="Size (e.g. Full)" value="${v.qty}"><input type="number" class="input-field w-1/2 var-price" placeholder="Price (₹)" value="${v.price}">${index > 0 ? `<button type="button" onclick="this.parentElement.remove()" class="w-12 shrink-0 bg-gray-100 text-gray-500 rounded-xl flex justify-center items-center hover:bg-red-50 hover:text-red-500 transition border border-gray-200"><i class="fa-solid fa-xmark"></i></button>` : ''}`;
+                    const row = document.createElement('div');
+                    row.className = "flex gap-2 variant-row" + (index > 0 ? " mt-3" : "");
+                    row.innerHTML = `
+                        <input class="input-field w-1/2 var-qty" placeholder="Size (e.g. Full)" value="${v.qty}">
+                        <input type="number" class="input-field w-1/2 var-price" placeholder="Price (₹)" value="${v.price}">
+                        ${index > 0 ? `<button type="button" onclick="this.parentElement.remove()" class="w-12 shrink-0 bg-gray-100 text-gray-500 rounded-xl flex justify-center items-center hover:bg-red-50 hover:text-red-500 transition border border-gray-200"><i class="fa-solid fa-xmark"></i></button>` : ''}
+                    `;
                     container.appendChild(row);
                 });
                 
@@ -1900,163 +2300,591 @@
 
             const name = document.getElementById('prod-name').value.trim();
             const prepTime = document.getElementById('prod-prep-time').value.trim() || '15';
-            const itemCatEl = document.getElementById('prod-item-category'); const itemCategory = itemCatEl ? itemCatEl.value : 'Others';
-            const isOffer = document.getElementById('prod-is-offer').checked; const isFavourite = document.getElementById('prod-is-fav').checked;
+            const itemCatEl = document.getElementById('prod-item-category');
+            const itemCategory = itemCatEl ? itemCatEl.value : 'Others';
+            
+            const isOffer = document.getElementById('prod-is-offer').checked;
+            const isFavourite = document.getElementById('prod-is-fav').checked;
+            
             if(!name) return window.showToast("Enter item name.", "error");
 
-            const rows = document.querySelectorAll('.variant-row'); let variants = [];
-            rows.forEach(row => { const qty = row.querySelector('.var-qty').value.trim(); const price = parseInt(row.querySelector('.var-price').value); if(qty && !isNaN(price)) variants.push({ qty, price }); });
+            const rows = document.querySelectorAll('.variant-row');
+            let variants = [];
+            rows.forEach(row => {
+                const qty = row.querySelector('.var-qty').value.trim();
+                const price = parseInt(row.querySelector('.var-price').value);
+                if(qty && !isNaN(price)) variants.push({ qty, price });
+            });
+
             if(variants.length === 0) return window.showToast("Add at least one size and price.", "error");
 
-            if(!currentUser.shopName) { window.showToast("Please setup and Save your Business Profile first.", "error"); document.getElementById('partner-shop-name').focus(); return; }
+            if(!currentUser.shopName) {
+                window.showToast("Please setup and Save your Business Profile first.", "error");
+                document.getElementById('partner-shop-name').focus();
+                return;
+            }
 
             let defaultImg = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80';
             const imgInput = document.getElementById('prod-image-upload');
-            const btn = document.getElementById('btn-add-prod'); const originalText = btn.innerText; btn.innerText = "Saving..."; btn.disabled = true;
+            
+            const btn = document.getElementById('btn-add-prod');
+            const originalText = btn.innerText;
+            btn.innerText = "Saving...";
+            btn.disabled = true;
 
             try {
                 let imgUrl = defaultImg;
-                if (window.editingProductId) { try { const existingSnap = await window.dbCall(getDoc(getDocRef('products', window.editingProductId)), 5000); if (existingSnap.exists() && existingSnap.data().image) { imgUrl = existingSnap.data().image; } } catch(e){} }
-                if (imgInput && imgInput.files.length > 0) { imgUrl = await window.resizeImage(imgInput.files[0], 400); }
-
-                const productData = { name, variants, price: variants[0].price, qty: variants[0].qty, prepTime: prepTime, category: itemCategory, partnerId: currentUser.phone, shopName: currentUser.shopName, shopAddress: currentUser.shopAddress || '', shopCategory: currentUser.category || 'Food Owner', openTime: currentUser.openTime || '', closeTime: currentUser.closeTime || '', image: imgUrl, inStock: true, shopStatus: currentUser.shopStatus || 'Open', isOffer: isOffer, isFavourite: isFavourite };
-
-                if (window.editingProductId) { await window.dbCall(updateDoc(getDocRef('products', window.editingProductId), productData), 15000); window.showToast("Successfully updated Menu Item!", "success"); window.editingProductId = null; } 
-                else { productData.created = new Date().toISOString(); await window.dbCall(addDoc(getCol('products'), productData), 15000); window.showToast("Successfully added to Menu!", "success"); }
                 
-                document.getElementById('prod-name').value = ''; document.getElementById('prod-prep-time').value = ''; document.getElementById('prod-is-offer').checked = false; document.getElementById('prod-is-fav').checked = false; if(imgInput) imgInput.value = '';
-                document.getElementById('variant-container').innerHTML = `<label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Portion & Price</label><div class="flex gap-2 variant-row"><input class="input-field w-1/2 var-qty" placeholder="Size (e.g. Full)"><input type="number" class="input-field w-1/2 var-price" placeholder="Price (₹)"></div>`;
-            } catch(e) { window.showToast("Network delayed. Saving in background.", "info"); } finally { btn.innerText = "Save to Menu"; btn.disabled = false; }
+                if (window.editingProductId) {
+                    try {
+                        const existingSnap = await window.dbCall(getDoc(getDocRef('products', window.editingProductId)), 5000);
+                        if (existingSnap.exists() && existingSnap.data().image) {
+                            imgUrl = existingSnap.data().image;
+                        }
+                    } catch(e){}
+                }
+
+                if (imgInput && imgInput.files.length > 0) {
+                    imgUrl = await window.resizeImage(imgInput.files[0], 400);
+                }
+
+                const productData = {
+                    name, 
+                    variants,
+                    price: variants[0].price, 
+                    qty: variants[0].qty,     
+                    prepTime: prepTime,
+                    category: itemCategory, 
+                    partnerId: currentUser.phone,
+                    shopName: currentUser.shopName,
+                    shopAddress: currentUser.shopAddress || '',
+                    shopCategory: currentUser.category || 'Food Owner',
+                    openTime: currentUser.openTime || '',
+                    closeTime: currentUser.closeTime || '',
+                    image: imgUrl,
+                    inStock: true,
+                    shopStatus: currentUser.shopStatus || 'Open',
+                    isOffer: isOffer,
+                    isFavourite: isFavourite
+                };
+
+                if (window.editingProductId) {
+                    await window.dbCall(updateDoc(getDocRef('products', window.editingProductId), productData), 15000);
+                    window.showToast("Successfully updated Menu Item!", "success");
+                    window.editingProductId = null;
+                } else {
+                    productData.created = new Date().toISOString();
+                    await window.dbCall(addDoc(getCol('products'), productData), 15000);
+                    window.showToast("Successfully added to Menu!", "success");
+                }
+                
+                document.getElementById('prod-name').value = '';
+                document.getElementById('prod-prep-time').value = '';
+                document.getElementById('prod-is-offer').checked = false;
+                document.getElementById('prod-is-fav').checked = false;
+                if(imgInput) imgInput.value = '';
+                document.getElementById('variant-container').innerHTML = `
+                    <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Portion & Price</label>
+                    <div class="flex gap-2 variant-row">
+                        <input class="input-field w-1/2 var-qty" placeholder="Size (e.g. Full)">
+                        <input type="number" class="input-field w-1/2 var-price" placeholder="Price (₹)">
+                    </div>
+                `;
+            } catch(e) {
+                window.showToast("Network delayed. Saving in background.", "info");
+            } finally {
+                btn.innerText = "Save to Menu";
+                btn.disabled = false;
+            }
         };
 
         window.submitPartnerProfile = async () => {
             if(!currentUser || !currentUser.phone) return;
-            const shopNameInput = document.getElementById('partner-shop-name'); const shopAddressInput = document.getElementById('partner-shop-address'); const openTimeInput = document.getElementById('partner-open-time'); const closeTimeInput = document.getElementById('partner-close-time');
-            const shopName = shopNameInput ? shopNameInput.value.trim() : null; const shopAddress = shopAddressInput ? shopAddressInput.value.trim() : ''; const openTime = openTimeInput ? openTimeInput.value : ''; const closeTime = closeTimeInput ? closeTimeInput.value : '';
-            const codEnabled = document.getElementById('partner-cod-toggle-setup').checked; const onlineEnabled = document.getElementById('partner-online-toggle-setup').checked; const qrInput = document.getElementById('partner-qr-upload');
-
-            if (!shopName) return window.showToast("Enter a business name.", "error"); if (!shopAddress) return window.showToast("Enter business address.", "error");
             
-            const btn = document.getElementById('btn-submit-profile'); const orig = btn.innerText; btn.innerText = "Submitting..."; btn.disabled = true;
+            const shopNameInput = document.getElementById('partner-shop-name');
+            const shopAddressInput = document.getElementById('partner-shop-address');
+            const openTimeInput = document.getElementById('partner-open-time');
+            const closeTimeInput = document.getElementById('partner-close-time');
+            
+            const shopName = shopNameInput ? shopNameInput.value.trim() : null;
+            const shopAddress = shopAddressInput ? shopAddressInput.value.trim() : '';
+            const openTime = openTimeInput ? openTimeInput.value : '';
+            const closeTime = closeTimeInput ? closeTimeInput.value : '';
+            const codEnabled = document.getElementById('partner-cod-toggle-setup').checked;
+            const onlineEnabled = document.getElementById('partner-online-toggle-setup').checked;
+            const qrInput = document.getElementById('partner-qr-upload');
+
+            if (!shopName) return window.showToast("Enter a business name.", "error");
+            if (!shopAddress) return window.showToast("Enter business address.", "error");
+            
+            const btn = document.getElementById('btn-submit-profile');
+            const orig = btn.innerText;
+            btn.innerText = "Submitting...";
+            btn.disabled = true;
+
             let qrBase64 = currentUser.qrCode || null;
 
             try {
-                if (onlineEnabled && qrInput && qrInput.files.length > 0) { qrBase64 = await window.resizeImage(qrInput.files[0], 600); }
+                if (onlineEnabled && qrInput && qrInput.files.length > 0) {
+                    qrBase64 = await window.resizeImage(qrInput.files[0], 600);
+                }
                 if(!onlineEnabled) qrBase64 = null; 
-                const updateData = { shopName: shopName, shopAddress: shopAddress, openTime: openTime, closeTime: closeTime, codEnabled: codEnabled, onlineEnabled: onlineEnabled, qrCode: qrBase64 };
+
+                const updateData = { 
+                    shopName: shopName, 
+                    shopAddress: shopAddress,
+                    openTime: openTime,
+                    closeTime: closeTime,
+                    codEnabled: codEnabled,
+                    onlineEnabled: onlineEnabled,
+                    qrCode: qrBase64
+                };
 
                 try {
                     await window.dbCall(setDoc(getDocRef('users', currentUser.phone), updateData, { merge: true }), 10000);
+                    
                     const snap = await window.dbCall(getDocs(getCol('products')), 10000);
                     const myProducts = snap.docs.filter(d => d.data().partnerId === currentUser.phone);
-                    myProducts.forEach(d => { updateDoc(getDocRef('products', d.id), { shopName, shopAddress, openTime, closeTime }); });
+                    myProducts.forEach(d => {
+                        updateDoc(getDocRef('products', d.id), { shopName, shopAddress, openTime, closeTime });
+                    });
+
                 } catch(dbErr) { console.warn("DB Write timeout/failed.", dbErr); }
 
-                currentUser.shopName = shopName; currentUser.shopAddress = shopAddress; currentUser.openTime = openTime; currentUser.closeTime = closeTime; currentUser.codEnabled = codEnabled; currentUser.onlineEnabled = onlineEnabled; currentUser.qrCode = qrBase64;
-                window.showToast("Profile saved!", "success"); window.finalizeLoginSequence(); 
-            } catch(e) { console.error(e); window.showToast("Network error. Try again.", "error"); } finally { btn.innerText = orig; btn.disabled = false; }
+                currentUser.shopName = shopName;
+                currentUser.shopAddress = shopAddress;
+                currentUser.openTime = openTime;
+                currentUser.closeTime = closeTime;
+                currentUser.codEnabled = codEnabled;
+                currentUser.onlineEnabled = onlineEnabled;
+                currentUser.qrCode = qrBase64;
+                
+                window.showToast("Profile saved!", "success");
+                window.finalizeLoginSequence(); 
+            } catch(e) {
+                console.error(e);
+                window.showToast("Network error. Try again.", "error");
+            } finally { 
+                btn.innerText = orig; 
+                btn.disabled = false; 
+            }
         };
 
-        window.switchUserTab = (tab) => { window.adminCurrentUserTab = tab; window.adminUsersLoaded = true; document.querySelectorAll('.admin-user-tab').forEach(el => { el.classList.remove('bg-white', 'text-gray-900', 'shadow-sm'); el.classList.add('text-gray-500'); }); const activeEl = document.getElementById(`tab-user-${tab.replace(/\s+/g, '')}`); if(activeEl) { activeEl.classList.add('bg-white', 'text-gray-900', 'shadow-sm'); activeEl.classList.remove('text-gray-500'); } window.renderAdminUsers(); };
-        window.openAdminUserEdit = (phone, name, shopName) => { document.getElementById('edit-u-phone').value = phone; document.getElementById('edit-u-name').value = name; document.getElementById('edit-u-shop').value = shopName && shopName !== 'null' && shopName !== 'undefined' ? shopName : ''; document.getElementById('admin-edit-user-modal').classList.add('active'); };
-        window.submitAdminUserEdit = async () => { const phone = document.getElementById('edit-u-phone').value; const newName = document.getElementById('edit-u-name').value.trim(); const newShop = document.getElementById('edit-u-shop').value.trim(); if(!phone || !newName) return window.showToast("Name cannot be empty.", "error"); try { await window.dbCall(setDoc(getDocRef('users', phone), { name: newName, shopName: newShop || null }, { merge: true }), 10000); window.showToast("User profile updated!", "success"); document.getElementById('admin-edit-user-modal').classList.remove('active'); } catch(e) { window.showToast("Failed to update.", "error"); } };
-        window.adminReviewPartner = async (partnerPhone, status) => { if(currentUser.role !== 'Admin') return; const actionVerb = status === 'Approved' ? "Approve" : "Revoke"; const confirmed = await window.customConfirm(`${actionVerb} Partner`, `Are you sure you want to ${actionVerb.toLowerCase()} this partner's registration?`, `Yes, ${actionVerb}`); if(!confirmed) return; try { await window.dbCall(setDoc(getDocRef('users', partnerPhone), { approvalStatus: status }, { merge: true }), 10000); window.showToast(`Partner status changed to ${status}!`, "success"); } catch(e) { window.showToast("Error updating status.", "error"); } };
-        window.adminToggleUserVisibility = async (partnerPhone, currentStatus) => { if(currentUser.role !== 'Admin') return; const newStatus = currentStatus === 'Closed' || currentStatus === 'Offline' ? 'Open' : 'Closed'; try { await window.dbCall(setDoc(getDocRef('users', partnerPhone), { shopStatus: newStatus }, { merge: true }), 10000); const snap = await window.dbCall(getDocs(getCol('products')), 10000); const myProducts = snap.docs.filter(d => d.data().partnerId === partnerPhone); myProducts.forEach(d => { updateDoc(getDocRef('products', d.id), { shopStatus: newStatus }); }); window.showToast(`Partner visibility forced ${newStatus}.`, "success"); } catch(e) { window.showToast("Error toggling visibility.", "error"); } };
+        window.switchUserTab = (tab) => {
+            window.adminCurrentUserTab = tab;
+            window.adminUsersLoaded = true; 
+            document.querySelectorAll('.admin-user-tab').forEach(el => {
+                el.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
+                el.classList.add('text-gray-500');
+            });
+            const activeEl = document.getElementById(`tab-user-${tab.replace(/\s+/g, '')}`);
+            if(activeEl) {
+                activeEl.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
+                activeEl.classList.remove('text-gray-500');
+            }
+            window.renderAdminUsers();
+        };
+
+        window.openAdminUserEdit = (phone, name, shopName) => {
+            document.getElementById('edit-u-phone').value = phone;
+            document.getElementById('edit-u-name').value = name;
+            document.getElementById('edit-u-shop').value = shopName && shopName !== 'null' && shopName !== 'undefined' ? shopName : '';
+            document.getElementById('admin-edit-user-modal').classList.add('active');
+        };
+
+        window.submitAdminUserEdit = async () => {
+            const phone = document.getElementById('edit-u-phone').value;
+            const newName = document.getElementById('edit-u-name').value.trim();
+            const newShop = document.getElementById('edit-u-shop').value.trim();
+
+            if(!phone || !newName) return window.showToast("Name cannot be empty.", "error");
+
+            try {
+                await window.dbCall(setDoc(getDocRef('users', phone), {
+                    name: newName,
+                    shopName: newShop || null
+                }, { merge: true }), 10000);
+                window.showToast("User profile updated!", "success");
+                document.getElementById('admin-edit-user-modal').classList.remove('active');
+            } catch(e) {
+                window.showToast("Failed to update.", "error");
+            }
+        };
+
+        window.adminReviewPartner = async (partnerPhone, status) => {
+            if(currentUser.role !== 'Admin') return;
+            const actionVerb = status === 'Approved' ? "Approve" : "Revoke";
+            const confirmed = await window.customConfirm(`${actionVerb} Partner`, `Are you sure you want to ${actionVerb.toLowerCase()} this partner's registration?`, `Yes, ${actionVerb}`);
+            if(!confirmed) return;
+
+            try {
+                await window.dbCall(setDoc(getDocRef('users', partnerPhone), { approvalStatus: status }, { merge: true }), 10000);
+                window.showToast(`Partner status changed to ${status}!`, "success");
+            } catch(e) {
+                window.showToast("Error updating status.", "error");
+            }
+        };
+
+        window.adminToggleUserVisibility = async (partnerPhone, currentStatus) => {
+            if(currentUser.role !== 'Admin') return;
+            const newStatus = currentStatus === 'Closed' || currentStatus === 'Offline' ? 'Open' : 'Closed'; 
+            
+            try {
+                await window.dbCall(setDoc(getDocRef('users', partnerPhone), { shopStatus: newStatus }, { merge: true }), 10000);
+                
+                const snap = await window.dbCall(getDocs(getCol('products')), 10000);
+                const myProducts = snap.docs.filter(d => d.data().partnerId === partnerPhone);
+                myProducts.forEach(d => {
+                    updateDoc(getDocRef('products', d.id), { shopStatus: newStatus });
+                });
+                
+                window.showToast(`Partner visibility forced ${newStatus}.`, "success");
+            } catch(e) { window.showToast("Error toggling visibility.", "error"); }
+        };
 
         window.renderAdminUsers = () => {
-            const usersBody = document.getElementById('admin-users-body'); if(!usersBody) return;
-            if (!window.adminUsersLoaded) { usersBody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-gray-400 font-bold text-xs"><i class="fa-solid fa-hand-pointer mb-2 text-2xl block opacity-30"></i>Click a tab above to load directory data.</td></tr>'; return; }
-            let filteredUsers = window.adminUsersData.filter(u => { if (window.adminCurrentUserTab === 'All') return true; if (window.adminCurrentUserTab === 'User') return u.role === 'User'; if (window.adminCurrentUserTab === 'Food Owner') return u.role === 'Partner' && u.category === 'Food Owner'; if (window.adminCurrentUserTab === 'Grocery Shop') return u.role === 'Partner' && u.category === 'Grocery Shop'; if (window.adminCurrentUserTab === 'Rider') return u.role === 'Partner' && ['Rider', 'Ride Partner'].includes(u.category); return true; });
-            if(filteredUsers.length === 0) { usersBody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-gray-400 text-xs italic">No users found in this category.</td></tr>'; return; }
+            const usersBody = document.getElementById('admin-users-body');
+            if(!usersBody) return;
+
+            if (!window.adminUsersLoaded) {
+                usersBody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-gray-400 font-bold text-xs"><i class="fa-solid fa-hand-pointer mb-2 text-2xl block opacity-30"></i>Click a tab above to load directory data.</td></tr>';
+                return;
+            }
+
+            let filteredUsers = window.adminUsersData.filter(u => {
+                if (window.adminCurrentUserTab === 'All') return true;
+                if (window.adminCurrentUserTab === 'User') return u.role === 'User';
+                if (window.adminCurrentUserTab === 'Food Owner') return u.role === 'Partner' && u.category === 'Food Owner';
+                if (window.adminCurrentUserTab === 'Grocery Shop') return u.role === 'Partner' && u.category === 'Grocery Shop';
+                if (window.adminCurrentUserTab === 'Rider') return u.role === 'Partner' && ['Rider', 'Ride Partner'].includes(u.category);
+                return true;
+            });
+
+            if(filteredUsers.length === 0) {
+                usersBody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-gray-400 text-xs italic">No users found in this category.</td></tr>';
+                return;
+            }
 
             usersBody.innerHTML = filteredUsers.map(u => {
-                let displayPhone = u.phone ? String(u.phone) : ''; if(displayPhone.includes('@')) displayPhone = displayPhone.split('@')[0] + '@...';
-                let detailsHtml = ''; let approvalControlsHtml = ''; let visibilityToggleHtml = '';
+                let displayPhone = u.phone ? String(u.phone) : '';
+                if(displayPhone.includes('@')) displayPhone = displayPhone.split('@')[0] + '@...';
+                
+                let detailsHtml = '';
+                let approvalControlsHtml = '';
+                let visibilityToggleHtml = '';
 
                 if(u.role === 'Partner') {
-                    const isApproved = u.approvalStatus === 'Approved'; const isOffline = u.shopStatus === 'Closed' || u.shopStatus === 'Offline';
-                    approvalControlsHtml = isApproved ? `<button onclick="window.adminReviewPartner('${u.phone}', 'Pending')" class="text-[9px] font-bold bg-orange-50 text-orange-600 px-2 py-1 rounded border border-orange-100 mt-1 w-full text-center">Revoke Approval</button>` : `<button onclick="window.adminReviewPartner('${u.phone}', 'Approved')" class="text-[9px] font-bold bg-emerald-50 text-emerald-600 px-2 py-1 rounded border border-emerald-100 mt-1 w-full text-center">Approve Now</button>`;
-                    visibilityToggleHtml = `<div class="mt-2 flex items-center justify-between bg-gray-50 p-1.5 rounded-lg border border-gray-100"><span class="text-[8px] font-bold text-gray-500 uppercase">App Visible</span><label class="relative inline-flex items-center cursor-pointer transform scale-75"><input type="checkbox" class="sr-only peer" ${!isOffline ? 'checked' : ''} onchange="window.adminToggleUserVisibility('${u.phone}', '${u.shopStatus}')"><div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div></label></div>`;
+                    const isApproved = u.approvalStatus === 'Approved';
+                    const isOffline = u.shopStatus === 'Closed' || u.shopStatus === 'Offline';
+                    
+                    approvalControlsHtml = isApproved 
+                        ? `<button onclick="window.adminReviewPartner('${u.phone}', 'Pending')" class="text-[9px] font-bold bg-orange-50 text-orange-600 px-2 py-1 rounded border border-orange-100 mt-1 w-full text-center">Revoke Approval</button>`
+                        : `<button onclick="window.adminReviewPartner('${u.phone}', 'Approved')" class="text-[9px] font-bold bg-emerald-50 text-emerald-600 px-2 py-1 rounded border border-emerald-100 mt-1 w-full text-center">Approve Now</button>`;
+                    
+                    visibilityToggleHtml = `
+                        <div class="mt-2 flex items-center justify-between bg-gray-50 p-1.5 rounded-lg border border-gray-100">
+                            <span class="text-[8px] font-bold text-gray-500 uppercase">App Visible</span>
+                            <label class="relative inline-flex items-center cursor-pointer transform scale-75">
+                                <input type="checkbox" class="sr-only peer" ${!isOffline ? 'checked' : ''} onchange="window.adminToggleUserVisibility('${u.phone}', '${u.shopStatus}')">
+                                <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                            </label>
+                        </div>
+                    `;
 
-                    if(['Rider', 'Ride Partner'].includes(u.category)) { detailsHtml = `<span class="font-bold text-gray-700">Vehicle:</span> ${u.carModel || 'N/A'} (${u.carNum || 'N/A'})<br/><span class="font-bold text-gray-700">Wallet:</span> ${u.walletPoints || 0} pts`; } 
-                    else { detailsHtml = `<span class="font-bold text-gray-700">Shop:</span> ${u.shopName || 'N/A'}<br/><span class="font-bold text-gray-700">Status:</span> <span class="${isApproved ? 'text-emerald-500' : 'text-orange-500'} font-bold">${u.approvalStatus || 'Pending'}</span>`; }
-                } else { detailsHtml = `Verified User`; }
+                    if(['Rider', 'Ride Partner'].includes(u.category)) {
+                        detailsHtml = `<span class="font-bold text-gray-700">Vehicle:</span> ${u.carModel || 'N/A'} (${u.carNum || 'N/A'})<br/><span class="font-bold text-gray-700">Wallet:</span> ${u.walletPoints || 0} pts`;
+                    } else {
+                        detailsHtml = `<span class="font-bold text-gray-700">Shop:</span> ${u.shopName || 'N/A'}<br/><span class="font-bold text-gray-700">Status:</span> <span class="${isApproved ? 'text-emerald-500' : 'text-orange-500'} font-bold">${u.approvalStatus || 'Pending'}</span>`;
+                    }
+                } else {
+                    detailsHtml = `Verified User`;
+                }
 
                 let actionsHtml = `<span class="cursor-pointer font-black text-gray-400 bg-gray-100 px-2 py-0.5 rounded" onclick="this.innerText='${u.pin}'" title="Click to reveal">***</span>`;
                 let editBtn = `<button onclick="window.openAdminUserEdit('${u.phone}', '${u.name.replace(/'/g, "\\'")}', '${(u.shopName || '').replace(/'/g, "\\'")}')" class="text-blue-500 hover:text-blue-700 ml-2" title="Edit User"><i class="fa-solid fa-pen"></i></button>`;
 
-                return `<tr class="hover:bg-gray-50 transition-colors border-b border-gray-50"><td class="p-3 font-bold text-xs align-top pt-4"><span class="px-2 py-0.5 rounded text-[9px] uppercase tracking-widest block text-center mb-2 ${u.role === 'Admin' ? 'bg-purple-100 text-purple-700' : u.role === 'Partner' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'}">${u.category || u.role || 'USER'}</span>${approvalControlsHtml}</td><td class="p-3 font-bold text-gray-900 text-xs align-top pt-4">${u.name || 'N/A'} ${editBtn}<br/><span class="font-mono font-normal text-[10px] text-gray-500">${displayPhone || 'N/A'}</span></td><td class="p-3 text-[10px] text-gray-500 align-top pt-4">${detailsHtml}${visibilityToggleHtml}</td><td class="p-3 text-right font-mono text-gray-900 text-xs align-top pt-4">${actionsHtml}</td></tr>`;
+                return `
+                <tr class="hover:bg-gray-50 transition-colors border-b border-gray-50">
+                    <td class="p-3 font-bold text-xs align-top pt-4">
+                        <span class="px-2 py-0.5 rounded text-[9px] uppercase tracking-widest block text-center mb-2 ${u.role === 'Admin' ? 'bg-purple-100 text-purple-700' : u.role === 'Partner' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'}">${u.category || u.role || 'USER'}</span>
+                        ${approvalControlsHtml}
+                    </td>
+                    <td class="p-3 font-bold text-gray-900 text-xs align-top pt-4">${u.name || 'N/A'} ${editBtn}<br/><span class="font-mono font-normal text-[10px] text-gray-500">${displayPhone || 'N/A'}</span></td>
+                    <td class="p-3 text-[10px] text-gray-500 align-top pt-4">${detailsHtml}${visibilityToggleHtml}</td>
+                    <td class="p-3 text-right font-mono text-gray-900 text-xs align-top pt-4">${actionsHtml}</td>
+                </tr>`;
             }).join('');
         };
 
-        window.switchOrderTab = (tab) => { window.adminCurrentOrderTab = tab; document.querySelectorAll('.admin-order-tab').forEach(el => { el.classList.remove('bg-white', 'text-gray-900', 'shadow-sm'); el.classList.add('text-gray-500'); }); const activeEl = document.getElementById(`tab-order-${tab}`); if(activeEl) { activeEl.classList.add('bg-white', 'text-gray-900', 'shadow-sm'); activeEl.classList.remove('text-gray-500'); } window.renderAdminOrders(); };
+        window.switchOrderTab = (tab) => {
+            window.adminCurrentOrderTab = tab;
+            document.querySelectorAll('.admin-order-tab').forEach(el => {
+                el.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
+                el.classList.add('text-gray-500');
+            });
+            const activeEl = document.getElementById(`tab-order-${tab}`);
+            if(activeEl) {
+                activeEl.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
+                activeEl.classList.remove('text-gray-500');
+            }
+            window.renderAdminOrders();
+        };
 
         window.renderAdminOrders = () => {
-            const adminLog = document.getElementById('admin-log-body'); if(!adminLog) return;
-            let filteredOrders = window.adminOrdersData.filter(o => { if (window.adminCurrentOrderTab === 'Live') { return !['Delivered', 'Completed', 'Rejected'].includes(o.status); } else if (window.adminCurrentOrderTab === 'Rejected') { return o.status === 'Rejected'; } else { return ['Delivered', 'Completed'].includes(o.status); } });
-            if(filteredOrders.length === 0) { adminLog.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-gray-400 text-xs italic">No ${window.adminCurrentOrderTab.toLowerCase()} orders</td></tr>`; return; }
+            const adminLog = document.getElementById('admin-log-body');
+            if(!adminLog) return;
+            
+            let filteredOrders = window.adminOrdersData.filter(o => {
+                if (window.adminCurrentOrderTab === 'Live') {
+                    return !['Delivered', 'Completed', 'Rejected'].includes(o.status);
+                } else if (window.adminCurrentOrderTab === 'Rejected') {
+                    return o.status === 'Rejected';
+                } else {
+                    return ['Delivered', 'Completed'].includes(o.status);
+                }
+            });
+
+            if(filteredOrders.length === 0) {
+                adminLog.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-gray-400 text-xs italic">No ${window.adminCurrentOrderTab.toLowerCase()} orders</td></tr>`;
+                return;
+            }
 
             let html = '';
             filteredOrders.forEach(o => {
                 const timeStr = window.formatOrderTime(o.time);
                 let statusColor = o.status === 'Placed' || o.status === 'Requested' || o.status === 'Broadcasted' ? 'text-amber-500' : o.status === 'Preparing' || o.status === 'Started' || o.status === 'Out for Delivery' ? 'text-blue-500' : o.status === 'Rejected' ? 'text-red-500' : 'text-emerald-500';
+                
                 const displayType = o.type === 'Ride' ? '🚕 Ride' : '🍔 Order';
-                const addressDisplay = o.type === 'Ride' ? `<span class="text-blue-500 font-medium">From:</span> ${o.pickup || 'N/A'}<br/><span class="text-emerald-500 font-medium">To:</span> ${o.address || 'N/A'}` : o.address || 'N/A';
+                
+                const addressDisplay = o.type === 'Ride' 
+                    ? `<span class="text-blue-500 font-medium">From:</span> ${o.pickup || 'N/A'}<br/><span class="text-emerald-500 font-medium">To:</span> ${o.address || 'N/A'}` 
+                    : o.address || 'N/A';
+
                 const itemsListHtml = o.items && o.type !== 'Ride' ? `<ul class="text-[9px] text-gray-500 list-disc pl-3 mt-1 leading-tight">${o.items.map(i => `<li>${i.name} (₹${i.price})</li>`).join('')}</ul>` : '';
 
-                html += `<tr class="hover:bg-gray-50 transition-colors border-b border-gray-50"><td class="p-3 font-mono font-bold text-[10px] text-gray-500 align-top pt-4">#${o.id.slice(-5).toUpperCase()}<br/><span class="font-sans font-medium text-[9px] text-gray-400">${timeStr}</span></td><td class="p-3 font-bold text-gray-900 text-xs align-top pt-4">${o.customer || 'Unknown'} <span class="font-normal text-[9px] text-gray-500 bg-gray-100 px-1 rounded ml-1">${displayType}</span><br/><a href="tel:${o.phone}" class="font-mono font-normal text-[10px] text-blue-600 hover:underline inline-block mt-0.5"><i class="fa-solid fa-phone text-[8px]"></i> ${o.phone || 'N/A'}</a><br/><span class="font-normal text-[10px] text-gray-500 leading-snug mt-1 inline-block"><i class="fa-solid fa-location-dot text-[8px] text-red-400"></i> ${addressDisplay}</span></td><td class="p-3 font-medium text-gray-600 text-xs align-top pt-4"><span class="font-bold text-gray-800">${o.type === 'Ride' ? (o.riderName || 'Pending') : (o.restaurantName || '-')}</span>${itemsListHtml}</td><td class="p-3 font-black text-gray-900 text-xs align-top pt-4">₹${o.total ? o.total.toFixed(2) : (o.amount || 0)}</td><td class="p-3 text-right uppercase text-[9px] font-black ${statusColor} tracking-wider align-top pt-4">${o.status}</td></tr>`;
+                html += `
+                    <tr class="hover:bg-gray-50 transition-colors border-b border-gray-50">
+                        <td class="p-3 font-mono font-bold text-[10px] text-gray-500 align-top pt-4">#${o.id.slice(-5).toUpperCase()}<br/><span class="font-sans font-medium text-[9px] text-gray-400">${timeStr}</span></td>
+                        <td class="p-3 font-bold text-gray-900 text-xs align-top pt-4">
+                            ${o.customer || 'Unknown'} <span class="font-normal text-[9px] text-gray-500 bg-gray-100 px-1 rounded ml-1">${displayType}</span><br/>
+                            <a href="tel:${o.phone}" class="font-mono font-normal text-[10px] text-blue-600 hover:underline inline-block mt-0.5"><i class="fa-solid fa-phone text-[8px]"></i> ${o.phone || 'N/A'}</a><br/>
+                            <span class="font-normal text-[10px] text-gray-500 leading-snug mt-1 inline-block"><i class="fa-solid fa-location-dot text-[8px] text-red-400"></i> ${addressDisplay}</span>
+                        </td>
+                        <td class="p-3 font-medium text-gray-600 text-xs align-top pt-4">
+                            <span class="font-bold text-gray-800">${o.type === 'Ride' ? (o.riderName || 'Pending') : (o.restaurantName || '-')}</span>
+                            ${itemsListHtml}
+                        </td>
+                        <td class="p-3 font-black text-gray-900 text-xs align-top pt-4">₹${o.total ? o.total.toFixed(2) : (o.amount || 0)}</td>
+                        <td class="p-3 text-right uppercase text-[9px] font-black ${statusColor} tracking-wider align-top pt-4">${o.status}</td>
+                    </tr>`;
             });
             adminLog.innerHTML = html;
         };
 
-        window.switchPartnerOrderTab = (tab) => { window.partnerCurrentOrderTab = tab; document.querySelectorAll('.partner-order-tab').forEach(el => { el.classList.remove('bg-gray-200', 'text-gray-900'); el.classList.add('text-gray-500'); }); const activeEl = document.getElementById(`tab-partner-order-${tab}`); if(activeEl) { activeEl.classList.add('bg-gray-200', 'text-gray-900'); activeEl.classList.remove('text-gray-500'); } window.renderPartnerOrders(); };
-
-        window.renderPartnerOrders = () => {
-            const listEl = document.getElementById('partner-orders-list'); if (!listEl || !currentUser) return;
-            let filteredOrders = window.partnerOrdersData.filter(o => { if (window.partnerCurrentOrderTab === 'Live') { return !['Delivered', 'Completed', 'Rejected'].includes(o.status); } else if (window.partnerCurrentOrderTab === 'Rejected') { return o.status === 'Rejected'; } else { return ['Delivered', 'Completed'].includes(o.status); } });
-            if (filteredOrders.length === 0) { listEl.innerHTML = `<p class="text-gray-400 font-medium text-sm text-center py-10 bg-white rounded-3xl shadow-sm border border-gray-100">No ${window.partnerCurrentOrderTab.toLowerCase()} tasks right now.</p>`; return; }
-
-            let html = '';
-            filteredOrders.forEach(o => {
-                const itemsStr = o.items ? o.items.map(i => `${i.name}`).join(', ') : ''; const timeStr = window.formatOrderTime(o.time);
-                let cardStyle = 'border-gray-100', actionButtons = ''; let paymentBadge = o.paymentMode === 'Prepaid' ? `<span class="bg-blue-100 text-blue-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">Prepaid</span>` : `<span class="bg-gray-100 text-gray-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">COD</span>`;
-                let screenshotHtml = o.paymentMode === 'Prepaid' && o.paymentScreenshot ? `<button type="button" onclick="window.viewImage('${o.paymentScreenshot}')" class="text-[10px] text-blue-600 bg-blue-50 px-2 py-1 rounded font-bold hover:bg-blue-100 transition mt-2 w-full text-left"><i class="fa-solid fa-image"></i> View Payment Screenshot</button>` : '';
-                
-                let showPhone = true;
-                if (['Rider', 'Ride Partner'].includes(currentUser.category)) { if (o.type === 'Ride') { showPhone = !['Broadcasted', 'Requested'].includes(o.status); } else { showPhone = o.riderId === currentUser.phone; } }
-                
-                let displayPhone = showPhone ? o.phone : '+91 ••••• •••••'; let phoneLink = showPhone ? `tel:${o.phone}` : 'javascript:void(0)'; let phoneClass = showPhone ? 'text-blue-600' : 'text-gray-400 cursor-not-allowed';
-                let customerInfo = `<div class="mb-3 bg-gray-50 p-2 rounded-xl border border-gray-100"><p class="text-xs font-black text-gray-800"><i class="fa-solid fa-user text-gray-400 mr-1"></i> ${o.customer}</p><p class="text-xs font-bold ${phoneClass} mt-1"><a href="${phoneLink}"><i class="fa-solid fa-phone mr-1"></i> ${displayPhone}</a></p></div>`;
-
-                if (!['Rider', 'Ride Partner'].includes(currentUser.category)) {
-                    if (o.status === 'Placed') actionButtons = `<div class="flex gap-2"><button type="button" onclick="window.acceptFoodOrder('${o.id}')" class="flex-1 bg-black text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-gray-800 transition-colors active:scale-95"><i class="fa-solid fa-check"></i> Accept</button><button type="button" onclick="window.openRejectModal('${o.id}')" class="flex-1 bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm hover:bg-red-100 transition-colors active:scale-95"><i class="fa-solid fa-xmark"></i> Reject</button></div>`;
-                    else if (o.status === 'Accepted') { cardStyle = 'border-blue-200 bg-blue-50/30'; actionButtons = `<button type="button" onclick="window.markPreparing('${o.id}')" class="w-full bg-blue-600 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-blue-700 active:scale-95">Start Preparing</button>`; }
-                    else if (o.status === 'Preparing') { cardStyle = 'border-orange-200 bg-orange-50/30'; actionButtons = `<button type="button" onclick="window.markReady('${o.id}')" class="w-full bg-orange-500 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-orange-600 active:scale-95">Mark Ready for Rider</button>`; }
-                    else if (o.status === 'Ready') { cardStyle = 'border-yellow-200 bg-yellow-50/30'; actionButtons = `<p class="text-xs font-bold text-orange-600 text-center py-2 bg-orange-50 rounded-xl">Waiting for Delivery Partner...</p><button type="button" onclick="window.markOutForDelivery('${o.id}')" class="w-full mt-2 bg-yellow-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95 border border-yellow-600">Self Deliver (Skip Rider)</button>`; }
-                    else if (o.status === 'Out for Delivery') {
-                        if (!o.riderId) { actionButtons = `<button type="button" onclick="window.markDelivered('${o.id}')" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-check-double mr-1"></i> Mark as Delivered</button>`; } 
-                        else { actionButtons = `<div class="flex gap-2 w-full mt-1"><div class="flex-1 bg-yellow-50 border border-yellow-200 text-yellow-700 py-2 rounded-xl flex flex-col items-center justify-center"><span class="text-[9px] font-black uppercase">Out for Delivery</span><span class="text-xs font-bold">${o.riderName || 'Rider'}</span></div><a href="tel:${o.riderPhone || o.riderId}" class="flex-[0.3] bg-blue-600 text-white rounded-xl flex items-center justify-center text-lg shadow-md active:scale-95"><i class="fa-solid fa-phone"></i></a></div>`; }
-                    }
-                    else if (o.status === 'Delivered') actionButtons = `<div class="w-full bg-emerald-50 text-emerald-600 py-3 rounded-xl font-bold text-sm text-center border border-emerald-100"><i class="fa-solid fa-circle-check mr-1"></i> Order Completed</div>`;
-                    else if (o.status === 'Rejected') actionButtons = `<div class="w-full bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm text-center border border-red-100"><i class="fa-solid fa-circle-xmark mr-1"></i> Order Rejected</div>`;
-                }
-
-                let ratingHtml = o.rating ? `<div class="mt-2 text-center text-xs font-bold text-yellow-600 bg-yellow-50 rounded-lg py-1 border border-yellow-100"><i class="fa-solid fa-star"></i> Customer Rated: ${o.rating} Star</div>` : '';
-
-                html += `<div class="bg-white rounded-3xl p-5 shadow-sm border ${cardStyle}"><div class="flex justify-between items-start mb-3"><div><div class="flex items-center gap-2 mb-1"><span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Order #${o.id.slice(-4).toUpperCase()}</span><span class="text-[9px] font-medium text-gray-400"><i class="fa-regular fa-clock"></i> ${timeStr}</span>${paymentBadge}</div><h4 class="font-bold text-gray-900 text-sm"><i class="fa-solid fa-map-pin text-red-500 mr-1"></i> ${o.address}</h4></div><span class="text-xl font-black text-emerald-600">₹${o.total.toFixed(2)}</span></div>${customerInfo}<div class="bg-gray-50 p-3 rounded-xl mb-4 border border-gray-100"><p class="text-xs text-gray-700 font-bold mb-1"><i class="fa-solid fa-clipboard-list text-gray-400 mr-1"></i> Items:</p><p class="text-sm text-gray-600 font-medium">${itemsStr}</p>${screenshotHtml}</div>${actionButtons}${ratingHtml}</div>`;
+        // --- PARTNER TABS LOGIC ---
+        window.switchPartnerOrderTab = (tab) => {
+            window.partnerCurrentOrderTab = tab;
+            document.querySelectorAll('.partner-order-tab').forEach(el => {
+                el.classList.remove('bg-gray-200', 'text-gray-900');
+                el.classList.add('text-gray-500');
             });
-            listEl.innerHTML = html;
+            const activeEl = document.getElementById(`tab-partner-order-${tab}`);
+            if(activeEl) {
+                activeEl.classList.add('bg-gray-200', 'text-gray-900');
+                activeEl.classList.remove('text-gray-500');
+            }
+            window.renderPartnerOrders();
         };
 
-        window.loadPromoItems = async (partnerId) => { const itemSelect = document.getElementById('admin-promo-item'); itemSelect.innerHTML = '<option value="All">All Items</option>'; if(partnerId === 'Global') return; try { const snap = await window.dbCall(getDocs(getCol('products')), 5000); const items = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(i => i.partnerId === partnerId); items.forEach(i => { itemSelect.innerHTML += `<option value="${i.id}">${i.name}</option>`; }); } catch(e) {} };
-        window.adminCreatePromo = async () => { if(currentUser.role !== 'Admin') return; const code = document.getElementById('admin-promo-code').value.trim().toUpperCase(); const discount = parseFloat(document.getElementById('admin-promo-discount').value); const type = document.getElementById('admin-promo-type').value; const selectEl = document.getElementById('admin-promo-restaurant'); const restaurantId = selectEl.value; const restaurantName = selectEl.options[selectEl.selectedIndex].text; const itemSelectEl = document.getElementById('admin-promo-item'); const itemId = itemSelectEl ? itemSelectEl.value : 'All'; const itemName = itemSelectEl && itemSelectEl.value !== 'All' ? itemSelectEl.options[itemSelectEl.selectedIndex].text : 'All Items'; if(!code || isNaN(discount) || discount <= 0) return window.showToast("Enter valid code and discount", "error"); try { await window.dbCall(addDoc(getCol('promos'), { code, discount, type, restaurantId, restaurantName: restaurantId === 'Global' ? 'All Restaurants' : restaurantName, itemId, itemName, isActive: true }), 10000); document.getElementById('admin-promo-code').value = ''; document.getElementById('admin-promo-discount').value = ''; window.showToast("Promo Created!", "success"); } catch(e) { window.showToast("Failed to create", "error"); } };
-        window.togglePromo = async (id, currentStatus) => { try { await window.dbCall(updateDoc(getDocRef('promos', id), {isActive: !currentStatus}), 10000); } catch(e){} };
-        window.deletePromo = async (id) => { try { await window.dbCall(deleteDoc(getDocRef('promos', id)), 10000); window.showToast("Promo Deleted", "info"); } catch(e){} };
-        window.adminUpdateMarquee = async () => { if(currentUser.role !== 'Admin') return; const text = document.getElementById('admin-marquee-text').value.trim(); if(!text) return window.showToast("Please enter marquee text.", "error"); const btn = document.getElementById('btn-update-marquee'); const orig = btn.innerText; btn.innerText = "Updating..."; btn.disabled = true; try { await window.dbCall(setDoc(getDocRef('settings', 'app_config'), { marqueeText: text }, { merge: true }), 10000); window.showToast("Marquee Updated!", "success"); document.getElementById('admin-marquee-text').value = ""; } catch(e) { window.showToast("Error updating marquee.", "error"); } finally { btn.innerText = orig; btn.disabled = false; } };
+        window.renderPartnerOrders = () => {
+                const listEl = document.getElementById('partner-orders-list');
+                if (!listEl || !currentUser) return;
+                
+                let filteredOrders = window.partnerOrdersData.filter(o => {
+                    if (window.partnerCurrentOrderTab === 'Live') {
+                        return !['Delivered', 'Completed', 'Rejected'].includes(o.status);
+                    } else if (window.partnerCurrentOrderTab === 'Rejected') {
+                        return o.status === 'Rejected';
+                    } else {
+                        return ['Delivered', 'Completed'].includes(o.status);
+                    }
+                });
+
+                if (filteredOrders.length === 0) {
+                    listEl.innerHTML = `<p class="text-gray-400 font-medium text-sm text-center py-10 bg-white rounded-3xl shadow-sm border border-gray-100">No ${window.partnerCurrentOrderTab.toLowerCase()} tasks right now.</p>`;
+                    return;
+                }
+
+                let html = '';
+                const isLiveTab = window.partnerCurrentOrderTab === 'Live';
+
+                filteredOrders.forEach(o => {
+                    const itemsStr = o.items ? o.items.map(i => `${i.name}`).join(', ') : '';
+                    const timeStr = window.formatOrderTime(o.time);
+                    
+                    // Emphasize live cards with an emerald glow
+                    let cardStyle = isLiveTab ? 'border-2 border-emerald-500 shadow-xl ring-4 ring-emerald-500/10 scale-[1.02] transform transition' : 'border-gray-100 shadow-sm';
+                    
+                    let actionButtons = '';
+                    let paymentBadge = o.paymentMode === 'Prepaid' ? `<span class="bg-blue-100 text-blue-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">Prepaid</span>` : `<span class="bg-gray-100 text-gray-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">COD</span>`;
+                    let screenshotHtml = o.paymentMode === 'Prepaid' && o.paymentScreenshot ? `<button type="button" onclick="window.viewImage('${o.paymentScreenshot}')" class="text-[10px] text-blue-600 bg-blue-50 px-2 py-1 rounded font-bold hover:bg-blue-100 transition mt-2 w-full text-left"><i class="fa-solid fa-image"></i> View Payment Screenshot</button>` : '';
+                    
+                    let showPhone = true;
+                    if (['Rider', 'Ride Partner'].includes(currentUser.category)) {
+                        if (o.type === 'Ride') {
+                            showPhone = !['Broadcasted', 'Requested'].includes(o.status);
+                        } else {
+                            showPhone = o.riderId === currentUser.phone;
+                        }
+                    }
+                    
+                    let displayPhone = showPhone ? o.phone : '+91 ••••• •••••';
+                    let phoneLink = showPhone ? `tel:${o.phone}` : 'javascript:void(0)';
+                    let phoneClass = showPhone ? 'text-blue-600' : 'text-gray-400 cursor-not-allowed';
+
+                    let customerInfo = `<div class="mb-3 bg-gray-50 p-3 rounded-xl border border-gray-100">
+                        <p class="text-xs font-black text-gray-800"><i class="fa-solid fa-user text-gray-400 mr-1"></i> ${o.customer}</p>
+                        <p class="text-sm font-black ${phoneClass} mt-1"><a href="${phoneLink}"><i class="fa-solid fa-phone mr-1"></i> ${displayPhone}</a></p>
+                    </div>`;
+
+                    if (['Rider', 'Ride Partner'].includes(currentUser.category)) {
+                        // Rider specific logic removed as this is index.html
+                    } else {
+                        // For partners, make action buttons very prominent in Live View
+                        if (o.status === 'Placed') {
+                            actionButtons = `
+                                <div class="flex gap-3">
+                                    <button type="button" onclick="window.acceptFoodOrder('${o.id}')" class="flex-[2] bg-emerald-500 text-white py-4 rounded-xl font-black text-lg shadow-[0_5px_15px_rgba(16,185,129,0.4)] hover:bg-emerald-600 transition-colors active:scale-95"><i class="fa-solid fa-check mr-2"></i> Accept Order</button>
+                                    <button type="button" onclick="window.openRejectModal('${o.id}')" class="flex-[1] bg-red-50 text-red-600 py-4 rounded-xl font-bold text-sm hover:bg-red-100 border border-red-200 transition-colors active:scale-95"><i class="fa-solid fa-xmark"></i> Reject</button>
+                                </div>`;
+                        }
+                        else if (o.status === 'Accepted') { cardStyle = 'border-blue-400 bg-blue-50/20 border-2 shadow-lg'; actionButtons = `<button type="button" onclick="window.markPreparing('${o.id}')" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black text-lg shadow-[0_5px_15px_rgba(37,99,235,0.4)] hover:bg-blue-700 active:scale-95">Start Preparing</button>`; }
+                        else if (o.status === 'Preparing') { cardStyle = 'border-orange-400 bg-orange-50/20 border-2 shadow-lg'; actionButtons = `<button type="button" onclick="window.markReady('${o.id}')" class="w-full bg-orange-500 text-white py-4 rounded-xl font-black text-lg shadow-[0_5px_15px_rgba(249,115,22,0.4)] hover:bg-orange-600 active:scale-95">Mark Ready for Rider</button>`; }
+                        else if (o.status === 'Ready') { cardStyle = 'border-yellow-400 bg-yellow-50/20 border-2 shadow-lg'; actionButtons = `<p class="text-sm font-black text-orange-600 text-center py-3 bg-orange-50 rounded-xl mb-3 border border-orange-200 animate-pulse">Waiting for Delivery Partner...</p><button type="button" onclick="window.markOutForDelivery('${o.id}')" class="w-full bg-gray-900 text-white py-4 rounded-xl font-black text-sm shadow-md active:scale-95">Self Deliver (Skip Rider)</button>`; }
+                        else if (o.status === 'Out for Delivery') {
+                            if (!o.riderId) { 
+                                actionButtons = `<button type="button" onclick="window.markDelivered('${o.id}')" class="w-full bg-emerald-500 text-white py-4 rounded-xl font-black text-lg shadow-md active:scale-95"><i class="fa-solid fa-check-double mr-2"></i> Mark as Delivered</button>`;
+                            } else {
+                                actionButtons = `
+                                <div class="flex gap-2 w-full mt-2">
+                                    <div class="flex-1 bg-yellow-50 border-2 border-yellow-300 text-yellow-800 py-3 rounded-xl flex flex-col items-center justify-center">
+                                        <span class="text-[10px] font-black uppercase tracking-widest">Out for Delivery</span>
+                                        <span class="text-sm font-black">${o.riderName || 'Rider'}</span>
+                                    </div>
+                                    <a href="tel:${o.riderPhone || o.riderId}" class="flex-[0.3] bg-blue-600 text-white rounded-xl flex items-center justify-center text-2xl shadow-md active:scale-95"><i class="fa-solid fa-phone"></i></a>
+                                </div>
+                                `;
+                            }
+                        }
+                        else if (o.status === 'Delivered') actionButtons = `<div class="w-full bg-emerald-50 text-emerald-600 py-3 rounded-xl font-bold text-sm text-center border border-emerald-100"><i class="fa-solid fa-circle-check mr-1"></i> Order Completed</div>`;
+                        else if (o.status === 'Rejected') actionButtons = `<div class="w-full bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm text-center border border-red-100"><i class="fa-solid fa-circle-xmark mr-1"></i> Order Rejected</div>`;
+                    }
+
+                    let ratingHtml = o.rating ? `<div class="mt-2 text-center text-xs font-bold text-yellow-600 bg-yellow-50 rounded-lg py-1 border border-yellow-100"><i class="fa-solid fa-star"></i> Customer Rated: ${o.rating} Star</div>` : '';
+
+                    html += `<div class="bg-white rounded-[2rem] p-6 shadow-sm border ${cardStyle} mb-5">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <div class="flex items-center gap-2 mb-2">
+                                        ${isLiveTab ? `<span class="bg-red-500 text-white text-[8px] font-black uppercase px-2 py-0.5 rounded-full animate-pulse tracking-widest">LIVE</span>` : ''}
+                                        <span class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Order #${o.id.slice(-4).toUpperCase()}</span>
+                                        <span class="text-[9px] font-medium text-gray-400"><i class="fa-regular fa-clock"></i> ${timeStr}</span>
+                                        ${paymentBadge}
+                                    </div>
+                                    <h4 class="font-black text-gray-900 text-base"><i class="fa-solid fa-map-pin text-red-500 mr-1"></i> ${o.address}</h4>
+                                </div>
+                                <span class="text-2xl font-black text-emerald-600">₹${o.total.toFixed(2)}</span>
+                            </div>
+                            
+                            ${customerInfo}
+                            
+                            <div class="bg-gray-50/80 p-4 rounded-2xl mb-5 border border-gray-200">
+                                <p class="text-xs text-gray-700 font-bold mb-2 uppercase tracking-wide"><i class="fa-solid fa-clipboard-list text-emerald-500 mr-1"></i> Items to prepare:</p>
+                                <p class="text-sm text-gray-800 font-medium leading-relaxed">${itemsStr}</p>
+                                ${screenshotHtml}
+                            </div>
+                            
+                            ${actionButtons}
+                            ${ratingHtml}
+                            </div>`;
+                });
+                listEl.innerHTML = html;
+        };
+
+        window.loadPromoItems = async (partnerId) => {
+            const itemSelect = document.getElementById('admin-promo-item');
+            itemSelect.innerHTML = '<option value="All">All Items</option>';
+            if(partnerId === 'Global') return;
+            
+            try {
+                const snap = await window.dbCall(getDocs(getCol('products')), 5000);
+                const items = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(i => i.partnerId === partnerId);
+                items.forEach(i => {
+                    itemSelect.innerHTML += `<option value="${i.id}">${i.name}</option>`;
+                });
+            } catch(e) {}
+        };
+
+        window.adminCreatePromo = async () => {
+            if(currentUser.role !== 'Admin') return;
+            const code = document.getElementById('admin-promo-code').value.trim().toUpperCase();
+            const discount = parseFloat(document.getElementById('admin-promo-discount').value);
+            const type = document.getElementById('admin-promo-type').value;
+            const selectEl = document.getElementById('admin-promo-restaurant');
+            const restaurantId = selectEl.value;
+            const restaurantName = selectEl.options[selectEl.selectedIndex].text;
+            const itemSelectEl = document.getElementById('admin-promo-item');
+            const itemId = itemSelectEl ? itemSelectEl.value : 'All';
+            const itemName = itemSelectEl && itemSelectEl.value !== 'All' ? itemSelectEl.options[itemSelectEl.selectedIndex].text : 'All Items';
+
+            if(!code || isNaN(discount) || discount <= 0) return window.showToast("Enter valid code and discount", "error");
+
+            try {
+                await window.dbCall(addDoc(getCol('promos'), {
+                    code, discount, type, restaurantId, restaurantName: restaurantId === 'Global' ? 'All Restaurants' : restaurantName,
+                    itemId, itemName, isActive: true
+                }), 10000);
+                document.getElementById('admin-promo-code').value = '';
+                document.getElementById('admin-promo-discount').value = '';
+                window.showToast("Promo Created!", "success");
+            } catch(e) { window.showToast("Failed to create", "error"); }
+        };
+
+        window.togglePromo = async (id, currentStatus) => {
+            try { await window.dbCall(updateDoc(getDocRef('promos', id), {isActive: !currentStatus}), 10000); } catch(e){}
+        };
+
+        window.deletePromo = async (id) => {
+            try { await window.dbCall(deleteDoc(getDocRef('promos', id)), 10000); window.showToast("Promo Deleted", "info"); } catch(e){}
+        };
+
+        window.adminUpdateMarquee = async () => {
+            if(currentUser.role !== 'Admin') return;
+            const text = document.getElementById('admin-marquee-text').value.trim();
+            if(!text) return window.showToast("Please enter marquee text.", "error");
+
+            const btn = document.getElementById('btn-update-marquee');
+            const orig = btn.innerText;
+            btn.innerText = "Updating...";
+            btn.disabled = true;
+
+            try {
+                await window.dbCall(setDoc(getDocRef('settings', 'app_config'), { marqueeText: text }, { merge: true }), 10000);
+                window.showToast("Marquee Updated!", "success");
+                document.getElementById('admin-marquee-text').value = "";
+            } catch(e) {
+                window.showToast("Error updating marquee.", "error");
+            } finally {
+                btn.innerText = orig;
+                btn.disabled = false;
+            }
+        };
 
         window.initRoleListeners = () => {
             if (!auth.currentUser || !currentUser) return;
-            unsubscribeListeners.forEach(u => u()); unsubscribeListeners = [];
+
+            unsubscribeListeners.forEach(u => u());
+            unsubscribeListeners = [];
 
             if (currentUser.role === 'Admin') {
                 const unsubOrders = onSnapshot(getCol('orders'), (snap) => {
@@ -2064,25 +2892,37 @@
                     const orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
                     orders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0));
 
-                    let newOrderIds = {}; let firstLoad = Object.keys(window.lastKnownOrders || {}).length === 0;
+                    let newOrderIds = {};
+                    let firstLoad = Object.keys(window.lastKnownOrders || {}).length === 0;
 
                     orders.forEach(o => {
                         if (o.status !== 'Rejected') {
                             if (o.type === 'Ride') revRide += (o.total || o.amount || 0);
                             else if (o.restaurantName && o.restaurantName.toLowerCase().includes('grocery')) revGrocery += (o.total || 0); 
                             else revFood += (o.total || 0);
+                            
                             count++;
                         }
+                        
                         newOrderIds[o.id] = o.status;
-                        if (!firstLoad && !window.lastKnownOrders[o.id]) { window.speakAlert("New order received"); window.showStatusPopup("New Order Alert", `Order #${o.id.slice(-5).toUpperCase()} placed for ₹${o.total}`); }
+                        if (!firstLoad && !window.lastKnownOrders[o.id]) {
+                            window.speakAlert("New order received");
+                            window.showStatusPopup("New Order Alert", `Order #${o.id.slice(-5).toUpperCase()} placed for ₹${o.total}`);
+                        }
                     });
                     
                     window.lastKnownOrders = newOrderIds;
-                    const elRev = document.getElementById('stat-rev'); if(elRev) elRev.innerText = `₹${(revFood + revGrocery + revRide).toFixed(2)}`;
-                    const elFood = document.getElementById('stat-rev-food'); if(elFood) elFood.innerText = `₹${revFood.toFixed(0)}`;
-                    const elGroc = document.getElementById('stat-rev-grocery'); if(elGroc) elGroc.innerText = `₹${revGrocery.toFixed(0)}`;
-                    const elRide = document.getElementById('stat-rev-ride'); if(elRide) elRide.innerText = `₹${revRide.toFixed(0)}`;
-                    const elOrd = document.getElementById('stat-ord'); if(elOrd) elOrd.innerText = count;
+                    
+                    const elRev = document.getElementById('stat-rev');
+                    if(elRev) elRev.innerText = `₹${(revFood + revGrocery + revRide).toFixed(2)}`;
+                    const elFood = document.getElementById('stat-rev-food');
+                    if(elFood) elFood.innerText = `₹${revFood.toFixed(0)}`;
+                    const elGroc = document.getElementById('stat-rev-grocery');
+                    if(elGroc) elGroc.innerText = `₹${revGrocery.toFixed(0)}`;
+                    const elRide = document.getElementById('stat-rev-ride');
+                    if(elRide) elRide.innerText = `₹${revRide.toFixed(0)}`;
+                    const elOrd = document.getElementById('stat-ord');
+                    if(elOrd) elOrd.innerText = count;
 
                     window.adminOrdersData = orders;
                     if(window.renderAdminOrders) window.renderAdminOrders();
@@ -2091,35 +2931,64 @@
 
                 const unsubUsers = onSnapshot(getCol('users'), (snap) => {
                     const allUsers = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                    const elUsers = document.getElementById('stat-users'); if(elUsers) elUsers.innerText = allUsers.length;
+                    const elUsers = document.getElementById('stat-users');
+                    if(elUsers) elUsers.innerText = allUsers.length;
+                    
                     const partners = allUsers.filter(u => u.role === 'Partner' && u.approvalStatus === 'Approved');
                     const promoSelect = document.getElementById('admin-promo-restaurant');
-                    if(promoSelect) { promoSelect.innerHTML = '<option value="Global">All Restaurants (Global)</option>' + partners.map(p => `<option value="${p.id}">${p.shopName || p.name}</option>`).join(''); }
-                    window.adminUsersData = allUsers; if(window.renderAdminUsers) window.renderAdminUsers();
+                    if(promoSelect) {
+                        promoSelect.innerHTML = '<option value="Global">All Restaurants (Global)</option>' + partners.map(p => `<option value="${p.id}">${p.shopName || p.name}</option>`).join('');
+                    }
+
+                    window.adminUsersData = allUsers;
+                    if(window.renderAdminUsers) window.renderAdminUsers();
                 });
                 unsubscribeListeners.push(unsubUsers);
 
                 const unsubPromos = onSnapshot(getCol('promos'), (snap) => {
-                    const promoList = document.getElementById('admin-promo-list'); if(!promoList) return;
+                    const promoList = document.getElementById('admin-promo-list');
+                    if(!promoList) return;
                     const promos = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                    if(promos.length === 0) { promoList.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-400">No promo codes active.</td></tr>'; return; }
-                    promoList.innerHTML = promos.map(p => `<tr class="border-b border-gray-50"><td class="p-2 font-bold text-gray-900 uppercase">${p.code}</td><td class="p-2 font-black text-red-600">${p.type === 'flat' ? '₹' : ''}${p.discount}${p.type === 'percentage' || !p.type ? '%' : ''}</td><td class="p-2 text-gray-500 text-[10px] truncate max-w-[100px]">${p.restaurantName || 'Global'} <br><span class="font-bold text-gray-800">${p.itemName || 'All Items'}</span></td><td class="p-2 text-right"><button onclick="window.togglePromo('${p.id}', ${p.isActive})" class="px-2 py-1 rounded text-[10px] font-bold ${p.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'}">${p.isActive ? 'Active' : 'Disabled'}</button><button onclick="window.deletePromo('${p.id}')" class="px-2 py-1 rounded text-[10px] font-bold bg-red-100 text-red-700 ml-1"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('');
+                    if(promos.length === 0) {
+                        promoList.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-400">No promo codes active.</td></tr>';
+                        return;
+                    }
+                    promoList.innerHTML = promos.map(p => `
+                        <tr class="border-b border-gray-50">
+                            <td class="p-2 font-bold text-gray-900 uppercase">${p.code}</td>
+                            <td class="p-2 font-black text-red-600">${p.type === 'flat' ? '₹' : ''}${p.discount}${p.type === 'percentage' || !p.type ? '%' : ''}</td>
+                            <td class="p-2 text-gray-500 text-[10px] truncate max-w-[100px]">${p.restaurantName || 'Global'} <br><span class="font-bold text-gray-800">${p.itemName || 'All Items'}</span></td>
+                            <td class="p-2 text-right">
+                                <button onclick="window.togglePromo('${p.id}', ${p.isActive})" class="px-2 py-1 rounded text-[10px] font-bold ${p.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'}">${p.isActive ? 'Active' : 'Disabled'}</button>
+                                <button onclick="window.deletePromo('${p.id}')" class="px-2 py-1 rounded text-[10px] font-bold bg-red-100 text-red-700 ml-1"><i class="fa-solid fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    `).join('');
                 });
                 unsubscribeListeners.push(unsubPromos);
             } 
             else if (currentUser.role === 'User') {
                 const unsubUserOrders = onSnapshot(getCol('orders'), (snap) => {
-                    const listEl = document.getElementById('user-orders-list'); if(!listEl) return;
+                    const listEl = document.getElementById('user-orders-list');
+                    if(!listEl) return;
                     const myOrders = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(o => o.phone === currentUser.phone);
-                    myOrders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0)); window.userOrderHistory = myOrders;
+                    myOrders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0));
+                    window.userOrderHistory = myOrders;
 
-                    if(myOrders.length === 0) { listEl.innerHTML = '<div class="text-center py-10 bg-white rounded-3xl border border-gray-100"><img src="https://cdn-icons-png.flaticon.com/512/1008/1008000.png" class="w-16 h-16 mx-auto mb-4 opacity-20"><p class="text-gray-400 font-medium text-sm">No orders yet. Discover great food around you!</p></div>'; return; }
+                    if(myOrders.length === 0) {
+                        listEl.innerHTML = '<div class="text-center py-10 bg-white rounded-3xl border border-gray-100"><img src="https://cdn-icons-png.flaticon.com/512/1008/1008000.png" class="w-16 h-16 mx-auto mb-4 opacity-20"><p class="text-gray-400 font-medium text-sm">No orders yet. Discover great food around you!</p></div>';
+                        return;
+                    }
 
-                    let newOrderIds = {}; let firstLoad = Object.keys(window.lastKnownOrders || {}).length === 0;
+                    let newOrderIds = {};
+                    let firstLoad = Object.keys(window.lastKnownOrders || {}).length === 0;
 
                     listEl.innerHTML = myOrders.map(o => {
                         newOrderIds[o.id] = o.status;
-                        if (!firstLoad && window.lastKnownOrders[o.id] && window.lastKnownOrders[o.id] !== o.status) { window.showStatusPopup("Order Update", `Your order #${o.id.slice(-5).toUpperCase()} is now ${o.status}`); }
+                        
+                        if (!firstLoad && window.lastKnownOrders[o.id] && window.lastKnownOrders[o.id] !== o.status) {
+                            window.showStatusPopup("Order Update", `Your order #${o.id.slice(-5).toUpperCase()} is now ${o.status}`);
+                        }
 
                         const timeStr = window.formatOrderTime(o.time);
                         let statusColor = 'text-orange-500', progressWidth = '15%', statusText = 'Pending Approval';
@@ -2132,30 +3001,81 @@
 
                         const itemsList = o.items ? o.items.map(i => i.name).join(', ') : '';
                         const paymentBadge = o.paymentMode === 'Prepaid' ? `<span class="bg-blue-100 text-blue-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">Prepaid</span>` : `<span class="bg-gray-100 text-gray-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">COD</span>`;
-                        let trackingHtml = '';
+let trackingHtml = '';
                         if (o.type === 'Ride') {
                             if (o.status === 'Requested') statusText = "Searching for Cab...";
                             if (o.status === 'Confirmed') { statusColor = 'text-blue-500'; progressWidth = '50%'; statusText = "Driver is arriving..."; }
                             if (o.status === 'Started') { statusColor = 'text-blue-500'; progressWidth = '75%'; statusText = "Ride in Progress"; }
                             if (o.status === 'Completed') { statusColor = 'text-emerald-500'; progressWidth = '100%'; statusText = "Ride Completed"; }
 
-                            trackingHtml = `<div class="mt-4 bg-blue-50 border border-blue-100 rounded-xl p-3"><p class="text-[10px] font-black uppercase text-blue-600 mb-1">Driver Details</p><div class="flex items-center gap-2"><div class="w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center text-blue-700"><i class="fa-solid fa-taxi"></i></div><div class="flex-1"><p class="text-xs font-bold text-gray-900">${o.riderName || 'Searching...'}</p><p class="text-[10px] text-gray-500">${o.riderPhone || ''}</p></div>${o.riderPhone ? `<a href="tel:${o.riderPhone}" class="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone text-xs"></i></a>` : ''}</div></div>`;
+                            trackingHtml = `
+                            <div class="mt-4 bg-blue-50 border border-blue-100 rounded-xl p-3">
+                                <p class="text-[10px] font-black uppercase text-blue-600 mb-1">Driver Details</p>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center text-blue-700"><i class="fa-solid fa-taxi"></i></div>
+                                    <div class="flex-1">
+                                        <p class="text-xs font-bold text-gray-900">${o.riderName || 'Searching...'}</p>
+                                        <p class="text-[10px] text-gray-500">${o.riderPhone || ''}</p>
+                                    </div>
+                                    ${o.riderPhone ? `<a href="tel:${o.riderPhone}" class="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone text-xs"></i></a>` : ''}
+                                </div>
+                            </div>`;
                         } else if (o.status === 'Out for Delivery') {
-                            const displayRiderName = o.riderName || 'Restaurant (Self Delivery)'; const displayRiderPhone = o.riderPhone || '';
-                            trackingHtml = `<div class="mt-4 bg-blue-50 border border-blue-100 rounded-xl p-3"><p class="text-[10px] font-black uppercase text-blue-600 mb-1">Delivery Partner</p><div class="flex items-center gap-2"><div class="w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center text-blue-700"><i class="fa-solid fa-motorcycle"></i></div><div class="flex-1"><p class="text-xs font-bold text-gray-900">${displayRiderName}</p><p class="text-[10px] text-gray-500">${displayRiderPhone}</p></div>${displayRiderPhone ? `<a href="tel:${displayRiderPhone}" class="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone text-xs"></i></a>` : ''}</div></div>`;
+                            const displayRiderName = o.riderName || 'Restaurant (Self Delivery)';
+                            const displayRiderPhone = o.riderPhone || '';
+                            trackingHtml = `
+                            <div class="mt-4 bg-blue-50 border border-blue-100 rounded-xl p-3">
+                                <p class="text-[10px] font-black uppercase text-blue-600 mb-1">Delivery Partner</p>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center text-blue-700"><i class="fa-solid fa-motorcycle"></i></div>
+                                    <div class="flex-1">
+                                        <p class="text-xs font-bold text-gray-900">${displayRiderName}</p>
+                                        <p class="text-[10px] text-gray-500">${displayRiderPhone}</p>
+                                    </div>
+                                    ${displayRiderPhone ? `<a href="tel:${displayRiderPhone}" class="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone text-xs"></i></a>` : ''}
+                                </div>
+                            </div>`;
                         } else if (o.status === 'Rejected' && o.rejectReason) {
                             trackingHtml = `<p class="text-xs font-bold text-red-500 mt-3 bg-red-50 p-2 rounded-lg border border-red-100"><i class="fa-solid fa-circle-info mr-1"></i> Reason: ${o.rejectReason}</p>`;
                         }
 
                         let ratingHtml = '';
                         if (o.status === 'Delivered' || o.status === 'Completed') {
-                            if (o.rating) { ratingHtml = `<div class="mt-3 bg-yellow-50 p-3 rounded-xl border border-yellow-100"><div class="flex items-center justify-between"><span class="text-[10px] font-bold text-yellow-700">Your Rating</span><span class="text-sm font-black text-yellow-500">${o.rating} <i class="fa-solid fa-star"></i></span></div>${o.review ? `<p class="text-xs text-gray-600 mt-1 italic">"${o.review}"</p>` : ''}</div>`; } 
-                            else { ratingHtml = `<button onclick="window.openRatingModal('${o.id}', '${o.restaurantId || o.riderId}')" class="w-full mt-3 bg-yellow-400 text-gray-900 py-3 rounded-xl font-bold text-xs shadow-sm hover:bg-yellow-500 transition-colors"><i class="fa-solid fa-star mr-1"></i> Rate Your Experience</button>`; }
+                            if (o.rating) {
+                                ratingHtml = `
+                                    <div class="mt-3 bg-yellow-50 p-3 rounded-xl border border-yellow-100">
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-[10px] font-bold text-yellow-700">Your Rating</span>
+                                            <span class="text-sm font-black text-yellow-500">${o.rating} <i class="fa-solid fa-star"></i></span>
+                                        </div>
+                                        ${o.review ? `<p class="text-xs text-gray-600 mt-1 italic">"${o.review}"</p>` : ''}
+                                    </div>
+                                `;
+                            } else {
+                                ratingHtml = `<button onclick="window.openRatingModal('${o.id}', '${o.restaurantId || o.riderId}')" class="w-full mt-3 bg-yellow-400 text-gray-900 py-3 rounded-xl font-bold text-xs shadow-sm hover:bg-yellow-500 transition-colors"><i class="fa-solid fa-star mr-1"></i> Rate Your Experience</button>`;
+                            }
                         }
 
                         let resAddressHtml = o.restaurantAddress && o.type !== 'Ride' ? `<p class="text-[9px] text-gray-500 font-medium mb-1"><i class="fa-solid fa-location-dot"></i> ${o.restaurantAddress}</p>` : '';
 
-                        return `<div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 relative overflow-hidden transition-all hover:shadow-md"><div class="flex justify-between items-start mb-2"><div><div class="flex items-center gap-2 mb-1"><span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">${o.type === 'Ride' ? '🚕 RIDE' : 'Order'} #${o.id.slice(-5).toUpperCase()}</span><span class="text-[9px] font-medium text-gray-400"><i class="fa-regular fa-clock"></i> ${timeStr}</span>${o.type !== 'Ride' ? paymentBadge : ''}</div><h4 class="font-black text-gray-900 text-base leading-none">${o.type === 'Ride' ? 'Ride Service' : (o.restaurantName || 'Gramzo Partner')}</h4></div><span class="text-xl font-black text-gray-900">₹${o.total ? o.total.toFixed(2) : (o.amount || 0)}</span></div>${resAddressHtml}${o.type !== 'Ride' ? `<p class="text-xs text-gray-500 mb-5 font-medium line-clamp-2 mt-2">${itemsList}</p>` : ''}<div class="mb-2 mt-4 bg-gray-50 p-3 rounded-xl"><div class="flex justify-between text-[10px] font-black uppercase tracking-wider mb-2 ${statusColor}"><span>${statusText}</span></div><div class="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden"><div class="bg-current h-1.5 rounded-full transition-all duration-1000 ${statusColor.replace('text-', 'bg-')}" style="width: ${progressWidth}"></div></div></div>${trackingHtml}${ratingHtml}</div>`;
+                        return `
+                            <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 relative overflow-hidden transition-all hover:shadow-md">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div>
+                                        <div class="flex items-center gap-2 mb-1"><span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">${o.type === 'Ride' ? '🚕 RIDE' : 'Order'} #${o.id.slice(-5).toUpperCase()}</span><span class="text-[9px] font-medium text-gray-400"><i class="fa-regular fa-clock"></i> ${timeStr}</span>${o.type !== 'Ride' ? paymentBadge : ''}</div>
+                                        <h4 class="font-black text-gray-900 text-base leading-none">${o.type === 'Ride' ? 'Ride Service' : (o.restaurantName || 'Gramzo Partner')}</h4>
+                                    </div>
+                                    <span class="text-xl font-black text-gray-900">₹${o.total ? o.total.toFixed(2) : (o.amount || 0)}</span>
+                                </div>
+                                ${resAddressHtml}
+                                ${o.type !== 'Ride' ? `<p class="text-xs text-gray-500 mb-5 font-medium line-clamp-2 mt-2">${itemsList}</p>` : ''}
+                                <div class="mb-2 mt-4 bg-gray-50 p-3 rounded-xl">
+                                    <div class="flex justify-between text-[10px] font-black uppercase tracking-wider mb-2 ${statusColor}"><span>${statusText}</span></div>
+                                    <div class="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden"><div class="bg-current h-1.5 rounded-full transition-all duration-1000 ${statusColor.replace('text-', 'bg-')}" style="width: ${progressWidth}"></div></div>
+                                </div>
+                                ${trackingHtml}
+                                ${ratingHtml}
+                            </div>`;
                     }).join('');
                     
                     window.lastKnownOrders = newOrderIds;
@@ -2168,51 +3088,71 @@
                         const data = docSnap.data();
                         currentUser.shopStatus = data.shopStatus || 'Offline';
                         const isCurrentlyOpen = ['Open', 'Online'].includes(currentUser.shopStatus);
-                        const statusToggleShop = document.getElementById('partner-status-toggle'); if (statusToggleShop) statusToggleShop.checked = isCurrentlyOpen;
-                        const shopStatusTxt = document.getElementById('shop-status-text'); if(shopStatusTxt) shopStatusTxt.innerText = `Currently ${isCurrentlyOpen ? 'Open' : 'Closed'}`;
+                        
+                        const statusToggleShop = document.getElementById('partner-status-toggle');
+                        if (statusToggleShop) statusToggleShop.checked = isCurrentlyOpen;
+                        
+                        const shopStatusTxt = document.getElementById('shop-status-text');
+                        if(shopStatusTxt) shopStatusTxt.innerText = `Currently ${isCurrentlyOpen ? 'Open' : 'Closed'}`;
                     }
                 });
                 unsubscribeListeners.push(userUnsub);
 
                 const orderUnsub = onSnapshot(getCol('orders'), (snap) => {
                     const orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                    
                     let relevantOrders = [];
                     if (['Food Owner', 'Grocery Shop'].includes(currentUser.category)) {
                         relevantOrders = orders.filter(o => o.restaurantId === currentUser.phone && o.type !== 'Ride');
                     }
                     relevantOrders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0));
 
-                    let newOrderIds = {}; let firstLoad = Object.keys(window.lastKnownOrders || {}).length === 0;
+                    let newOrderIds = {};
+                    let firstLoad = Object.keys(window.lastKnownOrders || {}).length === 0;
 
-                    let totalSales = 0; let netEarnings = 0; let orderCount = 0; let totalPlatformFee = 0; let totalDeliveryAndHandling = 0;
+                    let totalOrderValue = 0; 
+                    let totalPlatformFee = 0; 
+                    let totalDeliveryFee = 0; 
+                    let orderCount = 0;
 
                     relevantOrders.forEach(o => {
                         newOrderIds[o.id] = o.status;
-                        if (!firstLoad && !window.lastKnownOrders[o.id]) { window.showStatusPopup("New Task Received!", `Order #${o.id.slice(-5).toUpperCase()} needs attention.`); }
+                        if (!firstLoad && !window.lastKnownOrders[o.id]) {
+                            window.showStatusPopup("New Task Received!", `Order #${o.id.slice(-5).toUpperCase()} needs attention.`);
+                        }
 
                         if (['Delivered', 'Completed'].includes(o.status)) {
+                            // Summing up financial numbers exactly as requested
                             let orderTotal = o.total || 0;
-                            let orderSubtotal = o.subtotal || orderTotal;
-                            let orderDiscount = o.discount || 0;
-                            
-                            let subtotalAfterDiscount = orderSubtotal - orderDiscount;
-                            let platformFee = subtotalAfterDiscount * 0.10; // 10% Platform fee on discounted subtotal
-                            let partnerShare = subtotalAfterDiscount - platformFee;
-                            let customerFees = orderTotal - subtotalAfterDiscount; // What customer paid for delivery/handling
+                            let dFee = o.deliveryFee !== undefined ? o.deliveryFee : (o.total > o.subtotal ? 30 : 0); // Handle old orders without specific field
+                            let pFee = 5; // Flat 5 Rs Platform Fee
 
-                            totalSales += orderTotal;
+                            totalOrderValue += orderTotal;
+                            totalPlatformFee += pFee;
+                            totalDeliveryFee += dFee;
                             orderCount++;
-                            totalPlatformFee += platformFee;
-                            totalDeliveryAndHandling += customerFees;
-                            netEarnings += partnerShare;
                         }
                     });
                     
-                    const salesEl = document.getElementById('p-fin-sales'); if(salesEl) salesEl.innerText = `₹${totalSales.toFixed(2)}`;
-                    const countEl = document.getElementById('p-fin-count'); if(countEl) countEl.innerText = orderCount;
-                    const platFeeEl = document.getElementById('p-fin-plat-fee'); if(platFeeEl) platFeeEl.innerText = `-₹${totalPlatformFee.toFixed(2)}`;
-                    const delFeeEl = document.getElementById('p-fin-del-fee'); if(delFeeEl) delFeeEl.innerText = `-₹${totalDeliveryAndHandling.toFixed(2)}`;
-                    const netEl = document.getElementById('p-fin-net'); if(netEl) netEl.innerText = `₹${netEarnings.toFixed(2)}`;
+                    // Deductions and Net Revenue Calculation
+                    let totalDeductions = totalPlatformFee + totalDeliveryFee;
+                    let netEarnings = totalOrderValue - totalDeductions;
+
+                    // Update UI Dashboard in Settings
+                    const salesEl = document.getElementById('p-fin-sales');
+                    if(salesEl) salesEl.innerText = `₹${totalOrderValue.toFixed(2)}`;
+                    
+                    const countEl = document.getElementById('p-fin-count');
+                    if(countEl) countEl.innerText = orderCount;
+                    
+                    const platFeeEl = document.getElementById('p-fin-plat-fee');
+                    if(platFeeEl) platFeeEl.innerText = `-₹${totalPlatformFee.toFixed(2)}`;
+                    
+                    const delFeeEl = document.getElementById('p-fin-del-fee');
+                    if(delFeeEl) delFeeEl.innerText = `-₹${totalDeliveryFee.toFixed(2)}`;
+                    
+                    const netEl = document.getElementById('p-fin-net');
+                    if(netEl) netEl.innerText = `₹${netEarnings.toFixed(2)}`;
                     
                     window.lastKnownOrders = newOrderIds;
                     window.partnerOrdersData = relevantOrders;
@@ -2222,7 +3162,8 @@
 
                 if (['Food Owner', 'Grocery Shop'].includes(currentUser.category)) {
                     const catalogUnsub = onSnapshot(getCol('products'), (snap) => {
-                        const list = document.getElementById('partner-catalog-list'); if (!list) return;
+                        const list = document.getElementById('partner-catalog-list');
+                        if (!list) return;
                         const items = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(p => p.partnerId === currentUser.phone); 
                         if (items.length === 0) { list.innerHTML = '<p class="text-sm text-gray-400 text-center py-4 bg-white rounded-2xl border border-gray-100">No items added to catalogue yet.</p>'; return; }
                         list.innerHTML = items.map(p => {
@@ -2241,23 +3182,51 @@
             if (user) {
                 if (!currentUser) {
                     let sessionPhone = null;
-                    try { const sessionSnap = await window.dbCall(getDoc(getDocRef('sessions', user.uid)), 5000); if (sessionSnap && sessionSnap.exists()) { sessionPhone = sessionSnap.data().phone; } } catch(e) { console.warn("Session fetch delayed."); }
+                    try {
+                        const sessionSnap = await window.dbCall(getDoc(getDocRef('sessions', user.uid)), 5000);
+                        if (sessionSnap && sessionSnap.exists()) {
+                            sessionPhone = sessionSnap.data().phone;
+                        }
+                    } catch(e) { console.warn("Session fetch delayed."); }
+
                     if (!sessionPhone) {
                         try {
-                            const usersSnap = await window.dbCall(getDocs(getCol('users')), 5000); const matchedUser = usersSnap.docs.find(d => d.data().uid === user.uid);
-                            if (matchedUser) { sessionPhone = matchedUser.id; setDoc(getDocRef('sessions', user.uid), { phone: sessionPhone }, { merge: true }).catch(()=>{}); }
+                            const usersSnap = await window.dbCall(getDocs(getCol('users')), 5000);
+                            const matchedUser = usersSnap.docs.find(d => d.data().uid === user.uid);
+                            if (matchedUser) {
+                                sessionPhone = matchedUser.id;
+                                setDoc(getDocRef('sessions', user.uid), { phone: sessionPhone }, { merge: true }).catch(()=>{});
+                            }
                         } catch(e) { console.warn("Fallback fetch failed."); }
                     }
 
                     if (sessionPhone) {
-                        if (sessionPhone === 'admin_session' || sessionPhone === 'Gramzo_admin') { currentUser = { name: 'Super Admin', role: 'Admin', phone: 'Admin', docId: 'admin_session', uid: user.uid }; window.finalizeLoginSequence(); } 
-                        else { try { const userSnap = await window.dbCall(getDoc(getDocRef('users', sessionPhone)), 5000); if (userSnap && userSnap.exists()) { currentUser = { ...userSnap.data(), docId: sessionPhone }; window.finalizeLoginSequence(); } } catch(e) { console.warn("Profile fetch failed."); } }
+                        if (sessionPhone === 'admin_session' || sessionPhone === 'Gramzo_admin') {
+                            currentUser = { name: 'Super Admin', role: 'Admin', phone: 'Admin', docId: 'admin_session', uid: user.uid };
+                            window.finalizeLoginSequence();
+                        } else {
+                            try {
+                                const userSnap = await window.dbCall(getDoc(getDocRef('users', sessionPhone)), 5000);
+                                if (userSnap && userSnap.exists()) {
+                                    currentUser = { ...userSnap.data(), docId: sessionPhone };
+                                    window.finalizeLoginSequence(); 
+                                }
+                            } catch(e) { console.warn("Profile fetch failed."); }
+                        }
                     }
                     window.loadMarketplaceData();
                 }
-            } else { if(window.startApp) window.startApp(); }
+            } else {
+                if(window.startApp) window.startApp(); 
+            }
             
-            setTimeout(() => { const locInput = document.getElementById('user-location-input'); if (locInput && !locInput.value) { window.getCurrentLocation('user-location-input'); } }, 1500);
+            // Auto fetch location on app open if empty
+            setTimeout(() => {
+                const locInput = document.getElementById('user-location-input');
+                if (locInput && !locInput.value) {
+                    window.getCurrentLocation('user-location-input');
+                }
+            }, 1500);
         });
 
     </script>
