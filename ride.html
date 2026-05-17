@@ -3,7 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- Aggressive Cache Busting Meta Tags -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
     <title>Gramzo Rides | Book Cab & Moto</title>
+
+    <!-- AGGRESSIVE AUTO CACHE BUSTER SCRIPT -->
+    <script>
+        (function() {
+            const APP_VERSION = "11.28.2"; // Live Network Sync Update
+            
+            const storedVersion = localStorage.getItem("gramzo_ride_version");
+            if (storedVersion !== APP_VERSION) {
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                        for(let registration of registrations) { registration.unregister(); }
+                    }).catch(e => console.log(e));
+                }
+
+                localStorage.setItem("gramzo_ride_version", APP_VERSION);
+                if ('caches' in window) {
+                    caches.keys().then(names => { names.forEach(name => caches.delete(name)) });
+                }
+                let newUrl = new URL(window.location.href);
+                newUrl.searchParams.set('v', new Date().getTime());
+                window.location.replace(newUrl.toString());
+            }
+
+            setTimeout(() => {
+                fetch(window.location.pathname + '?nocache=' + new Date().getTime(), { cache: "no-store" })
+                    .then(res => res.text())
+                    .then(html => {
+                        if (!html.includes('const APP_VERSION = "' + APP_VERSION + '"')) {
+                            console.log("Newer version found. Force reloading...");
+                            localStorage.removeItem("gramzo_ride_version");
+                            if ('caches' in window) {
+                                caches.keys().then(names => { names.forEach(name => caches.delete(name)) });
+                            }
+                            let newUrl = new URL(window.location.href);
+                            newUrl.searchParams.set('v', new Date().getTime());
+                            window.location.replace(newUrl.toString());
+                        }
+                    }).catch(e => console.log("Offline mode active."));
+            }, 2000);
+        })();
+    </script>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#3B82F6"> <!-- Blue theme for rides -->
@@ -29,6 +76,7 @@
 </head>
 <body>
 
+    <!-- Header -->
     <div class="fixed top-0 w-full z-50 bg-white/95 backdrop-blur shadow-sm h-[60px] flex justify-between items-center px-4 border-b border-gray-100">
         <button type="button" onclick="location.href='index.html'" class="text-blue-600 font-bold bg-blue-50 px-3 py-1.5 rounded-lg active:scale-95 transition"><i class="fa-solid fa-arrow-left mr-1"></i> Back</button>
         <div class="font-black text-xl italic text-blue-600 absolute left-1/2 transform -translate-x-1/2 flex items-center gap-1">
@@ -53,11 +101,12 @@
             </div>
 
             <!-- Ride Specific Tabs (Book vs Scheduled) -->
-            <div class="flex gap-2 mb-4">
+            <div class="flex gap-2 mb-4" id="rider-booking-tabs">
                 <button id="tab-book-now" onclick="window.switchRideTab('Now')" class="flex-1 bg-gray-900 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition-colors">Book Ride</button>
                 <button id="tab-sched-trips" onclick="window.switchRideTab('Sched')" class="flex-1 bg-white text-gray-600 font-bold py-2.5 rounded-xl text-xs border border-gray-200 shadow-sm transition-colors">Scheduled Trips</button>
             </div>
 
+            <!-- Booking Section -->
             <div id="view-ride-now" class="space-y-4 animate-fadeIn">
                 <div class="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm">
                     <div class="relative">
@@ -79,7 +128,7 @@
                         </select>
                     </div>
 
-                    <!-- Bike & Toto Round Trip Checkbox Unlocked -->
+                    <!-- Bike & Toto Round Trip Checkbox -->
                     <label class="flex items-center gap-2 text-xs font-bold text-gray-700 mt-3 p-2 bg-gray-50 rounded-lg border border-gray-100 cursor-pointer" id="round-trip-container">
                         <input type="checkbox" id="ride-round-trip" onchange="window.resetRideCalc()" class="w-4 h-4 text-blue-600 focus:ring-blue-500 rounded border-gray-300 disabled:opacity-50" checked disabled>
                         <span id="round-trip-label-text" class="text-blue-600">Round Trip (Mandatory for Car)</span>
@@ -89,9 +138,9 @@
                     
                     <div id="ride-distance-display" class="hidden mt-4 text-center py-3 px-4 bg-blue-50 border border-blue-100 rounded-xl animate-fadeIn"></div>
 
-                    <!-- Dispatch Options (Now vs Later) -->
+                    <!-- Dispatch Options -->
                     <div id="dispatch-options" class="hidden gap-2 mt-4 animate-fadeIn flex-col sm:flex-row">
-                        <button type="button" onclick="window.requestBroadcastRide(false)" class="flex-1 bg-yellow-400 text-gray-900 font-bold py-3.5 rounded-xl shadow-md active:scale-95 text-sm border border-yellow-500"><i class="fa-solid fa-bolt mr-1"></i> Ride Now</button>
+                        <button type="button" onclick="window.requestBroadcastRide(false)" class="flex-1 bg-yellow-400 text-gray-900 font-bold py-3.5 rounded-xl shadow-md active:scale-95 text-sm border border-yellow-500"><i class="fa-solid fa-bolt mr-1"></i> Request Ride Now</button>
                         <button type="button" onclick="window.customPrompt('Schedule Ride', 'When do you need the ride? (e.g. 5:00 PM Tomorrow)').then(t => { if(t) window.requestBroadcastRide(true, t) })" class="flex-1 bg-white text-blue-600 font-bold py-3.5 rounded-xl border-2 border-blue-600 text-sm active:scale-95 hover:bg-blue-50"><i class="fa-solid fa-clock mr-1"></i> Ride Later</button>
                     </div>
                 </div>
@@ -125,9 +174,12 @@
 
             <!-- Partner Dashboard for Rides -->
             <div id="partner-dashboard-ride" class="hidden mt-6 bg-gray-900 p-5 rounded-3xl text-white shadow-xl">
-                <div class="flex justify-between items-center mb-4 border-b border-gray-700 pb-2">
-                    <h3 class="font-black text-lg text-emerald-400 flex items-center gap-2"><i class="fa-solid fa-satellite-dish animate-pulse"></i> Live Requests</h3>
-                    <span class="bg-gray-800 text-xs px-2 py-1 rounded font-bold border border-gray-700" id="partner-online-indicator">Offline</span>
+                <div class="flex justify-between items-center mb-4 border-b border-gray-700 pb-3">
+                    <h3 class="font-black text-lg text-blue-400 flex items-center gap-2" id="ride-dash-title"><i class="fa-solid fa-satellite-dish animate-pulse"></i> Live Requests</h3>
+                    <div class="flex items-center gap-2">
+                        <span id="rider-points-badge" class="hidden bg-yellow-500/20 text-yellow-400 text-[10px] uppercase tracking-widest px-2 py-1 rounded font-black border border-yellow-500/50"><i class="fa-solid fa-coins"></i> <span id="rider-points-val">0</span> Pts</span>
+                        <span class="bg-gray-800 text-[10px] px-3 py-1.5 rounded uppercase tracking-widest font-bold border border-gray-700 cursor-pointer transition active:scale-95" id="partner-online-indicator" onclick="window.toggleRiderStatus()">Offline</span>
+                    </div>
                 </div>
                 <div id="live-requests-list" class="space-y-3">
                     <p class="text-xs text-gray-500 text-center py-4">Waiting for ride requests...</p>
@@ -187,7 +239,6 @@
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, getDoc, setDoc, onSnapshot, addDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Same exact config used in index.html
         const liveFirebaseConfig = {
             apiKey: "AIzaSyCA4U4jva7HHeMP-yk1VJy3l_BBct3Gohg",
             authDomain: "gramzo.firebaseapp.com",
@@ -201,7 +252,6 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         
-        // App State Variables
         let currentUser = null;
         window.currentSelectedRideType = null;
         window.currentRideDistanceKm = null;
@@ -271,14 +321,12 @@
             const roundTripCheckbox = document.getElementById('ride-round-trip');
             const roundTripLabelText = document.getElementById('round-trip-label-text');
 
-            // Car logic: Mandatory Round Trip
             if (searchType.startsWith('Car')) {
                 roundTripCheckbox.checked = true;
                 roundTripCheckbox.disabled = true;
                 roundTripLabelText.innerText = "Round Trip (Mandatory for Car)";
                 roundTripLabelText.classList.add('text-blue-600');
             } else {
-                // Bike and Toto: Optional Round Trip
                 roundTripCheckbox.disabled = false;
                 roundTripLabelText.innerText = "Round Trip (Optional)";
                 roundTripLabelText.classList.remove('text-blue-600');
@@ -318,7 +366,6 @@
 
             let distanceData = await window.calculateDistance(pickup, drop);
             
-            // Fallback if Maps API fails
             if (!distanceData) {
                 btnCalc.innerText = origText; btnCalc.disabled = false;
                 const manualDistStr = await window.customPrompt("Calculation Failed", "Enter estimated distance in KM (e.g. 5.5):", "number");
@@ -337,14 +384,27 @@
             if (isDouble) distKm = baseKm * 2;
             window.currentRideDistanceKm = distKm;
 
+            // Updated, highly standard ride calculation
             let estFare = 0;
             let breakdownStr = "";
-            if (searchType === 'Car_Mini') { estFare = 200 + (distKm * 15); breakdownStr = "Base ₹200 + ₹15/km"; } 
-            else if (searchType === 'Car_SUV') { estFare = 200 + (distKm * 20); breakdownStr = "Base ₹200 + ₹20/km"; } 
-            else if (searchType === 'Bike') { estFare = distKm <= 5 ? 20 : 20 + ((distKm - 5) * 5); breakdownStr = "Base ₹20 (5km) + ₹5/km"; } 
-            else if (searchType === 'Toto') { estFare = distKm <= 5 ? 100 : 100 + ((distKm - 5) * 10); breakdownStr = "Base ₹100 (5km) + ₹10/km"; }
+            if (searchType === 'Car_Mini') { 
+                estFare = 150 + (Math.max(0, distKm - 5) * 15); 
+                breakdownStr = "Base ₹150 (Upto 5km) + ₹15/km"; 
+            } 
+            else if (searchType === 'Car_SUV') { 
+                estFare = 200 + (Math.max(0, distKm - 5) * 20); 
+                breakdownStr = "Base ₹200 (Upto 5km) + ₹20/km"; 
+            } 
+            else if (searchType === 'Bike') { 
+                estFare = 20 + (Math.max(0, distKm - 2) * 5); 
+                breakdownStr = "Base ₹20 (Upto 2km) + ₹5/km"; 
+            } 
+            else if (searchType === 'Toto') { 
+                estFare = 30 + (Math.max(0, distKm - 2) * 10); 
+                breakdownStr = "Base ₹30 (Upto 2km) + ₹10/km"; 
+            }
             
-            estFare = Math.max(20, Math.round(estFare));
+            estFare = Math.round(estFare);
             window.currentRideFares[searchType] = estFare;
             window.currentSelectedRideType = searchType;
 
@@ -475,41 +535,88 @@
             });
         };
 
-        const loadPartnerLiveRequests = () => {
-            if (!currentUser || !['Rider', 'Ride Partner'].includes(currentUser.category)) return;
+        window.toggleRiderStatus = async () => {
+            if(!currentUser) return;
+            const currentStatus = currentUser.shopStatus || 'Offline';
+            const newStatus = (currentStatus === 'Online' || currentStatus === 'Open') ? 'Offline' : 'Online';
+            
+            try {
+                await window.dbCall(updateDoc(doc(db, 'users', currentUser.phone), { shopStatus: newStatus }), 5000);
+                window.showToast(`You are now ${newStatus}`, "success");
+            } catch(e) { window.showToast("Failed to update status", "error"); }
+        };
 
-            const isOnline = currentUser.shopStatus === 'Online' || currentUser.shopStatus === 'Open';
-            document.getElementById('partner-online-indicator').innerText = isOnline ? 'ONLINE' : 'OFFLINE';
-            document.getElementById('partner-online-indicator').className = isOnline ? 'bg-emerald-100 text-emerald-700 text-[10px] uppercase tracking-widest px-2 py-1 rounded font-black border border-emerald-200' : 'bg-gray-800 text-gray-400 text-[10px] uppercase tracking-widest px-2 py-1 rounded font-black border border-gray-700';
+        const loadPartnerLiveRequests = () => {
+            if (!currentUser) return;
+            
+            const isAdmin = currentUser.role === 'Admin';
+            const isRider = currentUser.category && ['rider', 'ride partner', 'partner'].includes(currentUser.category.toLowerCase());
+            
+            // Check roles strictly
+            if (!isAdmin && !isRider) return;
+
+            // Make sure UI components are visible
+            document.getElementById('partner-dashboard-ride').classList.remove('hidden');
+            document.getElementById('view-ride-now').classList.add('hidden');
+            document.getElementById('rider-booking-tabs').classList.add('hidden'); // Hide booking tabs for driver
+            if(isRider) document.getElementById('rider-post-trip-section').classList.remove('hidden');
+            
+            if (isAdmin) {
+                document.getElementById('ride-dash-title').innerHTML = '<i class="fa-solid fa-shield-halved text-purple-400"></i> Admin Ride Control';
+                document.getElementById('partner-online-indicator').classList.add('hidden');
+            }
 
             onSnapshot(collection(db, 'orders'), (snap) => {
                 const list = document.getElementById('live-requests-list');
                 const orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
                 
+                const isOnline = currentUser.shopStatus === 'Online' || currentUser.shopStatus === 'Open';
+                
+                if (isRider) {
+                    document.getElementById('partner-online-indicator').innerText = isOnline ? 'ONLINE' : 'OFFLINE';
+                    document.getElementById('partner-online-indicator').className = isOnline ? 'bg-emerald-100 text-emerald-700 text-[10px] uppercase tracking-widest px-3 py-1.5 rounded font-black border border-emerald-200 cursor-pointer transition active:scale-95' : 'bg-gray-800 text-gray-400 text-[10px] uppercase tracking-widest px-3 py-1.5 rounded font-black border border-gray-700 cursor-pointer transition active:scale-95';
+                    
+                    // Display wallet points
+                    const pointsBadge = document.getElementById('rider-points-badge');
+                    pointsBadge.classList.remove('hidden');
+                    document.getElementById('rider-points-val').innerText = currentUser.walletPoints || 0;
+                }
+
                 let myType = currentUser.vehicleType || 'Bike';
                 let isCar = myType.startsWith('Car');
 
                 let liveRequests = orders.filter(o => {
                     if(o.type !== 'Ride') return false;
-                    if(o.status === 'Confirmed' || o.status === 'Started') return o.riderId === currentUser.phone; // Show my active rides
-                    if(o.status !== 'Broadcasted' && o.status !== 'Requested') return false; // Hide archived/completed
-                    if(!isOnline) return false; // Must be online to see broadcasts
                     
-                    let orderVeh = o.vehicleType || 'Bike';
-                    return isCar ? orderVeh.startsWith('Car') : orderVeh === myType;
+                    if (isAdmin) {
+                        return !['Completed', 'Delivered', 'Archived'].includes(o.status); // Admins see all active
+                    } else if (isRider) {
+                        if(o.status === 'Confirmed' || o.status === 'Started') return o.riderId === currentUser.phone; // My active rides
+                        if(o.status !== 'Broadcasted' && o.status !== 'Requested') return false; // Hide archived
+                        if(!isOnline) return false; // Must be online to see new requests
+                        
+                        let orderVeh = o.vehicleType || 'Bike';
+                        return isCar ? orderVeh.startsWith('Car') : orderVeh === myType;
+                    }
+                    return false;
                 });
 
-                if(liveRequests.length === 0) { list.innerHTML = `<div class="text-center py-6 border border-gray-700 rounded-2xl bg-gray-800/50"><i class="fa-solid fa-radar text-2xl text-gray-600 mb-2"></i><p class="text-xs text-gray-400 font-medium">${isOnline ? 'Scanning for nearby requests...' : 'Go Online to receive requests.'}</p></div>`; return; }
+                if(liveRequests.length === 0) { list.innerHTML = `<div class="text-center py-6 border border-gray-700 rounded-2xl bg-gray-800/50"><i class="fa-solid fa-radar text-2xl text-gray-600 mb-2"></i><p class="text-xs text-gray-400 font-medium">${isAdmin ? 'No active rides.' : (isOnline ? 'Scanning for nearby requests...' : 'Go Online to receive requests.')}</p></div>`; return; }
 
                 list.innerHTML = liveRequests.map(o => {
                     const isMine = o.riderId === currentUser.phone;
                     let actionHtml = '';
-                    if (o.status === 'Broadcasted' || o.status === 'Requested') {
-                        actionHtml = `<button onclick="window.driverAcceptRide('${o.id}')" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black py-3 rounded-xl shadow-md transition-colors active:scale-95 text-sm uppercase tracking-widest"><i class="fa-solid fa-check mr-1"></i> Accept Ride</button>`;
-                    } else if (isMine && o.status === 'Confirmed') {
-                        actionHtml = `<button onclick="window.markRideStarted('${o.id}')" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-black py-3 rounded-xl shadow-md transition-colors active:scale-95 text-sm uppercase tracking-widest"><i class="fa-solid fa-play mr-1"></i> Start Ride</button>`;
-                    } else if (isMine && o.status === 'Started') {
-                        actionHtml = `<button onclick="window.completeRide('${o.id}', ${o.amount})" class="w-full bg-gray-100 text-gray-900 font-black py-3 rounded-xl shadow-md active:scale-95 text-sm uppercase tracking-widest"><i class="fa-solid fa-flag-checkered mr-1"></i> End & Collect ₹${o.amount}</button>`;
+                    
+                    if (isAdmin) {
+                        actionHtml = `<button onclick="window.adminRejectRide('${o.id}')" class="w-full bg-red-500 hover:bg-red-600 text-white font-black py-3 rounded-xl shadow-md transition-colors active:scale-95 text-xs uppercase tracking-widest"><i class="fa-solid fa-ban mr-1"></i> Force Reject Ride</button>`;
+                    } else {
+                        if (o.status === 'Broadcasted' || o.status === 'Requested') {
+                            actionHtml = `<button onclick="window.driverAcceptRide('${o.id}')" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black py-3 rounded-xl shadow-md transition-colors active:scale-95 text-sm uppercase tracking-widest"><i class="fa-solid fa-check mr-1"></i> Accept Ride</button>`;
+                        } else if (isMine && o.status === 'Confirmed') {
+                            actionHtml = `<button onclick="window.markRideStarted('${o.id}')" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-black py-3 rounded-xl shadow-md transition-colors active:scale-95 text-sm uppercase tracking-widest"><i class="fa-solid fa-play mr-1"></i> Start Ride</button>`;
+                        } else if (isMine && o.status === 'Started') {
+                            actionHtml = `<button onclick="window.completeRide('${o.id}', ${o.amount})" class="w-full bg-yellow-400 text-gray-900 font-black py-3 rounded-xl shadow-md active:scale-95 text-sm uppercase tracking-widest hover:bg-yellow-500 transition"><i class="fa-solid fa-flag-checkered mr-1"></i> End & Collect ₹${o.amount}</button>`;
+                        }
                     }
 
                     return `
@@ -527,6 +634,16 @@
                     `;
                 }).join('');
             });
+        };
+
+        // ADMIN REJECT RIDE
+        window.adminRejectRide = async (orderId) => {
+            const reason = await window.customPrompt("Reject Ride", "Reason for cancellation:");
+            if(!reason) return;
+            try {
+                await window.dbCall(updateDoc(doc(db, 'orders', orderId), { status: 'Rejected', rejectReason: reason }), 10000);
+                window.showToast("Ride successfully rejected.", "success");
+            } catch(e) { window.showToast("Failed to reject ride.", "error"); }
         };
 
         window.driverAcceptRide = async (orderId) => {
@@ -548,11 +665,11 @@
         
         window.completeRide = async (orderId, amount) => {
             const deductPoints = ['Car', 'Car_Mini', 'Car_SUV'].includes(currentUser.vehicleType) ? 50 : 5;
-            const confirmed = await window.customConfirm("Complete Ride", `Confirm completion and payment collection of ₹${amount}? (-${deductPoints} Pts)`, "Complete");
+            const confirmed = await window.customConfirm("Complete Ride", `Confirm completion and payment collection of ₹${amount}? (Deducts ${deductPoints} Pts)`, "Complete Ride");
             if(!confirmed) return;
             
             if((currentUser.walletPoints || 0) < deductPoints) {
-                return window.showToast(`Insufficient Gramzo Points (${deductPoints} needed) to complete this ride. Contact Admin.`, "error");
+                return window.showToast(`Insufficient Gramzo Points (${deductPoints} needed) to complete this ride. Please contact Admin.`, "error");
             }
             
             try {
@@ -560,30 +677,34 @@
                 await window.dbCall(updateDoc(doc(db, 'orders', orderId), { status: 'Completed' }), 10000);
                 await window.dbCall(updateDoc(doc(db, 'users', currentUser.phone), { walletPoints: newPoints }), 10000);
                 currentUser.walletPoints = newPoints;
+                document.getElementById('rider-points-val').innerText = newPoints;
                 window.showToast("Ride Completed!", "success");
             } catch(e) { window.showToast("Failed to complete ride.", "error"); }
         };
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                // Same dual-check session matching as index.html
+                // Dynamically fetch active profile and auto-run load logic
                 const snap = await window.dbCall(getDoc(doc(db, 'sessions', user.uid)), 5000).catch(()=>null);
                 if (snap && snap.exists()) {
                     const sessionPhone = snap.data().phone;
                     if(sessionPhone === 'admin_session') {
                         currentUser = { name: 'Super Admin', role: 'Admin', phone: 'Admin' };
+                        document.getElementById('nav-name').innerText = 'Admin';
+                        loadPartnerLiveRequests();
                     } else {
-                        const uSnap = await window.dbCall(getDoc(doc(db, 'users', sessionPhone)), 5000).catch(()=>null);
-                        if (uSnap && uSnap.exists()) {
-                            currentUser = uSnap.data();
-                            document.getElementById('nav-name').innerText = currentUser.name.split(' ')[0];
-                            
-                            if(['Rider', 'Ride Partner'].includes(currentUser.category)) {
-                                document.getElementById('rider-post-trip-section').classList.remove('hidden');
-                                document.getElementById('partner-dashboard-ride').classList.remove('hidden');
-                                loadPartnerLiveRequests();
+                        onSnapshot(doc(db, 'users', sessionPhone), (uSnap) => {
+                            if (uSnap.exists()) {
+                                currentUser = uSnap.data();
+                                document.getElementById('nav-name').innerText = currentUser.name.split(' ')[0];
+                                
+                                // Explicitly check if rider
+                                const isRider = currentUser.category && ['rider', 'ride partner', 'partner'].includes(currentUser.category.toLowerCase());
+                                if(isRider) {
+                                    loadPartnerLiveRequests();
+                                }
                             }
-                        }
+                        });
                     }
                 }
             } else { signInAnonymously(auth); }
