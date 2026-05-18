@@ -11,19 +11,17 @@
 
     <title>Gramzo | Instant Delivery Super App</title>
 
-    <!-- AGGRESSIVE AUTO CACHE BUSTER SCRIPT -->
     <script>
         (function() {
-            const APP_VERSION = "11.29.0"; // Full Lifecycle + Profile Edit Update
+            const APP_VERSION = "12.0.0"; // Major Update: Unified Profile, Delivery Fees, FCM, & Zomato UI
             
             if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                    for(let registration of registrations) {
-                        if(!registration.active || !registration.active.scriptURL.includes('sw.js')) {
-                            registration.unregister();
-                        }
-                    }
-                }).catch(e => console.log(e));
+                // Registering the SW for Firebase Cloud Messaging
+                navigator.serviceWorker.register('/sw.js').then((registration) => {
+                    console.log('Service Worker registered with scope:', registration.scope);
+                }).catch((err) => {
+                    console.log('Service worker registration failed:', err);
+                });
             }
 
             const storedVersion = localStorage.getItem("gramzo_app_version");
@@ -36,10 +34,26 @@
                 newUrl.searchParams.set('v', new Date().getTime());
                 window.location.replace(newUrl.toString());
             }
+
+            setTimeout(() => {
+                fetch(window.location.pathname + '?nocache=' + new Date().getTime(), { cache: "no-store" })
+                    .then(res => res.text())
+                    .then(html => {
+                        if (!html.includes('const APP_VERSION = "' + APP_VERSION + '"')) {
+                            console.log("Newer version found. Force reloading...");
+                            localStorage.removeItem("gramzo_app_version");
+                            if ('caches' in window) {
+                                caches.keys().then(names => { names.forEach(name => caches.delete(name)) });
+                            }
+                            let newUrl = new URL(window.location.href);
+                            newUrl.searchParams.set('v', new Date().getTime());
+                            window.location.replace(newUrl.toString());
+                        }
+                    }).catch(e => console.log("Offline mode active."));
+            }, 2000);
         })();
     </script>
     
-    <!-- PWA Meta Tags & Manifest -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#E23744">
     <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/New%20logo%20Gramzo%20-%206%20may.png">
@@ -51,7 +65,9 @@
         window.initGoogleMap = function() {
             console.log("Google Maps API loaded.");
             window.isGoogleMapsLoaded = true;
-            if (typeof window.setupMapsFeatures === 'function') window.setupMapsFeatures();
+            if (typeof window.setupMapsFeatures === 'function') {
+                window.setupMapsFeatures();
+            }
         };
     </script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDTwDel0JxkWaXuXSHf-whhxJTkqlNlxa0&libraries=places&callback=initGoogleMap" async defer></script>
@@ -123,15 +139,10 @@
         
         .hide-scroll::-webkit-scrollbar { display: none; }
         .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        /* Premium Card Hover Effects */
-        .food-card { transition: all 0.3s ease; border: 1px solid transparent; }
-        .food-card:hover { border-color: #fca5a5; transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(226, 55, 68, 0.1); }
     </style>
 </head>
 <body>
 
-    <!-- Tall Top Bar for Auth -->
     <div class="fixed top-0 w-full z-50 bg-white/95 backdrop-blur shadow-sm h-[60px] flex justify-between items-center px-2 sm:px-4">
         
         <!-- Left Side: Partner Login -->
@@ -161,16 +172,16 @@
                 <i class="fa-solid fa-chevron-down text-[10px] text-gray-400 ml-1"></i>
             </div>
 
-            <div id="profile-menu" class="hidden absolute right-4 top-[65px] w-48 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden transform origin-top-right transition-all z-50">
+            <div id="profile-menu" class="hidden absolute right-4 top-[65px] w-52 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden transform origin-top-right transition-all z-50">
                 <div class="p-4 border-b border-gray-50 bg-gray-50/50">
                     <p id="menu-name" class="font-bold text-sm text-gray-900">Name</p>
                     <p id="menu-phone" class="text-xs text-gray-500 font-medium">Phone</p>
                 </div>
                 <div class="p-2 space-y-1">
-                    <button type="button" onclick="window.openProfileEditModal()" class="w-full text-left px-4 py-2 text-sm font-bold text-gray-700 hover:bg-gray-100 rounded-xl transition-colors flex items-center gap-2">
-                        <i class="fa-solid fa-user-pen"></i> Edit Profile
+                    <button type="button" onclick="window.openProfileEditModal()" class="w-full text-left px-4 py-2.5 text-sm font-bold text-gray-700 hover:bg-gray-50 rounded-xl transition-colors flex items-center gap-2">
+                        <i class="fa-solid fa-user-pen text-gray-400"></i> Edit Profile
                     </button>
-                    <button type="button" onclick="window.logout()" class="w-full text-left px-4 py-2 text-sm font-bold text-red-600 hover:bg-red-50 rounded-xl transition-colors flex items-center gap-2">
+                    <button type="button" onclick="window.logout()" class="w-full text-left px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 rounded-xl transition-colors flex items-center gap-2">
                         <i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out
                     </button>
                 </div>
@@ -178,9 +189,8 @@
         </div>
     </div>
 
-    <!-- Scrollable Content Starts Here -->
     <div class="pt-[60px]">
-
+        
         <!-- Marquee -->
         <div id="marquee-container" class="w-full bg-gray-900 border-b border-gray-800 z-30 overflow-hidden h-10 flex items-center shadow-lg relative">
             <div id="dynamic-marquee" class="animate-marquee inline-block whitespace-nowrap text-sm sm:text-base font-black font-bengali text-yellow-300 tracking-wide drop-shadow-md">
@@ -222,76 +232,32 @@
                     </button>
                 </div>
 
-                <!-- FOOD & GROCERY SECTION (Swiggy / Zomato Style) -->
+                <!-- FOOD & GROCERY SECTION -->
                 <div id="food-grocery-section">
-                    
-                    <div class="relative w-full search-shadow rounded-2xl bg-white border border-gray-100 flex items-center px-4 py-3.5 focus-within:ring-2 focus-within:ring-red-500/20 transition-all mt-4 mb-6">
+                    <div id="search-bar-container" class="relative w-full search-shadow rounded-2xl bg-white border border-gray-100 flex items-center px-4 py-3.5 focus-within:ring-2 focus-within:ring-red-500/20 transition-all mt-4">
                         <i class="fa-solid fa-magnifying-glass text-red-500 text-lg"></i>
                         <div class="w-px h-5 bg-gray-200 mx-3"></div>
                         <input type="text" id="global-search" onkeyup="window.handleSearchInput()" placeholder="Search items or shops..." class="w-full bg-transparent outline-none text-sm font-medium text-gray-800 placeholder-gray-400">
                     </div>
 
-                    <!-- SUB-VIEW: MARKETPLACE DISCOVERY -->
-                    <div id="discovery-container" class="space-y-8 animate-fadeIn">
-                        
-                        <!-- Top Offers Carousel -->
-                        <div id="offers-wrapper" class="hidden">
-                            <h3 class="font-black text-lg text-gray-900 tracking-tight mb-3 flex items-center gap-2"><i class="fa-solid fa-tags text-blue-500"></i> Top Offers for You</h3>
-                            <div id="offers-carousel" class="flex gap-4 overflow-x-auto pb-4 no-scrollbar px-1 snap-x">
-                                <!-- Populated by JS -->
-                            </div>
-                        </div>
-
-                        <!-- Favourites Carousel -->
-                        <div id="favs-wrapper" class="hidden">
-                            <h3 class="font-black text-lg text-gray-900 tracking-tight mb-3 flex items-center gap-2"><i class="fa-solid fa-heart text-red-500"></i> Our Favourites</h3>
-                            <div id="favs-carousel" class="flex gap-4 overflow-x-auto pb-4 no-scrollbar px-1 snap-x">
-                                <!-- Populated by JS -->
-                            </div>
-                        </div>
-
-                        <!-- All Restaurants Vertical List -->
-                        <div>
-                            <h3 class="font-black text-xl text-gray-900 tracking-tight mb-4 flex items-center gap-2" id="marketplace-title"><i class="fa-solid fa-store text-emerald-500"></i> All Restaurants</h3>
-                            <div id="rest-vertical-list" class="flex flex-col gap-4 pb-6 w-full">
-                                <div class="py-10 text-center text-gray-400 font-medium text-sm animate-pulse border border-gray-200 rounded-3xl bg-white w-full">Finding nearby places...</div>
-                            </div>
-                        </div>
+                    <!-- Category Chips for Filtering -->
+                    <div id="food-category-chips" class="hidden mt-4 flex gap-2 overflow-x-auto hide-scroll pb-2">
+                        <!-- Filled by JS when viewing a specific restaurant -->
                     </div>
 
-                    <!-- SUB-VIEW: RESTAURANT SPECIFIC MENU -->
-                    <div id="restaurant-menu-container" class="hidden animate-fadeIn pb-6">
-                        <button type="button" onclick="window.closeRestaurantMenu()" class="mb-4 flex items-center gap-2 text-sm font-bold text-gray-600 hover:text-red-600 transition"><i class="fa-solid fa-arrow-left"></i> Back to Discovery</button>
-                        
-                        <div class="bg-white rounded-[2rem] p-5 shadow-sm border border-gray-100 mb-6 relative overflow-hidden">
-                            <div class="absolute top-0 right-0 w-32 h-32 bg-red-50 rounded-bl-full -z-10"></div>
-                            <div class="flex justify-between items-start z-10 relative">
-                                <div>
-                                    <h2 class="text-2xl font-black text-gray-900 mb-1" id="menu-shop-name">Restaurant Name</h2>
-                                    <p class="text-xs text-gray-500 font-medium mb-3" id="menu-shop-address"><i class="fa-solid fa-location-dot"></i> Address goes here</p>
-                                    <div class="flex items-center gap-2">
-                                        <span id="menu-shop-status" class="text-[10px] font-black uppercase px-2 py-1 rounded bg-emerald-100 text-emerald-700">OPEN</span>
-                                        <span class="text-[10px] font-bold text-gray-500 bg-gray-100 px-2 py-1 rounded"><i class="fa-solid fa-clock text-gray-400"></i> 30-45 mins</span>
-                                    </div>
-                                </div>
-                                <div class="w-16 h-16 rounded-full overflow-hidden border-2 border-white shadow-md">
-                                    <img id="menu-shop-img" src="" class="w-full h-full object-cover">
-                                </div>
-                            </div>
+                    <div id="restaurant-carousel-wrapper">
+                        <div class="flex justify-between items-end mb-3 mt-4">
+                            <h3 class="font-black text-lg text-gray-900 tracking-tight" id="marketplace-title">Restaurants Near You</h3>
+                            <button type="button" id="btn-clear-filter" onclick="window.filterRestaurant(null, '')" class="hidden text-xs font-bold text-red-600 bg-red-50 px-3 py-1.5 rounded-full border border-red-100 shadow-sm transition hover:bg-red-100"><i class="fa-solid fa-arrow-left mr-1"></i> Back to Stores</button>
                         </div>
+                        <div id="restaurant-list-carousel" class="flex gap-4 overflow-x-auto pb-4 no-scrollbar px-1 snap-x"></div>
+                    </div>
 
-                        <div class="flex justify-between items-end mb-3">
-                            <h3 class="font-black text-xl text-gray-900 tracking-tight">Menu Items</h3>
-                        </div>
-
-                        <!-- Category Chips -->
-                        <div id="food-category-chips" class="hidden flex gap-2 overflow-x-auto hide-scroll pb-4">
-                            <!-- Filled by JS -->
-                        </div>
-
-                        <!-- Vertical List of Items -->
+                    <div>
+                        <h3 class="font-black text-xl text-gray-900 mb-4 tracking-tight" id="items-header-title">Top rated near you</h3>
+                        <!-- Redesigned Vertical list container for Zomato-style cards -->
                         <div id="market-list" class="flex flex-col gap-0 pb-6 w-full">
-                            <!-- Filled by JS -->
+                            <div class="py-10 text-center text-gray-400 font-medium text-sm animate-pulse border border-gray-200 rounded-3xl bg-white w-full">Loading catalogue...</div>
                         </div>
                     </div>
                 </div>
@@ -327,13 +293,11 @@
                             </div>
                         </div>
 
-                        <!-- Round Trip (Toto Optional, Car Mandatory) -->
                         <label class="flex items-center gap-2 text-xs font-bold text-gray-700 mt-3" id="round-trip-container" style="display: flex;">
                             <input type="checkbox" id="ride-round-trip" onchange="window.resetRideCalc()" class="w-4 h-4 text-red-600 focus:ring-red-500 rounded border-gray-300 disabled:opacity-50" checked disabled>
                             <span id="round-trip-label-text" class="text-red-600">Round Trip (Mandatory for Car)</span>
                         </label>
 
-                        <!-- T&C Checkbox -->
                         <label class="flex items-start gap-2 text-[9px] text-gray-500 mt-4 leading-tight bg-gray-50 p-2.5 rounded-lg border border-gray-200">
                             <input type="checkbox" id="ride-tnc" class="mt-0.5 shrink-0 w-3 h-3 text-red-600 focus:ring-red-500 rounded border-gray-300">
                             <span><b>Terms & Conditions:</b> Gramzo operates strictly as a technology aggregator. Any liability regarding driving, licensing, accidents, or service quality rests entirely with the service provider and the user. Gramzo assumes no corporate or legal liability.</span>
@@ -394,7 +358,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.29.0 - Full Updates</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v12.0.0 - FCM & Complete UI</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right">
                             <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
@@ -434,9 +398,9 @@
                                 <option value="Gangpur">Gangpur</option>
                                 <option value="Baranti Dam">Baranti Dam</option>
                                 <option value="Sakambari Plant">Sakambari Plant</option>
-                                <option value="Others">Others (₹30 Delivery)</option>
+                                <option value="Others">Others</option>
                             </select>
-                            <input type="text" id="cart-other-village" class="input-field !py-3 !rounded-xl mb-3 hidden" placeholder="Type your village name...">
+                            <input type="text" id="cart-other-village" oninput="window.renderCartUI()" class="input-field !py-3 !rounded-xl mb-3 hidden" placeholder="Type your village name...">
                             
                             <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2 ml-2">Detailed Delivery Address</label>
                             <div class="relative">
@@ -466,9 +430,10 @@
                             </div>
                         </div>
                         
+                        <!-- Dynamic Cart Summary rendered by JS -->
                         <div class="bg-gray-50 rounded-2xl p-4 space-y-3 border border-gray-100" id="cart-summary-totals"></div>
                         
-                        <button type="button" id="btn-place-order" onclick="window.placeOrder()" class="w-full bg-red-600 hover:bg-red-700 text-white py-4 rounded-2xl font-black text-lg shadow-lg shadow-red-600/30 active:scale-95 disabled:opacity-50">
+                        <button type="button" id="btn-place-order" onclick="window.placeOrder()" class="w-full bg-red-600 hover:bg-red-700 text-white py-4 rounded-2xl font-black text-lg shadow-lg shadow-red-600/30 active:scale-95 disabled:opacity-50 transition-all">
                             PLACE ORDER
                         </button>
                     </div>
@@ -502,7 +467,6 @@
                             </div>
                         </div>
 
-                        <!-- Current Location Broadcast -->
                         <div class="bg-white/10 rounded-2xl p-3 border border-white/20 mt-2">
                             <label class="block text-[10px] font-bold text-blue-100 uppercase tracking-wider mb-1">Broadcast Current Location</label>
                             <div class="flex gap-2">
@@ -514,7 +478,6 @@
                             </div>
                         </div>
 
-                        <!-- Master Online Toggle -->
                         <div class="flex items-center justify-between mt-4 pt-4 border-t border-white/20">
                             <p class="font-bold text-sm" id="rider-status-text">You are Offline</p>
                             <label class="relative inline-flex items-center cursor-pointer">
@@ -655,7 +618,6 @@
                     </div>
                 </div>
 
-                <!-- ADD MENU ITEM -->
                 <div id="add-product-container" class="bg-white rounded-3xl p-6 border border-gray-200 shadow-sm relative hidden mt-6">
                     <h3 class="font-black text-gray-900 mb-4" id="add-product-title">Add Menu Item</h3>
                     <div class="space-y-4 relative z-10">
@@ -679,6 +641,17 @@
                             </select>
                         </div>
 
+                        <div class="flex gap-3 mt-1">
+                            <div class="flex-1 bg-red-50 p-2 rounded-xl border border-red-100 flex items-center justify-between">
+                                <label class="text-[9px] font-bold text-red-600 uppercase">Mark Fav</label>
+                                <input type="checkbox" id="prod-is-fav" class="w-4 h-4 text-red-600">
+                            </div>
+                            <div class="flex-1 bg-yellow-50 p-2 rounded-xl border border-yellow-100 flex items-center justify-between">
+                                <label class="text-[9px] font-bold text-yellow-600 uppercase">Offer Item</label>
+                                <input type="checkbox" id="prod-is-offer" class="w-4 h-4 text-yellow-600">
+                            </div>
+                        </div>
+
                         <div class="flex gap-3">
                             <div class="flex-1">
                                 <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Prep Time (Mins)</label>
@@ -688,12 +661,6 @@
                                 <label class="text-[10px] font-bold text-blue-500 uppercase ml-1">Offer Discount %</label>
                                 <input type="number" id="prod-discount" class="input-field mt-1 border-blue-200 focus:ring-blue-500/30 focus:border-blue-500" placeholder="E.g. 15 (Optional)">
                             </div>
-                        </div>
-
-                        <!-- Mark as Favourite Checkbox -->
-                        <div class="flex items-center gap-2 mt-2 bg-red-50/50 p-2.5 rounded-xl border border-red-100">
-                            <input type="checkbox" id="prod-is-fav" class="w-4 h-4 text-red-600 rounded">
-                            <label for="prod-is-fav" class="text-[11px] font-black text-red-600 uppercase tracking-wide cursor-pointer">Mark as Favourite Item</label>
                         </div>
 
                         <div>
@@ -727,6 +694,7 @@
                     <h2 class="text-2xl font-black text-gray-900">Admin Control</h2>
                     <div class="flex gap-2">
                         <button type="button" onclick="window.initRoleListeners()" class="bg-gray-100 px-3 py-1.5 rounded-full text-xs font-bold"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+                        <button type="button" onclick="window.logout()" class="bg-red-50 text-red-600 px-3 py-1.5 rounded-full text-xs font-bold"><i class="fa-solid fa-power-off"></i> Logout</button>
                     </div>
                 </div>
                 
@@ -771,7 +739,10 @@
                         <span class="font-bold text-sm shrink-0 mr-4">Directory</span>
                         <div class="flex bg-gray-200 rounded-lg p-1 shrink-0">
                             <button id="tab-user-All" onclick="window.switchUserTab('All')" class="admin-user-tab text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold transition">All</button>
-                            <button id="tab-user-Pending" onclick="window.switchUserTab('Pending')" class="admin-user-tab text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold transition relative">Pending</button>
+                            <button id="tab-user-Pending" onclick="window.switchUserTab('Pending')" class="admin-user-tab text-orange-600 hover:text-orange-700 px-3 py-1 rounded-md text-[10px] font-bold transition flex items-center relative">
+                                Pending 
+                                <span id="admin-pending-badge" class="hidden absolute -top-1 -right-1 bg-red-600 text-white text-[8px] px-1 rounded-full">0</span>
+                            </button>
                             <button id="tab-user-User" onclick="window.switchUserTab('User')" class="admin-user-tab text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold transition">Users</button>
                             <button id="tab-user-FoodOwner" onclick="window.switchUserTab('Food Owner')" class="admin-user-tab text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold transition">Shops</button>
                             <button id="tab-user-GroceryShop" onclick="window.switchUserTab('Grocery Shop')" class="admin-user-tab text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold transition">Grocery</button>
@@ -831,6 +802,7 @@
                 <button type="button" onclick="document.getElementById('info-modal').classList.remove('active')" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div id="info-modal-body" class="text-sm text-gray-600 space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+                <!-- Content injected via JS -->
             </div>
         </div>
     </div>
@@ -891,69 +863,59 @@
         </div>
     </div>
 
-    <!-- Edit Profile Modal (Unified for Users & Partners) -->
+    <!-- User & Partner Unified Profile Edit Modal -->
     <div id="profile-edit-modal" class="modal-overlay z-[200]">
         <div class="modal-content !max-w-md">
             <div class="flex justify-between items-center mb-4 border-b pb-2">
-                <h3 class="font-black text-xl text-gray-900"><i class="fa-solid fa-user-pen text-blue-500 mr-2"></i>Edit Profile</h3>
-                <button type="button" onclick="document.getElementById('profile-edit-modal').classList.remove('active')" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition"><i class="fa-solid fa-xmark"></i></button>
+                <h3 class="font-black text-xl text-gray-900">Edit Profile</h3>
+                <button onclick="document.getElementById('profile-edit-modal').classList.remove('active')" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
-            <div class="space-y-4 max-h-[65vh] overflow-y-auto pr-2 pb-2">
-                <div id="profile-edit-msg" class="hidden text-xs text-center font-bold px-4 py-2 rounded-lg bg-blue-50 text-blue-600"></div>
-
+            <div class="space-y-3 max-h-[60vh] overflow-y-auto px-1 hide-scroll pb-2">
                 <div>
-                    <label class="block text-[10px] font-bold text-gray-500 uppercase ml-1 mb-1">Full Name</label>
-                    <input type="text" id="prof-edit-name" class="input-field !py-3">
+                    <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Full Name</label>
+                    <input id="edit-my-name" type="text" class="input-field mt-1" placeholder="Your Name">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Mobile Number (Login ID)</label>
+                    <input id="edit-my-phone" type="tel" class="input-field mt-1 border-orange-200 bg-orange-50 focus:ring-orange-400" placeholder="10-Digit Mobile" maxlength="10">
+                    <p class="text-[9px] text-orange-600 font-bold mt-1 ml-1"><i class="fa-solid fa-triangle-exclamation"></i> Changing this will require you to login again.</p>
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Password</label>
+                    <input id="edit-my-pass" type="text" class="input-field mt-1" placeholder="New Password">
                 </div>
 
-                <div>
-                    <label class="block text-[10px] font-bold text-gray-500 uppercase ml-1 mb-1">Mobile Number (Login ID)</label>
-                    <input type="tel" id="prof-edit-phone" class="input-field !py-3" maxlength="10">
-                    <p class="text-[9px] text-red-500 mt-1 ml-1 font-bold"><i class="fa-solid fa-triangle-exclamation"></i> Changing this will log you out immediately.</p>
-                </div>
-
-                <div>
-                    <label class="block text-[10px] font-bold text-gray-500 uppercase ml-1 mb-1">Password</label>
-                    <input type="text" id="prof-edit-pass" class="input-field !py-3" placeholder="Change password (optional)">
-                </div>
-
-                <!-- Partner Only Fields -->
-                <div id="prof-edit-partner-fields" class="hidden border-t border-gray-100 pt-4 mt-2 space-y-4">
-                    <p class="text-xs font-black text-gray-800 uppercase tracking-widest"><i class="fa-solid fa-store mr-1"></i> Business Details</p>
-                    
+                <div id="edit-my-partner-fields" class="hidden space-y-3 pt-3 border-t border-gray-100">
                     <div>
-                        <label class="block text-[10px] font-bold text-gray-500 uppercase ml-1 mb-1">Shop / Vehicle Name</label>
-                        <input type="text" id="prof-edit-shopname" class="input-field !py-3">
-                    </div>
-
-                    <div>
-                        <label class="block text-[10px] font-bold text-gray-500 uppercase ml-1 mb-1">Primary Location / Address</label>
-                        <div class="relative">
-                            <textarea id="prof-edit-location" rows="2" class="input-field !py-3 resize-none pr-16"></textarea>
-                            <button type="button" onclick="window.getCurrentLocation('prof-edit-location')" class="absolute right-3 top-3 text-red-500 text-xs font-bold bg-red-50 px-2 py-1 rounded border border-red-100 hover:bg-red-100">
-                                <i class="fa-solid fa-location-crosshairs"></i> GPS
-                            </button>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-[10px] font-bold text-gray-500 uppercase ml-1 mb-1">Landmark / Extra Info</label>
-                        <input type="text" id="prof-edit-landmark" class="input-field !py-3" placeholder="Near post office, etc.">
+                        <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Shop / Vehicle Name</label>
+                        <input id="edit-my-shop" type="text" class="input-field mt-1" placeholder="Business Name">
                     </div>
                 </div>
 
-                <button type="button" id="btn-save-profile" onclick="window.saveProfileEdit()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-xl font-black text-sm shadow-md transition-all active:scale-95 mt-4">
-                    SAVE CHANGES
-                </button>
+                <div class="pt-3 border-t border-gray-100">
+                    <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Default Address Location</label>
+                    <div class="relative">
+                        <textarea id="edit-my-location" rows="2" class="input-field mt-1 resize-none pr-12" placeholder="Tap GPS to locate..."></textarea>
+                        <button type="button" onclick="window.getCurrentLocation('edit-my-location')" class="absolute right-3 top-4 text-red-500 text-lg hover:text-red-700">
+                            <i class="fa-solid fa-location-crosshairs"></i>
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Landmark / House No.</label>
+                    <input id="edit-my-landmark" type="text" class="input-field mt-1" placeholder="e.g. Near Post Office">
+                </div>
             </div>
+
+            <button type="button" onclick="window.saveProfileDetails()" id="btn-save-profile" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold mt-4 shadow-md hover:bg-blue-700">Save Changes</button>
         </div>
     </div>
 
     <!-- Admin Edit User Modal -->
     <div id="admin-edit-user-modal" class="modal-overlay z-[200]">
         <div class="modal-content !max-w-xs">
-            <h3 class="font-black text-xl text-gray-900 mb-4 border-b pb-2">Edit User Base</h3>
+            <h3 class="font-black text-xl text-gray-900 mb-4 border-b pb-2">Admin User Edit</h3>
             <input type="hidden" id="edit-u-phone">
             <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Name</label>
             <input id="edit-u-name" type="text" class="input-field mb-3 !py-2.5" placeholder="User Name">
@@ -1006,7 +968,7 @@
         </div>
     </div>
 
-    <!-- Admin Modal -->
+    <!-- Admin Auth Modal -->
     <div id="admin-auth-overlay" class="modal-overlay z-[150]">
         <div class="modal-content !bg-gray-900 border border-gray-800">
             <div class="flex justify-between items-center mb-4">
@@ -1035,20 +997,11 @@
     <!-- Reject Reason Modal -->
     <div id="reject-modal" class="modal-overlay z-[200]">
         <div class="modal-content !max-w-xs">
-            <h3 class="font-black text-xl text-gray-900 mb-2">Reject Order</h3>
-            <p class="text-xs text-gray-500 mb-4">Please provide a reason for rejecting.</p>
-            <select id="reject-reason" class="input-field mb-4 bg-white" onchange="document.getElementById('reject-reason-custom').classList.toggle('hidden', this.value !== 'Other')">
-                <option value="">Select a reason</option>
-                <option value="Items out of stock">Items out of stock</option>
-                <option value="Store is closing">Store is closing</option>
-                <option value="Too busy/High volume">Too busy/High volume</option>
-                <option value="Delivery unavailable">Delivery unavailable</option>
-                <option value="Other">Other (Type below)</option>
-            </select>
-            <textarea id="reject-reason-custom" class="input-field mb-4 hidden !py-2 resize-none text-xs" rows="2" placeholder="Type the exact reason..."></textarea>
+            <h3 class="font-black text-xl text-gray-900 mb-2">Reject Task</h3>
+            <p class="text-xs text-gray-500 mb-4">You will not be assigned this request.</p>
             <div class="flex gap-2">
                 <button onclick="document.getElementById('reject-modal').classList.remove('active')" class="flex-1 bg-gray-100 text-gray-600 py-3 rounded-xl font-bold text-sm hover:bg-gray-200">Cancel</button>
-                <button onclick="window.confirmRejectOrder()" class="flex-1 bg-red-600 text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-red-700">Reject</button>
+                <button onclick="window.confirmRejectOrder()" class="flex-1 bg-red-600 text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-red-700">Confirm Reject</button>
             </div>
         </div>
     </div>
@@ -1081,7 +1034,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, getDoc, getDocs, setDoc, onSnapshot, addDoc, updateDoc, deleteDoc, serverTimestamp, arrayUnion } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, getDoc, getDocs, setDoc, onSnapshot, addDoc, updateDoc, deleteDoc, serverTimestamp, initializeFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-messaging.js";
 
         const IS_LIVE_WEBSITE = true;
@@ -1097,9 +1050,12 @@
         
         const app = initializeApp(liveFirebaseConfig);
         const auth = getAuth(app);
-        const db = getFirestore(app);
+        const db = initializeFirestore(app, { experimentalForceLongPolling: true });
+        
         let messaging = null;
-        try { messaging = getMessaging(app); } catch(e) { console.warn("FCM init failed"); }
+        if ('Notification' in window) {
+            try { messaging = getMessaging(app); } catch(e) { console.log("Messaging unsupported", e); }
+        }
 
         // GLOBALS & STATE
         let currentUser = null;
@@ -1122,7 +1078,7 @@
         window.editingProductId = null;
 
         // ADMIN TABS STATE
-        window.adminCurrentUserTab = 'All';
+        window.adminCurrentUserTab = 'Pending'; // Defaulting to pending to show off the feature
         window.adminUsersLoaded = false;
         window.adminCurrentOrderTab = 'Live';
         window.adminUsersData = [];
@@ -1136,23 +1092,40 @@
         window.currentRideDistanceKm = null;
         window.currentRideFares = { Bike: 0, Toto: 0, Car_Mini: 0, Car_SUV: 0 };
 
+        // FCM PUSH NOTIFICATION PERMISSION
+        window.requestPushPermissions = async () => {
+            if(!messaging || !currentUser) return;
+            try {
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') {
+                    const token = await getToken(messaging, { vapidKey: 'BKbZ_GfO-615f79_9m17y7D70-xU184wNnB6-a1x_k96gUuR3wZ4P4P3X_0W-8U' }); // ADD YOUR VAPID KEY HERE
+                    if (token) {
+                        await window.dbCall(updateDoc(doc(db, 'users', currentUser.phone), { fcmToken: token }), 5000);
+                        console.log("FCM Token saved");
+                    }
+                }
+            } catch (error) { console.log("Push Permission Error:", error); }
+        };
+
+        if (messaging) {
+            onMessage(messaging, (payload) => {
+                window.showStatusPopup(payload.notification?.title || "Update", payload.notification?.body || "Check your app.");
+            });
+        }
+
         window.wakeLockRef = null;
         window.requestWakeLock = async () => {
             if ('wakeLock' in navigator) {
                 try {
                     window.wakeLockRef = await navigator.wakeLock.request('screen');
                     console.log('Screen Wake Lock active');
-                } catch (err) {
-                    console.log('Wake Lock error:', err);
-                }
+                } catch (err) {}
             }
         };
 
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible') {
-                if (currentUser && ['Partner', 'Admin'].includes(currentUser.role)) {
-                    window.requestWakeLock();
-                }
+                if (currentUser && ['Partner', 'Admin'].includes(currentUser.role)) window.requestWakeLock();
                 if (document.getElementById('status-popup-modal').classList.contains('active')) {
                     window.speakAlert(document.getElementById('status-popup-desc').innerText);
                 }
@@ -1222,6 +1195,96 @@
             window.renderCartUI(); 
         };
 
+        // PROFILE EDIT LOGIC
+        window.openProfileEditModal = () => {
+            document.getElementById('profile-menu').classList.add('hidden');
+            if(!currentUser) return;
+
+            document.getElementById('edit-my-name').value = currentUser.name || '';
+            document.getElementById('edit-my-phone').value = currentUser.phone || '';
+            document.getElementById('edit-my-pass').value = currentUser.pin || '';
+            document.getElementById('edit-my-location').value = currentUser.shopAddress || currentUser.defaultAddress || '';
+            document.getElementById('edit-my-landmark').value = currentUser.landmark || '';
+
+            const pFields = document.getElementById('edit-my-partner-fields');
+            if (currentUser.role === 'Partner') {
+                pFields.classList.remove('hidden');
+                document.getElementById('edit-my-shop').value = currentUser.shopName || '';
+            } else {
+                pFields.classList.add('hidden');
+            }
+
+            document.getElementById('profile-edit-modal').classList.add('active');
+        };
+
+        window.saveProfileDetails = async () => {
+            const name = document.getElementById('edit-my-name').value.trim();
+            const phone = document.getElementById('edit-my-phone').value.trim();
+            const pass = document.getElementById('edit-my-pass').value.trim();
+            const loc = document.getElementById('edit-my-location').value.trim();
+            const landmark = document.getElementById('edit-my-landmark').value.trim();
+            const shopName = document.getElementById('edit-my-shop').value.trim();
+
+            if(!name || pass.length < 3 || !/^\d{10}$/.test(phone)) {
+                return window.showToast("Valid Name, Password, and 10-digit Mobile required.", "error");
+            }
+
+            const btn = document.getElementById('btn-save-profile');
+            const orig = btn.innerText; btn.innerText = "Saving..."; btn.disabled = true;
+
+            try {
+                let docRef = getDocRef('users', currentUser.phone);
+                
+                // If phone number changed, we must migrate the document.
+                if (phone !== currentUser.phone) {
+                    const checkNew = await window.dbCall(getDoc(getDocRef('users', phone)), 5000);
+                    if(checkNew.exists()) {
+                        btn.innerText = orig; btn.disabled = false;
+                        return window.showToast("This Mobile Number is already in use.", "error");
+                    }
+                    
+                    const newData = { ...currentUser, name, phone, pin: pass, shopAddress: loc, defaultAddress: loc, landmark };
+                    if (currentUser.role === 'Partner') newData.shopName = shopName;
+                    
+                    // Create new doc
+                    await window.dbCall(setDoc(getDocRef('users', phone), newData), 10000);
+                    // Delete old doc
+                    await window.dbCall(deleteDoc(getDocRef('users', currentUser.phone)), 10000);
+                    
+                    // Update session
+                    if(auth.currentUser) await window.dbCall(setDoc(getDocRef('sessions', auth.currentUser.uid), { phone }, { merge: true }), 3000);
+                    
+                    window.showToast("Mobile Number Updated! Please relogin.", "success");
+                    setTimeout(() => window.logout(), 2000);
+                    return;
+                }
+
+                // Normal Update
+                const updateData = { name, pin: pass, shopAddress: loc, defaultAddress: loc, landmark };
+                if (currentUser.role === 'Partner') updateData.shopName = shopName;
+
+                await window.dbCall(setDoc(docRef, updateData, {merge: true}), 10000);
+                
+                currentUser.name = name;
+                currentUser.pin = pass;
+                currentUser.shopAddress = loc;
+                currentUser.defaultAddress = loc;
+                currentUser.landmark = landmark;
+                if(currentUser.role === 'Partner') currentUser.shopName = shopName;
+
+                document.getElementById('nav-initial').innerText = name.charAt(0).toUpperCase();
+                document.getElementById('nav-name').innerText = name;
+                document.getElementById('menu-name').innerText = name;
+
+                window.showToast("Profile Updated!", "success");
+                document.getElementById('profile-edit-modal').classList.remove('active');
+            } catch(e) {
+                window.showToast("Error saving profile.", "error");
+            } finally {
+                btn.innerText = orig; btn.disabled = false;
+            }
+        };
+
         window.switchMainCategory = (cat) => {
             window.currentUserMainCategory = cat;
             
@@ -1241,7 +1304,11 @@
                 document.getElementById('ride-section').classList.add('hidden');
                 if(!currentUser) document.getElementById('partner-cta').classList.remove('hidden');
 
-                window.closeRestaurantMenu();
+                window.currentRestaurantFilter = null; 
+                window.currentFoodCategoryFilter = null;
+                document.getElementById('food-category-chips').classList.add('hidden');
+                document.getElementById('marketplace-title').innerText = cat === 'Food Owner' ? 'Restaurants Near You' : 'Grocery Stores Near You';
+                document.getElementById('btn-clear-filter').classList.add('hidden');
                 window.loadMarketplaceData();
             }
         };
@@ -1271,7 +1338,6 @@
             });
         };
 
-        // --- Notification & Voice Alert Logic ---
         window.alertAudio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
         window.alertAudio.loop = true;
 
@@ -1284,9 +1350,7 @@
                     window.speechSynthesis.speak(msg);
                 }
                 window.alertAudio.play().catch(e => console.log("Audio blocked until user clicks."));
-            } catch(e) {
-                console.error("Speech Synthesis Error:", e);
-            }
+            } catch(e) {}
         };
 
         window.stopAlertSound = () => {
@@ -1301,50 +1365,18 @@
             window.speakAlert(desc); 
         };
 
-        // --- FCM Push Notification Logic ---
-        window.requestPushPermissions = async () => {
-            try {
-                if (!("Notification" in window) || !messaging) return;
-                
-                const permission = await Notification.requestPermission();
-                if (permission === 'granted') {
-                    // 1. Manually register your custom sw.js
-                    const registration = await navigator.serviceWorker.register('/sw.js');
-                    
-                    // 2. Get the FCM Token using your sw.js registration
-                    // !!! IMPORTANT !!! REPLACE THIS VAPID KEY
-                    const token = await getToken(messaging, { 
-                        vapidKey: 'YOUR_VAPID_KEY_HERE', // <--- REPLACE THIS!!!
-                        serviceWorkerRegistration: registration 
-                    });
-                    
-                    // 3. Save the token to the user's database profile
-                    if (token && currentUser) {
-                        await window.dbCall(updateDoc(getDocRef('users', currentUser.phone), { 
-                            fcmToken: token 
-                        }), 5000);
-                        console.log("FCM Push Token registered successfully.");
-                    }
-                }
-            } catch (error) {
-                console.warn("Push Permission Error:", error);
+        window.sendAlert = (title, body) => {
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification(title, { 
+                    body: body, 
+                    icon: 'https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/New%20logo%20Gramzo%20-%206%20may.png' 
+                });
+            } else {
+                window.showToast(title + " - " + body, "info");
             }
         };
 
-        if (messaging) {
-            onMessage(messaging, (payload) => {
-                console.log("Foreground Message:", payload);
-                const title = payload.notification?.title || "Gramzo Update";
-                const body = payload.notification?.body || "Check your app for updates.";
-                window.showStatusPopup(title, body);
-            });
-        }
-
-        window.sendAlert = (title, body) => {
-            window.showToast(title + " - " + body, "info");
-        };
-
-        // --- Rating System ---
+        // RATING SYSTEM
         window.openRatingModal = (orderId, partnerId) => {
             window.currentRatingOrderId = orderId;
             window.currentRatingPartnerId = partnerId;
@@ -1386,112 +1418,6 @@
                 document.getElementById('rating-modal').classList.remove('active');
             } catch(e) {
                 window.showToast("Failed to submit rating.", "error");
-            } finally {
-                btn.innerText = origTxt; btn.disabled = false;
-            }
-        };
-
-        // --- Edit Profile System ---
-        window.openProfileEditModal = () => {
-            if (!currentUser) return;
-            document.getElementById('profile-menu').classList.add('hidden');
-            
-            document.getElementById('profile-edit-msg').classList.add('hidden');
-            document.getElementById('prof-edit-name').value = currentUser.name || '';
-            document.getElementById('prof-edit-phone').value = currentUser.phone || '';
-            document.getElementById('prof-edit-pass').value = ''; // Don't show current pass for security
-            
-            if (currentUser.role === 'Partner') {
-                document.getElementById('prof-edit-partner-fields').classList.remove('hidden');
-                document.getElementById('prof-edit-shopname').value = currentUser.shopName || '';
-                document.getElementById('prof-edit-location').value = currentUser.shopAddress || '';
-                document.getElementById('prof-edit-landmark').value = currentUser.landmark || '';
-            } else {
-                document.getElementById('prof-edit-partner-fields').classList.add('hidden');
-            }
-            
-            document.getElementById('profile-edit-modal').classList.add('active');
-        };
-
-        window.saveProfileEdit = async () => {
-            if (!currentUser) return;
-            
-            const msgEl = document.getElementById('profile-edit-msg');
-            msgEl.classList.remove('hidden');
-            msgEl.className = "text-xs text-center font-bold px-4 py-2 rounded-lg bg-blue-50 text-blue-600 mb-4 block";
-            msgEl.innerText = "Saving changes...";
-            
-            const newName = document.getElementById('prof-edit-name').value.trim();
-            const newPhone = document.getElementById('prof-edit-phone').value.trim();
-            const newPass = document.getElementById('prof-edit-pass').value.trim();
-            
-            if (!newName) return msgEl.innerText = "Name cannot be empty.";
-            if (!/^\d{10}$/.test(newPhone)) return msgEl.innerText = "Please enter a valid 10-digit mobile number.";
-
-            let updateData = { name: newName };
-            if (newPass) updateData.pin = newPass;
-
-            if (currentUser.role === 'Partner') {
-                updateData.shopName = document.getElementById('prof-edit-shopname').value.trim();
-                updateData.shopAddress = document.getElementById('prof-edit-location').value.trim();
-                updateData.landmark = document.getElementById('prof-edit-landmark').value.trim();
-                
-                if (['Rider', 'Ride Partner'].includes(currentUser.category)) {
-                    updateData.carModel = updateData.shopName;
-                }
-            }
-
-            const btn = document.getElementById('btn-save-profile');
-            const origTxt = btn.innerText;
-            btn.innerText = "SAVING..."; btn.disabled = true;
-
-            try {
-                // If phone number changed, we have to transfer the document
-                if (newPhone !== currentUser.phone) {
-                    const snap = await window.dbCall(getDoc(getDocRef('users', newPhone)), 5000);
-                    if (snap.exists()) throw new Error("This mobile number is already registered.");
-                    
-                    const newUserData = { ...currentUser, ...updateData, phone: newPhone };
-                    
-                    // Create new doc
-                    await window.dbCall(setDoc(getDocRef('users', newPhone), newUserData), 10000);
-                    // Update auth session
-                    if (auth.currentUser) {
-                        await window.dbCall(setDoc(getDocRef('sessions', auth.currentUser.uid), { phone: newPhone }, { merge: true }), 5000);
-                    }
-                    // Delete old doc
-                    await window.dbCall(deleteDoc(getDocRef('users', currentUser.phone)), 10000);
-                    
-                    currentUser = { ...newUserData, docId: newPhone };
-                    msgEl.className = "text-xs text-center font-bold px-4 py-2 rounded-lg bg-emerald-50 text-emerald-600 mb-4 block";
-                    msgEl.innerText = "Mobile number changed successfully!";
-                    
-                    // If phone changed, force a reload to clean state
-                    setTimeout(() => window.location.reload(), 1500);
-                    return;
-                } else {
-                    // Just a standard update
-                    await window.dbCall(updateDoc(getDocRef('users', currentUser.phone), updateData), 10000);
-                    currentUser = { ...currentUser, ...updateData };
-                    msgEl.className = "text-xs text-center font-bold px-4 py-2 rounded-lg bg-emerald-50 text-emerald-600 mb-4 block";
-                    msgEl.innerText = "Profile updated successfully!";
-                }
-
-                // Update UI visually
-                document.getElementById('nav-name').innerText = currentUser.name;
-                document.getElementById('menu-name').innerText = currentUser.name;
-                document.getElementById('menu-phone').innerText = currentUser.phone;
-                if(currentUser.shopName) document.getElementById('hub-name-val').innerText = currentUser.shopName;
-                if(currentUser.shopAddress) {
-                    document.getElementById('hub-address-val').innerText = currentUser.shopAddress;
-                    document.getElementById('hub-address-row').classList.remove('hidden');
-                }
-
-                setTimeout(() => document.getElementById('profile-edit-modal').classList.remove('active'), 1500);
-
-            } catch (e) {
-                msgEl.className = "text-xs text-center font-bold px-4 py-2 rounded-lg bg-red-50 text-red-600 mb-4 block";
-                msgEl.innerText = e.message || "Failed to save profile.";
             } finally {
                 btn.innerText = origTxt; btn.disabled = false;
             }
@@ -1615,8 +1541,7 @@
             initInput('ride-pickup');
             initInput('ride-drop');
             initInput('partner-ride-location');
-            initInput('prof-edit-location');
-            initInput('cart-address');
+            initInput('edit-my-location');
         };
 
         if (window.isGoogleMapsLoaded) window.setupMapsFeatures();
@@ -1815,7 +1740,6 @@
                     total: fare,
                     waitingTime: window.currentRideWaitTime || 0,
                     distanceStr: window.currentRideDistStr || '',
-                    rejectedBy: [], // Array to track riders who rejected this broadcast
                     time: serverTimestamp() 
                 }), 15000);
 
@@ -1846,18 +1770,6 @@
                 }), 10000);
                 window.showToast("Ride Accepted! Assigned to you.", "success");
             } catch(e) { window.showToast("Failed to accept ride.", "error"); }
-        };
-
-        window.rejectRideBroadcast = async (orderId) => {
-            try {
-                // Add current rider's phone to the rejectedBy array so it disappears for them
-                await window.dbCall(updateDoc(getDocRef('orders', orderId), {
-                    rejectedBy: arrayUnion(currentUser.phone)
-                }), 5000);
-                window.showToast("Ride ignored.", "info");
-            } catch (e) {
-                window.showToast("Error ignoring ride.", "error");
-            }
         };
 
         window.markRideStarted = async (orderId) => {
@@ -1949,7 +1861,6 @@
             }
         };
 
-        // --- AUTH UI ---
         window.openAuthModal = (role = 'User') => {
             currentAuthRole = role;
             document.getElementById('auth-overlay').classList.add('active');
@@ -1970,15 +1881,19 @@
         window.togglePartnerRegFields = () => {
             const cat = document.getElementById('reg-partner-category').value;
             const restFields = document.getElementById('reg-restaurant-fields');
+            const riderFields = document.getElementById('reg-rider-fields');
             const rideFields = document.getElementById('reg-ride-fields');
             
             restFields.classList.add('hidden');
+            if(riderFields) riderFields.classList.add('hidden');
             if(rideFields) rideFields.classList.add('hidden');
 
             if (['Food Owner', 'Grocery Shop'].includes(cat)) {
                 restFields.classList.remove('hidden');
             } else if (cat === 'Rider' || cat === 'Ride Partner') {
                 if(rideFields) rideFields.classList.remove('hidden');
+            } else {
+                if(riderFields) riderFields.classList.remove('hidden');
             }
         };
 
@@ -2088,6 +2003,10 @@
                             shopName = carModel;
                             
                             if(!carNum || !carModel) throw new Error("Vehicle Registration and Model are required.");
+                        } else {
+                            const vehEl = document.getElementById('reg-vehicle-name');
+                            shopName = vehEl ? vehEl.value.trim() : 'Delivery Rider';
+                            shopAddress = '';
                         }
                     }
 
@@ -2144,8 +2063,8 @@
 
         window.finalizeLoginSequence = () => {
             window.closeAuthModal();
-            window.requestPushPermissions(); // Attempt to initialize FCM Push
-
+            window.requestPushPermissions();
+            
             window.showToast(`Welcome back, ${currentUser.name.split(' ')[0]}!`, "success");
 
             document.getElementById('btn-partner-login-trigger').classList.add('hidden');
@@ -2267,7 +2186,198 @@
             window.loadMarketplaceData();
         };
 
-        // --- ZOMATO / SWIGGY STYLE UI RENDERING ---
+        window.renderProducts = (items) => {
+            const listEl = document.getElementById('market-list');
+            const chipsEl = document.getElementById('food-category-chips');
+            
+            if (!listEl) return;
+            
+            if (currentRestaurantFilter && window.currentUserMainCategory === 'Food Owner' && chipsEl) {
+                const restaurantItems = items.filter(i => i.partnerId === currentRestaurantFilter);
+                const uniqueCategories = [...new Set(restaurantItems.map(i => i.category || 'Others'))];
+                
+                if (uniqueCategories.length > 0) {
+                    chipsEl.classList.remove('hidden');
+                    chipsEl.innerHTML = `
+                        <button onclick="window.filterFoodCategory(null)" class="px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors border ${!currentFoodCategoryFilter ? 'bg-red-600 text-white border-red-600 shadow-md' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}">All Menu</button>
+                        ${uniqueCategories.map(cat => `
+                            <button onclick="window.filterFoodCategory('${cat}')" class="px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors border ${currentFoodCategoryFilter === cat ? 'bg-red-600 text-white border-red-600 shadow-md' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}">${cat}</button>
+                        `).join('')}
+                    `;
+                } else {
+                    chipsEl.classList.add('hidden');
+                }
+            } else if (chipsEl) {
+                chipsEl.classList.add('hidden');
+            }
+            
+            const filtered = items.filter(i => {
+                const pShopCat = i.shopCategory || 'Food Owner'; 
+                if (pShopCat !== window.currentUserMainCategory) return false;
+                if (currentRestaurantFilter && i.partnerId !== currentRestaurantFilter) return false;
+                if (currentFoodCategoryFilter && i.category !== currentFoodCategoryFilter) return false;
+                
+                if (window.currentSearchQuery) {
+                    const q = window.currentSearchQuery.toLowerCase();
+                    return i.name.toLowerCase().includes(q) || (i.shopName && i.shopName.toLowerCase().includes(q));
+                }
+                return true;
+            });
+            
+            listEl.className = "flex flex-col gap-0 pb-6 w-full";
+
+            if (filtered.length === 0) {
+                listEl.innerHTML = '<div class="w-full py-10 text-center text-gray-400 font-medium text-sm border border-gray-200 rounded-3xl bg-white mt-4 shadow-sm">No items found. Try a different search.</div>';
+                return;
+            }
+
+            const generateProductCard = (p) => {
+                const hasVariants = p.variants && p.variants.length > 0;
+                const isClosed = p.shopStatus === 'Closed' || p.shopStatus === 'Offline';
+                const isOutOfStock = p.inStock === false;
+                const itemDiscount = p.discount || 0;
+                const originalPrice = hasVariants ? p.variants[0].price : p.price;
+                const finalPrice = itemDiscount > 0 ? Math.round(originalPrice - (originalPrice * itemDiscount / 100)) : originalPrice;
+                
+                const priceHtml = itemDiscount > 0 
+                    ? `<span class="text-[15px] font-black text-gray-900">₹${finalPrice}</span> <span class="text-xs text-gray-400 line-through ml-1">₹${originalPrice}</span> <span class="text-[9px] font-black text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded ml-2">${itemDiscount}% OFF</span>`
+                    : `<span class="text-[15px] font-black text-gray-900">₹${finalPrice}</span>`;
+                
+                let addressDisplay = !currentRestaurantFilter ? `
+                    <div class="mt-2">
+                        <p class="text-[10px] font-bold text-gray-600 truncate bg-gray-50 border border-gray-100 inline-block px-2 py-1 rounded"><i class="fa-solid fa-store text-red-500 mr-1"></i> ${p.shopName || 'Gramzo Partner'}</p>
+                    </div>
+                ` : '';
+                
+                let qtyDisplay = '';
+                if (hasVariants) {
+                    const options = p.variants.map((v, i) => `<option value="${i}" data-price="${v.price}">${v.qty}</option>`).join('');
+                    qtyDisplay = `
+                        <div class="my-2 w-full max-w-[160px]">
+                            <select onchange="window.updatePriceDisplay(this, 'price-container-${p.id}', ${itemDiscount})" id="sel-${p.id}" class="text-xs bg-white border border-gray-200 rounded-lg p-1.5 outline-none focus:ring-1 ring-red-500 font-medium text-gray-800 w-full shadow-sm">
+                                ${options}
+                            </select>
+                        </div>
+                    `;
+                } else if (p.qty) {
+                    qtyDisplay = `<p class="text-[11px] font-medium text-gray-500 mt-1">${p.qty}</p>`;
+                }
+
+                let actionHtml = '';
+                if (isClosed) {
+                    actionHtml = `<div class="bg-gray-100 text-gray-500 text-[10px] font-black text-center py-2 rounded-xl w-full shadow-sm border border-gray-200 uppercase tracking-widest">CLOSED</div>`;
+                } else if (isOutOfStock) {
+                    actionHtml = `<div class="bg-gray-100 text-gray-500 text-[10px] font-black text-center py-2 rounded-xl w-full shadow-sm border border-gray-200 uppercase tracking-widest">NO STOCK</div>`;
+                } else {
+                    actionHtml = `<button type="button" onclick="${hasVariants ? `window.addToCartVariant('${p.id}', '${p.name.replace(/'/g, "\\'")}', '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}', ${itemDiscount})` : `window.addToCartStandard('${p.id}', '${p.name.replace(/'/g, "\\'")}', ${finalPrice}, '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')`}" class="w-full bg-white text-red-600 border border-gray-200 shadow-md py-2 rounded-lg font-black text-[13px] hover:bg-gray-50 transition-colors active:scale-95 uppercase tracking-wide relative">ADD ${hasVariants ? '<span class="absolute top-1 right-1 text-[10px]">+</span>' : ''}</button>`;
+                }
+
+                return `
+                    <div class="bg-white border-b border-gray-100 flex py-5 relative w-full gap-4 ${isClosed || isOutOfStock ? 'opacity-60 grayscale-[0.5]' : ''}">
+                        <div class="flex-1 flex flex-col justify-start">
+                            ${p.isOffer ? '<span class="text-[9px] font-black text-blue-600 uppercase tracking-wider mb-1"><i class="fa-solid fa-tag"></i> Special Offer</span>' : ''}
+                            <h4 class="font-bold text-gray-900 text-base leading-tight mb-1">${p.name}</h4>
+                            <div class="flex items-center flex-wrap mb-1" id="price-container-${p.id}">
+                                ${priceHtml}
+                            </div>
+                            ${qtyDisplay}
+                            ${addressDisplay}
+                            ${p.prepTime ? `<p class="text-[10px] font-medium text-gray-500 mt-2"><i class="fa-regular fa-clock mr-1"></i>${p.prepTime} mins to prepare</p>` : ''}
+                        </div>
+                        
+                        <div class="w-[120px] shrink-0 relative flex flex-col items-center">
+                            <div class="w-[120px] h-[120px] rounded-2xl overflow-hidden bg-gray-50 shadow-sm border border-gray-100 relative">
+                                <img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x300/f3f4f6/a1a1aa?text=Image'">
+                                ${p.category && !currentRestaurantFilter ? `<span class="absolute top-0 left-0 bg-white/90 backdrop-blur text-[8px] font-black uppercase px-1.5 py-0.5 rounded-br-lg text-gray-800 shadow-sm">${p.category}</span>` : ''}
+                            </div>
+                            <div class="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-[85%] z-10">
+                                ${actionHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            };
+
+            if (currentRestaurantFilter) {
+                // Grouping Logic specific for single restaurant view
+                const favs = filtered.filter(p => p.isFavourite);
+                const offers = filtered.filter(p => p.isOffer && !p.isFavourite);
+                const rest = filtered.filter(p => !p.isFavourite && !p.isOffer);
+                
+                const cats = {};
+                rest.forEach(p => {
+                    const c = p.category || 'Others';
+                    if(!cats[c]) cats[c] = [];
+                    cats[c].push(p);
+                });
+
+                let finalHtml = '';
+                if (favs.length > 0) {
+                    finalHtml += `<div class="mt-4 bg-red-50/50 p-4 rounded-3xl border border-red-50 mb-6"><h3 class="font-black text-lg text-red-700 mb-2 flex items-center"><i class="fa-solid fa-heart text-red-500 mr-2"></i> Recommended</h3>${favs.map(generateProductCard).join('')}</div>`;
+                }
+                if (offers.length > 0) {
+                    finalHtml += `<div class="mt-4 bg-blue-50/50 p-4 rounded-3xl border border-blue-50 mb-6"><h3 class="font-black text-lg text-blue-700 mb-2 flex items-center"><i class="fa-solid fa-tags text-blue-500 mr-2"></i> Today's Offers</h3>${offers.map(generateProductCard).join('')}</div>`;
+                }
+                
+                Object.keys(cats).forEach(catName => {
+                    finalHtml += `<div class="mt-6"><h3 class="font-black text-lg text-gray-900 mb-2">${catName}</h3>${cats[catName].map(generateProductCard).join('')}</div>`;
+                });
+
+                listEl.innerHTML = finalHtml;
+            } else {
+                listEl.innerHTML = filtered.map(generateProductCard).join('');
+            }
+        };
+
+        window.renderRestaurants = (restaurants) => {
+            const carousel = document.getElementById('restaurant-list-carousel');
+            if (!carousel) return;
+            if(restaurants.length === 0) {
+                carousel.innerHTML = '<p class="text-xs text-gray-400 p-4">No stores available.</p>';
+                return;
+            }
+            
+            carousel.innerHTML = restaurants.map(r => {
+                const isActive = currentRestaurantFilter === r.partnerId;
+                const isOffline = r.shopStatus === 'Closed' || r.shopStatus === 'Offline';
+                return `
+                <div class="cursor-pointer group shrink-0 flex flex-col items-center w-20 relative" onclick="window.filterRestaurant('${r.partnerId}', '${r.shopName.replace(/'/g, "\\'")}')">
+                    <div class="w-16 h-16 rounded-full flex items-center justify-center overflow-hidden mb-2 shadow-sm border-2 transition-all ${isActive ? 'border-red-500 scale-105' : 'border-gray-100 bg-gray-50 group-hover:border-red-300'} ${isOffline ? 'grayscale opacity-60' : ''}">
+                        <img src="${r.image}" class="w-full h-full object-cover" alt="${r.shopName}">
+                    </div>
+                    ${isOffline ? `<span class="absolute top-0 right-0 bg-red-500 text-white text-[8px] font-black px-1 rounded uppercase shadow-sm">Closed</span>` : ''}
+                    <p class="text-center text-[10px] font-bold ${isActive ? 'text-red-600' : 'text-gray-700'} leading-tight w-full px-1 truncate ${isOffline ? 'opacity-60' : ''}">${r.shopName}</p>
+                </div>`;
+            }).join('');
+        };
+
+        const extractRestaurants = async () => {
+            try {
+                const snap = await window.dbCall(getDocs(getCol('users')), 5000);
+                const approvedPartners = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(u => u.role === 'Partner' && u.approvalStatus === 'Approved' && (u.category === window.currentUserMainCategory));
+                
+                const prodSnap = await window.dbCall(getDocs(getCol('products')), 5000);
+                const products = prodSnap.docs.map(d => d.data());
+
+                const uniqueRestaurants = approvedPartners.map(p => {
+                    const shopProducts = products.filter(prod => prod.partnerId === p.id);
+                    let displayImage = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&q=80';
+                    if (window.currentUserMainCategory === 'Grocery Shop') displayImage = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=200&q=80';
+                    if (shopProducts.length > 0 && shopProducts[0].image) displayImage = shopProducts[0].image;
+
+                    return {
+                        partnerId: p.id, 
+                        shopName: p.shopName || p.name, 
+                        shopAddress: p.shopAddress || '',
+                        shopStatus: p.shopStatus || 'Closed',
+                        image: displayImage
+                    };
+                });
+                
+                window.renderRestaurants(uniqueRestaurants);
+            } catch(e) { console.error("Error extracting restaurants:", e); }
+        };
+
         window.loadMarketplaceData = () => {
             const defaultMarqueeText = "🚀 খাবার অর্ডার করুন ঘরে বসেই - সার্ভিস অ্যাভেইলেবল অ্যাট কোটালডিহ, কিনাইডিহ, লালগড়, কৃষ্ণপুর, রামচন্দ্রপুর, মুরাডি, গাংপুর, যশপুর এবং বড়ন্তি এলাকা 🚀";
 
@@ -2290,264 +2400,40 @@
                 }
             }, (err) => console.error(err));
 
-            onSnapshot(getCol('products'), async (snap) => {
+            onSnapshot(getCol('products'), (snap) => {
                 let items = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
-                
-                try {
-                    const uSnap = await window.dbCall(getDocs(getCol('users')), 5000);
-                    const approvedPartners = uSnap.docs.map(d => ({id: d.id, ...d.data()})).filter(u => u.role === 'Partner' && u.approvalStatus === 'Approved' && (u.category === window.currentUserMainCategory));
-
-                    const uniqueRestaurants = approvedPartners.map(p => {
-                        const shopProducts = items.filter(prod => prod.partnerId === p.id);
-                        let displayImage = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80';
-                        if (window.currentUserMainCategory === 'Grocery Shop') displayImage = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=80';
-                        if (shopProducts.length > 0 && shopProducts[0].image) displayImage = shopProducts[0].image;
-
-                        return {
-                            partnerId: p.id, 
-                            shopName: p.shopName || p.name, 
-                            shopAddress: p.shopAddress || '',
-                            shopStatus: p.shopStatus || 'Closed',
-                            image: displayImage,
-                            itemCount: shopProducts.length
-                        };
-                    }).filter(r => r.itemCount > 0); // Only show restaurants that have items
-                    
-                    window.renderDiscoveryUI(uniqueRestaurants, items);
-                    
-                    // If a restaurant is open, render its specific menu
-                    if (currentRestaurantFilter) {
-                        window.renderSpecificRestaurantMenu(currentRestaurantFilter, items, uniqueRestaurants);
-                    }
-
-                } catch(e) { console.error("Error formatting marketplace data:", e); }
-
+                extractRestaurants();
+                renderProducts(items);
             }, (err) => {
-                if (err.code === 'permission-denied') window.showToast("Firebase Permissions Denied!", "error");
+                if (err.code === 'permission-denied') window.showToast("Firebase Permissions Denied! Check rules.", "error");
             });
         };
 
-        window.renderDiscoveryUI = (restaurants, allItems) => {
-            const isMenuOpen = document.getElementById('restaurant-menu-container').classList.contains('hidden') === false;
-            if (isMenuOpen && currentRestaurantFilter) return; // Don't redraw discovery if inside a menu
+        window.filterRestaurant = (partnerId, shopName) => {
+            const marquee = document.getElementById('marquee-container');
+            const carouselWrapper = document.getElementById('restaurant-carousel-wrapper');
 
-            // 1. Process Offers
-            const offerItems = allItems.filter(i => (i.shopCategory || 'Food Owner') === window.currentUserMainCategory && i.discount > 0 && i.shopStatus !== 'Closed' && i.inStock !== false);
-            const offersWrapper = document.getElementById('offers-wrapper');
-            const offersCarousel = document.getElementById('offers-carousel');
-            
-            if (offerItems.length > 0) {
-                offersWrapper.classList.remove('hidden');
-                offersCarousel.innerHTML = offerItems.map(p => window.createSmallItemCard(p)).join('');
+            if (currentRestaurantFilter === partnerId || partnerId === null) {
+                currentRestaurantFilter = null;
+                currentFoodCategoryFilter = null;
+                document.getElementById('marketplace-title').innerText = window.currentUserMainCategory === 'Food Owner' ? 'Restaurants Near You' : 'Grocery Stores Near You';
+                document.getElementById('items-header-title').innerText = 'Top rated near you';
+                document.getElementById('btn-clear-filter').classList.add('hidden');
+                
+                if(marquee) marquee.style.display = 'flex';
+                if(carouselWrapper) carouselWrapper.classList.remove('hidden');
             } else {
-                offersWrapper.classList.add('hidden');
+                currentRestaurantFilter = partnerId;
+                currentFoodCategoryFilter = null;
+                document.getElementById('marketplace-title').innerText = `${shopName}`;
+                document.getElementById('items-header-title').innerText = `Menu Details`;
+                document.getElementById('btn-clear-filter').classList.remove('hidden');
+                
+                if(marquee) marquee.style.display = 'none';
+                if(carouselWrapper) carouselWrapper.classList.add('hidden');
             }
-
-            // 2. Process Favourites
-            const favItems = allItems.filter(i => (i.shopCategory || 'Food Owner') === window.currentUserMainCategory && i.isFavourite === true && i.shopStatus !== 'Closed' && i.inStock !== false);
-            const favsWrapper = document.getElementById('favs-wrapper');
-            const favsCarousel = document.getElementById('favs-carousel');
-            
-            if (favItems.length > 0) {
-                favsWrapper.classList.remove('hidden');
-                favsCarousel.innerHTML = favItems.map(p => window.createSmallItemCard(p)).join('');
-            } else {
-                favsWrapper.classList.add('hidden');
-            }
-
-            // 3. Process All Restaurants
-            const restListEl = document.getElementById('rest-vertical-list');
-            
-            // Search Filtering
-            let filteredRests = restaurants;
-            if (window.currentSearchQuery) {
-                const q = window.currentSearchQuery.toLowerCase();
-                filteredRests = restaurants.filter(r => r.shopName.toLowerCase().includes(q) || allItems.some(i => i.partnerId === r.partnerId && i.name.toLowerCase().includes(q)));
-            }
-
-            if (filteredRests.length === 0) {
-                restListEl.innerHTML = '<div class="w-full py-10 text-center text-gray-400 font-medium text-sm border border-gray-200 rounded-3xl bg-white mt-4">No places found. Try a different search.</div>';
-            } else {
-                restListEl.innerHTML = filteredRests.map(r => {
-                    const isClosed = r.shopStatus === 'Closed' || r.shopStatus === 'Offline';
-                    return `
-                    <div onclick="window.openRestaurant('${r.partnerId}')" class="food-card bg-white rounded-3xl p-4 shadow-sm border border-gray-100 flex gap-4 cursor-pointer relative overflow-hidden ${isClosed ? 'opacity-60 grayscale-[0.5]' : ''}">
-                        <div class="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl overflow-hidden shadow-inner shrink-0 relative">
-                            <img src="${r.image}" class="w-full h-full object-cover">
-                            ${isClosed ? `<div class="absolute inset-0 bg-black/50 flex items-center justify-center"><span class="text-white text-[10px] font-black uppercase tracking-widest">Closed</span></div>` : ''}
-                        </div>
-                        <div class="flex flex-col justify-center flex-1">
-                            <h4 class="font-black text-lg text-gray-900 leading-tight mb-1 truncate">${r.shopName}</h4>
-                            <p class="text-xs text-gray-500 font-medium line-clamp-1 mb-2"><i class="fa-solid fa-location-dot text-gray-300"></i> ${r.shopAddress || 'Local Partner'}</p>
-                            <div class="flex items-center gap-3">
-                                <span class="bg-emerald-100 text-emerald-700 text-[10px] font-black px-2 py-1 rounded flex items-center gap-1"><i class="fa-solid fa-star"></i> 4.5</span>
-                                <span class="text-[10px] font-bold text-gray-500"><i class="fa-solid fa-clock text-gray-400"></i> 35-45 min</span>
-                            </div>
-                        </div>
-                        <div class="absolute bottom-4 right-4 w-8 h-8 bg-red-50 text-red-600 rounded-full flex items-center justify-center">
-                            <i class="fa-solid fa-chevron-right text-sm"></i>
-                        </div>
-                    </div>`;
-                }).join('');
-            }
-        };
-
-        window.createSmallItemCard = (p) => {
-            const originalPrice = (p.variants && p.variants.length > 0) ? p.variants[0].price : (p.price || 0);
-            const discount = p.discount || 0;
-            const finalPrice = discount > 0 ? Math.round(originalPrice - (originalPrice * discount / 100)) : originalPrice;
-            
-            return `
-            <div onclick="window.openRestaurant('${p.partnerId}')" class="food-card cursor-pointer shrink-0 w-36 sm:w-40 bg-white rounded-2xl border border-gray-100 shadow-sm relative overflow-hidden flex flex-col">
-                <div class="w-full h-24 sm:h-28 bg-gray-100 relative">
-                    <img src="${p.image}" class="w-full h-full object-cover">
-                    ${discount > 0 ? `<div class="absolute top-0 right-0 bg-blue-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-bl-lg shadow-sm">${discount}% OFF</div>` : ''}
-                </div>
-                <div class="p-3 flex flex-col flex-1">
-                    <h4 class="font-bold text-gray-900 text-xs leading-tight mb-1 line-clamp-2 flex-1">${p.name}</h4>
-                    <div class="flex items-center justify-between mt-auto pt-1">
-                        <span class="font-black text-sm text-emerald-600">₹${finalPrice}</span>
-                        <div class="w-6 h-6 bg-red-50 rounded-full flex items-center justify-center text-red-600"><i class="fa-solid fa-plus text-[10px]"></i></div>
-                    </div>
-                </div>
-            </div>`;
-        };
-
-        window.openRestaurant = (partnerId) => {
-            currentRestaurantFilter = partnerId;
-            currentFoodCategoryFilter = null;
-            document.getElementById('discovery-container').classList.add('hidden');
-            document.getElementById('restaurant-menu-container').classList.remove('hidden');
-            document.getElementById('btn-clear-filter').classList.remove('hidden');
-            window.scrollTo(0, 0);
-            window.loadMarketplaceData(); // Re-trigger to build the specific menu
-        };
-
-        window.closeRestaurantMenu = () => {
-            currentRestaurantFilter = null;
-            currentFoodCategoryFilter = null;
-            document.getElementById('discovery-container').classList.remove('hidden');
-            document.getElementById('restaurant-menu-container').classList.add('hidden');
-            document.getElementById('btn-clear-filter').classList.add('hidden');
             window.loadMarketplaceData();
-        };
-
-        window.renderSpecificRestaurantMenu = (partnerId, allItems, uniqueRestaurants) => {
-            const restaurant = uniqueRestaurants.find(r => r.partnerId === partnerId);
-            if (!restaurant) {
-                window.closeRestaurantMenu();
-                return;
-            }
-
-            // Populate Restaurant Header
-            document.getElementById('menu-shop-name').innerText = restaurant.shopName;
-            document.getElementById('menu-shop-address').innerHTML = `<i class="fa-solid fa-location-dot"></i> ${restaurant.shopAddress || 'Local Partner'}`;
-            document.getElementById('menu-shop-img').src = restaurant.image;
-            
-            const isClosed = restaurant.shopStatus === 'Closed' || restaurant.shopStatus === 'Offline';
-            const statusEl = document.getElementById('menu-shop-status');
-            if (isClosed) {
-                statusEl.className = "text-[10px] font-black uppercase px-2 py-1 rounded bg-red-100 text-red-700";
-                statusEl.innerText = "CLOSED";
-            } else {
-                statusEl.className = "text-[10px] font-black uppercase px-2 py-1 rounded bg-emerald-100 text-emerald-700";
-                statusEl.innerText = "OPEN";
-            }
-
-            // Filter items for this restaurant
-            let shopItems = allItems.filter(i => i.partnerId === partnerId);
-            
-            // Generate Category Chips
-            const chipsEl = document.getElementById('food-category-chips');
-            const uniqueCategories = [...new Set(shopItems.map(i => i.category || 'Others'))];
-            
-            if (uniqueCategories.length > 0) {
-                chipsEl.classList.remove('hidden');
-                chipsEl.innerHTML = `
-                    <button onclick="window.filterFoodCategory(null)" class="px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors border ${!currentFoodCategoryFilter ? 'bg-red-600 text-white border-red-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50 shadow-sm'}">All Items</button>
-                    ${uniqueCategories.map(cat => `
-                        <button onclick="window.filterFoodCategory('${cat}')" class="px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors border ${currentFoodCategoryFilter === cat ? 'bg-red-600 text-white border-red-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50 shadow-sm'}">${cat}</button>
-                    `).join('')}
-                `;
-            } else {
-                chipsEl.classList.add('hidden');
-            }
-
-            // Apply Category and Search Filters
-            if (currentFoodCategoryFilter) shopItems = shopItems.filter(i => i.category === currentFoodCategoryFilter);
-            if (window.currentSearchQuery) {
-                const q = window.currentSearchQuery.toLowerCase();
-                shopItems = shopItems.filter(i => i.name.toLowerCase().includes(q));
-            }
-
-            // Render Vertical Menu List
-            const listEl = document.getElementById('market-list');
-            if (shopItems.length === 0) {
-                listEl.innerHTML = '<div class="w-full py-10 text-center text-gray-400 font-medium text-sm border border-gray-200 rounded-3xl bg-white mt-4">No items found in this category.</div>';
-                return;
-            }
-
-            listEl.innerHTML = shopItems.map(p => {
-                const hasVariants = p.variants && p.variants.length > 0;
-                const isItemClosed = isClosed || p.shopStatus === 'Closed' || p.shopStatus === 'Offline';
-                const isOutOfStock = p.inStock === false;
-                const itemDiscount = p.discount || 0;
-                const originalPrice = hasVariants ? p.variants[0].price : p.price;
-                const finalPrice = itemDiscount > 0 ? Math.round(originalPrice - (originalPrice * itemDiscount / 100)) : originalPrice;
-                
-                const priceHtml = itemDiscount > 0 
-                    ? `<span class="text-sm font-black text-gray-900">₹${finalPrice}</span> <span class="text-xs text-gray-400 line-through ml-1">₹${originalPrice}</span> <span class="text-[9px] font-black text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded ml-1">${itemDiscount}% OFF</span>`
-                    : `<span class="text-sm font-black text-gray-900">₹${finalPrice}</span>`;
-                
-                let qtyDisplay = '';
-                if (hasVariants) {
-                    const options = p.variants.map((v, i) => `<option value="${i}" data-price="${v.price}">${v.qty}</option>`).join('');
-                    qtyDisplay = `
-                        <div class="my-1.5 w-3/4 max-w-[150px]">
-                            <select onchange="window.updatePriceDisplay(this, 'price-container-${p.id}', ${itemDiscount})" id="sel-${p.id}" class="text-[10px] sm:text-xs bg-gray-50 border border-gray-200 rounded-lg p-1 outline-none focus:ring-1 ring-red-500 font-medium text-gray-700 w-full">
-                                ${options}
-                            </select>
-                        </div>
-                    `;
-                } else if (p.qty) {
-                    qtyDisplay = `<p class="text-[10px] text-gray-500 mt-1">${p.qty}</p>`;
-                }
-
-                let actionHtml = '';
-                if (isItemClosed) {
-                    actionHtml = `<div class="bg-gray-100 text-gray-500 text-[10px] font-black text-center py-2 rounded-xl w-full shadow-sm border border-gray-200 uppercase tracking-widest">CLOSED</div>`;
-                } else if (isOutOfStock) {
-                    actionHtml = `<div class="bg-gray-100 text-gray-500 text-[10px] font-black text-center py-2 rounded-xl w-full shadow-sm border border-gray-200 uppercase tracking-widest">NO STOCK</div>`;
-                } else {
-                    actionHtml = `<button type="button" onclick="${hasVariants ? `window.addToCartVariant('${p.id}', '${p.name.replace(/'/g, "\\'")}', '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}', ${itemDiscount})` : `window.addToCartStandard('${p.id}', '${p.name.replace(/'/g, "\\'")}', ${finalPrice}, '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')`}" class="w-full bg-white text-red-600 border border-red-100 shadow-md py-1.5 sm:py-2 rounded-xl font-black text-xs hover:bg-red-50 transition-colors active:scale-95 uppercase tracking-wide">ADD</button>`;
-                }
-
-                return `
-                    <div class="bg-white border-b border-gray-100 flex py-4 ${isItemClosed || isOutOfStock ? 'opacity-60 grayscale-[0.5]' : ''} relative w-full">
-                        <div class="flex-1 pr-4 flex flex-col justify-start">
-                            <div class="flex items-center gap-1 mb-1">
-                                <i class="fa-solid fa-square-caret-up text-emerald-500 text-xs"></i>
-                                ${p.isFavourite ? `<i class="fa-solid fa-heart text-red-500 text-[10px]"></i> <span class="text-[8px] font-black text-red-500 uppercase tracking-widest">Bestseller</span>` : ''}
-                            </div>
-                            <h4 class="font-bold text-gray-900 text-base leading-tight mb-1">${p.name}</h4>
-                            <div class="flex items-center flex-wrap mb-1" id="price-container-${p.id}">
-                                ${priceHtml}
-                            </div>
-                            ${qtyDisplay}
-                            ${p.prepTime ? `<p class="text-[10px] font-medium text-gray-500 mt-1"><i class="fa-regular fa-clock mr-1"></i>${p.prepTime} mins</p>` : ''}
-                        </div>
-                        
-                        <div class="w-[110px] sm:w-[130px] shrink-0 flex flex-col items-center">
-                            <div class="w-full h-24 sm:h-28 rounded-2xl overflow-hidden bg-gray-100 shadow-sm relative border border-gray-100">
-                                <img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x300/f3f4f6/a1a1aa?text=Image'">
-                            </div>
-                            <div class="relative -mt-4 w-10/12 z-10">
-                                ${actionHtml}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
+            window.scrollTo(0,0);
         };
 
         window.filterFoodCategory = (categoryName) => {
@@ -2562,9 +2448,9 @@
             const container = document.getElementById(priceId);
             if(container) {
                 if(discount > 0) {
-                    container.innerHTML = `<span class="text-sm font-black text-gray-900">₹${finalPrice}</span> <span class="text-xs text-gray-400 line-through ml-1">₹${originalPrice}</span> <span class="text-[9px] font-black text-blue-600 bg-blue-50 px-1 rounded ml-1">${discount}% OFF</span>`;
+                    container.innerHTML = `<span class="text-[15px] font-black text-gray-900">₹${finalPrice}</span> <span class="text-xs text-gray-400 line-through ml-1">₹${originalPrice}</span> <span class="text-[9px] font-black text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded ml-2">${discount}% OFF</span>`;
                 } else {
-                    container.innerHTML = `<span class="text-sm font-black text-gray-900">₹${finalPrice}</span>`;
+                    container.innerHTML = `<span class="text-[15px] font-black text-gray-900">₹${finalPrice}</span>`;
                 }
             }
         };
@@ -2680,14 +2566,14 @@
             const handlingFee = window.cart.length > 0 ? 5 : 0;
             const discountAmt = (sub * (window.appliedPromo || 0)) / 100;
             
-            // DELIVERY FEE LOGIC: Rs 20 if cart < 99, otherwise Free (unless 'Others' selected)
             let deliveryFee = 0;
             if (selectedVillage === 'Others') {
-                deliveryFee = 30;
-            } else if (sub > 0 && sub < 99) {
-                deliveryFee = 20;
+                deliveryFee = 30; // Standard distant fee
+            } else if (selectedVillage !== '') {
+                // If it is a standard dropdown village, 20 Rs fee if subtotal is below 99
+                deliveryFee = sub < 99 ? 20 : 0;
             }
-            
+
             const total = sub - discountAmt + handlingFee + deliveryFee;
 
             if (summaryTotals) {
@@ -2695,20 +2581,17 @@
                     ? `<div class="flex justify-between text-sm text-emerald-600 font-bold"><span>Promo Discount (${window.appliedPromo}%)</span><span>-₹${discountAmt.toFixed(2)}</span></div>` 
                     : '';
                 
-                let freeDeliveryHtml = '';
-                if (selectedVillage && selectedVillage !== 'Others' && sub > 0 && sub < 99) {
-                    freeDeliveryHtml = `<div class="text-[10px] text-blue-600 bg-blue-50 px-2 py-1 rounded mt-1 font-bold text-right"><i class="fa-solid fa-circle-info"></i> Add ₹${(99 - sub).toFixed(2)} more for FREE Delivery!</div>`;
+                let dfHtml = `<div class="flex justify-between text-sm text-red-600 font-bold"><span>Delivery Fee</span><span>${deliveryFee === 0 && selectedVillage !== '' ? 'FREE' : '₹'+deliveryFee+'.00'}</span></div>`;
+                if (selectedVillage !== 'Others' && selectedVillage !== '' && sub < 99) {
+                    const diff = 99 - sub;
+                    dfHtml += `<div class="text-[9px] text-blue-600 font-bold bg-blue-50 px-2 py-1 rounded w-max mt-1 border border-blue-100"><i class="fa-solid fa-circle-info"></i> Add ₹${diff.toFixed(0)} more to get FREE Delivery!</div>`;
                 }
-                
+
                 summaryTotals.innerHTML = `
                     <div class="flex justify-between text-sm text-gray-600 font-medium"><span>Item Subtotal</span><span id="cart-subtotal">₹${sub.toFixed(2)}</span></div>
                     ${discountHtml}
-                    <div class="flex justify-between text-sm ${deliveryFee === 0 ? 'text-emerald-600' : 'text-red-600'} font-bold">
-                        <span>Delivery Fee</span>
-                        <span>${deliveryFee === 0 ? 'FREE' : `₹${deliveryFee.toFixed(2)}`}</span>
-                    </div>
-                    ${freeDeliveryHtml}
-                    <div class="flex justify-between text-sm text-gray-600 font-medium mt-1"><span>Platform Fee</span><span id="cart-handling">₹${handlingFee.toFixed(2)}</span></div>
+                    ${dfHtml}
+                    <div class="flex justify-between text-sm text-gray-600 font-medium"><span>Platform Fee</span><span id="cart-handling">₹${handlingFee.toFixed(2)}</span></div>
                     
                     <div class="pt-3 mt-3 border-t border-gray-200 border-dashed flex justify-between items-center">
                         <span class="text-sm font-black text-gray-900">Grand Total</span>
@@ -2841,12 +2724,16 @@
             }
 
             const sub = window.cart.reduce((s,i) => s + i.price, 0);
-            let deliveryFee = 0;
-            if (village === 'Others') { deliveryFee = 30; } 
-            else if (sub < 99) { deliveryFee = 20; }
-            
             const handlingFee = window.cart.length > 0 ? 5 : 0;
             const discountAmt = (sub * (window.appliedPromo || 0)) / 100;
+            
+            let deliveryFee = 0;
+            if (village === 'Others') {
+                deliveryFee = 30;
+            } else if (village !== '') {
+                deliveryFee = sub < 99 ? 20 : 0;
+            }
+
             const total = sub - discountAmt + handlingFee + deliveryFee;
             
             const restaurantId = window.cart[0].partnerId || null;
@@ -2902,28 +2789,32 @@
 
         window.openRejectModal = (id) => {
             window.currentRejectOrderId = id;
-            document.getElementById('reject-reason').value = '';
-            document.getElementById('reject-reason-custom').value = '';
-            document.getElementById('reject-reason-custom').classList.add('hidden');
             document.getElementById('reject-modal').classList.add('active');
         };
 
         window.confirmRejectOrder = async () => {
-            let reason = document.getElementById('reject-reason').value;
-            
-            if (reason === 'Other') {
-                reason = document.getElementById('reject-reason-custom').value.trim();
-                if (!reason) return window.showToast("Please type the exact reason.", "error");
-            } else if (!reason) {
-                return window.showToast("Please select a reason.", "error");
-            }
-
             if (!window.currentRejectOrderId) return;
-
             try {
+                // If it's a Ride, we ONLY want to hide it for this specific rider so others can accept it
+                const orderSnap = await window.dbCall(getDoc(getDocRef('orders', window.currentRejectOrderId)), 5000);
+                if(orderSnap.exists()) {
+                    const oData = orderSnap.data();
+                    if(oData.type === 'Ride' && oData.status === 'Broadcasted') {
+                        let rejectedBy = oData.rejectedBy || [];
+                        rejectedBy.push(currentUser.phone);
+                        await window.dbCall(updateDoc(getDocRef('orders', window.currentRejectOrderId), {
+                            rejectedBy: rejectedBy
+                        }), 10000);
+                        window.showToast("Ride ignored.", "info");
+                        document.getElementById('reject-modal').classList.remove('active');
+                        return;
+                    }
+                }
+
+                // If not a ride, or already assigned, Reject fully
                 await window.dbCall(updateDoc(getDocRef('orders', window.currentRejectOrderId), {
                     status: 'Rejected',
-                    rejectReason: reason
+                    rejectReason: 'Partner Declined'
                 }), 10000);
                 window.showToast("Order Rejected.", "success");
                 document.getElementById('reject-modal').classList.remove('active');
@@ -2986,7 +2877,6 @@
                 }
                 
                 window.showToast(`Status marked as ${newStatus}`, "success");
-                
                 if (window.initRoleListeners) window.initRoleListeners();
                 
             } catch(e) {
@@ -3036,7 +2926,7 @@
                 document.getElementById('prod-prep-time').value = p.prepTime || '';
                 document.getElementById('prod-discount').value = p.discount || '';
                 document.getElementById('prod-is-fav').checked = p.isFavourite || false;
-
+                document.getElementById('prod-is-offer').checked = p.isOffer || false;
                 if(p.category && document.getElementById('prod-item-category')) {
                     document.getElementById('prod-item-category').value = p.category;
                 }
@@ -3070,7 +2960,8 @@
             const name = document.getElementById('prod-name').value.trim();
             const prepTime = document.getElementById('prod-prep-time').value.trim() || '15';
             const discount = parseInt(document.getElementById('prod-discount').value) || 0;
-            const isFav = document.getElementById('prod-is-fav').checked;
+            const isFavourite = document.getElementById('prod-is-fav').checked;
+            const isOffer = document.getElementById('prod-is-offer').checked;
             const itemCatEl = document.getElementById('prod-item-category');
             const itemCategory = itemCatEl ? itemCatEl.value : 'Others';
             
@@ -3123,7 +3014,8 @@
                     qty: variants[0].qty,     
                     prepTime: prepTime,
                     discount: discount,
-                    isFavourite: isFav,
+                    isFavourite: isFavourite,
+                    isOffer: isOffer,
                     category: itemCategory, 
                     partnerId: currentUser.phone,
                     shopName: currentUser.shopName,
@@ -3150,6 +3042,7 @@
                 document.getElementById('prod-prep-time').value = '';
                 document.getElementById('prod-discount').value = '';
                 document.getElementById('prod-is-fav').checked = false;
+                document.getElementById('prod-is-offer').checked = false;
                 if(imgInput) imgInput.value = '';
                 document.getElementById('variant-container').innerHTML = `
                     <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Portion & Price</label>
@@ -3285,13 +3178,14 @@
             window.adminCurrentUserTab = tab;
             window.adminUsersLoaded = true;
             document.querySelectorAll('.admin-user-tab').forEach(el => {
-                el.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
-                el.classList.add('text-gray-500');
+                el.classList.remove('bg-white', 'text-gray-900', 'shadow-sm', 'text-orange-600', 'text-orange-700');
+                if(el.id !== 'tab-user-Pending') el.classList.add('text-gray-500');
             });
             const activeEl = document.getElementById(`tab-user-${tab.replace(/\s+/g, '')}`);
             if(activeEl) {
                 activeEl.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
-                activeEl.classList.remove('text-gray-500');
+                if(tab === 'Pending') activeEl.classList.add('text-orange-700');
+                else activeEl.classList.remove('text-gray-500');
             }
             window.renderAdminUsers();
         };
@@ -3390,8 +3284,8 @@
                     const isOffline = u.shopStatus === 'Closed' || u.shopStatus === 'Offline';
                     
                     approvalControlsHtml = isApproved 
-                        ? `<button onclick="window.adminReviewPartner('${u.phone}', 'Pending')" class="text-[9px] font-bold bg-orange-50 text-orange-600 px-2 py-1 rounded border border-orange-100 mt-1 w-full text-center">Revoke Approval</button>`
-                        : `<button onclick="window.adminReviewPartner('${u.phone}', 'Approved')" class="text-[9px] font-bold bg-emerald-50 text-emerald-600 px-2 py-1 rounded border border-emerald-100 mt-1 w-full text-center animate-pulse">Approve Now</button>`;
+                        ? `<button onclick="window.adminReviewPartner('${u.phone}', 'Pending')" class="text-[9px] font-bold bg-orange-50 text-orange-600 px-2 py-1 rounded border border-orange-100 mt-1 w-full text-center hover:bg-orange-100">Revoke</button>`
+                        : `<button onclick="window.adminReviewPartner('${u.phone}', 'Approved')" class="text-[9px] font-bold bg-emerald-500 text-white px-2 py-1 rounded shadow-sm mt-1 w-full text-center hover:bg-emerald-600">Approve</button>`;
                     
                     visibilityToggleHtml = `
                         <div class="mt-2 flex items-center justify-between bg-gray-50 p-1.5 rounded-lg border border-gray-100">
@@ -3453,13 +3347,11 @@
             
             let filteredOrders = window.adminOrdersData.filter(o => {
                 if (window.adminCurrentOrderTab === 'Live') {
-                    // Hide unaccepted rides, cancelled, completed, delivered, and rejected from "Live"
-                    if (o.type === 'Ride' && ['Broadcasted', 'Requested'].includes(o.status)) return false; 
                     return !['Delivered', 'Completed', 'Rejected', 'Cancelled'].includes(o.status);
                 } else if (window.adminCurrentOrderTab === 'Rejected') {
                     return o.status === 'Rejected';
                 } else if (window.adminCurrentOrderTab === 'Cancelled') {
-                    return o.status === 'Cancelled' || (o.type === 'Ride' && ['Broadcasted', 'Requested'].includes(o.status)); // Pending rides also visible here
+                    return o.status === 'Cancelled';
                 } else {
                     return ['Delivered', 'Completed'].includes(o.status);
                 }
@@ -3473,7 +3365,7 @@
             let html = '';
             filteredOrders.forEach(o => {
                 const timeStr = window.formatOrderTime(o.time);
-                let statusColor = o.status === 'Placed' || o.status === 'Requested' || o.status === 'Broadcasted' ? 'text-amber-500' : o.status === 'Preparing' || o.status === 'Started' || o.status === 'Out for Delivery' ? 'text-blue-500' : o.status === 'Rejected' || o.status === 'Cancelled' ? 'text-red-500' : 'text-emerald-500';
+                let statusColor = o.status === 'Placed' || o.status === 'Requested' || o.status === 'Broadcasted' ? 'text-amber-500' : o.status === 'Preparing' || o.status === 'Started' || o.status === 'Out for Delivery' ? 'text-blue-500' : (o.status === 'Rejected' || o.status === 'Cancelled') ? 'text-red-500' : 'text-emerald-500';
                 
                 const displayType = o.type === 'Ride' ? '🚕 Ride' : '🍔 Order';
                 
@@ -3562,7 +3454,7 @@
                                 actionButtons = `
                                     <div class="flex gap-2">
                                         <button type="button" onclick="window.driverAcceptRide('${o.id}')" class="flex-[1.5] bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-check mr-1"></i> Accept</button>
-                                        <button type="button" onclick="window.rejectRideBroadcast('${o.id}')" class="flex-1 bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm hover:bg-red-100 transition-colors active:scale-95"><i class="fa-solid fa-xmark"></i> Ignore</button>
+                                        <button type="button" onclick="window.openRejectModal('${o.id}')" class="flex-1 bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm hover:bg-red-100 transition-colors active:scale-95"><i class="fa-solid fa-xmark"></i> Ignore</button>
                                     </div>
                                 `;
                             } else if (o.status === 'Confirmed') {
@@ -3572,6 +3464,8 @@
                                 actionButtons = `<button type="button" onclick="window.completeRide('${o.id}')" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-check-double mr-1"></i> End Ride & Collect ₹${o.amount} (-${deduction} Pts)</button>`;
                             } else if (o.status === 'Completed') {
                                 actionButtons = `<div class="w-full bg-gray-100 text-gray-500 py-3 rounded-xl font-bold text-sm text-center border border-gray-200"><i class="fa-solid fa-check mr-1"></i> Completed (₹${o.amount})</div>`;
+                            } else if (o.status === 'Cancelled') {
+                                actionButtons = `<div class="w-full bg-red-50 text-red-500 py-3 rounded-xl font-bold text-sm text-center border border-red-200"><i class="fa-solid fa-ban mr-1"></i> Expired / Cancelled</div>`;
                             }
                         } else {
                             if (o.status === 'Ready' && !o.riderId) {
@@ -3589,21 +3483,19 @@
                             if (!o.riderId) { 
                                 actionButtons = `<button type="button" onclick="window.markDelivered('${o.id}')" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-check-double mr-1"></i> Mark as Delivered</button>`;
                             } else {
-                                const displayRiderName = o.riderName || 'Restaurant (Self Delivery)';
-                                const displayRiderPhone = o.riderPhone || '';
                                 actionButtons = `
                                 <div class="flex gap-2 w-full mt-1">
                                     <div class="flex-1 bg-yellow-50 border border-yellow-200 text-yellow-700 py-2 rounded-xl flex flex-col items-center justify-center">
                                         <span class="text-[9px] font-black uppercase">Out for Delivery</span>
-                                        <span class="text-xs font-bold">${displayRiderName}</span>
+                                        <span class="text-xs font-bold">${o.riderName || 'Rider'}</span>
                                     </div>
-                                    <a href="tel:${displayRiderPhone || o.riderId}" class="flex-[0.3] bg-blue-600 text-white rounded-xl flex items-center justify-center text-lg shadow-md active:scale-95"><i class="fa-solid fa-phone"></i></a>
+                                    <a href="tel:${o.riderPhone || o.riderId}" class="flex-[0.3] bg-blue-600 text-white rounded-xl flex items-center justify-center text-lg shadow-md active:scale-95"><i class="fa-solid fa-phone"></i></a>
                                 </div>
                                 `;
                             }
                         }
                         else if (o.status === 'Delivered') actionButtons = `<div class="w-full bg-emerald-50 text-emerald-600 py-3 rounded-xl font-bold text-sm text-center border border-emerald-100"><i class="fa-solid fa-circle-check mr-1"></i> Order Completed</div>`;
-                        else if (o.status === 'Rejected' || o.status === 'Cancelled') actionButtons = `<div class="w-full bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm text-center border border-red-100"><i class="fa-solid fa-circle-xmark mr-1"></i> Order Rejected/Cancelled</div>`;
+                        else if (o.status === 'Rejected') actionButtons = `<div class="w-full bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm text-center border border-red-100"><i class="fa-solid fa-circle-xmark mr-1"></i> Order Rejected</div>`;
                     }
 
                     let ratingHtml = o.rating ? `<div class="mt-2 text-center text-xs font-bold text-yellow-600 bg-yellow-50 rounded-lg py-1 border border-yellow-100"><i class="fa-solid fa-star"></i> Customer Rated: ${o.rating} Star</div>` : '';
@@ -3712,7 +3604,15 @@
                     let firstLoad = Object.keys(window.lastKnownOrders || {}).length === 0;
 
                     orders.forEach(o => {
-                        if (o.status !== 'Rejected' && o.status !== 'Cancelled') {
+                        // Ride expiration check
+                        if (o.type === 'Ride' && o.status === 'Broadcasted' && o.time) {
+                            if (Date.now() - o.time.toMillis() > 5 * 60 * 1000) {
+                                // Background auto-cancel
+                                updateDoc(getDocRef('orders', o.id), { status: 'Cancelled' }).catch(()=>{});
+                            }
+                        }
+
+                        if (!['Rejected', 'Cancelled'].includes(o.status)) {
                             if (o.type === 'Ride') revRide += (o.total || o.amount || 0);
                             else if (o.restaurantName && o.restaurantName.toLowerCase().includes('grocery')) revGrocery += (o.total || 0); 
                             else revFood += (o.total || 0);
@@ -3751,6 +3651,15 @@
                     if(elUsers) elUsers.innerText = allUsers.length;
                     
                     const partners = allUsers.filter(u => u.role === 'Partner' && u.approvalStatus === 'Approved');
+                    const pendingPartners = allUsers.filter(u => u.role === 'Partner' && u.approvalStatus === 'Pending');
+
+                    const badge = document.getElementById('admin-pending-badge');
+                    if (badge) {
+                        badge.innerText = pendingPartners.length;
+                        if(pendingPartners.length > 0) badge.classList.remove('hidden');
+                        else badge.classList.add('hidden');
+                    }
+
                     const promoSelect = document.getElementById('admin-promo-restaurant');
                     if(promoSelect) {
                         promoSelect.innerHTML = '<option value="Global">All Restaurants (Global)</option>' + partners.map(p => `<option value="${p.id}">${p.shopName || p.name}</option>`).join('');
@@ -3802,6 +3711,13 @@
                     listEl.innerHTML = myOrders.map(o => {
                         newOrderIds[o.id] = o.status;
                         
+                        // Expiration check
+                        if (o.type === 'Ride' && o.status === 'Broadcasted' && o.time) {
+                            if (Date.now() - o.time.toMillis() > 5 * 60 * 1000) {
+                                updateDoc(getDocRef('orders', o.id), { status: 'Cancelled' }).catch(()=>{});
+                            }
+                        }
+
                         if (!firstLoad && window.lastKnownOrders[o.id] && window.lastKnownOrders[o.id] !== o.status) {
                             window.showStatusPopup("Order Update", `Your order #${o.id.slice(-5).toUpperCase()} is now ${o.status}`);
                         }
@@ -3814,7 +3730,7 @@
                         if(o.status === 'Out for Delivery') { statusColor = 'text-yellow-500'; progressWidth = '85%'; statusText = 'OUT FOR DELIVERY.. Reaching soon'; }
                         if(o.status === 'Delivered') { statusColor = 'text-emerald-500'; progressWidth = '100%'; statusText = 'Delivered Successfully'; }
                         if(o.status === 'Rejected') { statusColor = 'text-red-500'; progressWidth = '100%'; statusText = 'Order Rejected'; }
-
+                        if(o.status === 'Cancelled') { statusColor = 'text-red-500'; progressWidth = '100%'; statusText = 'Ride Expired'; }
 
                         const itemsList = o.items ? o.items.map(i => i.name).join(', ') : '';
                         const paymentBadge = o.paymentMode === 'Prepaid' ? `<span class="bg-blue-100 text-blue-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">Prepaid</span>` : `<span class="bg-gray-100 text-gray-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">COD</span>`;
