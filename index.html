@@ -2439,7 +2439,7 @@
             
             const villageSelect = document.getElementById('cart-village');
             const selectedVillage = villageSelect ? villageSelect.value : '';
-            
+
             const sub = window.cart.reduce((s, i) => s + i.price, 0);
             
             let deliveryFee = 0;
@@ -2461,7 +2461,7 @@
                 summaryTotals.innerHTML = `
                     <div class="flex justify-between text-sm text-gray-600 font-medium"><span>Item Subtotal</span><span id="cart-subtotal">₹${sub.toFixed(2)}</span></div>
                     ${discountHtml}
-                    <div class="flex justify-between text-sm text-red-600 font-bold"><span>Delivery Fee</span><span>${deliveryFee === 0 ? 'FREE' : '₹' + deliveryFee.toFixed(2)}</span></div>
+                    <div class="flex justify-between text-sm text-red-600 font-bold"><span>Delivery Fee</span><span>${selectedVillage === '' ? '-' : (deliveryFee === 0 ? 'FREE' : '₹' + deliveryFee.toFixed(2))}</span></div>
                     <div class="flex justify-between text-sm text-gray-600 font-medium"><span>Platform Fee</span><span id="cart-handling">₹${handlingFee.toFixed(2)}</span></div>
                     
                     <div class="pt-3 mt-3 border-t border-gray-200 border-dashed flex justify-between items-center">
