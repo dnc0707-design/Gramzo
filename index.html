@@ -16,12 +16,15 @@
         (function() {
             const APP_VERSION = "11.27.0"; // Live Network Sync Update
             
+            // FIX: Register the service worker instead of unregistering it!
             if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                    for(let registration of registrations) {
-                        registration.unregister();
-                    }
-                }).catch(e => console.log(e));
+                navigator.serviceWorker.register('/sw.js')
+                .then(function(registration) {
+                    console.log('Service Worker Registered with scope:', registration.scope);
+                    registration.update(); // Force an update check
+                }).catch(function(err) {
+                    console.log('Service Worker registration failed:', err);
+                });
             }
 
             const storedVersion = localStorage.getItem("gramzo_app_version");
@@ -1000,6 +1003,8 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, getDoc, getDocs, setDoc, onSnapshot, addDoc, updateDoc, deleteDoc, serverTimestamp, initializeFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // FIX: Import Firebase Messaging
+        import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-messaging.js";
 
         const IS_LIVE_WEBSITE = true;
 
@@ -1015,6 +1020,14 @@
         const app = initializeApp(liveFirebaseConfig);
         const auth = getAuth(app);
         const db = initializeFirestore(app, { experimentalForceLongPolling: true });
+
+        // FIX: Initialize Messaging
+        let messaging;
+        try {
+            messaging = getMessaging(app);
+        } catch(e) {
+            console.warn("Firebase Messaging not supported in this browser environment.", e);
+        }
 
         // GLOBALS & STATE
         let currentUser = null;
@@ -1968,9 +1981,29 @@
         window.finalizeLoginSequence = () => {
             window.closeAuthModal();
             
-            // Request Notification Permission on Login
-            if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
-                Notification.requestPermission();
+            // Request Notification Permission on Login & Generate FCM Token
+            if ("Notification" in window && Notification.permission !== "denied") {
+                Notification.requestPermission().then((permission) => {
+                    if (permission === 'granted' && messaging) {
+                        console.log('Notification permission granted.');
+                        
+                        // FIX: Generate FCM Token for push notifications
+                        // YOU MUST REPLACE 'YOUR_VAPID_KEY_HERE' WITH YOUR KEY FROM FIREBASE CONSOLE
+                        getToken(messaging, { vapidKey: 'YOUR_VAPID_KEY_HERE' }).then((currentToken) => {
+                            if (currentToken) {
+                                console.log("FCM Token generated successfully.");
+                                // Save the token to the user's Firestore document
+                                if (currentUser && currentUser.phone) {
+                                    window.dbCall(setDoc(getDocRef('users', currentUser.phone), { fcmToken: currentToken }, { merge: true }), 5000).catch(e=>{});
+                                }
+                            } else {
+                                console.log('No registration token available. Request permission to generate one.');
+                            }
+                        }).catch((err) => {
+                            console.log('An error occurred while retrieving token. ', err);
+                        });
+                    }
+                });
             }
 
             window.showToast(`Welcome back, ${currentUser.name.split(' ')[0]}!`, "success");
@@ -2090,6 +2123,18 @@
                     qrPreview.src = currentUser.qrCode;
                     qrPreview.classList.remove('hidden');
                 }
+            }
+
+            // FIX: Listen for foreground messages when the app is open
+            if (messaging) {
+                onMessage(messaging, (payload) => {
+                    console.log('Foreground Push Notification received: ', payload);
+                    window.sendAlert(
+                        payload.notification?.title || "Gramzo Alert", 
+                        payload.notification?.body || "You have a new update."
+                    );
+                    window.speakAlert(payload.notification?.body || "New notification");
+                });
             }
 
             window.initRoleListeners();
