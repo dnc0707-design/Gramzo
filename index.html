@@ -2646,9 +2646,16 @@
             
             const villageSelect = document.getElementById('cart-village');
             const selectedVillage = villageSelect ? villageSelect.value : '';
-            const deliveryFee = (selectedVillage === 'Others') ? 30 : 0;
 
             const sub = window.cart.reduce((s, i) => s + i.price, 0);
+            
+            let deliveryFee = 0;
+            if (selectedVillage === 'Others') {
+                deliveryFee = 30;
+            } else if (selectedVillage) {
+                deliveryFee = sub < 99 ? 20 : 0;
+            }
+
             const handlingFee = window.cart.length > 0 ? 5 : 0;
             const discountAmt = (sub * (window.appliedPromo || 0)) / 100;
             const total = sub - discountAmt + handlingFee + deliveryFee;
@@ -2658,10 +2665,15 @@
                     ? `<div class="flex justify-between text-sm text-emerald-600 font-bold"><span>Promo Discount (${window.appliedPromo}%)</span><span>-₹${discountAmt.toFixed(2)}</span></div>` 
                     : '';
                 
+                let deliveryHtml = `<div class="flex justify-between text-sm text-red-600 font-bold"><span>Delivery Fee</span><span>${deliveryFee === 0 ? 'FREE' : '₹' + deliveryFee.toFixed(2)}</span></div>`;
+                if (selectedVillage && selectedVillage !== 'Others' && sub < 99) {
+                    deliveryHtml += `<div class="text-[10px] text-gray-500 text-right w-full block -mt-1 mb-1">Add ₹${(99 - sub).toFixed(2)} more for FREE delivery</div>`;
+                }
+                
                 summaryTotals.innerHTML = `
                     <div class="flex justify-between text-sm text-gray-600 font-medium"><span>Item Subtotal</span><span id="cart-subtotal">₹${sub.toFixed(2)}</span></div>
                     ${discountHtml}
-                    <div class="flex justify-between text-sm text-red-600 font-bold"><span>Delivery Fee</span><span>${deliveryFee === 0 ? 'FREE' : '₹30.00'}</span></div>
+                    ${deliveryHtml}
                     <div class="flex justify-between text-sm text-gray-600 font-medium"><span>Platform Fee</span><span id="cart-handling">₹${handlingFee.toFixed(2)}</span></div>
                     
                     <div class="pt-3 mt-3 border-t border-gray-200 border-dashed flex justify-between items-center">
@@ -2794,8 +2806,15 @@
                 try { paymentScreenshot = await window.resizeImage(fileInput.files[0], 800); } catch(e) { return window.showToast("Failed to process image.", "error"); }
             }
 
-            const deliveryFee = (village === 'Others') ? 30 : 0;
             const sub = window.cart.reduce((s,i) => s + i.price, 0);
+            
+            let deliveryFee = 0;
+            if (village === 'Others') {
+                deliveryFee = 30;
+            } else if (village) {
+                deliveryFee = sub < 99 ? 20 : 0;
+            }
+
             const handlingFee = window.cart.length > 0 ? 5 : 0;
             const discountAmt = (sub * (window.appliedPromo || 0)) / 100;
             const total = sub - discountAmt + handlingFee + deliveryFee;
@@ -3775,6 +3794,7 @@
                         if(o.status === 'Out for Delivery') { statusColor = 'text-yellow-500'; progressWidth = '85%'; statusText = 'OUT FOR DELIVERY.. Reaching soon'; }
                         if(o.status === 'Delivered') { statusColor = 'text-emerald-500'; progressWidth = '100%'; statusText = 'Delivered Successfully'; }
                         if(o.status === 'Rejected') { statusColor = 'text-red-500'; progressWidth = '100%'; statusText = 'Order Rejected'; }
+
 
                         const itemsList = o.items ? o.items.map(i => i.name).join(', ') : '';
                         const paymentBadge = o.paymentMode === 'Prepaid' ? `<span class="bg-blue-100 text-blue-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">Prepaid</span>` : `<span class="bg-gray-100 text-gray-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">COD</span>`;
