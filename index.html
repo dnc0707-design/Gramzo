@@ -291,6 +291,16 @@
                         <!-- Filled by JS when viewing a specific restaurant -->
                     </div>
 
+                    <!-- NEW RESTAURANT BANNER -->
+                    <div id="restaurant-banner" class="hidden bg-white p-4 rounded-2xl shadow-sm border border-red-100 mb-4 mt-2 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-red-50 rounded-bl-full opacity-50 pointer-events-none"></div>
+                        <h2 id="banner-shop-name" class="text-xl font-black text-gray-900 leading-tight">Shop Name</h2>
+                        <p id="banner-shop-address" class="text-xs text-gray-500 mt-1.5 font-medium"><i class="fa-solid fa-location-dot text-red-400 mr-1"></i> <span>Address</span></p>
+                        <div class="mt-3 flex gap-2">
+                            <a href="#" id="banner-shop-phone" class="bg-red-50 text-red-600 px-4 py-2 rounded-xl text-xs font-bold inline-flex items-center gap-1.5 border border-red-100 shadow-sm active:scale-95 transition-transform"><i class="fa-solid fa-phone"></i> Call Store</a>
+                        </div>
+                    </div>
+
                     <div>
                         <div class="flex justify-between items-end mb-3 mt-4">
                             <h3 class="font-black text-lg text-gray-900 tracking-tight" id="marketplace-title">Restaurants Near You</h3>
@@ -1233,6 +1243,10 @@
                 window.currentRestaurantFilter = null; 
                 window.currentFoodCategoryFilter = null;
                 document.getElementById('food-category-chips').classList.add('hidden');
+                
+                const banner = document.getElementById('restaurant-banner');
+                if (banner) banner.classList.add('hidden');
+                
                 document.getElementById('marketplace-title').innerText = cat === 'Food Owner' ? 'Restaurants Near You' : 'Grocery Stores Near You';
                 document.getElementById('btn-clear-filter').classList.add('hidden');
                 window.loadMarketplaceData();
@@ -2366,16 +2380,17 @@
                 return;
             }
             
+            // Map the first product image to the restaurant if available, otherwise use a placeholder
             carousel.innerHTML = restaurants.map(r => {
                 const isActive = currentRestaurantFilter === r.partnerId;
                 const isOffline = r.shopStatus === 'Closed' || r.shopStatus === 'Offline';
                 return `
-                <div class="cursor-pointer group shrink-0 flex flex-col items-center w-20 relative" onclick="window.filterRestaurant('${r.partnerId}', '${r.shopName.replace(/'/g, "\\'")}')">
-                    <div class="w-16 h-16 rounded-full flex items-center justify-center overflow-hidden mb-2 shadow-sm border-2 transition-all ${isActive ? 'border-red-500 scale-105' : 'border-gray-100 bg-gray-50 group-hover:border-red-300'} ${isOffline ? 'grayscale opacity-60' : ''}">
+                <div class="cursor-pointer group shrink-0 flex flex-col items-center w-24 relative" onclick="window.filterRestaurant('${r.partnerId}', '${r.shopName.replace(/'/g, "\\'")}', '${(r.shopAddress || '').replace(/'/g, "\\'")}', '${r.partnerId}')">
+                    <div class="w-20 h-14 rounded-xl flex items-center justify-center overflow-hidden mb-1.5 shadow-sm border border-gray-200 transition-all ${isActive ? 'border-red-500 scale-105 ring-2 ring-red-500/20' : 'bg-white group-hover:border-red-300'} ${isOffline ? 'grayscale opacity-60' : ''}">
                         <img src="${r.image}" class="w-full h-full object-cover" alt="${r.shopName}">
                     </div>
-                    ${isOffline ? `<span class="absolute top-0 right-0 bg-red-500 text-white text-[8px] font-black px-1 rounded uppercase shadow-sm">Closed</span>` : ''}
-                    <p class="text-center text-[10px] font-bold ${isActive ? 'text-red-600' : 'text-gray-700'} leading-tight w-full px-1 truncate ${isOffline ? 'opacity-60' : ''}">${r.shopName}</p>
+                    ${isOffline ? `<span class="absolute -top-1 -right-0 bg-red-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded shadow-sm z-10 uppercase tracking-widest">Closed</span>` : ''}
+                    <p class="text-center text-[10px] font-bold ${isActive ? 'text-red-600' : 'text-gray-700'} leading-snug w-full px-1 line-clamp-2 ${isOffline ? 'opacity-60' : ''}">${r.shopName}</p>
                 </div>`;
             }).join('');
         };
@@ -2432,24 +2447,34 @@
             onSnapshot(getCol('products'), (snap) => {
                 let items = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
                 
-                extractRestaurants(); 
+                extractRestaurants(); // Uses live user data now
                 renderProducts(items);
             }, (err) => {
                 if (err.code === 'permission-denied') window.showToast("Firebase Permissions Denied! Check rules.", "error");
             });
         };
 
-        window.filterRestaurant = (partnerId, shopName) => {
-            if (currentRestaurantFilter === partnerId) {
+        window.filterRestaurant = (partnerId, shopName, shopAddress = '', shopPhone = '') => {
+            const banner = document.getElementById('restaurant-banner');
+            
+            if (currentRestaurantFilter === partnerId || !partnerId) {
                 currentRestaurantFilter = null;
                 currentFoodCategoryFilter = null;
                 document.getElementById('marketplace-title').innerText = window.currentUserMainCategory === 'Food Owner' ? 'Restaurants Near You' : 'Grocery Stores Near You';
                 document.getElementById('btn-clear-filter').classList.add('hidden');
+                if (banner) banner.classList.add('hidden');
             } else {
                 currentRestaurantFilter = partnerId;
                 currentFoodCategoryFilter = null;
-                document.getElementById('marketplace-title').innerText = `${shopName} Items`;
+                document.getElementById('marketplace-title').innerText = `Menu Items`;
                 document.getElementById('btn-clear-filter').classList.remove('hidden');
+                
+                if (banner) {
+                    document.getElementById('banner-shop-name').innerText = shopName;
+                    document.getElementById('banner-shop-address').innerHTML = `<i class="fa-solid fa-location-dot text-red-400 mr-1"></i> <span>${shopAddress || 'Address not provided'}</span>`;
+                    document.getElementById('banner-shop-phone').href = `tel:${shopPhone}`;
+                    banner.classList.remove('hidden');
+                }
             }
             window.loadMarketplaceData();
         };
