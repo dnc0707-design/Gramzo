@@ -14,46 +14,56 @@
     <!-- AGGRESSIVE AUTO CACHE BUSTER SCRIPT -->
     <script>
         (function() {
-            const APP_VERSION = "11.27.0"; // Live Network Sync Update
-            
-            // FIX: Register the service worker instead of unregistering it!
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/sw.js')
-                .then(function(registration) {
-                    console.log('Service Worker Registered with scope:', registration.scope);
-                    registration.update(); // Force an update check
-                }).catch(function(err) {
-                    console.log('Service Worker registration failed:', err);
-                });
-            }
-
-            const storedVersion = localStorage.getItem("gramzo_app_version");
-            if (storedVersion !== APP_VERSION) {
-                localStorage.setItem("gramzo_app_version", APP_VERSION);
-                if ('caches' in window) {
-                    caches.keys().then(names => { names.forEach(name => caches.delete(name)) });
+            try {
+                // Prevent infinite reload loops inside native Android WebViews
+                if (window.location.protocol === 'file:' || window.location.protocol === 'content:') {
+                    console.log("Native App Wrapper detected. Skipping aggressive web cache buster.");
+                    return; 
                 }
-                let newUrl = new URL(window.location.href);
-                newUrl.searchParams.set('v', new Date().getTime());
-                window.location.replace(newUrl.toString());
-            }
 
-            setTimeout(() => {
-                fetch(window.location.pathname + '?nocache=' + new Date().getTime(), { cache: "no-store" })
-                    .then(res => res.text())
-                    .then(html => {
-                        if (!html.includes('const APP_VERSION = "' + APP_VERSION + '"')) {
-                            console.log("Newer version found. Force reloading...");
-                            localStorage.removeItem("gramzo_app_version");
-                            if ('caches' in window) {
-                                caches.keys().then(names => { names.forEach(name => caches.delete(name)) });
+                const APP_VERSION = "11.27.0"; // Live Network Sync Update
+                
+                // FIX: Register the service worker instead of unregistering it!
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.register('/sw.js')
+                    .then(function(registration) {
+                        console.log('Service Worker Registered with scope:', registration.scope);
+                        registration.update(); // Force an update check
+                    }).catch(function(err) {
+                        console.log('Service Worker registration failed:', err);
+                    });
+                }
+
+                const storedVersion = localStorage.getItem("gramzo_app_version");
+                if (storedVersion !== APP_VERSION) {
+                    localStorage.setItem("gramzo_app_version", APP_VERSION);
+                    if ('caches' in window) {
+                        caches.keys().then(names => { names.forEach(name => caches.delete(name)) });
+                    }
+                    let newUrl = new URL(window.location.href);
+                    newUrl.searchParams.set('v', new Date().getTime());
+                    window.location.replace(newUrl.toString());
+                }
+
+                setTimeout(() => {
+                    fetch(window.location.pathname + '?nocache=' + new Date().getTime(), { cache: "no-store" })
+                        .then(res => res.text())
+                        .then(html => {
+                            if (!html.includes('const APP_VERSION = "' + APP_VERSION + '"')) {
+                                console.log("Newer version found. Force reloading...");
+                                localStorage.removeItem("gramzo_app_version");
+                                if ('caches' in window) {
+                                    caches.keys().then(names => { names.forEach(name => caches.delete(name)) });
+                                }
+                                let newUrl = new URL(window.location.href);
+                                newUrl.searchParams.set('v', new Date().getTime());
+                                window.location.replace(newUrl.toString());
                             }
-                            let newUrl = new URL(window.location.href);
-                            newUrl.searchParams.set('v', new Date().getTime());
-                            window.location.replace(newUrl.toString());
-                        }
-                    }).catch(e => console.log("Offline mode active."));
-            }, 2000);
+                        }).catch(e => console.log("Offline mode active."));
+                }, 2000);
+            } catch (error) {
+                console.warn("Storage or Network restricted by App Wrapper. Proceeding normally.", error);
+            }
         })();
     </script>
     
