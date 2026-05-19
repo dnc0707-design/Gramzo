@@ -21,7 +21,7 @@
                     return; 
                 }
 
-                const APP_VERSION = "11.27.1"; // Live Network Sync Update
+                const APP_VERSION = "11.27.2"; // Live Network Sync Update
                 
                 const clearAllCachesAndReload = () => {
                     console.log("Wiping Service Workers and Caches for update...");
@@ -43,10 +43,8 @@
                     
                     // 4. Force hard reload bypassing cache
                     setTimeout(() => {
-                        let newUrl = new URL(window.location.href);
-                        newUrl.searchParams.set('update', new Date().getTime());
-                        window.location.replace(newUrl.toString());
-                    }, 500);
+                        window.location.href = window.location.href.split('?')[0] + '?v=' + new Date().getTime();
+                    }, 800);
                 };
 
                 // Register Service Worker normally
@@ -63,14 +61,15 @@
 
                 // Background check for newer version on server
                 setTimeout(() => {
-                    fetch(window.location.pathname + '?nocache=' + new Date().getTime(), { 
-                        cache: "no-store",
+                    // FORCE bypass Service Worker cache using 'reload' mode
+                    fetch(window.location.href.split('?')[0] + '?nocache=' + new Date().getTime(), { 
+                        cache: "reload",
                         headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
                     })
                     .then(res => res.text())
                     .then(html => {
                         // Strict Regex extraction of the live server's version
-                        const match = html.match(/const APP_VERSION = "([^"]+)"/);
+                        const match = html.match(/const APP_VERSION = ["']([^"']+)["']/);
                         if (match && match[1] && match[1] !== APP_VERSION) {
                             console.log("Update found on server: " + match[1] + ". Force updating...");
                             localStorage.removeItem("gramzo_app_version"); // Force update trigger
@@ -1081,7 +1080,13 @@
         let currentUser = null;
         let currentRestaurantFilter = null;
         let currentFoodCategoryFilter = null;
+        
         window.cart = [];
+        try { 
+            const savedCart = localStorage.getItem('gramzo_cart'); 
+            if(savedCart) window.cart = JSON.parse(savedCart); 
+        } catch(e){}
+
         window.appliedPromo = 0;
         window.promoCode = '';
         window.currentSearchQuery = '';
@@ -1896,6 +1901,7 @@
             }
             currentUser = null;
             window.cart = [];
+            localStorage.removeItem('gramzo_cart');
             window.appliedPromo = 0;
             window.promoCode = '';
             window.lastKnownOrders = {};
@@ -2525,6 +2531,7 @@
                 window.cart.push({name, price, partnerId, shopName, quantity: 1});
             }
 
+            localStorage.setItem('gramzo_cart', JSON.stringify(window.cart));
             window.renderCartUI();
             window.showToast(`${name} added!`, "success");
             window.setupBottomNav(currentUser.role);
@@ -2676,6 +2683,8 @@
                     otherInput.classList.add('hidden');
                 }
             }
+            
+            localStorage.setItem('gramzo_cart', JSON.stringify(window.cart));
             window.renderCartUI(); 
             window.setupBottomNav(currentUser?.role);
         };
@@ -2756,6 +2765,7 @@
                 }), 15000);
                 
                 window.cart = []; window.appliedPromo = 0; window.promoCode = '';
+                localStorage.removeItem('gramzo_cart');
                 document.getElementById('cart-address').value = '';
                 document.getElementById('cart-village').value = '';
                 document.getElementById('cart-other-village').value = '';
