@@ -264,15 +264,6 @@
                         <div id="restaurant-list-carousel" class="flex gap-4 overflow-x-auto pb-4 no-scrollbar px-1 snap-x"></div>
                     </div>
 
-                    <!-- Banner Ad in Middle -->
-                    <div class="w-full relative rounded-3xl overflow-hidden shadow-sm border border-gray-100 h-32 sm:h-40 group bg-red-50 mt-2 mb-4 flex items-center justify-center">
-                        <span class="absolute top-2 left-2 z-10 inline-flex items-center gap-1.5 py-1 px-2.5 rounded-full bg-black/70 backdrop-blur text-[10px] font-black text-white uppercase tracking-widest">
-                            <i class="fa-solid fa-bolt text-yellow-400"></i> PROMO
-                        </span>
-                        <img id="user-offer-banner" src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80" class="w-full h-full object-cover transition-opacity duration-500" alt="Offers">
-                        <div id="banner-dots" class="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex gap-1.5 z-10"></div>
-                    </div>
-
                     <div>
                         <h3 class="font-black text-xl text-gray-900 mb-4 tracking-tight">Top rated near you</h3>
                         <div id="market-list" class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 pb-6">
@@ -777,14 +768,6 @@
                     </div>
                 </div>
 
-                <div class="bg-white rounded-3xl border border-gray-100 p-5 mt-6 shadow-sm">
-                    <h3 class="font-bold text-gray-900 mb-2 border-b border-gray-100 pb-2">Manage Promo Banners</h3>
-                    <div class="space-y-3 mt-3">
-                        <input type="file" id="admin-offer-file" accept="image/*" multiple class="w-full text-sm border p-1.5 bg-gray-50 rounded-xl">
-                        <button type="button" onclick="window.adminUpdateOffer()" id="btn-update-offer" class="w-full bg-red-600 text-white py-3 rounded-xl font-bold text-sm">Publish Offer Banners</button>
-                    </div>
-                </div>
-
                 <div class="bg-gray-900 rounded-3xl border border-gray-800 p-5 mt-6 shadow-xl">
                     <h3 class="font-bold text-white mb-2 border-b border-gray-700 pb-2">Manage Scrolling Marquee</h3>
                     <div class="space-y-3 mt-3">
@@ -998,6 +981,13 @@
         <i class="fa-solid fa-circle-info text-emerald-400"></i>
         <span id="toast-text">Message</span>
     </div>
+
+    <!-- Global WhatsApp Support Button -->
+    <a href="https://wa.me/918335929505?text=Hi%20Gramzo%20Support,%20I%20need%20help" target="_blank" title="Chat with Support" class="fixed bottom-24 right-4 sm:bottom-24 sm:right-6 z-[250] w-14 h-14 bg-[#25D366] text-white rounded-full flex items-center justify-center shadow-[0_8px_20px_rgba(37,211,102,0.5)] hover:bg-[#20bd5a] transition-transform active:scale-90 border-[3px] border-white">
+        <i class="fa-brands fa-whatsapp text-[34px] mt-0.5 ml-0.5"></i>
+        <!-- Ping animation ring -->
+        <span class="absolute w-full h-full rounded-full border-2 border-[#25D366] animate-ping opacity-30"></span>
+    </a>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -1989,7 +1979,7 @@
                         
                         // FIX: Generate FCM Token for push notifications
                         // YOU MUST REPLACE 'YOUR_VAPID_KEY_HERE' WITH YOUR KEY FROM FIREBASE CONSOLE
-                        getToken(messaging, { vapidKey: 'BM4kAcfdUnR_a3T_4akm1Y-VsebvaZ8kTCShHLFqoCxGjHIOfILQP0QhpYHLtNXXIOXAqF8RiE9iUZ8YuWSU7MU' }).then((currentToken) => {
+                        getToken(messaging, { vapidKey: 'YOUR_VAPID_KEY_HERE' }).then((currentToken) => {
                             if (currentToken) {
                                 console.log("FCM Token generated successfully.");
                                 // Save the token to the user's Firestore document
@@ -2322,15 +2312,11 @@
             const defaultMarqueeText = "🚀 খাবার অর্ডার করুন ঘরে বসেই - সার্ভিস অ্যাভেইলেবল অ্যাট কোটালডিহ, কিনাইডিহ, লালগড়, কৃষ্ণপুর, রামচন্দ্রপুর, মুরাডি, গাংপুর, যশপুর এবং বড়ন্তি এলাকা 🚀";
 
             onSnapshot(getDocRef('settings', 'app_config'), (snap) => {
-                const bannerEl = document.getElementById('user-offer-banner');
                 const marqueeContainer = document.getElementById('marquee-container');
                 const marqueeEl = document.getElementById('dynamic-marquee');
                 
                 if (snap.exists()) {
                     const data = snap.data();
-                    if (data.offerBanners && data.offerBanners.length > 0 && bannerEl) {
-                        bannerEl.src = data.offerBanners[0];
-                    }
                     if (data.marqueeText && data.marqueeText.trim() !== '') {
                         if(marqueeContainer) marqueeContainer.classList.remove('hidden');
                         if(marqueeEl) marqueeEl.innerHTML = `${data.marqueeText} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${data.marqueeText}`;
@@ -2385,11 +2371,13 @@
             const container = bNav.querySelector('div');
             container.innerHTML = ''; 
 
+            const totalCartItems = window.cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+
             const createNavItem = (id, icon, label, targetView) => `
                 <button type="button" id="nav-btn-${id}" onclick="window.switchMainView('${targetView}')" class="b-nav-item flex flex-col items-center gap-1 w-16 text-gray-400 font-medium transition-colors relative">
                     <i class="${icon} text-xl mb-0.5"></i>
                     <span class="text-[10px] tracking-wide">${label}</span>
-                    ${id === 'Cart' && window.cart.length > 0 ? `<span class="absolute -top-1 right-2 bg-red-600 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-sm">${window.cart.length}</span>` : ''}
+                    ${id === 'Cart' && totalCartItems > 0 ? `<span class="absolute -top-1 right-2 bg-red-600 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-sm">${totalCartItems}</span>` : ''}
                 </button>
             `;
 
@@ -2472,7 +2460,13 @@
                 return;
             }
 
-            window.cart.push({name, price, partnerId, shopName});
+            const existingItemIndex = window.cart.findIndex(i => i.name === name);
+            if (existingItemIndex > -1) {
+                window.cart[existingItemIndex].quantity = (window.cart[existingItemIndex].quantity || 1) + 1;
+            } else {
+                window.cart.push({name, price, partnerId, shopName, quantity: 1});
+            }
+
             window.renderCartUI();
             window.showToast(`${name} added!`, "success");
             window.setupBottomNav(currentUser.role);
@@ -2484,8 +2478,8 @@
             
             const villageSelect = document.getElementById('cart-village');
             const selectedVillage = villageSelect ? villageSelect.value : '';
-
-            const sub = window.cart.reduce((s, i) => s + i.price, 0);
+            
+            const sub = window.cart.reduce((s, i) => s + (i.price * (i.quantity || 1)), 0);
             
             let deliveryFee = 0;
             if (selectedVillage === 'Others') {
@@ -2533,7 +2527,10 @@
             btn.disabled = false;
             detailsSection.style.display = 'block';
 
-            list.innerHTML = window.cart.map((i, idx) => `
+            list.innerHTML = window.cart.map((i, idx) => {
+                const qty = i.quantity || 1;
+                const lineTotal = i.price * qty;
+                return `
                 <div class="flex justify-between items-center py-3 border-b border-gray-50 last:border-0 group">
                     <div class="flex items-center gap-3">
                         <i class="fa-regular fa-square-caret-up text-emerald-500 mt-0.5 self-start"></i>
@@ -2542,13 +2539,23 @@
                             <p class="text-[9px] font-bold text-gray-500 mt-0.5 uppercase tracking-wider"><i class="fa-solid fa-store text-red-400 mr-1"></i> ${i.shopName || 'Gramzo Partner'}</p>
                         </div>
                     </div>
-                    <div class="flex items-center gap-4">
-                        <span class="text-sm font-black text-gray-900">₹${i.price}</span>
-                        <button type="button" onclick="window.removeFromCart(${idx})" class="w-6 h-6 rounded bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors">
-                            <i class="fa-solid fa-minus text-[10px]"></i>
-                        </button>
+                    <div class="flex items-center gap-3">
+                        <div class="flex flex-col items-end">
+                            <span class="text-sm font-black text-gray-900">₹${lineTotal}</span>
+                            ${qty > 1 ? `<span class="text-[9px] text-gray-400 font-medium">₹${i.price} x ${qty}</span>` : ''}
+                        </div>
+                        <div class="flex items-center bg-red-50 rounded-lg border border-red-100 overflow-hidden">
+                            <button type="button" onclick="window.removeFromCart(${idx})" class="w-7 h-7 text-red-600 flex items-center justify-center hover:bg-red-200 transition-colors active:scale-95">
+                                <i class="fa-solid fa-minus text-[10px]"></i>
+                            </button>
+                            <span class="w-6 text-center text-xs font-black text-gray-900">${qty}</span>
+                            <button type="button" onclick="window.addToCartActual('${i.name.replace(/'/g, "\\'")}', ${i.price}, '${i.partnerId || ''}', '${(i.shopName || '').replace(/'/g, "\\'")}')" class="w-7 h-7 text-red-600 flex items-center justify-center hover:bg-red-200 transition-colors active:scale-95">
+                                <i class="fa-solid fa-plus text-[10px]"></i>
+                            </button>
+                        </div>
                     </div>
-                </div>`).join('');
+                </div>`;
+            }).join('');
 
             const partnerId = window.cart[0].partnerId;
             if(partnerId) {
@@ -2592,7 +2599,12 @@
         };
 
         window.removeFromCart = (idx) => { 
-            window.cart.splice(idx, 1);
+            if (window.cart[idx].quantity > 1) {
+                window.cart[idx].quantity -= 1;
+            } else {
+                window.cart.splice(idx, 1);
+            }
+
             if(window.cart.length === 0) {
                 window.appliedPromo = 0;
                 window.promoCode = '';
@@ -2639,7 +2651,7 @@
                 try { paymentScreenshot = await window.resizeImage(fileInput.files[0], 800); } catch(e) { return window.showToast("Failed to process image.", "error"); }
             }
 
-            const sub = window.cart.reduce((s,i) => s + i.price, 0);
+            const sub = window.cart.reduce((s,i) => s + (i.price * (i.quantity || 1)), 0);
             
             let deliveryFee = 0;
             if (village === 'Others') {
@@ -2667,6 +2679,7 @@
                     items: window.cart.map(item => ({
                         name: item.name || '',
                         price: item.price || 0,
+                        quantity: item.quantity || 1,
                         partnerId: item.partnerId || null,
                         shopName: item.shopName || null
                     })), 
@@ -3329,7 +3342,7 @@
 
                 let html = '';
                 filteredOrders.forEach(o => {
-                    const itemsStr = o.items ? o.items.map(i => `${i.name}`).join(', ') : '';
+                    const itemsStr = o.items ? o.items.map(i => `${i.name} ${i.quantity && i.quantity > 1 ? '(x'+i.quantity+')' : ''}`.trim()).join(', ') : '';
                     const timeStr = window.formatOrderTime(o.time);
                     let cardStyle = 'border-gray-100', actionButtons = '';
                     let paymentBadge = o.paymentMode === 'Prepaid' ? `<span class="bg-blue-100 text-blue-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">Prepaid</span>` : `<span class="bg-gray-100 text-gray-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">COD</span>`;
@@ -3468,33 +3481,6 @@
 
             window.deletePromo = async (id) => {
                 try { await window.dbCall(deleteDoc(getDocRef('promos', id)), 10000); window.showToast("Promo Deleted", "info"); } catch(e){}
-            };
-
-            window.adminUpdateOffer = async () => {
-                if(currentUser.role !== 'Admin') return;
-                const fileInput = document.getElementById('admin-offer-file');
-                if(!fileInput.files || fileInput.files.length === 0) return window.showToast("Please select image files.", "error");
-
-                const btn = document.getElementById('btn-update-offer');
-                const orig = btn.innerText;
-                btn.innerText = "Uploading...";
-                btn.disabled = true;
-
-                try {
-                    const base64Array = [];
-                    for(let i=0; i<fileInput.files.length; i++) {
-                        const base64 = await window.resizeImage(fileInput.files[i], 800); 
-                        base64Array.push(base64);
-                    }
-                    await window.dbCall(setDoc(getDocRef('settings', 'app_config'), { offerBanners: base64Array }, { merge: true }), 15000);
-                    window.showToast("Offer Banners Updated!", "success");
-                    fileInput.value = "";
-                } catch(e) {
-                    window.showToast("Error updating banners. Image might be too large.", "error");
-                } finally {
-                    btn.innerText = orig;
-                    btn.disabled = false;
-                }
             };
 
             window.adminUpdateMarquee = async () => {
@@ -3638,7 +3624,7 @@
                         if(o.status === 'Delivered') { statusColor = 'text-emerald-500'; progressWidth = '100%'; statusText = 'Delivered Successfully'; }
                         if(o.status === 'Rejected') { statusColor = 'text-red-500'; progressWidth = '100%'; statusText = 'Order Rejected'; }
 
-                        const itemsList = o.items ? o.items.map(i => i.name).join(', ') : '';
+                        const itemsList = o.items ? o.items.map(i => `${i.name} ${i.quantity && i.quantity > 1 ? '(x'+i.quantity+')' : ''}`.trim()).join(', ') : '';
                         const paymentBadge = o.paymentMode === 'Prepaid' ? `<span class="bg-blue-100 text-blue-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">Prepaid</span>` : `<span class="bg-gray-100 text-gray-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">COD</span>`;
 
                         let trackingHtml = '';
