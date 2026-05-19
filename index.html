@@ -15,25 +15,25 @@
     <script>
         (function() {
             try {
-                // Prevent infinite reload loops inside native Android WebViews
-                if (window.location.protocol === 'file:' || window.location.protocol === 'content:') {
-                    console.log("Native App Wrapper detected. Skipping aggressive web cache buster.");
-                    return; 
-                }
-
-                const APP_VERSION = "11.27.2"; // Live Network Sync Update
+                const APP_VERSION = "11.28.0"; // Bumped version to force update
                 
                 const clearAllCachesAndReload = () => {
+                    // Prevent infinite reload loops
+                    if (sessionStorage.getItem('gramzo_reloading')) {
+                        console.log("Already reloading, preventing loop.");
+                        return;
+                    }
+                    sessionStorage.setItem('gramzo_reloading', 'true');
                     console.log("Wiping Service Workers and Caches for update...");
                     
-                    // 1. Unregister Service Worker (Crucial for PWA updates)
+                    // 1. Unregister Service Worker (Crucial for PWA and APK updates)
                     if ('serviceWorker' in navigator) {
                         navigator.serviceWorker.getRegistrations().then(regs => {
                             for(let reg of regs) reg.unregister();
                         });
                     }
                     
-                    // 2. Wipe Cache Storage
+                    // 2. Wipe Cache Storage completely
                     if ('caches' in window) {
                         caches.keys().then(names => { names.forEach(name => caches.delete(name)) });
                     }
@@ -41,11 +41,16 @@
                     // 3. Update Local Storage
                     localStorage.setItem("gramzo_app_version", APP_VERSION);
                     
-                    // 4. Force hard reload bypassing cache
+                    // 4. Force hard reload bypassing cache with unique timestamp
                     setTimeout(() => {
                         window.location.href = window.location.href.split('?')[0] + '?v=' + new Date().getTime();
                     }, 800);
                 };
+
+                // Clear the reloading flag once successfully loaded
+                if (sessionStorage.getItem('gramzo_reloading')) {
+                    sessionStorage.removeItem('gramzo_reloading');
+                }
 
                 // Register Service Worker normally
                 if ('serviceWorker' in navigator) {
@@ -61,9 +66,9 @@
 
                 // Background check for newer version on server
                 setTimeout(() => {
-                    // FORCE bypass Service Worker cache using 'reload' mode
+                    // FORCE bypass Service Worker cache using unique string
                     fetch(window.location.href.split('?')[0] + '?nocache=' + new Date().getTime(), { 
-                        cache: "reload",
+                        cache: "no-store",
                         headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
                     })
                     .then(res => res.text())
@@ -213,7 +218,10 @@
                     <p id="menu-name" class="font-bold text-sm text-gray-900">Name</p>
                     <p id="menu-phone" class="text-xs text-gray-500 font-medium">Phone</p>
                 </div>
-                <div class="p-2">
+                <div class="p-2 space-y-1">
+                    <button type="button" onclick="window.forceAppUpdate()" class="w-full text-left px-4 py-2.5 text-sm font-bold text-gray-700 hover:bg-gray-100 rounded-xl transition-colors flex items-center gap-2">
+                        <i class="fa-solid fa-rotate text-blue-500"></i> App Update
+                    </button>
                     <button type="button" onclick="window.logout()" class="w-full text-left px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 rounded-xl transition-colors flex items-center gap-2">
                         <i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out
                     </button>
@@ -389,7 +397,7 @@
                             <h4 class="font-bold text-gray-900 mb-4 tracking-tight">Legal</h4>
                             <ul class="space-y-3 text-xs text-gray-500 font-medium">
                                 <li><a href="#" onclick="window.openStaticPage('terms'); return false;" class="hover:text-red-600 transition">Terms & Conditions</a></li>
-                                <!-- FIXED PRIVACY POLICY LINK: Now uses internal modal instead of external file -->
+                                <!-- FIXED PRIVACY POLICY LINK -->
                                 <li><a href="#" onclick="window.openStaticPage('privacy'); return false;" class="hover:text-red-600 transition">Privacy Policy</a></li>
                             </ul>
                         </div>
@@ -398,7 +406,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.27.0 - Live Network Sync</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.28.0 - Live Network Sync</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right">
                             <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
@@ -1093,13 +1101,13 @@
         window.lastKnownOrders = {}; 
         let unsubscribeListeners = []; 
         let currentAuthRole = 'User'; 
-        window.currentUserMainCategory = 'Food Owner'; // Default to Food
+        window.currentUserMainCategory = 'Food Owner';
 
         // RATING STATE
         window.currentRatingOrderId = null;
         window.currentRatingPartnerId = null;
         window.selectedRating = 0;
-        window.editingProductId = null; // Added to track edit mode
+        window.editingProductId = null;
 
         // ADMIN TABS STATE
         window.adminCurrentUserTab = 'All';
@@ -1140,6 +1148,7 @@
             }
         });
 
+        // CUSTOM PROMPT/CONFIRM STATE
         let customPromptResolve = null;
         let customConfirmResolve = null;
 
@@ -1262,7 +1271,7 @@
         window.speakAlert = (text) => {
             try {
                 if ('speechSynthesis' in window) {
-                    window.speechSynthesis.cancel();
+                    window.speechSynthesis.cancel(); 
                     const msg = new SpeechSynthesisUtterance(text);
                     msg.rate = 1.0; 
                     window.speechSynthesis.speak(msg);
@@ -1385,6 +1394,20 @@
             }, 3000);
         };
 
+        // MANUAL REFRESH METHOD
+        window.forceAppUpdate = () => {
+            localStorage.removeItem("gramzo_app_version");
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(regs => {
+                    for(let reg of regs) reg.unregister();
+                });
+            }
+            if ('caches' in window) {
+                caches.keys().then(names => { names.forEach(name => caches.delete(name)) });
+            }
+            window.location.href = window.location.href.split('?')[0] + '?v=' + new Date().getTime();
+        };
+
         window.openStaticPage = (page) => {
             const titleEl = document.getElementById('info-modal-title');
             const bodyEl = document.getElementById('info-modal-body');
@@ -1465,22 +1488,38 @@
                     <p class="text-gray-600 mb-4 leading-relaxed">Gramzo reserves the right to modify these terms at any time. Continued use of the platform after changes constitutes acceptance of the new terms.</p>
                 `;
             } else if (page === 'privacy') {
-                // FIXED: Embedded Privacy Policy natively into the App Modal
-                titleEl.innerText = "Privacy Policy";
+                titleEl.innerText = "Privacy Policy for Gramzo";
                 bodyEl.innerHTML = `
-                    <p class="text-xs text-gray-400 mb-4 italic">Last Updated: May 2026</p>
+                    <p><strong>Last Updated:</strong> ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                     
-                    <h4 class="font-black text-gray-800 text-base mb-1">1. Information We Collect</h4>
-                    <p class="text-gray-600 mb-4 leading-relaxed">We collect your phone number, name, and delivery address to facilitate food/grocery orders and rides. For partners, we additionally collect business details, vehicle information, and live location data to provide our services.</p>
-                    
-                    <h4 class="font-black text-gray-800 text-base mb-1">2. How We Use Your Information</h4>
-                    <p class="text-gray-600 mb-4 leading-relaxed">Your data is used exclusively to process transactions, provide live delivery/ride tracking, and communicate service updates. Gramzo operates strictly as a technology aggregator and does not sell your personal data to third parties.</p>
-                    
-                    <h4 class="font-black text-gray-800 text-base mb-1">3. Location Services</h4>
-                    <p class="text-gray-600 mb-4 leading-relaxed">We require location access to show nearby stores, calculate accurate delivery/ride distances, and allow users to track their assigned riders in real-time.</p>
-                    
-                    <h4 class="font-black text-gray-800 text-base mb-1">4. Data Security & Deletion</h4>
-                    <p class="text-gray-600 mb-4 leading-relaxed">We employ industry-standard security measures to safeguard your data. You may request the deletion of your account and associated data by contacting our support team at any time.</p>
+                    <p class="text-gray-600 mb-4 mt-2 leading-relaxed">This Privacy Policy explains how Gramzo ("we," "us," or "our") collects, uses, and protects your information when you use our mobile application.</p>
+
+                    <h4 class="font-black text-gray-800 text-base mt-5 mb-1">1. Information We Collect</h4>
+                    <p class="text-gray-600 mb-4 leading-relaxed">When you create an account, we collect information you provide directly to us, such as your username, email address, and password. We also use Firebase for backend services, which may collect basic app usage data to ensure the app functions correctly securely.</p>
+
+                    <h4 class="font-black text-gray-800 text-base mt-5 mb-1">2. How We Use Your Information</h4>
+                    <p class="text-gray-600 mb-4 leading-relaxed">We use the information we collect to operate, maintain, and provide the features and functionality of Gramzo, as well as to communicate directly with you.</p>
+
+                    <h4 class="font-black text-gray-800 text-base mt-5 mb-1">3. Security</h4>
+                    <p class="text-gray-600 mb-4 leading-relaxed">All data transmitted between your device and our servers (via Firebase) is encrypted in transit. We take reasonable measures to protect your information from unauthorized access.</p>
+
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 my-5 rounded-r-lg">
+                        <h4 class="font-black text-blue-700 text-base mb-2">4. Account and Data Deletion (Your Rights)</h4>
+                        <p class="text-gray-700 mb-2">If you wish to permanently delete your Gramzo account and all associated personal data, you have the right to do so at any time. To request data deletion, please follow these steps:</p>
+                        <ol class="list-decimal pl-5 text-gray-700 space-y-1 mb-2">
+                            <li>Send an email to <strong>support@gramzo.in</strong>.</li>
+                            <li>You must include the exact user ID you used to register your Gramzo account.</li>
+                            <li>Use the subject line: <strong>"Account Deletion Request"</strong>.</li>
+                            <li>In the body of the email, state your Gramzo user ID and explicitly ask for your account and data to be deleted.</li>
+                        </ol>
+                        <p class="text-gray-700 mt-2">Upon receiving your request, we will verify your identity and permanently delete your account, credentials, and associated data from our active databases within 14 days.</p>
+                    </div>
+
+                    <h4 class="font-black text-gray-800 text-base mt-5 mb-1">5. Changes to This Policy</h4>
+                    <p class="text-gray-600 mb-4 leading-relaxed">We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page.</p>
+
+                    <h4 class="font-black text-gray-800 text-base mt-5 mb-1">6. Contact Us</h4>
+                    <p class="text-gray-600 mb-4 leading-relaxed">If you have any questions about this Privacy Policy, please contact us at <strong>support@gramzo.in</strong>.</p>
                 `;
             }
             
@@ -1621,18 +1660,13 @@
             window.currentRideDistanceKm = distKm;
 
             let estFare = 0;
-            // Fare Logic Update - Strict implementation
             if (searchType === 'Car_Mini') {
-                // Car_Mini: 200 base + 15 per km (distKm is already doubled)
                 estFare = 200 + (distKm * 15);
             } else if (searchType === 'Car_SUV') {
-                // Car_SUV: 200 base + 20 per km
                 estFare = 200 + (distKm * 20);
             } else if (searchType === 'Bike') {
-                // Bike: 20 flat for 5km, then 5 per km
                 estFare = distKm <= 5 ? 20 : 20 + ((distKm - 5) * 5);
             } else if (searchType === 'Toto') {
-                // Toto: 100 flat for 5km, then 10 per km
                 estFare = distKm <= 5 ? 100 : 100 + ((distKm - 5) * 10);
             }
             
@@ -1680,7 +1714,6 @@
             window.currentRideWaitTime = waitTime;
             window.currentRideDistStr = distanceStrForDb;
 
-            // Hide calc button, show request button
             document.getElementById('btn-calc-fare').classList.add('hidden');
             document.getElementById('btn-request-broadcast-ride').classList.remove('hidden');
         };
@@ -1713,7 +1746,7 @@
                     riderId: null,
                     riderName: null,
                     riderPhone: null,
-                    vehicleType: searchType, // Store requested vehicle type (e.g. Car_Mini)
+                    vehicleType: searchType,
                     pickup: pickup,
                     address: drop,
                     status: 'Broadcasted', 
@@ -1996,7 +2029,7 @@
 
                     const userData = { 
                         name, phone, pin: pass, role: currentAuthRole, shopStatus: ['Rider', 'Ride Partner'].includes(partnerCategory) ? 'Offline' : 'Open',
-                        approvalStatus: currentAuthRole === 'Partner' ? 'Pending' : 'Approved', // Partner needs admin approval
+                        approvalStatus: currentAuthRole === 'Partner' ? 'Pending' : 'Approved',
                         uid: auth?.currentUser?.uid || 'unknown',
                         created: new Date().toISOString(),
                         ...(currentAuthRole === 'Partner' && { 
@@ -2010,7 +2043,7 @@
                                 carNum: carNum,
                                 carModel: carModel,
                                 seater: seater,
-                                walletPoints: 20, // Initial free 20 points
+                                walletPoints: 20,
                                 currentLocation: ''
                             })
                         })
