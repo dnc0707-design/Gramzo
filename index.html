@@ -1088,7 +1088,7 @@
 
         let messaging;
         try {
-            messaging = getMessaging(app);
+            const messaging = getMessaging(app);
         } catch(e) {
             console.warn("Firebase Messaging not supported in this browser environment.", e);
         }
@@ -2256,13 +2256,9 @@
 
             if (messaging) {
                 onMessage(messaging, (payload) => {
-                    console.log('Foreground Push Notification received: ', payload);
-                    window.sendAlert(
-                        payload.notification?.title || "Gramzo Alert", 
-                        payload.notification?.body || "You have a new update."
-                    );
-                    window.speakAlert(payload.notification?.body || "New notification");
-                });
+    console.log("Foreground notification received:", payload);
+    alert("Test Received: " + payload.notification.title); // Force an alert
+});
             }
 
             window.initRoleListeners();
