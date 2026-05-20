@@ -1259,18 +1259,22 @@
         window.alertAudio.loop = true; 
 
         window.speakAlert = (text) => {
-            try {
-                if ('speechSynthesis' in window) {
-                    window.speechSynthesis.cancel();
-                    const msg = new SpeechSynthesisUtterance(text);
-                    msg.rate = 1.0; 
-                    window.speechSynthesis.speak(msg);
-                }
-                window.alertAudio.play().catch(e => console.log("Audio blocked until user clicks on screen."));
-            } catch(e) {
-                console.error("Speech Synthesis Error:", e);
-            }
-        };
+    try {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const msg = new SpeechSynthesisUtterance(text);
+            
+            // This forces the device to use the Bengali engine to read the text
+            msg.lang = 'bn-IN'; 
+            msg.rate = 0.9;
+            window.speechSynthesis.speak(msg);
+        }
+        window.alertAudio.play().catch(e => console.log("Audio blocked."));
+    } catch(e) {
+        console.error("Speech Synthesis Error:", e);
+    }
+};
+
 
         window.stopAlertSound = () => {
             window.alertAudio.pause();
