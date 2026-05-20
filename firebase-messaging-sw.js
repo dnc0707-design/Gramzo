@@ -12,15 +12,25 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// This function triggers only when the app is NOT in the foreground
-messaging.onBackgroundMessage((payload) => {
-    console.log('[firebase-messaging-sw.js] Received background message: ', payload);
+// Firebase AUTOMATICALLY shows the notification if the payload contains 'notification'.
+// Do NOT call showNotification manually here, or Android will block it!
 
-    const notificationTitle = payload.notification.title || 'Gramzo';
-    const notificationOptions = {
-        body: payload.notification.body || 'You have a new update from Gramzo',
-        icon: 'https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/New%20logo%20-Gramzo%20-%206%20may.png'
-    };
-
-    return self.registration.showNotification(notificationTitle, notificationOptions);
+// This listener simply ensures that if they tap the notification, it opens the Gramzo app.
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+    event.waitUntil(
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+            // If Gramzo is already open in a background tab, bring it to the front
+            for (let i = 0; i < windowClients.length; i++) {
+                const client = windowClients[i];
+                if (client.url.indexOf('/') !== -1 && 'focus' in client) {
+                    return client.focus();
+                }
+            }
+            // Otherwise, open a new window to the app
+            if (clients.openWindow) {
+                return clients.openWindow('/');
+            }
+        })
+    );
 });
