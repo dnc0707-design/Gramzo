@@ -2093,51 +2093,44 @@
         };
 
         window.finalizeLoginSequence = () => {
-            window.closeAuthModal();
-            
-            // CORRECTED NOTIFICATION REGISTRATION LOGIC
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/firebase-messaging-sw.js')
-                    .then((registration) => {
-                        console.log('Service Worker registered successfully for FCM.');
+    window.closeAuthModal();
+    
+    // 1. Force notification registration after login
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/firebase-messaging-sw.js')
+            .then((registration) => {
+                console.log('Service Worker registered.');
 
-                        if ("Notification" in window && Notification.permission !== "denied") {
-                            Notification.requestPermission().then((permission) => {
-                                if (permission === 'granted' && messaging) {
-                                    console.log('Notification permission granted.');
-                                    
-                                    // 1. Explicitly bind token generation to the active SW registration
-                                    // 2. Ensure VAPID key is correct
-                                    getToken(messaging, { 
-                                        vapidKey: 'BM4kAcfdUnR_a3T_4akm1Y-VsebvaZ8kTCShHLFqoCxGjHIOfILQP0QhpYHLtNXXIOXAqF8RiE9iUZ8YuWSU7MU',
-                                        serviceWorkerRegistration: registration 
-                                    }).then((currentToken) => {
-                                        if (currentToken) {
-                                            console.log("FCM Token generated successfully.");
-                                            // Save token to Firestore User Profile
-                                            if (currentUser && currentUser.phone) {
-                                                window.dbCall(setDoc(getDocRef('users', currentUser.phone), { fcmToken: currentToken }, { merge: true }), 5000)
-                                                    .catch(e => console.error("Error saving token to DB:", e));
-                                            }
-                                        } else {
-                                            console.log('No registration token available. Request permission to generate one.');
-                                        }
-                                    }).catch((err) => {
-                                        console.error('An error occurred while retrieving token. ', err);
-                                    });
-                                } else {
-                                    console.log('Notification permission not granted.');
+                if ("Notification" in window && Notification.permission !== "denied") {
+                    Notification.requestPermission().then((permission) => {
+                        if (permission === 'granted' && messaging) {
+                            console.log('Notification permission granted.');
+
+                            getToken(messaging, { 
+                                vapidKey: 'BM4kAcfdUnR_a3T_4akm1Y-VsebvaZ8kTCShHLFqoCxGjHIOfILQP0QhpYHLtNXXIOXAqF8RiE9iUZ8YuWSU7MU',
+                                serviceWorkerRegistration: registration 
+                            }).then((currentToken) => {
+                                if (currentToken) {
+                                    console.log("FCM Token generated:", currentToken);
+                                    // 2. FORCE SAVE TO FIRESTORE
+                                    if (currentUser && currentUser.phone) {
+                                        window.dbCall(setDoc(getDocRef('users', currentUser.phone), { fcmToken: currentToken }, { merge: true }), 5000)
+                                            .then(() => console.log("Token saved to Database!"))
+                                            .catch(e => console.error("Error saving token:", e));
+                                    }
                                 }
+                            }).catch((err) => {
+                                console.error('Token generation failed:', err);
                             });
                         }
-                    }).catch((err) => {
-                        console.error('Service Worker registration failed. Cannot setup Push Notifications.', err);
                     });
-            } else {
-                 console.log("Service Workers not supported by browser.");
-            }
+                }
+            }).catch((err) => {
+                console.error('Service Worker failed:', err);
+            });
+    }
 
-            window.showToast(`Welcome back, ${currentUser.name.split(' ')[0]}!`, "success");
+    window.showToast(`Welcome back, ${currentUser.name.split(' ')[0]}!`, "success");
 
             document.getElementById('btn-partner-login-trigger').classList.add('hidden');
             document.getElementById('btn-login-trigger').classList.add('hidden');
