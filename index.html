@@ -2193,40 +2193,30 @@
         };
 
         // --- NEW ISOLATED NOTIFICATION REGISTRATION ---
-        window.registerDeviceForNotifications = async (phone) => {
-            console.log("DEBUG: Starting isolated notification registration for:", phone);
-            if ('serviceWorker' in navigator && messaging) {
-                try {
-                    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-                    console.log("DEBUG: SW successfully registered.");
-                    
-                    if ("Notification" in window) {
-                        const permission = await Notification.requestPermission();
-                        console.log("DEBUG: Notification permission:", permission);
-                        
-                        if (permission === 'granted') {
-                            const token = await getToken(messaging, { 
-                                vapidKey: 'BM4kAcfdUnR_a3T_4akm1Y-VsebvaZ8kTCShHLFqoCxGjHIOfILQP0QhpYHLtNXXIOXAqF8RiE9iUZ8YuWSU7MU',
-                                serviceWorkerRegistration: registration 
-                            });
-                            
-                            if (token) {
-                                console.log("DEBUG: Generated FCM Token:", token);
-                                await window.dbCall(setDoc(getDocRef('users', phone), { fcmToken: token }, { merge: true }), 5000);
-                                console.log("DEBUG: FCM Token successfully saved to Firestore.");
-                            } else {
-                                console.log("DEBUG: getToken returned empty.");
-                            }
-                        }
-                    }
-                } catch (err) {
-                    console.error("DEBUG: Notification registration failed:", err);
+        window.registerDeviceForNotifications = async () => {
+    console.log("DEBUG: Registering device for role:", currentUser ? currentUser.role : "Unknown");
+    
+    if ('serviceWorker' in navigator && messaging) {
+        try {
+            const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+            const permission = await Notification.requestPermission();
+            
+            if (permission === 'granted') {
+                const token = await getToken(messaging, { 
+                    vapidKey: 'BM4kAcfdUnR_a3T_4akm1Y-VsebvaZ8kTCShHLFqoCxGjHIOfILQP0QhpYHLtNXXIOXAqF8RiE9iUZ8YuWSU7MU',
+                    serviceWorkerRegistration: registration 
+                });
+                
+                if (token && currentUser && currentUser.phone) {
+                    await window.dbCall(setDoc(getDocRef('users', currentUser.phone), { fcmToken: token }, { merge: true }), 5000);
+                    console.log("DEBUG: Token saved for role:", currentUser.role);
                 }
-            } else {
-                console.log("DEBUG: SW or messaging not available.");
             }
-        };
-
+        } catch (err) {
+            console.error("DEBUG: Registration failed:", err);
+        }
+    }
+};
         const renderProducts = (items) => {
             const listEl = document.getElementById('market-list');
             const chipsEl = document.getElementById('food-category-chips');
