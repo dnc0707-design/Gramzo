@@ -2093,44 +2093,56 @@
         };
 
         window.finalizeLoginSequence = () => {
-    window.closeAuthModal();
-    
-    // 1. Force notification registration after login
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/firebase-messaging-sw.js')
-            .then((registration) => {
-                console.log('Service Worker registered.');
+            window.closeAuthModal();
+            console.log("DEBUG: Login sequence initiated.");
+            
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/firebase-messaging-sw.js')
+                    .then((registration) => {
+                        console.log('DEBUG: SW registered successfully.');
 
-                if ("Notification" in window && Notification.permission !== "denied") {
-                    Notification.requestPermission().then((permission) => {
-                        if (permission === 'granted' && messaging) {
-                            console.log('Notification permission granted.');
-
-                            getToken(messaging, { 
-                                vapidKey: 'BM4kAcfdUnR_a3T_4akm1Y-VsebvaZ8kTCShHLFqoCxGjHIOfILQP0QhpYHLtNXXIOXAqF8RiE9iUZ8YuWSU7MU',
-                                serviceWorkerRegistration: registration 
-                            }).then((currentToken) => {
-                                if (currentToken) {
-                                    console.log("FCM Token generated:", currentToken);
-                                    // 2. FORCE SAVE TO FIRESTORE
-                                    if (currentUser && currentUser.phone) {
-                                        window.dbCall(setDoc(getDocRef('users', currentUser.phone), { fcmToken: currentToken }, { merge: true }), 5000)
-                                            .then(() => console.log("Token saved to Database!"))
-                                            .catch(e => console.error("Error saving token:", e));
+                        if ("Notification" in window && Notification.permission !== "denied") {
+                            Notification.requestPermission().then((permission) => {
+                                console.log('DEBUG: Permission result:', permission);
+                                
+                                if (permission === 'granted') {
+                                    if (!messaging) {
+                                        console.error('DEBUG: Messaging variable is undefined!');
+                                        return;
                                     }
+
+                                    getToken(messaging, { 
+                                        vapidKey: 'BM4kAcfdUnR_a3T_4akm1Y-VsebvaZ8kTCShHLFqoCxGjHIOfILQP0QhpYHLtNXXIOXAqF8RiE9iUZ8YuWSU7MU',
+                                        serviceWorkerRegistration: registration 
+                                    }).then((currentToken) => {
+                                        if (currentToken) {
+                                            console.log("DEBUG: FCM Token generated:", currentToken);
+                                            if (currentUser && currentUser.phone) {
+                                                window.dbCall(setDoc(getDocRef('users', currentUser.phone), { fcmToken: currentToken }, { merge: true }), 5000)
+                                                    .then(() => console.log("DEBUG: Token saved to Database!"))
+                                                    .catch(e => console.error("DEBUG: DB Save Error:", e));
+                                            } else {
+                                                console.error("DEBUG: CurrentUser missing phone, cannot save token.");
+                                            }
+                                        } else {
+                                            console.log("DEBUG: Token returned null.");
+                                        }
+                                    }).catch((err) => {
+                                        console.error('DEBUG: Token generation FAILED:', err);
+                                    });
+                                } else {
+                                    console.log('DEBUG: Permission not granted.');
                                 }
-                            }).catch((err) => {
-                                console.error('Token generation failed:', err);
                             });
                         }
+                    }).catch((err) => {
+                        console.error('DEBUG: SW registration failed:', err);
                     });
-                }
-            }).catch((err) => {
-                console.error('Service Worker failed:', err);
-            });
-    }
+            } else {
+                console.log("DEBUG: SW not supported.");
+            }
 
-    window.showToast(`Welcome back, ${currentUser.name.split(' ')[0]}!`, "success");
+            window.showToast(`Welcome back, ${currentUser.name.split(' ')[0]}!`, "success");
 
             document.getElementById('btn-partner-login-trigger').classList.add('hidden');
             document.getElementById('btn-login-trigger').classList.add('hidden');
