@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
+    <!-- Preconnect for Performance -->
+    <link rel="preconnect" href="https://firestore.googleapis.com">
+    <link rel="preconnect" href="https://www.gstatic.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
     <!-- Aggressive Cache Busting Meta Tags -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -20,7 +25,7 @@
                     return; 
                 }
 
-                const APP_VERSION = "11.28.1"; // Live Network Sync Update
+                const APP_VERSION = "11.29.0"; // Fast UI & Discount Sync
                 
                 const clearAllCachesAndReload = () => {
                     console.log("Wiping Service Workers and Caches for update...");
@@ -161,6 +166,15 @@
 </head>
 <body>
 
+    <!-- High-Performance Native Splash Screen -->
+    <div id="app-splash" class="fixed inset-0 bg-white z-[99999] flex flex-col items-center justify-center transition-opacity duration-500">
+        <img src="https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/New%20logo%20Gramzo%20-%206%20may.png" class="w-24 h-24 mb-6 animate-bounce object-contain">
+        <div class="w-32 h-1.5 bg-red-100 rounded-full overflow-hidden">
+            <div class="w-full h-full bg-red-600 rounded-full animate-[progress_1s_ease-in-out_infinite]"></div>
+        </div>
+        <style>@keyframes progress { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }</style>
+    </div>
+
     <!-- Tall Top Bar for Auth -->
     <div class="fixed top-0 w-full z-50 bg-white/95 backdrop-blur shadow-sm h-[60px] flex justify-between items-center px-2 sm:px-4">
         
@@ -292,7 +306,7 @@
 
                     <div>
                         <h3 class="font-black text-xl text-gray-900 mb-4 tracking-tight">Top rated near you</h3>
-                        <div id="market-list" class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 pb-6">
+                        <div id="market-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 pb-6">
                             <div class="col-span-full py-10 text-center text-gray-400 font-medium text-sm animate-pulse border border-gray-200 rounded-3xl bg-white">Loading catalogue...</div>
                         </div>
                     </div>
@@ -396,7 +410,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.28.1 - Live Network Sync</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.29.0 - Live Network Sync</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right">
                             <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
@@ -558,15 +572,33 @@
                     <i class="fa-solid fa-motorcycle absolute right-[-20px] bottom-[-20px] text-8xl text-blue-800/30"></i>
                 </div>
 
-                <!-- Specialized Dashboard for Shops (Food/Grocery) -->
+                <!-- Specialized Dashboard for Shops (Food/Grocery) with New Metrics -->
                 <div id="shop-top-dashboard" class="hidden bg-gray-900 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden">
-                    <div class="relative z-10 flex justify-between items-start">
-                        <div>
-                            <p class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">Partner Dashboard</p>
-                            <h2 class="text-2xl font-black mb-4" id="partner-welcome">Welcome, Partner!</h2>
+                    <div class="relative z-10">
+                        <p class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">Partner Dashboard</p>
+                        <h2 class="text-2xl font-black mb-4" id="partner-welcome">Welcome, Partner!</h2>
+                        
+                        <!-- New Financial Stats Grid -->
+                        <div class="grid grid-cols-2 gap-3 mt-4">
+                            <div class="bg-white/10 border border-white/20 rounded-xl p-3 backdrop-blur-sm">
+                                <p class="text-[9px] text-gray-300 font-bold uppercase mb-1">Total Sales</p>
+                                <p class="text-xl font-black text-white" id="partner-stat-sales">₹0</p>
+                            </div>
+                            <div class="bg-white/10 border border-white/20 rounded-xl p-3 backdrop-blur-sm">
+                                <p class="text-[9px] text-gray-300 font-bold uppercase mb-1">Completed Orders</p>
+                                <p class="text-xl font-black text-white" id="partner-stat-orders">0</p>
+                            </div>
+                            <div class="bg-white/10 border border-white/20 rounded-xl p-3 backdrop-blur-sm">
+                                <p class="text-[9px] text-gray-300 font-bold uppercase mb-1">Commission (₹5/order)</p>
+                                <p class="text-xl font-black text-red-400" id="partner-stat-comm">₹0</p>
+                            </div>
+                            <div class="bg-white/10 border border-white/20 rounded-xl p-3 backdrop-blur-sm">
+                                <p class="text-[9px] text-gray-300 font-bold uppercase mb-1">Delivery Fees</p>
+                                <p class="text-xl font-black text-emerald-400" id="partner-stat-delivery">₹0</p>
+                            </div>
                         </div>
                     </div>
-                    <i class="fa-solid fa-store absolute right-[-20px] bottom-[-20px] text-8xl text-gray-800"></i>
+                    <i class="fa-solid fa-store absolute right-[-20px] bottom-[-20px] text-8xl text-gray-800 opacity-50 pointer-events-none"></i>
                 </div>
                 
                 <!-- Partner Tasks Tabs -->
@@ -720,6 +752,23 @@
                                 <input type="file" id="prod-image-upload" accept="image/*" class="w-full text-[10px] text-gray-500 border border-gray-200 rounded-xl p-1.5 bg-gray-50 mt-1">
                             </div>
                         </div>
+
+                        <!-- NEW: Item Level Discount Fields -->
+                        <div class="flex gap-3">
+                            <div class="flex-1">
+                                <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Discount Type</label>
+                                <select id="prod-discount-type" class="input-field mt-1 bg-white">
+                                    <option value="None">None</option>
+                                    <option value="Percentage">% Percentage</option>
+                                    <option value="Flat">₹ Flat Amount</option>
+                                </select>
+                            </div>
+                            <div class="flex-1">
+                                <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Discount Value</label>
+                                <input type="number" id="prod-discount-value" class="input-field mt-1" placeholder="e.g. 10">
+                            </div>
+                        </div>
+
                         <div id="variant-container" class="space-y-2">
                             <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Portion & Price</label>
                             <div class="flex gap-2 variant-row">
@@ -1090,13 +1139,13 @@
         window.lastKnownOrders = {}; 
         let unsubscribeListeners = []; 
         let currentAuthRole = 'User'; 
-        window.currentUserMainCategory = 'Food Owner'; // Default to Food
+        window.currentUserMainCategory = 'Food Owner';
 
         // RATING STATE
         window.currentRatingOrderId = null;
         window.currentRatingPartnerId = null;
         window.selectedRating = 0;
-        window.editingProductId = null; // Added to track edit mode
+        window.editingProductId = null;
 
         // ADMIN TABS STATE
         window.adminCurrentUserTab = 'All';
@@ -1259,22 +1308,19 @@
         window.alertAudio.loop = true; 
 
         window.speakAlert = (text) => {
-    try {
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel();
-            const msg = new SpeechSynthesisUtterance(text);
-            
-            // This forces the device to use the Bengali engine to read the text
-            msg.lang = 'bn-IN'; 
-            msg.rate = 0.9;
-            window.speechSynthesis.speak(msg);
-        }
-        window.alertAudio.play().catch(e => console.log("Audio blocked."));
-    } catch(e) {
-        console.error("Speech Synthesis Error:", e);
-    }
-};
-
+            try {
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                    const msg = new SpeechSynthesisUtterance(text);
+                    msg.lang = 'bn-IN'; 
+                    msg.rate = 0.9;
+                    window.speechSynthesis.speak(msg);
+                }
+                window.alertAudio.play().catch(e => console.log("Audio blocked."));
+            } catch(e) {
+                console.error("Speech Synthesis Error:", e);
+            }
+        };
 
         window.stopAlertSound = () => {
             window.alertAudio.pause();
@@ -2196,31 +2242,32 @@
             }, 3000);
         };
 
-        // --- NEW ISOLATED NOTIFICATION REGISTRATION ---
+        // --- ISOLATED NOTIFICATION REGISTRATION ---
         window.registerDeviceForNotifications = async () => {
-    console.log("DEBUG: Registering device for role:", currentUser ? currentUser.role : "Unknown");
-    
-    if ('serviceWorker' in navigator && messaging) {
-        try {
-            const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-            const permission = await Notification.requestPermission();
+            console.log("DEBUG: Registering device for role:", currentUser ? currentUser.role : "Unknown");
             
-            if (permission === 'granted') {
-                const token = await getToken(messaging, { 
-                    vapidKey: 'BM4kAcfdUnR_a3T_4akm1Y-VsebvaZ8kTCShHLFqoCxGjHIOfILQP0QhpYHLtNXXIOXAqF8RiE9iUZ8YuWSU7MU',
-                    serviceWorkerRegistration: registration 
-                });
-                
-                if (token && currentUser && currentUser.phone) {
-                    await window.dbCall(setDoc(getDocRef('users', currentUser.phone), { fcmToken: token }, { merge: true }), 5000);
-                    console.log("DEBUG: Token saved for role:", currentUser.role);
+            if ('serviceWorker' in navigator && messaging) {
+                try {
+                    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+                    const permission = await Notification.requestPermission();
+                    
+                    if (permission === 'granted') {
+                        const token = await getToken(messaging, { 
+                            vapidKey: 'BM4kAcfdUnR_a3T_4akm1Y-VsebvaZ8kTCShHLFqoCxGjHIOfILQP0QhpYHLtNXXIOXAqF8RiE9iUZ8YuWSU7MU',
+                            serviceWorkerRegistration: registration 
+                        });
+                        
+                        if (token && currentUser && currentUser.phone) {
+                            await window.dbCall(setDoc(getDocRef('users', currentUser.phone), { fcmToken: token }, { merge: true }), 5000);
+                            console.log("DEBUG: Token saved for role:", currentUser.role);
+                        }
+                    }
+                } catch (err) {
+                    console.error("DEBUG: Registration failed:", err);
                 }
             }
-        } catch (err) {
-            console.error("DEBUG: Registration failed:", err);
-        }
-    }
-};
+        };
+
         const renderProducts = (items) => {
             const listEl = document.getElementById('market-list');
             const chipsEl = document.getElementById('food-category-chips');
@@ -2260,7 +2307,7 @@
             });
             
             if (currentRestaurantFilter || window.currentUserMainCategory === 'Grocery Shop') {
-                listEl.className = "grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 pb-6";
+                listEl.className = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 pb-6";
             } else {
                 listEl.className = "flex gap-5 overflow-x-auto pb-6 no-scrollbar snap-x";
             }
@@ -2270,39 +2317,49 @@
                 return;
             }
 
-            const cardWidthClass = currentRestaurantFilter || window.currentUserMainCategory === 'Grocery Shop' ? 'col-span-1 w-full' : 'w-[280px] sm:w-[320px] shrink-0 snap-center';
+            const isCarousel = !currentRestaurantFilter && window.currentUserMainCategory !== 'Grocery Shop';
+            const cardWidthClass = isCarousel ? 'w-[280px] sm:w-[320px] shrink-0 snap-center' : 'w-full';
 
             listEl.innerHTML = filtered.map(p => {
                 const hasVariants = p.variants && p.variants.length > 0;
-                const displayPrice = hasVariants ? p.variants[0].price : p.price;
+                let origPrice = parseFloat(hasVariants ? p.variants[0].price : p.price);
+                let finalPrice = origPrice;
+                let discountBadge = '';
+
+                // Discount Calculation Logic
+                if (p.discountValue > 0 && p.discountType !== 'None') {
+                    if (p.discountType === 'Percentage') {
+                        finalPrice = origPrice - (origPrice * p.discountValue / 100);
+                        discountBadge = `<span class="bg-red-50 text-red-600 text-[8px] font-black px-1.5 py-0.5 rounded shadow-sm border border-red-100 ml-2 whitespace-nowrap">${p.discountValue}% OFF</span>`;
+                    } else if (p.discountType === 'Flat') {
+                        finalPrice = origPrice - p.discountValue;
+                        discountBadge = `<span class="bg-red-50 text-red-600 text-[8px] font-black px-1.5 py-0.5 rounded shadow-sm border border-red-100 ml-2 whitespace-nowrap">₹${p.discountValue} OFF</span>`;
+                    }
+                }
+                finalPrice = Math.max(0, Math.round(finalPrice));
+
                 const isClosed = p.shopStatus === 'Closed' || p.shopStatus === 'Offline';
                 const isOutOfStock = p.inStock === false;
                 
-                const textSizeTitle = currentRestaurantFilter || window.currentUserMainCategory === 'Grocery Shop' ? 'text-xs' : 'text-sm';
-                const imgHeight = currentRestaurantFilter || window.currentUserMainCategory === 'Grocery Shop' ? 'h-24' : 'h-32';
-                
-                const extraDetailsClass = currentRestaurantFilter || window.currentUserMainCategory === 'Grocery Shop' ? 'hidden sm:block' : 'block';
-                
-                let addressDisplay = `<div class="mb-2">
-                    <p class="text-[10px] font-bold text-gray-800 truncate bg-gray-100 inline-block px-1.5 py-0.5 rounded mb-1"><i class="fa-solid fa-store text-red-500 mr-1"></i> ${p.shopName || 'Gramzo Partner'}</p>
-                    <div class="${extraDetailsClass}">
-                        ${p.shopAddress ? `<p class="text-[9px] text-gray-500 font-medium leading-tight truncate"><i class="fa-solid fa-location-dot text-gray-400 mr-1"></i> ${p.shopAddress}</p>` : ''}
-                        ${(p.openTime && p.closeTime) ? `<p class="text-[9px] text-blue-600 font-bold mt-0.5 leading-tight"><i class="fa-regular fa-clock text-blue-500 mr-1"></i> ${window.formatTime12(p.openTime)} - ${window.formatTime12(p.closeTime)}</p>` : ''}
-                    </div>
-                </div>`;
-                
-                let prepTimeDisplay = p.prepTime ? `<p class="text-[9px] sm:text-[10px] text-orange-600 font-bold mb-2"><i class="fa-regular fa-clock mr-1"></i> Prep: ${p.prepTime} mins</p>` : '';
-                
-                let qtyDisplay = `<p class="text-[9px] sm:text-[10px] text-gray-500 uppercase tracking-wide font-medium mb-2">${p.qty || ''}</p>`;
+                let addressDisplay = `<p class="text-[9px] text-gray-500 font-medium leading-tight line-clamp-1 mb-1"><i class="fa-solid fa-store text-gray-300 mr-1"></i> ${p.shopName || 'Gramzo Partner'}</p>`;
+                let prepTimeDisplay = p.prepTime ? `<p class="text-[9px] text-orange-600 font-bold mb-1"><i class="fa-regular fa-clock mr-1"></i> ${p.prepTime} mins</p>` : '';
+                let qtyDisplay = `<p class="text-[10px] text-gray-500 uppercase tracking-wide font-bold mb-1">${p.qty || ''}</p>`;
                 
                 if (hasVariants) {
-                    const options = p.variants.map((v, i) => `<option value="${i}" data-price="${v.price}">${v.qty}</option>`).join('');
+                    const options = p.variants.map((v, i) => {
+                        let vOrig = parseFloat(v.price);
+                        let vFinal = vOrig;
+                        if (p.discountValue > 0 && p.discountType !== 'None') {
+                            vFinal = p.discountType === 'Percentage' ? vOrig - (vOrig * p.discountValue / 100) : vOrig - p.discountValue;
+                        }
+                        vFinal = Math.max(0, Math.round(vFinal));
+                        return `<option value="${i}" data-original="${vOrig}" data-price="${vFinal}">${v.qty}</option>`;
+                    }).join('');
+                    
                     qtyDisplay = `
-                        <div class="mb-2">
-                            <select onchange="window.updatePriceDisplay(this, 'price-${p.id}')" id="sel-${p.id}" class="text-[10px] sm:text-xs bg-gray-50 border border-gray-200 rounded-lg p-1 outline-none focus:ring-1 ring-red-500 font-medium text-gray-700 w-full">
-                                ${options}
-                            </select>
-                        </div>
+                        <select onchange="window.updatePriceDisplay(this, 'price-${p.id}', 'orig-${p.id}')" id="sel-${p.id}" class="text-[10px] bg-gray-50 border border-gray-200 rounded-lg p-1 outline-none focus:ring-1 ring-red-500 font-medium text-gray-700 w-full mb-1">
+                            ${options}
+                        </select>
                     `;
                 }
 
@@ -2313,9 +2370,8 @@
                     actionHtml = `<span class="text-[9px] font-black text-orange-500 uppercase tracking-widest bg-orange-50 px-1.5 py-1 rounded">No Stock</span>`;
                 } else {
                     actionHtml = `
-                        <span id="price-${p.id}" class="text-sm sm:text-lg font-black text-red-600 tracking-tight">₹${displayPrice}</span>
-                        <button type="button" onclick="${hasVariants ? `window.addToCartVariant('${p.id}', '${p.name.replace(/'/g, "\\'")}', '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')` : `window.addToCartStandard('${p.id}', '${p.name.replace(/'/g, "\\'")}', ${p.price}, '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')`}" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition-colors active:scale-90 shrink-0 border border-red-100">
-                            <i class="fa-solid fa-plus text-[10px] sm:text-xs"></i>
+                        <button type="button" onclick="${hasVariants ? `window.addToCartVariant('${p.id}', '${p.name.replace(/'/g, "\\'")}', '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')` : `window.addToCartStandard('${p.id}', '${p.name.replace(/'/g, "\\'")}', ${finalPrice}, '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')`}" class="w-8 h-8 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition-colors active:scale-90 shrink-0 border border-red-100 shadow-sm">
+                            <i class="fa-solid fa-plus text-xs"></i>
                         </button>
                     `;
                 }
@@ -2323,20 +2379,31 @@
                 const dummyRating = `4.${Math.floor(Math.random() * 5) + 1}`;
 
                 return `
-                    <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex flex-col transform transition hover:-translate-y-1 hover:shadow-md ${cardWidthClass} ${isClosed || isOutOfStock ? 'opacity-60 grayscale-[0.5]' : ''}">
-                        <div class="${imgHeight} bg-gray-100 relative">
+                    <div class="bg-white rounded-2xl p-2 sm:p-3 shadow-sm border border-gray-100 flex gap-3 transform transition hover:-translate-y-1 hover:shadow-md ${cardWidthClass} ${isClosed || isOutOfStock ? 'opacity-60 grayscale-[0.5]' : ''}">
+                        <div class="w-24 h-24 sm:w-28 sm:h-28 shrink-0 bg-gray-100 rounded-xl relative overflow-hidden border border-gray-100">
                             <img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x300/f3f4f6/a1a1aa?text=Image'">
-                            ${p.category ? `<span class="absolute top-2 left-2 bg-white/90 backdrop-blur text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded text-gray-800 shadow-sm">${p.category}</span>` : ''}
-                            <span class="absolute bottom-2 right-2 bg-white/95 backdrop-blur text-[9px] font-black px-1.5 py-0.5 rounded text-gray-800 shadow-sm flex items-center gap-1"><i class="fa-solid fa-star text-yellow-500 text-[8px]"></i> ${dummyRating}</span>
+                            ${p.category ? `<span class="absolute top-1 left-1 bg-white/90 backdrop-blur text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded text-gray-800 shadow-sm">${p.category}</span>` : ''}
                         </div>
-                        <div class="p-2.5 sm:p-3 flex-1 flex flex-col justify-between">
+                        
+                        <div class="flex-1 flex flex-col justify-between overflow-hidden">
                             <div>
-                                <h4 class="font-bold text-gray-900 ${textSizeTitle} leading-tight mb-1 truncate">${p.name}</h4>
+                                <div class="flex items-start justify-between gap-1 mb-1">
+                                    <h4 class="font-bold text-gray-900 text-sm leading-tight line-clamp-2">${p.name}</h4>
+                                    <span class="text-[9px] font-black px-1.5 py-0.5 rounded bg-orange-50 text-orange-600 flex items-center gap-0.5 shrink-0"><i class="fa-solid fa-star text-[8px]"></i> ${dummyRating}</span>
+                                </div>
                                 ${addressDisplay}
-                                ${prepTimeDisplay}
                                 ${qtyDisplay}
+                                ${prepTimeDisplay}
                             </div>
-                            <div class="flex justify-between items-center mt-auto pt-2 border-t border-gray-50">
+                            
+                            <div class="flex justify-between items-end mt-2">
+                                <div class="flex flex-col leading-none">
+                                    ${discountBadge ? `<span id="orig-${p.id}" class="text-[10px] text-gray-400 line-through mb-0.5">₹${origPrice}</span>` : ''}
+                                    <div class="flex items-center">
+                                        <span id="price-${p.id}" class="text-base font-black text-gray-900 tracking-tight">₹${finalPrice}</span>
+                                        ${discountBadge}
+                                    </div>
+                                </div>
                                 ${actionHtml}
                             </div>
                         </div>
@@ -2418,7 +2485,6 @@
 
             onSnapshot(getCol('products'), (snap) => {
                 let items = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
-                
                 extractRestaurants(); 
                 renderProducts(items);
             }, (err) => {
@@ -2460,9 +2526,12 @@
             window.loadMarketplaceData();
         };
 
-        window.updatePriceDisplay = (selectEl, priceId) => {
-            const price = selectEl.options[selectEl.selectedIndex].dataset.price;
-            document.getElementById(priceId).innerText = `₹${price}`;
+        window.updatePriceDisplay = (selectEl, priceId, origId) => {
+            const finalP = selectEl.options[selectEl.selectedIndex].dataset.price;
+            const origP = selectEl.options[selectEl.selectedIndex].dataset.original;
+            document.getElementById(priceId).innerText = `₹${finalP}`;
+            const origEl = document.getElementById(origId);
+            if(origEl) origEl.innerText = `₹${origP}`;
         };
 
         window.setupBottomNav = (role) => {
@@ -2788,6 +2857,8 @@
                     subtotal: sub || 0, 
                     discount: discountAmt || 0, 
                     promoCode: window.promoCode || null,
+                    deliveryFee: deliveryFee || 0,
+                    platformFee: handlingFee || 0,
                     total: total || 0, 
                     address: fullAddress || '', 
                     status: 'Placed', 
@@ -2956,6 +3027,12 @@
                 if(p.category && document.getElementById('prod-item-category')) {
                     document.getElementById('prod-item-category').value = p.category;
                 }
+
+                // Load Discount Values
+                const discTypeEl = document.getElementById('prod-discount-type');
+                const discValEl = document.getElementById('prod-discount-value');
+                if (discTypeEl) discTypeEl.value = p.discountType || 'None';
+                if (discValEl) discValEl.value = p.discountValue || '';
                 
                 const container = document.getElementById('variant-container');
                 container.innerHTML = '<label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Portion & Price</label>';
@@ -2987,6 +3064,12 @@
             const prepTime = document.getElementById('prod-prep-time').value.trim() || '15';
             const itemCatEl = document.getElementById('prod-item-category');
             const itemCategory = itemCatEl ? itemCatEl.value : 'Others';
+            
+            // New Discount Values
+            const discountTypeEl = document.getElementById('prod-discount-type');
+            const discountValueEl = document.getElementById('prod-discount-value');
+            const discountType = discountTypeEl ? discountTypeEl.value : 'None';
+            const discountValue = discountValueEl ? (parseFloat(discountValueEl.value) || 0) : 0;
             
             if(!name) return window.showToast("Enter item name.", "error");
 
@@ -3037,6 +3120,8 @@
                     qty: variants[0].qty,     
                     prepTime: prepTime,
                     category: itemCategory, 
+                    discountType: discountType,
+                    discountValue: discountValue,
                     partnerId: currentUser.phone,
                     shopName: currentUser.shopName,
                     shopAddress: currentUser.shopAddress || '',
@@ -3060,6 +3145,7 @@
                 
                 document.getElementById('prod-name').value = '';
                 document.getElementById('prod-prep-time').value = '';
+                if(discountValueEl) discountValueEl.value = '';
                 if(imgInput) imgInput.value = '';
                 document.getElementById('variant-container').innerHTML = `
                     <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Portion & Price</label>
@@ -3396,7 +3482,7 @@
                         </td>
                         <td class="p-3 font-medium text-gray-600 text-xs align-top pt-4">${o.type === 'Ride' ? (o.riderName || 'Pending') : (o.restaurantName || '-')}</td>
                         <td class="p-3 font-black text-gray-900 text-xs align-top pt-4">₹${o.total ? o.total.toFixed(2) : (o.amount || 0)}</td>
-                        <td class="p-3 text-right uppercase text-[9px] font-black ${statusColor} tracking-wider align-top pt-4">${o.status}</td>
+                        <td class="p-3 text-right uppercase text-[9px] font-black ${statusColor} tracking-wider align-top pt-4">${o.status}
                     </tr>`;
             });
             adminLog.innerHTML = html;
