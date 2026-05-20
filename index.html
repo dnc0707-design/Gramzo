@@ -1186,6 +1186,15 @@
             }
         });
 
+        window.hideSplashScreen = () => {
+            const splash = document.getElementById('app-splash');
+            if (splash && splash.style.display !== 'none') {
+                splash.style.opacity = '0';
+                splash.style.pointerEvents = 'none';
+                setTimeout(() => { splash.style.display = 'none'; }, 500);
+            }
+        };
+
         // CUSTOM PROMPT/CONFIRM STATE
         let customPromptResolve = null;
         let customConfirmResolve = null;
@@ -2242,7 +2251,7 @@
             }, 3000);
         };
 
-        // --- ISOLATED NOTIFICATION REGISTRATION ---
+        // --- NEW ISOLATED NOTIFICATION REGISTRATION ---
         window.registerDeviceForNotifications = async () => {
             console.log("DEBUG: Registering device for role:", currentUser ? currentUser.role : "Unknown");
             
@@ -2267,7 +2276,7 @@
                 }
             }
         };
-
+        
         const renderProducts = (items) => {
             const listEl = document.getElementById('market-list');
             const chipsEl = document.getElementById('food-category-chips');
@@ -2306,27 +2315,22 @@
                 return true;
             });
             
-            if (currentRestaurantFilter || window.currentUserMainCategory === 'Grocery Shop') {
-                listEl.className = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 pb-6";
-            } else {
-                listEl.className = "flex gap-5 overflow-x-auto pb-6 no-scrollbar snap-x";
-            }
+            // List configuration for Grid / Vertical layout
+            listEl.className = "flex flex-col gap-3 pb-6";
 
             if (filtered.length === 0) {
                 listEl.innerHTML = '<div class="col-span-full py-10 text-center text-gray-400 font-medium text-sm border border-gray-200 rounded-3xl w-full">No items found. Try a different search.</div>';
                 return;
             }
 
-            const isCarousel = !currentRestaurantFilter && window.currentUserMainCategory !== 'Grocery Shop';
-            const cardWidthClass = isCarousel ? 'w-[280px] sm:w-[320px] shrink-0 snap-center' : 'w-full';
-
             listEl.innerHTML = filtered.map(p => {
                 const hasVariants = p.variants && p.variants.length > 0;
+                
                 let origPrice = parseFloat(hasVariants ? p.variants[0].price : p.price);
                 let finalPrice = origPrice;
                 let discountBadge = '';
 
-                // Discount Calculation Logic
+                // COMPUTE DISCOUNTS
                 if (p.discountValue > 0 && p.discountType !== 'None') {
                     if (p.discountType === 'Percentage') {
                         finalPrice = origPrice - (origPrice * p.discountValue / 100);
@@ -2341,7 +2345,7 @@
                 const isClosed = p.shopStatus === 'Closed' || p.shopStatus === 'Offline';
                 const isOutOfStock = p.inStock === false;
                 
-                let addressDisplay = `<p class="text-[9px] text-gray-500 font-medium leading-tight line-clamp-1 mb-1"><i class="fa-solid fa-store text-gray-300 mr-1"></i> ${p.shopName || 'Gramzo Partner'}</p>`;
+                let addressDisplay = `<p class="text-[9px] text-gray-500 font-medium leading-tight truncate mb-1"><i class="fa-solid fa-store text-gray-300 mr-1"></i> ${p.shopName || 'Gramzo Partner'}</p>`;
                 let prepTimeDisplay = p.prepTime ? `<p class="text-[9px] text-orange-600 font-bold mb-1"><i class="fa-regular fa-clock mr-1"></i> ${p.prepTime} mins</p>` : '';
                 let qtyDisplay = `<p class="text-[10px] text-gray-500 uppercase tracking-wide font-bold mb-1">${p.qty || ''}</p>`;
                 
@@ -2379,24 +2383,24 @@
                 const dummyRating = `4.${Math.floor(Math.random() * 5) + 1}`;
 
                 return `
-                    <div class="bg-white rounded-2xl p-2 sm:p-3 shadow-sm border border-gray-100 flex gap-3 transform transition hover:-translate-y-1 hover:shadow-md ${cardWidthClass} ${isClosed || isOutOfStock ? 'opacity-60 grayscale-[0.5]' : ''}">
-                        <div class="w-24 h-24 sm:w-28 sm:h-28 shrink-0 bg-gray-100 rounded-xl relative overflow-hidden border border-gray-100">
+                    <div class="bg-white rounded-xl p-2 shadow-sm border border-gray-100 flex gap-3 transform transition hover:-translate-y-1 w-full ${isClosed || isOutOfStock ? 'opacity-60 grayscale-[0.5]' : ''}">
+                        <div class="w-24 h-24 shrink-0 bg-gray-100 rounded-lg relative overflow-hidden border border-gray-100">
                             <img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x300/f3f4f6/a1a1aa?text=Image'">
-                            ${p.category ? `<span class="absolute top-1 left-1 bg-white/90 backdrop-blur text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded text-gray-800 shadow-sm">${p.category}</span>` : ''}
+                            ${p.category ? `<span class="absolute top-1 left-1 bg-white/90 backdrop-blur text-[8px] font-black uppercase tracking-widest px-1 py-0.5 rounded text-gray-800 shadow-sm">${p.category}</span>` : ''}
                         </div>
                         
                         <div class="flex-1 flex flex-col justify-between overflow-hidden">
                             <div>
-                                <div class="flex items-start justify-between gap-1 mb-1">
+                                <div class="flex items-start justify-between gap-1 mb-0.5">
                                     <h4 class="font-bold text-gray-900 text-sm leading-tight line-clamp-2">${p.name}</h4>
-                                    <span class="text-[9px] font-black px-1.5 py-0.5 rounded bg-orange-50 text-orange-600 flex items-center gap-0.5 shrink-0"><i class="fa-solid fa-star text-[8px]"></i> ${dummyRating}</span>
+                                    <span class="text-[9px] font-black px-1 py-0.5 rounded bg-orange-50 text-orange-600 flex items-center gap-0.5 shrink-0"><i class="fa-solid fa-star text-[8px]"></i> ${dummyRating}</span>
                                 </div>
                                 ${addressDisplay}
                                 ${qtyDisplay}
                                 ${prepTimeDisplay}
                             </div>
                             
-                            <div class="flex justify-between items-end mt-2">
+                            <div class="flex justify-between items-end mt-1">
                                 <div class="flex flex-col leading-none">
                                     ${discountBadge ? `<span id="orig-${p.id}" class="text-[10px] text-gray-400 line-through mb-0.5">₹${origPrice}</span>` : ''}
                                     <div class="flex items-center">
@@ -2485,6 +2489,7 @@
 
             onSnapshot(getCol('products'), (snap) => {
                 let items = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
+                
                 extractRestaurants(); 
                 renderProducts(items);
             }, (err) => {
@@ -2513,7 +2518,7 @@
                 if (banner) {
                     document.getElementById('banner-restaurant-name').innerText = shopName;
                     document.getElementById('banner-restaurant-address').innerHTML = `<i class="fa-solid fa-location-dot mr-1"></i> ${shopAddress || 'Local Partner'}`;
-                    document.getElementById('banner-call-btn').href = `tel:${shopPhone}`;
+                    document.getElementById('banner-call-btn').href = `tel:${shopPhone || partnerId}`;
                     banner.classList.remove('hidden');
                 }
                 if (marketplaceRow) marketplaceRow.classList.add('hidden');
@@ -3482,7 +3487,7 @@
                         </td>
                         <td class="p-3 font-medium text-gray-600 text-xs align-top pt-4">${o.type === 'Ride' ? (o.riderName || 'Pending') : (o.restaurantName || '-')}</td>
                         <td class="p-3 font-black text-gray-900 text-xs align-top pt-4">₹${o.total ? o.total.toFixed(2) : (o.amount || 0)}</td>
-                        <td class="p-3 text-right uppercase text-[9px] font-black ${statusColor} tracking-wider align-top pt-4">${o.status}
+                        <td class="p-3 text-right uppercase text-[9px] font-black ${statusColor} tracking-wider align-top pt-4">${o.status}</td>
                     </tr>`;
             });
             adminLog.innerHTML = html;
