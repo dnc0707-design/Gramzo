@@ -15,69 +15,50 @@
     <script>
         (function() {
             try {
-                const APP_VERSION = "11.28.0"; // Bumped version to force update
+                if (window.location.protocol === 'file:' || window.location.protocol === 'content:') {
+                    console.log("Native App Wrapper detected. Skipping aggressive web cache buster.");
+                    return; 
+                }
+
+                const APP_VERSION = "11.28.1"; // Live Network Sync Update
                 
                 const clearAllCachesAndReload = () => {
-                    // Prevent infinite reload loops
-                    if (sessionStorage.getItem('gramzo_reloading')) {
-                        console.log("Already reloading, preventing loop.");
-                        return;
-                    }
-                    sessionStorage.setItem('gramzo_reloading', 'true');
                     console.log("Wiping Service Workers and Caches for update...");
-                    
-                    // 1. Unregister Service Worker (Crucial for PWA and APK updates)
                     if ('serviceWorker' in navigator) {
                         navigator.serviceWorker.getRegistrations().then(regs => {
                             for(let reg of regs) reg.unregister();
                         });
                     }
-                    
-                    // 2. Wipe Cache Storage completely
                     if ('caches' in window) {
                         caches.keys().then(names => { names.forEach(name => caches.delete(name)) });
                     }
-                    
-                    // 3. Update Local Storage
                     localStorage.setItem("gramzo_app_version", APP_VERSION);
-                    
-                    // 4. Force hard reload bypassing cache with unique timestamp
                     setTimeout(() => {
                         window.location.href = window.location.href.split('?')[0] + '?v=' + new Date().getTime();
                     }, 800);
                 };
 
-                // Clear the reloading flag once successfully loaded
-                if (sessionStorage.getItem('gramzo_reloading')) {
-                    sessionStorage.removeItem('gramzo_reloading');
-                }
-
-                // Register Service Worker normally
                 if ('serviceWorker' in navigator) {
                     navigator.serviceWorker.register('/firebase-messaging-sw.js').then(reg => reg.update()).catch(e => {});
                 }
 
-                // Check Local Version on Initial Load
                 const storedVersion = localStorage.getItem("gramzo_app_version");
                 if (storedVersion !== APP_VERSION) {
                     clearAllCachesAndReload();
-                    return; // Stop execution while reloading
+                    return; 
                 }
 
-                // Background check for newer version on server
                 setTimeout(() => {
-                    // FORCE bypass Service Worker cache using unique string
                     fetch(window.location.href.split('?')[0] + '?nocache=' + new Date().getTime(), { 
-                        cache: "no-store",
+                        cache: "reload",
                         headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
                     })
                     .then(res => res.text())
                     .then(html => {
-                        // Strict Regex extraction of the live server's version
                         const match = html.match(/const APP_VERSION = ["']([^"']+)["']/);
                         if (match && match[1] && match[1] !== APP_VERSION) {
                             console.log("Update found on server: " + match[1] + ". Force updating...");
-                            localStorage.removeItem("gramzo_app_version"); // Force update trigger
+                            localStorage.removeItem("gramzo_app_version"); 
                             clearAllCachesAndReload();
                         }
                     }).catch(e => console.log("Offline mode active."));
@@ -92,7 +73,6 @@
     <!-- PWA Meta Tags & Manifest -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#E23744">
-    <!-- NEW LOGO -->
     <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/New%20logo%20Gramzo%20-%206%20may.png">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -109,8 +89,6 @@
         };
     </script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDTwDel0JxkWaXuXSHf-whhxJTkqlNlxa0&libraries=places&callback=initGoogleMap" async defer></script>
-    
-    <!-- jsPDF for Invoice Generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
@@ -218,10 +196,7 @@
                     <p id="menu-name" class="font-bold text-sm text-gray-900">Name</p>
                     <p id="menu-phone" class="text-xs text-gray-500 font-medium">Phone</p>
                 </div>
-                <div class="p-2 space-y-1">
-                    <button type="button" onclick="window.forceAppUpdate()" class="w-full text-left px-4 py-2.5 text-sm font-bold text-gray-700 hover:bg-gray-100 rounded-xl transition-colors flex items-center gap-2">
-                        <i class="fa-solid fa-rotate text-blue-500"></i> App Update
-                    </button>
+                <div class="p-2">
                     <button type="button" onclick="window.logout()" class="w-full text-left px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 rounded-xl transition-colors flex items-center gap-2">
                         <i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out
                     </button>
@@ -288,25 +263,31 @@
 
                     <!-- Category Chips for Filtering -->
                     <div id="food-category-chips" class="hidden mt-4 flex gap-2 overflow-x-auto hide-scroll pb-2">
-                        <!-- Filled by JS when viewing a specific restaurant -->
-                    </div>
-
-                    <!-- NEW RESTAURANT BANNER -->
-                    <div id="restaurant-banner" class="hidden bg-white p-4 rounded-2xl shadow-sm border border-red-100 mb-4 mt-2 relative overflow-hidden">
-                        <div class="absolute top-0 right-0 w-24 h-24 bg-red-50 rounded-bl-full opacity-50 pointer-events-none"></div>
-                        <h2 id="banner-shop-name" class="text-xl font-black text-gray-900 leading-tight">Shop Name</h2>
-                        <p id="banner-shop-address" class="text-xs text-gray-500 mt-1.5 font-medium"><i class="fa-solid fa-location-dot text-red-400 mr-1"></i> <span>Address</span></p>
-                        <div class="mt-3 flex gap-2">
-                            <a href="#" id="banner-shop-phone" class="bg-red-50 text-red-600 px-4 py-2 rounded-xl text-xs font-bold inline-flex items-center gap-1.5 border border-red-100 shadow-sm active:scale-95 transition-transform"><i class="fa-solid fa-phone"></i> Call Store</a>
-                        </div>
+                        <!-- Filled by JS -->
                     </div>
 
                     <div>
-                        <div class="flex justify-between items-end mb-3 mt-4">
+                        <!-- Restaurant Header Banner (Dynamic) -->
+                        <div id="active-restaurant-banner" class="hidden bg-white border border-gray-200 shadow-sm rounded-2xl p-4 mt-4 flex justify-between items-center relative overflow-hidden">
+                            <div class="absolute top-0 left-0 w-1 h-full bg-red-500"></div>
+                            <div>
+                                <h3 id="banner-restaurant-name" class="font-black text-lg text-gray-900 leading-tight mb-1">Restaurant Name</h3>
+                                <p id="banner-restaurant-address" class="text-[10px] text-gray-500 font-medium mb-1"><i class="fa-solid fa-location-dot mr-1"></i> Address goes here</p>
+                                <p class="text-[9px] text-emerald-600 font-bold uppercase tracking-widest"><i class="fa-solid fa-circle-check mr-1"></i> Currently Open</p>
+                            </div>
+                            <div class="flex flex-col items-end gap-2 shrink-0">
+                                <a id="banner-call-btn" href="#" class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 py-1.5 rounded-lg text-[10px] font-black flex items-center gap-1.5 transition-colors border border-gray-200">
+                                    <i class="fa-solid fa-phone text-blue-600"></i> Call Store
+                                </a>
+                                <button type="button" onclick="window.filterRestaurant(null, '')" class="text-[10px] font-bold text-red-500 hover:underline">View All Stores</button>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-end mb-3 mt-4" id="marketplace-header-row">
                             <h3 class="font-black text-lg text-gray-900 tracking-tight" id="marketplace-title">Restaurants Near You</h3>
                             <button type="button" id="btn-clear-filter" onclick="window.filterRestaurant(null, '')" class="hidden text-xs font-bold text-red-600 bg-red-50 px-3 py-1 rounded-full border border-red-100 shadow-sm">Clear Filter</button>
                         </div>
-                        <div id="restaurant-list-carousel" class="flex gap-4 overflow-x-auto pb-4 no-scrollbar px-1 snap-x"></div>
+                        <div id="restaurant-list-carousel" class="flex flex-wrap gap-3 mb-6"></div>
                     </div>
 
                     <div>
@@ -348,7 +329,7 @@
                             </div>
                         </div>
 
-                        <!-- Round Trip (Toto Optional, Car Mandatory) -->
+                        <!-- Round Trip -->
                         <label class="flex items-center gap-2 text-xs font-bold text-gray-700 mt-3" id="round-trip-container" style="display: flex;">
                             <input type="checkbox" id="ride-round-trip" onchange="window.resetRideCalc()" class="w-4 h-4 text-red-600 focus:ring-red-500 rounded border-gray-300 disabled:opacity-50" checked disabled>
                             <span id="round-trip-label-text" class="text-red-600">Round Trip (Mandatory for Car)</span>
@@ -407,7 +388,6 @@
                             <h4 class="font-bold text-gray-900 mb-4 tracking-tight">Legal</h4>
                             <ul class="space-y-3 text-xs text-gray-500 font-medium">
                                 <li><a href="#" onclick="window.openStaticPage('terms'); return false;" class="hover:text-red-600 transition">Terms & Conditions</a></li>
-                                <!-- FIXED PRIVACY POLICY LINK -->
                                 <li><a href="#" onclick="window.openStaticPage('privacy'); return false;" class="hover:text-red-600 transition">Privacy Policy</a></li>
                             </ul>
                         </div>
@@ -416,7 +396,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.28.0 - Live Network Sync</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.28.1 - Live Network Sync</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right">
                             <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
@@ -946,7 +926,7 @@
         </div>
     </div>
 
-    <!-- Custom Prompt Modal (Replaces native prompt) -->
+    <!-- Custom Prompt Modal -->
     <div id="custom-prompt-modal" class="modal-overlay z-[600]">
         <div class="modal-content !max-w-xs">
             <h3 class="font-black text-xl text-gray-900 mb-2" id="prompt-title">Prompt</h3>
@@ -959,7 +939,7 @@
         </div>
     </div>
 
-    <!-- Custom Confirm Modal (Replaces native confirm) -->
+    <!-- Custom Confirm Modal -->
     <div id="custom-confirm-modal" class="modal-overlay z-[600]">
         <div class="modal-content !max-w-xs">
             <div class="w-12 h-12 bg-yellow-50 rounded-full flex items-center justify-center mb-3">
@@ -1061,7 +1041,6 @@
     <!-- Global WhatsApp Support Button -->
     <a href="https://wa.me/918335929505?text=Hi%20Gramzo%20Support,%20I%20need%20help" target="_blank" title="Chat with Support" class="fixed bottom-24 right-4 sm:bottom-24 sm:right-6 z-[250] w-14 h-14 bg-[#25D366] text-white rounded-full flex items-center justify-center shadow-[0_8px_20px_rgba(37,211,102,0.5)] hover:bg-[#20bd5a] transition-transform active:scale-90 border-[3px] border-white">
         <i class="fa-brands fa-whatsapp text-[34px] mt-0.5 ml-0.5"></i>
-        <!-- Ping animation ring -->
         <span class="absolute w-full h-full rounded-full border-2 border-[#25D366] animate-ping opacity-30"></span>
     </a>
 
@@ -1088,7 +1067,7 @@
 
         let messaging;
         try {
-            const messaging = getMessaging(app);
+            messaging = getMessaging(app);
         } catch(e) {
             console.warn("Firebase Messaging not supported in this browser environment.", e);
         }
@@ -1111,13 +1090,13 @@
         window.lastKnownOrders = {}; 
         let unsubscribeListeners = []; 
         let currentAuthRole = 'User'; 
-        window.currentUserMainCategory = 'Food Owner';
+        window.currentUserMainCategory = 'Food Owner'; // Default to Food
 
         // RATING STATE
         window.currentRatingOrderId = null;
         window.currentRatingPartnerId = null;
         window.selectedRating = 0;
-        window.editingProductId = null;
+        window.editingProductId = null; // Added to track edit mode
 
         // ADMIN TABS STATE
         window.adminCurrentUserTab = 'All';
@@ -1242,11 +1221,8 @@
 
                 window.currentRestaurantFilter = null; 
                 window.currentFoodCategoryFilter = null;
+                document.getElementById('active-restaurant-banner').classList.add('hidden');
                 document.getElementById('food-category-chips').classList.add('hidden');
-                
-                const banner = document.getElementById('restaurant-banner');
-                if (banner) banner.classList.add('hidden');
-                
                 document.getElementById('marketplace-title').innerText = cat === 'Food Owner' ? 'Restaurants Near You' : 'Grocery Stores Near You';
                 document.getElementById('btn-clear-filter').classList.add('hidden');
                 window.loadMarketplaceData();
@@ -1280,12 +1256,12 @@
 
         // --- Notification & Voice Alert Logic ---
         window.alertAudio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-        window.alertAudio.loop = true;
+        window.alertAudio.loop = true; 
 
         window.speakAlert = (text) => {
             try {
                 if ('speechSynthesis' in window) {
-                    window.speechSynthesis.cancel(); 
+                    window.speechSynthesis.cancel();
                     const msg = new SpeechSynthesisUtterance(text);
                     msg.rate = 1.0; 
                     window.speechSynthesis.speak(msg);
@@ -1408,20 +1384,6 @@
             }, 3000);
         };
 
-        // MANUAL REFRESH METHOD
-        window.forceAppUpdate = () => {
-            localStorage.removeItem("gramzo_app_version");
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistrations().then(regs => {
-                    for(let reg of regs) reg.unregister();
-                });
-            }
-            if ('caches' in window) {
-                caches.keys().then(names => { names.forEach(name => caches.delete(name)) });
-            }
-            window.location.href = window.location.href.split('?')[0] + '?v=' + new Date().getTime();
-        };
-
         window.openStaticPage = (page) => {
             const titleEl = document.getElementById('info-modal-title');
             const bodyEl = document.getElementById('info-modal-body');
@@ -1502,38 +1464,39 @@
                     <p class="text-gray-600 mb-4 leading-relaxed">Gramzo reserves the right to modify these terms at any time. Continued use of the platform after changes constitutes acceptance of the new terms.</p>
                 `;
             } else if (page === 'privacy') {
-                titleEl.innerText = "Privacy Policy for Gramzo";
+                titleEl.innerText = "Privacy Policy & Data Deletion";
                 bodyEl.innerHTML = `
-                    <p><strong>Last Updated:</strong> ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                    
-                    <p class="text-gray-600 mb-4 mt-2 leading-relaxed">This Privacy Policy explains how Gramzo ("we," "us," or "our") collects, uses, and protects your information when you use our mobile application.</p>
+                    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #333;">
+                        <p><strong>Last Updated:</strong> ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                        <p>This Privacy Policy explains how Gramzo ("we," "us," or "our") collects, uses, and protects your information when you use our mobile application.</p>
 
-                    <h4 class="font-black text-gray-800 text-base mt-5 mb-1">1. Information We Collect</h4>
-                    <p class="text-gray-600 mb-4 leading-relaxed">When you create an account, we collect information you provide directly to us, such as your username, email address, and password. We also use Firebase for backend services, which may collect basic app usage data to ensure the app functions correctly securely.</p>
+                        <h2 style="color: #444; margin-top: 20px; font-weight: bold;">1. Information We Collect</h2>
+                        <p>When you create an account, we collect information you provide directly to us, such as your username, email address, and password. We also use Firebase for backend services, which may collect basic app usage data to ensure the app functions correctly and securely.</p>
 
-                    <h4 class="font-black text-gray-800 text-base mt-5 mb-1">2. How We Use Your Information</h4>
-                    <p class="text-gray-600 mb-4 leading-relaxed">We use the information we collect to operate, maintain, and provide the features and functionality of Gramzo, as well as to communicate directly with you.</p>
+                        <h2 style="color: #444; margin-top: 20px; font-weight: bold;">2. How We Use Your Information</h2>
+                        <p>We use the information we collect to operate, maintain, and provide the features and functionality of Gramzo, as well as to communicate directly with you.</p>
 
-                    <h4 class="font-black text-gray-800 text-base mt-5 mb-1">3. Security</h4>
-                    <p class="text-gray-600 mb-4 leading-relaxed">All data transmitted between your device and our servers (via Firebase) is encrypted in transit. We take reasonable measures to protect your information from unauthorized access.</p>
+                        <h2 style="color: #444; margin-top: 20px; font-weight: bold;">3. Security</h2>
+                        <p>All data transmitted between your device and our servers (via Firebase) is encrypted in transit. We take reasonable measures to protect your information from unauthorized access.</p>
 
-                    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 my-5 rounded-r-lg">
-                        <h4 class="font-black text-blue-700 text-base mb-2">4. Account and Data Deletion (Your Rights)</h4>
-                        <p class="text-gray-700 mb-2">If you wish to permanently delete your Gramzo account and all associated personal data, you have the right to do so at any time. To request data deletion, please follow these steps:</p>
-                        <ol class="list-decimal pl-5 text-gray-700 space-y-1 mb-2">
-                            <li>Send an email to <strong>support@gramzo.in</strong>.</li>
-                            <li>You must include the exact user ID you used to register your Gramzo account.</li>
-                            <li>Use the subject line: <strong>"Account Deletion Request"</strong>.</li>
-                            <li>In the body of the email, state your Gramzo user ID and explicitly ask for your account and data to be deleted.</li>
-                        </ol>
-                        <p class="text-gray-700 mt-2">Upon receiving your request, we will verify your identity and permanently delete your account, credentials, and associated data from our active databases within 14 days.</p>
+                        <div style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-left: 5px solid #007bff; padding: 15px; margin: 20px 0; border-radius: 4px;">
+                            <h2 style="margin-top: 0; color: #007bff; font-weight: bold;">4. Account and Data Deletion (Your Rights)</h2>
+                            <p>If you wish to permanently delete your Gramzo account and all associated personal data, you have the right to do so at any time. To request data deletion, please follow these steps:</p>
+                            <ol style="margin-left: 20px; margin-top: 10px;">
+                                <li>Send an email to <strong>support@gramzo.in</strong>.</li>
+                                <li>You must include the exact user ID (Phone Number) you used to register your Gramzo account.</li>
+                                <li>Use the subject line: <strong>"Account Deletion Request"</strong>.</li>
+                                <li>In the body of the email, state your Gramzo phone number and explicitly ask for your account and data to be deleted.</li>
+                            </ol>
+                            <p style="margin-top: 10px;">Upon receiving your request, we will verify your identity and permanently delete your account, credentials, and associated data from our active databases within 14 days.</p>
+                        </div>
+
+                        <h2 style="color: #444; margin-top: 20px; font-weight: bold;">5. Changes to This Policy</h2>
+                        <p>We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page.</p>
+
+                        <h2 style="color: #444; margin-top: 20px; font-weight: bold;">6. Contact Us</h2>
+                        <p>If you have any questions about this Privacy Policy, please contact us at <strong>support@gramzo.in</strong>.</p>
                     </div>
-
-                    <h4 class="font-black text-gray-800 text-base mt-5 mb-1">5. Changes to This Policy</h4>
-                    <p class="text-gray-600 mb-4 leading-relaxed">We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page.</p>
-
-                    <h4 class="font-black text-gray-800 text-base mt-5 mb-1">6. Contact Us</h4>
-                    <p class="text-gray-600 mb-4 leading-relaxed">If you have any questions about this Privacy Policy, please contact us at <strong>support@gramzo.in</strong>.</p>
                 `;
             }
             
@@ -1641,7 +1604,6 @@
 
             let distanceData = await window.calculateDistance(pickup, drop);
             
-            // Custom Prompt Fallback if Maps API fails to calculate distance
             if (!distanceData) {
                 btnCalc.innerText = origText;
                 btnCalc.disabled = false;
@@ -1684,7 +1646,7 @@
                 estFare = distKm <= 5 ? 100 : 100 + ((distKm - 5) * 10);
             }
             
-            estFare += (waitTime * 1); // 1 Rs per min wait time
+            estFare += (waitTime * 1); 
             estFare = Math.max(20, Math.round(estFare));
 
             let displayKm = distKm.toFixed(1);
@@ -1890,7 +1852,7 @@
             }
         };
 
-        // --- AUTH UI ---
+        // --- CLEANED AUTH UI LOGIC ---
         window.openAuthModal = (role = 'User') => {
             currentAuthRole = role;
             document.getElementById('auth-overlay').classList.add('active');
@@ -1911,19 +1873,15 @@
         window.togglePartnerRegFields = () => {
             const cat = document.getElementById('reg-partner-category').value;
             const restFields = document.getElementById('reg-restaurant-fields');
-            const riderFields = document.getElementById('reg-rider-fields');
             const rideFields = document.getElementById('reg-ride-fields');
             
             restFields.classList.add('hidden');
-            if(riderFields) riderFields.classList.add('hidden');
             if(rideFields) rideFields.classList.add('hidden');
 
             if (['Food Owner', 'Grocery Shop'].includes(cat)) {
                 restFields.classList.remove('hidden');
             } else if (cat === 'Rider' || cat === 'Ride Partner') {
                 if(rideFields) rideFields.classList.remove('hidden');
-            } else {
-                if(riderFields) riderFields.classList.remove('hidden');
             }
         };
 
@@ -1981,7 +1939,6 @@
                 if (id === 'Gramzo_admin' && pass === '1234') {
                     currentUser = { name: 'Super Admin', role: 'Admin', phone: 'Admin', docId: 'admin_session', uid: auth.currentUser?.uid || 'admin' };
                     if(auth.currentUser) window.dbCall(setDoc(getDocRef('sessions', auth.currentUser.uid), { phone: 'admin_session' }, { merge: true }), 3000).catch(e=>{});
-                    window.closeAdminModal();
                     window.finalizeLoginSequence();
                 } else {
                     window.showToast("Invalid Admin Credentials.", "error");
@@ -2092,55 +2049,9 @@
             } finally { btn.innerText = originalText; btn.disabled = false; }
         };
 
-        window.finalizeLoginSequence = () => {
-            window.closeAuthModal();
-            console.log("DEBUG: Login sequence initiated.");
-            
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/firebase-messaging-sw.js')
-                    .then((registration) => {
-                        console.log('DEBUG: SW registered successfully.');
-
-                        if ("Notification" in window && Notification.permission !== "denied") {
-                            Notification.requestPermission().then((permission) => {
-                                console.log('DEBUG: Permission result:', permission);
-                                
-                                if (permission === 'granted') {
-                                    if (!messaging) {
-                                        console.error('DEBUG: Messaging variable is undefined!');
-                                        return;
-                                    }
-
-                                    getToken(messaging, { 
-                                        vapidKey: 'BM4kAcfdUnR_a3T_4akm1Y-VsebvaZ8kTCShHLFqoCxGjHIOfILQP0QhpYHLtNXXIOXAqF8RiE9iUZ8YuWSU7MU',
-                                        serviceWorkerRegistration: registration 
-                                    }).then((currentToken) => {
-                                        if (currentToken) {
-                                            console.log("DEBUG: FCM Token generated:", currentToken);
-                                            if (currentUser && currentUser.phone) {
-                                                window.dbCall(setDoc(getDocRef('users', currentUser.phone), { fcmToken: currentToken }, { merge: true }), 5000)
-                                                    .then(() => console.log("DEBUG: Token saved to Database!"))
-                                                    .catch(e => console.error("DEBUG: DB Save Error:", e));
-                                            } else {
-                                                console.error("DEBUG: CurrentUser missing phone, cannot save token.");
-                                            }
-                                        } else {
-                                            console.log("DEBUG: Token returned null.");
-                                        }
-                                    }).catch((err) => {
-                                        console.error('DEBUG: Token generation FAILED:', err);
-                                    });
-                                } else {
-                                    console.log('DEBUG: Permission not granted.');
-                                }
-                            });
-                        }
-                    }).catch((err) => {
-                        console.error('DEBUG: SW registration failed:', err);
-                    });
-            } else {
-                console.log("DEBUG: SW not supported.");
-            }
+        // --- UI FINALIZATION (CLEANED) ---
+        window.finalizeLoginSequence = (isSessionRestore = false) => {
+            if(!isSessionRestore) window.closeAuthModal();
 
             window.showToast(`Welcome back, ${currentUser.name.split(' ')[0]}!`, "success");
 
@@ -2261,13 +2172,59 @@
 
             if (messaging) {
                 onMessage(messaging, (payload) => {
-    console.log("Foreground notification received:", payload);
-    alert("Test Received: " + payload.notification.title); // Force an alert
-});
+                    console.log('Foreground Push Notification received: ', payload);
+                    window.sendAlert(
+                        payload.notification?.title || "Gramzo Alert", 
+                        payload.notification?.body || "You have a new update."
+                    );
+                    window.speakAlert(payload.notification?.body || "New notification");
+                });
             }
 
             window.initRoleListeners();
             window.loadMarketplaceData();
+
+            // TRIGGER NOTIFICATION REGISTRATION
+            setTimeout(() => {
+                if (currentUser && currentUser.phone && currentUser.phone !== 'Admin') {
+                    window.registerDeviceForNotifications(currentUser.phone);
+                }
+            }, 3000);
+        };
+
+        // --- NEW ISOLATED NOTIFICATION REGISTRATION ---
+        window.registerDeviceForNotifications = async (phone) => {
+            console.log("DEBUG: Starting isolated notification registration for:", phone);
+            if ('serviceWorker' in navigator && messaging) {
+                try {
+                    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+                    console.log("DEBUG: SW successfully registered.");
+                    
+                    if ("Notification" in window) {
+                        const permission = await Notification.requestPermission();
+                        console.log("DEBUG: Notification permission:", permission);
+                        
+                        if (permission === 'granted') {
+                            const token = await getToken(messaging, { 
+                                vapidKey: 'BM4kAcfdUnR_a3T_4akm1Y-VsebvaZ8kTCShHLFqoCxGjHIOfILQP0QhpYHLtNXXIOXAqF8RiE9iUZ8YuWSU7MU',
+                                serviceWorkerRegistration: registration 
+                            });
+                            
+                            if (token) {
+                                console.log("DEBUG: Generated FCM Token:", token);
+                                await window.dbCall(setDoc(getDocRef('users', phone), { fcmToken: token }, { merge: true }), 5000);
+                                console.log("DEBUG: FCM Token successfully saved to Firestore.");
+                            } else {
+                                console.log("DEBUG: getToken returned empty.");
+                            }
+                        }
+                    }
+                } catch (err) {
+                    console.error("DEBUG: Notification registration failed:", err);
+                }
+            } else {
+                console.log("DEBUG: SW or messaging not available.");
+            }
         };
 
         const renderProducts = (items) => {
@@ -2296,7 +2253,7 @@
             }
             
             const filtered = items.filter(i => {
-                const pShopCat = i.shopCategory || 'Food Owner';
+                const pShopCat = i.shopCategory || 'Food Owner'; 
                 if (pShopCat !== window.currentUserMainCategory) return false;
                 if (currentRestaurantFilter && i.partnerId !== currentRestaurantFilter) return false;
                 if (currentFoodCategoryFilter && i.category !== currentFoodCategoryFilter) return false;
@@ -2402,17 +2359,16 @@
                 return;
             }
             
-            // Map the first product image to the restaurant if available, otherwise use a placeholder
             carousel.innerHTML = restaurants.map(r => {
                 const isActive = currentRestaurantFilter === r.partnerId;
                 const isOffline = r.shopStatus === 'Closed' || r.shopStatus === 'Offline';
                 return `
-                <div class="cursor-pointer group shrink-0 flex flex-col items-center w-24 relative" onclick="window.filterRestaurant('${r.partnerId}', '${r.shopName.replace(/'/g, "\\'")}', '${(r.shopAddress || '').replace(/'/g, "\\'")}', '${r.partnerId}')">
-                    <div class="w-20 h-14 rounded-xl flex items-center justify-center overflow-hidden mb-1.5 shadow-sm border border-gray-200 transition-all ${isActive ? 'border-red-500 scale-105 ring-2 ring-red-500/20' : 'bg-white group-hover:border-red-300'} ${isOffline ? 'grayscale opacity-60' : ''}">
+                <div class="cursor-pointer group shrink-0 flex flex-col items-center w-24 relative bg-white border ${isActive ? 'border-red-500 shadow-md' : 'border-gray-100 shadow-sm'} rounded-xl p-2 transition-all hover:border-red-300" onclick="window.filterRestaurant('${r.partnerId}', '${r.shopName.replace(/'/g, "\\'")}', '${(r.shopAddress || '').replace(/'/g, "\\'")}', '${r.partnerId}')">
+                    <div class="w-full h-12 rounded-lg flex items-center justify-center overflow-hidden mb-1.5 ${isOffline ? 'grayscale opacity-60' : ''}">
                         <img src="${r.image}" class="w-full h-full object-cover" alt="${r.shopName}">
                     </div>
-                    ${isOffline ? `<span class="absolute -top-1 -right-0 bg-red-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded shadow-sm z-10 uppercase tracking-widest">Closed</span>` : ''}
-                    <p class="text-center text-[10px] font-bold ${isActive ? 'text-red-600' : 'text-gray-700'} leading-snug w-full px-1 line-clamp-2 ${isOffline ? 'opacity-60' : ''}">${r.shopName}</p>
+                    ${isOffline ? `<span class="absolute -top-2 -right-2 bg-red-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded shadow-sm z-10">CLOSED</span>` : ''}
+                    <p class="text-center text-[10px] font-bold ${isActive ? 'text-red-600' : 'text-gray-700'} leading-tight w-full line-clamp-2 ${isOffline ? 'opacity-60' : ''}">${r.shopName}</p>
                 </div>`;
             }).join('');
         };
@@ -2469,7 +2425,7 @@
             onSnapshot(getCol('products'), (snap) => {
                 let items = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
                 
-                extractRestaurants(); // Uses live user data now
+                extractRestaurants(); 
                 renderProducts(items);
             }, (err) => {
                 if (err.code === 'permission-denied') window.showToast("Firebase Permissions Denied! Check rules.", "error");
@@ -2477,26 +2433,30 @@
         };
 
         window.filterRestaurant = (partnerId, shopName, shopAddress = '', shopPhone = '') => {
-            const banner = document.getElementById('restaurant-banner');
-            
+            const banner = document.getElementById('active-restaurant-banner');
+            const marketplaceRow = document.getElementById('marketplace-header-row');
+
             if (currentRestaurantFilter === partnerId || !partnerId) {
                 currentRestaurantFilter = null;
                 currentFoodCategoryFilter = null;
                 document.getElementById('marketplace-title').innerText = window.currentUserMainCategory === 'Food Owner' ? 'Restaurants Near You' : 'Grocery Stores Near You';
                 document.getElementById('btn-clear-filter').classList.add('hidden');
+                
                 if (banner) banner.classList.add('hidden');
+                if (marketplaceRow) marketplaceRow.classList.remove('hidden');
             } else {
                 currentRestaurantFilter = partnerId;
                 currentFoodCategoryFilter = null;
-                document.getElementById('marketplace-title').innerText = `Menu Items`;
+                document.getElementById('marketplace-title').innerText = `${shopName} Menu`;
                 document.getElementById('btn-clear-filter').classList.remove('hidden');
                 
                 if (banner) {
-                    document.getElementById('banner-shop-name').innerText = shopName;
-                    document.getElementById('banner-shop-address').innerHTML = `<i class="fa-solid fa-location-dot text-red-400 mr-1"></i> <span>${shopAddress || 'Address not provided'}</span>`;
-                    document.getElementById('banner-shop-phone').href = `tel:${shopPhone}`;
+                    document.getElementById('banner-restaurant-name').innerText = shopName;
+                    document.getElementById('banner-restaurant-address').innerHTML = `<i class="fa-solid fa-location-dot mr-1"></i> ${shopAddress || 'Local Partner'}`;
+                    document.getElementById('banner-call-btn').href = `tel:${shopPhone}`;
                     banner.classList.remove('hidden');
                 }
+                if (marketplaceRow) marketplaceRow.classList.add('hidden');
             }
             window.loadMarketplaceData();
         };
@@ -3227,7 +3187,7 @@
                 currentUser.qrCode = qrBase64;
                 
                 window.showToast("Profile saved!", "success");
-                window.finalizeLoginSequence(); 
+                window.finalizeLoginSequence(true); 
             } catch(e) {
                 console.error(e);
                 window.showToast("Network error. Try again.", "error");
@@ -3239,7 +3199,7 @@
 
         window.switchUserTab = (tab) => {
             window.adminCurrentUserTab = tab;
-            window.adminUsersLoaded = true;
+            window.adminUsersLoaded = true; 
             document.querySelectorAll('.admin-user-tab').forEach(el => {
                 el.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
                 el.classList.add('text-gray-500');
