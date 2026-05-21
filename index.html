@@ -20,7 +20,7 @@
                     return; 
                 }
 
-                const APP_VERSION = "11.29.0"; // Live Network Sync Update
+                const APP_VERSION = "11.30.0"; // Live Network Sync Update
                 
                 const clearAllCachesAndReload = () => {
                     console.log("Wiping Service Workers and Caches for update...");
@@ -158,6 +158,7 @@
         .hide-scroll::-webkit-scrollbar { display: none; }
         .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
         
+        /* Required for multi-line clamping */
         .line-clamp-2 {
             display: -webkit-box;
             -webkit-line-clamp: 2;
@@ -228,9 +229,7 @@
 
         <main id="main-content" class="px-4 pb-24 max-w-md mx-auto sm:max-w-4xl sm:px-6 pt-6">
             
-            <!-- ========================================== -->
-            <!-- VIEW: USER                                 -->
-            <!-- ========================================== -->
+            <!-- VIEW: USER -->
             <div id="view-User" class="view-section active space-y-6">
                 
                 <div class="flex items-center gap-3">
@@ -403,7 +402,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.29.0 - Live Network Sync</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.30.0 - Live Network Sync</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right">
                             <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
@@ -414,9 +413,7 @@
                 </footer>
             </div>
 
-            <!-- ========================================== -->
-            <!-- VIEW: CART                                 -->
-            <!-- ========================================== -->
+            <!-- VIEW: CART -->
             <div id="view-Cart" class="view-section">
                 <!-- NEW COMPACT ZOMATO-STYLE CART -->
                 <div class="flex items-center gap-3 mb-4 mt-2">
@@ -514,17 +511,13 @@
                 </div>
             </div>
 
-            <!-- ========================================== -->
-            <!-- VIEW: ORDERS                               -->
-            <!-- ========================================== -->
+            <!-- VIEW: ORDERS -->
             <div id="view-Orders" class="view-section space-y-6">
                 <h2 class="text-2xl font-black text-gray-900">My Orders & Rides</h2>
                 <div id="user-orders-list" class="space-y-4"></div>
             </div>
 
-            <!-- ========================================== -->
-            <!-- VIEW: PARTNER DASHBOARD                    -->
-            <!-- ========================================== -->
+            <!-- VIEW: PARTNER DASHBOARD -->
             <div id="view-Partner" class="view-section space-y-6">
                 <!-- Specialized Dashboard for Riders -->
                 <div id="rider-top-dashboard" class="hidden bg-blue-600 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden">
@@ -589,9 +582,7 @@
                 <div id="partner-orders-list" class="space-y-4"></div>
             </div>
 
-            <!-- ========================================== -->
             <!-- VIEW: PARTNER HUB (Profile & Shop Setup)   -->
-            <!-- ========================================== -->
             <div id="view-Partner-Profile" class="view-section space-y-6">
                 <h2 class="text-2xl font-black text-gray-900">Partner Settings</h2>
                 
@@ -779,9 +770,7 @@
                 </div>
             </div>
 
-            <!-- ========================================== -->
-            <!-- VIEW: ADMIN DASHBOARD                      -->
-            <!-- ========================================== -->
+            <!-- VIEW: ADMIN DASHBOARD -->
             <div id="view-Admin" class="view-section space-y-6">
                 <div class="flex justify-between items-center">
                     <h2 class="text-2xl font-black text-gray-900">Admin Control</h2>
@@ -1078,6 +1067,7 @@
         </div>
     </div>
 
+    <!-- Toast Notification -->
     <div id="toast-msg" class="fixed top-24 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full text-sm font-bold z-[300] shadow-2xl transition-all duration-300 transform -translate-y-10 opacity-0 pointer-events-none flex items-center gap-2">
         <i class="fa-solid fa-circle-info text-emerald-400"></i>
         <span id="toast-text">Message</span>
@@ -1325,7 +1315,6 @@
                 console.error("Speech Synthesis Error:", e);
             }
         };
-
 
         window.stopAlertSound = () => {
             window.alertAudio.pause();
@@ -1907,7 +1896,6 @@
             }
         };
 
-        // --- CLEANED AUTH UI LOGIC ---
         window.openAuthModal = (role = 'User') => {
             currentAuthRole = role;
             document.getElementById('auth-overlay').classList.add('active');
@@ -2104,7 +2092,6 @@
             } finally { btn.innerText = originalText; btn.disabled = false; }
         };
 
-        // --- UI FINALIZATION (CLEANED) ---
         window.finalizeLoginSequence = (isSessionRestore = false) => {
             if(!isSessionRestore) window.closeAuthModal();
 
