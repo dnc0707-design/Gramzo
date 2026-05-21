@@ -1259,21 +1259,21 @@
         window.alertAudio.loop = true; 
 
         window.speakAlert = (text) => {
-            try {
-                if ('speechSynthesis' in window) {
-                    window.speechSynthesis.cancel();
-                    const msg = new SpeechSynthesisUtterance(text);
-                    
-                    // This forces the device to use the Bengali engine to read the text
-                    msg.lang = 'bn-IN'; 
-                    msg.rate = 0.9;
-                    window.speechSynthesis.speak(msg);
-                }
-                window.alertAudio.play().catch(e => console.log("Audio blocked."));
-            } catch(e) {
-                console.error("Speech Synthesis Error:", e);
-            }
-        };
+    try {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const msg = new SpeechSynthesisUtterance(text);
+            
+            // This forces the device to use the Bengali engine to read the text
+            msg.lang = 'bn-IN'; 
+            msg.rate = 0.9;
+            window.speechSynthesis.speak(msg);
+        }
+        window.alertAudio.play().catch(e => console.log("Audio blocked."));
+    } catch(e) {
+        console.error("Speech Synthesis Error:", e);
+    }
+};
 
 
         window.stopAlertSound = () => {
@@ -2259,13 +2259,10 @@
                 return true;
             });
             
-            const isCompact = currentRestaurantFilter || window.currentUserMainCategory === 'Grocery Shop';
-
-            if (isCompact) {
-                // CHANGED: Use a 1-column grid on mobile for compact list view, 2-col on larger screens
-                listEl.className = "grid grid-cols-1 sm:grid-cols-2 gap-3 pb-6";
+            if (currentRestaurantFilter || window.currentUserMainCategory === 'Grocery Shop') {
+                listEl.className = "grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 pb-6";
             } else {
-                listEl.className = "flex gap-4 overflow-x-auto pb-6 no-scrollbar snap-x";
+                listEl.className = "flex gap-5 overflow-x-auto pb-6 no-scrollbar snap-x";
             }
 
             if (filtered.length === 0) {
@@ -2273,103 +2270,78 @@
                 return;
             }
 
+            const cardWidthClass = currentRestaurantFilter || window.currentUserMainCategory === 'Grocery Shop' ? 'col-span-1 w-full' : 'w-[280px] sm:w-[320px] shrink-0 snap-center';
+
             listEl.innerHTML = filtered.map(p => {
                 const hasVariants = p.variants && p.variants.length > 0;
                 const displayPrice = hasVariants ? p.variants[0].price : p.price;
                 const isClosed = p.shopStatus === 'Closed' || p.shopStatus === 'Offline';
                 const isOutOfStock = p.inStock === false;
                 
-                let qtyDisplay = `<p class="text-[10px] text-gray-500 uppercase tracking-wide font-medium mt-1">${p.qty || ''}</p>`;
+                const textSizeTitle = currentRestaurantFilter || window.currentUserMainCategory === 'Grocery Shop' ? 'text-xs' : 'text-sm';
+                const imgHeight = currentRestaurantFilter || window.currentUserMainCategory === 'Grocery Shop' ? 'h-24' : 'h-32';
+                
+                const extraDetailsClass = currentRestaurantFilter || window.currentUserMainCategory === 'Grocery Shop' ? 'hidden sm:block' : 'block';
+                
+                let addressDisplay = `<div class="mb-2">
+                    <p class="text-[10px] font-bold text-gray-800 truncate bg-gray-100 inline-block px-1.5 py-0.5 rounded mb-1"><i class="fa-solid fa-store text-red-500 mr-1"></i> ${p.shopName || 'Gramzo Partner'}</p>
+                    <div class="${extraDetailsClass}">
+                        ${p.shopAddress ? `<p class="text-[9px] text-gray-500 font-medium leading-tight truncate"><i class="fa-solid fa-location-dot text-gray-400 mr-1"></i> ${p.shopAddress}</p>` : ''}
+                        ${(p.openTime && p.closeTime) ? `<p class="text-[9px] text-blue-600 font-bold mt-0.5 leading-tight"><i class="fa-regular fa-clock text-blue-500 mr-1"></i> ${window.formatTime12(p.openTime)} - ${window.formatTime12(p.closeTime)}</p>` : ''}
+                    </div>
+                </div>`;
+                
+                let prepTimeDisplay = p.prepTime ? `<p class="text-[9px] sm:text-[10px] text-orange-600 font-bold mb-2"><i class="fa-regular fa-clock mr-1"></i> Prep: ${p.prepTime} mins</p>` : '';
+                
+                let qtyDisplay = `<p class="text-[9px] sm:text-[10px] text-gray-500 uppercase tracking-wide font-medium mb-2">${p.qty || ''}</p>`;
                 
                 if (hasVariants) {
                     const options = p.variants.map((v, i) => `<option value="${i}" data-price="${v.price}">${v.qty}</option>`).join('');
                     qtyDisplay = `
-                        <div class="mt-1">
-                            <select onchange="window.updatePriceDisplay(this, 'price-${p.id}')" id="sel-${p.id}" class="text-[10px] bg-gray-50 border border-gray-200 rounded p-1 outline-none focus:ring-1 ring-red-500 font-medium text-gray-700 w-auto max-w-[120px]">
+                        <div class="mb-2">
+                            <select onchange="window.updatePriceDisplay(this, 'price-${p.id}')" id="sel-${p.id}" class="text-[10px] sm:text-xs bg-gray-50 border border-gray-200 rounded-lg p-1 outline-none focus:ring-1 ring-red-500 font-medium text-gray-700 w-full">
                                 ${options}
                             </select>
                         </div>
                     `;
                 }
 
-                const actionBtnCode = hasVariants 
-                    ? `window.addToCartVariant('${p.id}', '${p.name.replace(/'/g, "\\'")}', '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')` 
-                    : `window.addToCartStandard('${p.id}', '${p.name.replace(/'/g, "\\'")}', ${p.price}, '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')`;
-
-                let actionCompact = '';
-                let actionVertical = '';
-
+                let actionHtml = '';
                 if (isClosed) {
-                    const badge = `<span class="text-[9px] font-black text-red-500 uppercase tracking-widest bg-red-50 px-1.5 py-1 rounded whitespace-nowrap border border-red-100">Closed</span>`;
-                    actionCompact = badge; actionVertical = badge;
+                    actionHtml = `<span class="text-[9px] font-black text-red-500 uppercase tracking-widest bg-red-50 px-1.5 py-1 rounded">Closed</span>`;
                 } else if (isOutOfStock) {
-                    const badge = `<span class="text-[9px] font-black text-orange-500 uppercase tracking-widest bg-orange-50 px-1.5 py-1 rounded whitespace-nowrap border border-orange-100">No Stock</span>`;
-                    actionCompact = badge; actionVertical = badge;
+                    actionHtml = `<span class="text-[9px] font-black text-orange-500 uppercase tracking-widest bg-orange-50 px-1.5 py-1 rounded">No Stock</span>`;
                 } else {
-                    actionCompact = `
-                        <div class="flex flex-col items-center gap-1.5">
-                            <span id="price-${p.id}" class="text-sm font-black text-gray-900 tracking-tight">₹${displayPrice}</span>
-                            <button type="button" onclick="${actionBtnCode}" class="px-4 py-1.5 rounded-lg bg-red-50 text-red-600 font-black text-[10px] hover:bg-red-600 hover:text-white transition-colors active:scale-95 border border-red-100 shadow-sm whitespace-nowrap">
-                                ADD <i class="fa-solid fa-plus ml-0.5"></i>
-                            </button>
-                        </div>
-                    `;
-                    actionVertical = `
-                        <span id="price-${p.id}" class="text-lg font-black text-gray-900 tracking-tight">₹${displayPrice}</span>
-                        <button type="button" onclick="${actionBtnCode}" class="w-8 h-8 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition-colors active:scale-90 shrink-0 border border-red-100">
-                            <i class="fa-solid fa-plus text-xs"></i>
+                    actionHtml = `
+                        <span id="price-${p.id}" class="text-sm sm:text-lg font-black text-red-600 tracking-tight">₹${displayPrice}</span>
+                        <button type="button" onclick="${hasVariants ? `window.addToCartVariant('${p.id}', '${p.name.replace(/'/g, "\\'")}', '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')` : `window.addToCartStandard('${p.id}', '${p.name.replace(/'/g, "\\'")}', ${p.price}, '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')`}" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition-colors active:scale-90 shrink-0 border border-red-100">
+                            <i class="fa-solid fa-plus text-[10px] sm:text-xs"></i>
                         </button>
                     `;
                 }
 
                 const dummyRating = `4.${Math.floor(Math.random() * 5) + 1}`;
 
-                if (isCompact) {
-                    // NEW COMPACT RECTANGULAR LAYOUT
-                    return `
-                        <div class="bg-white rounded-2xl p-2.5 shadow-sm border border-gray-100 flex items-center gap-3 w-full transform transition hover:shadow-md ${isClosed || isOutOfStock ? 'opacity-60 grayscale-[0.5]' : ''}">
-                            <div class="w-20 h-20 shrink-0 rounded-xl overflow-hidden bg-gray-50 relative border border-gray-100">
-                                <img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x300/f3f4f6/a1a1aa?text=Image'">
-                                ${p.category ? `<span class="absolute bottom-0 left-0 w-full bg-black/50 backdrop-blur-sm text-[8px] font-bold text-center text-white py-0.5 truncate px-1">${p.category}</span>` : ''}
+                return `
+                    <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex flex-col transform transition hover:-translate-y-1 hover:shadow-md ${cardWidthClass} ${isClosed || isOutOfStock ? 'opacity-60 grayscale-[0.5]' : ''}">
+                        <div class="${imgHeight} bg-gray-100 relative">
+                            <img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x300/f3f4f6/a1a1aa?text=Image'">
+                            ${p.category ? `<span class="absolute top-2 left-2 bg-white/90 backdrop-blur text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded text-gray-800 shadow-sm">${p.category}</span>` : ''}
+                            <span class="absolute bottom-2 right-2 bg-white/95 backdrop-blur text-[9px] font-black px-1.5 py-0.5 rounded text-gray-800 shadow-sm flex items-center gap-1"><i class="fa-solid fa-star text-yellow-500 text-[8px]"></i> ${dummyRating}</span>
+                        </div>
+                        <div class="p-2.5 sm:p-3 flex-1 flex flex-col justify-between">
+                            <div>
+                                <h4 class="font-bold text-gray-900 ${textSizeTitle} leading-tight mb-1 truncate">${p.name}</h4>
+                                ${addressDisplay}
+                                ${prepTimeDisplay}
+                                ${qtyDisplay}
                             </div>
-                            <div class="flex-1 min-w-0 flex justify-between items-center gap-2 h-full">
-                                <div class="flex-1 min-w-0 py-0.5 flex flex-col justify-center">
-                                    <h4 class="font-bold text-gray-900 text-sm leading-tight truncate">${p.name}</h4>
-                                    ${p.prepTime ? `<p class="text-[9px] text-orange-600 font-bold mt-0.5"><i class="fa-regular fa-clock mr-0.5"></i> ${p.prepTime} mins</p>` : ''}
-                                    ${qtyDisplay}
-                                </div>
-                                <div class="shrink-0 pl-2 border-l border-gray-50 flex items-center justify-center min-w-[70px] h-full">
-                                    ${actionCompact}
-                                </div>
+                            <div class="flex justify-between items-center mt-auto pt-2 border-t border-gray-50">
+                                ${actionHtml}
                             </div>
                         </div>
-                    `;
-                } else {
-                    // ORIGINAL VERTICAL CARD
-                    let addressDisplay = `<div class="mb-2 mt-1">
-                        <p class="text-[9px] font-bold text-gray-800 truncate bg-gray-50 inline-block px-1.5 py-0.5 rounded border border-gray-100"><i class="fa-solid fa-store text-red-500 mr-1"></i> ${p.shopName || 'Gramzo Partner'}</p>
-                    </div>`;
-
-                    return `
-                        <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex flex-col w-[260px] sm:w-[300px] shrink-0 snap-center transform transition hover:-translate-y-1 hover:shadow-md ${isClosed || isOutOfStock ? 'opacity-60 grayscale-[0.5]' : ''}">
-                            <div class="h-32 bg-gray-100 relative">
-                                <img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x300/f3f4f6/a1a1aa?text=Image'">
-                                ${p.category ? `<span class="absolute top-2 left-2 bg-white/90 backdrop-blur text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded text-gray-800 shadow-sm">${p.category}</span>` : ''}
-                                <span class="absolute bottom-2 right-2 bg-white/95 backdrop-blur text-[9px] font-black px-1.5 py-0.5 rounded text-gray-800 shadow-sm flex items-center gap-1"><i class="fa-solid fa-star text-yellow-500 text-[8px]"></i> ${dummyRating}</span>
-                            </div>
-                            <div class="p-3 flex-1 flex flex-col justify-between">
-                                <div>
-                                    <h4 class="font-bold text-gray-900 text-sm leading-tight truncate">${p.name}</h4>
-                                    ${addressDisplay}
-                                    ${qtyDisplay}
-                                </div>
-                                <div class="flex justify-between items-center mt-3 pt-3 border-t border-gray-50">
-                                    ${actionVertical}
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }
+                    </div>
+                `;
             }).join('');
         };
 
@@ -3413,7 +3385,6 @@
                 const addressDisplay = o.type === 'Ride' 
                     ? `<span class="text-blue-500 font-medium">From:</span> ${o.pickup || 'N/A'}<br/><span class="text-emerald-500 font-medium">To:</span> ${o.address || 'N/A'}` 
                     : o.address || 'N/A';
-
 
                 html += `
                     <tr class="hover:bg-gray-50 transition-colors border-b border-gray-50">
