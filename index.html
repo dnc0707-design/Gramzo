@@ -157,16 +157,6 @@
         
         .hide-scroll::-webkit-scrollbar { display: none; }
         .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-
-        /* Custom Swiggy/Zomato add button overlap style */
-        .zomato-add-btn-wrapper {
-            position: absolute;
-            bottom: -12px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 20;
-            width: max-content;
-        }
     </style>
 </head>
 <body>
@@ -278,25 +268,18 @@
 
                     <div>
                         <!-- Restaurant Header Banner (Dynamic) -->
-                        <div id="active-restaurant-banner" class="hidden bg-white border border-gray-200 shadow-sm rounded-2xl p-4 mt-4 relative overflow-hidden flex-col gap-3">
+                        <div id="active-restaurant-banner" class="hidden bg-white border border-gray-200 shadow-sm rounded-2xl p-4 mt-4 flex justify-between items-center relative overflow-hidden">
                             <div class="absolute top-0 left-0 w-1 h-full bg-red-500"></div>
-                            <div class="flex justify-between items-start w-full relative z-10 pl-2">
-                                <div>
-                                    <h3 id="banner-restaurant-name" class="font-black text-lg text-gray-900 leading-tight mb-1">Restaurant Name</h3>
-                                    <p id="banner-restaurant-address" class="text-[10px] text-gray-500 font-medium mb-1"><i class="fa-solid fa-location-dot mr-1"></i> Address goes here</p>
-                                    <p class="text-[9px] text-emerald-600 font-bold uppercase tracking-widest"><i class="fa-solid fa-circle-check mr-1"></i> Currently Open</p>
-                                </div>
-                                <div class="flex flex-col items-end gap-2 shrink-0">
-                                    <a id="banner-call-btn" href="#" class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 py-1.5 rounded-lg text-[10px] font-black flex items-center gap-1.5 transition-colors border border-gray-200">
-                                        <i class="fa-solid fa-phone text-blue-600"></i> Call Store
-                                    </a>
-                                    <button type="button" onclick="window.filterRestaurant(null, '')" class="text-[10px] font-bold text-red-500 hover:underline">View All Stores</button>
-                                </div>
+                            <div>
+                                <h3 id="banner-restaurant-name" class="font-black text-lg text-gray-900 leading-tight mb-1">Restaurant Name</h3>
+                                <p id="banner-restaurant-address" class="text-[10px] text-gray-500 font-medium mb-1"><i class="fa-solid fa-location-dot mr-1"></i> Address goes here</p>
+                                <p class="text-[9px] text-emerald-600 font-bold uppercase tracking-widest"><i class="fa-solid fa-circle-check mr-1"></i> Currently Open</p>
                             </div>
-                            <!-- Specific search inside the restaurant view -->
-                            <div class="w-full relative mt-1 z-10">
-                                <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-gray-400"></i>
-                                <input type="text" id="restaurant-search" onkeyup="window.handleRestaurantSearch()" placeholder="Search items in this store..." class="w-full bg-gray-50 rounded-xl py-2 pl-9 pr-3 text-xs outline-none border border-gray-200 focus:ring-1 focus:ring-red-400">
+                            <div class="flex flex-col items-end gap-2 shrink-0">
+                                <a id="banner-call-btn" href="#" class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 py-1.5 rounded-lg text-[10px] font-black flex items-center gap-1.5 transition-colors border border-gray-200">
+                                    <i class="fa-solid fa-phone text-blue-600"></i> Call Store
+                                </a>
+                                <button type="button" onclick="window.filterRestaurant(null, '')" class="text-[10px] font-bold text-red-500 hover:underline">View All Stores</button>
                             </div>
                         </div>
 
@@ -308,9 +291,9 @@
                     </div>
 
                     <div>
-                        <h3 id="top-rated-title" class="font-black text-xl text-gray-900 mb-4 tracking-tight">Offered / top rated / fav items near you</h3>
+                        <h3 id="market-list-title" class="font-black text-xl text-gray-900 mb-4 tracking-tight">Offered / top rated / fav items near you</h3>
                         <div id="market-list" class="grid grid-cols-1 md:grid-cols-2 gap-4 pb-6">
-                            <div class="col-span-full py-10 text-center text-gray-400 font-medium text-sm animate-pulse border border-gray-200 rounded-3xl bg-white">Loading catalogue...</div>
+                            <div class="col-span-full py-10 text-center text-gray-400 font-medium text-sm animate-pulse border border-gray-200 rounded-3xl w-full shadow-sm bg-white">Loading catalogue...</div>
                         </div>
                     </div>
                 </div>
@@ -712,41 +695,41 @@
                             <input id="prod-name" class="input-field mt-1" placeholder="E.g. Item Name">
                         </div>
                         
-                        <!-- Item Category Dropdown Zomato/Zepto style -->
+                        <!-- Item Category Dropdown -->
                         <div>
                             <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Category</label>
                             <select id="prod-item-category" class="input-field mt-1 bg-white">
                                 <optgroup label="Food Categories">
                                     <option value="Starters & Snacks">Starters & Snacks</option>
                                     <option value="Main Course">Main Course</option>
-                                    <option value="Fast Food">Fast Food</option>
-                                    <option value="Biryani & Rice">Biryani & Rice</option>
                                     <option value="Breads & Roti">Breads & Roti</option>
-                                    <option value="Desserts">Desserts</option>
                                     <option value="Beverages">Beverages</option>
+                                    <option value="Desserts">Desserts</option>
+                                    <option value="Fast Food">Fast Food</option>
+                                    <option value="Thalis & Combos">Thalis & Combos</option>
                                 </optgroup>
                                 <optgroup label="Grocery Categories">
                                     <option value="Atta, Rice & Dals">Atta, Rice & Dals</option>
-                                    <option value="Masala & Spices">Masala & Spices</option>
                                     <option value="Oil & Ghee">Oil & Ghee</option>
-                                    <option value="Dairy & Eggs">Dairy & Eggs</option>
-                                    <option value="Snacks & Packaged Food">Snacks & Packaged Food</option>
-                                    <option value="Bath & Body">Bath & Body</option>
-                                    <option value="Cleaning Essentials">Cleaning Essentials</option>
-                                    <option value="Vegetables & Fruits">Vegetables & Fruits</option>
-                                    <option value="Others">Others</option>
+                                    <option value="Spices & Masala">Spices & Masala</option>
+                                    <option value="Snacks & Biscuits">Snacks & Biscuits</option>
+                                    <option value="Dairy & Bakery">Dairy & Bakery</option>
+                                    <option value="Beverages (Grocery)">Beverages</option>
+                                    <option value="Cleaning & Bath">Cleaning & Bath</option>
+                                    <option value="Personal Care">Personal Care</option>
+                                    <option value="General Groceries">General Groceries</option>
                                 </optgroup>
+                                <option value="Others">Others</option>
                             </select>
                         </div>
                         
-                        <!-- Item Tags -->
                         <div>
-                            <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Special Tag (Optional)</label>
-                            <select id="prod-tag" class="input-field mt-1 bg-white">
-                                <option value="">None</option>
-                                <option value="Offered">Offered (Discount)</option>
+                            <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Item Tag (Optional)</label>
+                            <select id="prod-item-tag" class="input-field mt-1 bg-white">
+                                <option value="None">No Tag</option>
                                 <option value="Top Rated">Top Rated</option>
-                                <option value="Fav Item">Fav Item</option>
+                                <option value="Offered">Offered</option>
+                                <option value="Favorite">Favorite</option>
                             </select>
                         </div>
 
@@ -837,25 +820,6 @@
                         </div>
                     </div>
                     <div class="overflow-x-auto"><table class="w-full text-left text-xs"><tbody id="admin-users-body"></tbody></table></div>
-                </div>
-
-                <!-- ADMIN ITEM DISCOUNTS -->
-                <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden mt-6 p-5">
-                    <h3 class="font-bold text-gray-900 mb-2 border-b border-gray-100 pb-2">Admin Item Discounts</h3>
-                    <p class="text-[10px] text-gray-500 mb-4">Set direct discounts on partner items. Items will automatically show up in 'Offered' section.</p>
-                    <div class="space-y-3">
-                        <select id="admin-offer-partner" class="input-field bg-white !py-3" onchange="window.loadAdminOfferItems()">
-                            <option value="">Select Restaurant/Partner</option>
-                        </select>
-                        <div id="admin-offer-items-container" class="hidden">
-                            <select id="admin-offer-item" class="input-field bg-white mb-3 !py-3">
-                            </select>
-                            <div class="flex gap-2">
-                                <input type="number" id="admin-offer-discount" class="input-field flex-1 !py-3" placeholder="Discount % (e.g. 15)">
-                                <button type="button" onclick="window.applyAdminItemDiscount()" class="bg-blue-600 text-white px-4 rounded-xl font-bold text-sm shadow-md active:scale-95">Apply</button>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- ADMIN PROMO MANAGEMENT -->
@@ -1156,6 +1120,7 @@
         window.currentRatingPartnerId = null;
         window.selectedRating = 0;
         window.editingProductId = null; // Added to track edit mode
+        window.activePromos = [];
 
         // ADMIN TABS STATE
         window.adminCurrentUserTab = 'All';
@@ -1282,12 +1247,14 @@
                 window.currentFoodCategoryFilter = null;
                 document.getElementById('active-restaurant-banner').classList.add('hidden');
                 document.getElementById('food-category-chips').classList.add('hidden');
-                
-                document.getElementById('top-rated-title').innerText = 'Offered / top rated / fav items near you';
-                document.getElementById('top-rated-title').style.display = 'block';
-
                 document.getElementById('marketplace-title').innerText = cat === 'Food Owner' ? 'Restaurants Near You' : 'Grocery Stores Near You';
+                const searchInput = document.getElementById('global-search');
+                if(searchInput) searchInput.placeholder = "Search items or shops...";
+                
                 document.getElementById('btn-clear-filter').classList.add('hidden');
+                const listTitle = document.getElementById('market-list-title');
+                if (listTitle) listTitle.classList.remove('hidden');
+
                 window.loadMarketplaceData();
             }
         };
@@ -1326,6 +1293,8 @@
                 if ('speechSynthesis' in window) {
                     window.speechSynthesis.cancel();
                     const msg = new SpeechSynthesisUtterance(text);
+                    
+                    // This forces the device to use the Bengali engine to read the text
                     msg.lang = 'bn-IN'; 
                     msg.rate = 0.9;
                     window.speechSynthesis.speak(msg);
@@ -1448,13 +1417,127 @@
             }, 3000);
         };
 
-        window.handleSearchInput = () => {
-            window.currentSearchQuery = document.getElementById('global-search').value.toLowerCase();
-            window.loadMarketplaceData();
+        window.openStaticPage = (page) => {
+            const titleEl = document.getElementById('info-modal-title');
+            const bodyEl = document.getElementById('info-modal-body');
+            
+            if (page === 'about') {
+                titleEl.innerText = "About Gramzo";
+                bodyEl.innerHTML = `
+                    <div class="text-center mb-6">
+                        <img src="https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/New%20logo%20-Gramzo%20-%206%20may.png" alt="Gramzo Logo" class="h-16 object-contain mx-auto mb-4 rounded-2xl shadow-sm">
+                        <p class="font-bold text-lg text-gray-800">Welcome to Gramzo.in!</p>
+                        <p class="mt-2 leading-relaxed">We are India's emerging instant delivery super app, specially tailored for rural and semi-urban communities.</p>
+                    </div>
+                    
+                    <div class="bg-red-50 p-4 rounded-xl border border-red-100 mb-4">
+                        <h4 class="font-black text-red-600 mb-1"><i class="fa-solid fa-bullseye mr-1"></i> Our Mission</h4>
+                        <p class="text-gray-700">To deliver convenience and joy to every doorstep in rural India by seamlessly connecting local communities with local businesses, ensuring no village is left behind.</p>
+                    </div>
+                    
+                    <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 mb-4">
+                        <h4 class="font-black text-blue-600 mb-1"><i class="fa-solid fa-eye mr-1"></i> Our Vision</h4>
+                        <p class="text-gray-700">To be the most trusted and accessible super app for daily needs in every village, bridging the gap between urban amenities and rural accessibility.</p>
+                    </div>
+                    
+                    <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100">
+                        <h4 class="font-black text-emerald-600 mb-2"><i class="fa-solid fa-gem mr-1"></i> Our Core Values</h4>
+                        <ul class="list-none space-y-2 text-gray-700">
+                            <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i><strong>Community First:</strong> We prioritize the needs of our local communities.</li>
+                            <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i><strong>Empowering Locals:</strong> We help local businesses grow and reach more customers.</li>
+                            <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i><strong>Reliability & Trust:</strong> We deliver on our promises, every single time.</li>
+                        </ul>
+                    </div>
+                `;
+            } else if (page === 'contact') {
+                titleEl.innerText = "Contact Us";
+                bodyEl.innerHTML = `
+                    <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100 text-center">
+                        <i class="fa-solid fa-headset text-4xl text-red-500 mb-4"></i>
+                        <h4 class="font-black text-xl text-gray-900 mb-2">We'd love to hear from you!</h4>
+                        <p class="text-gray-600 mb-6">Have any questions, suggestions, or need help with your order? Our support team is always ready.</p>
+                        
+                        <a href="tel:7980230656" class="inline-block bg-red-600 text-white font-black px-6 py-3 rounded-xl shadow-md hover:bg-red-700 transition active:scale-95 mb-6 text-lg">
+                            <i class="fa-solid fa-phone mr-2"></i> +91 7980230656
+                        </a>
+                        
+                        <div class="text-left bg-white p-5 rounded-xl border border-gray-200 shadow-sm w-full">
+                            <p class="font-black text-gray-900 border-b border-gray-100 pb-2 mb-3"><i class="fa-solid fa-building text-red-500 mr-2"></i> Registered Office Address</p>
+                            <p class="font-bold text-gray-800">Gramzo.in</p>
+                            <p class="text-gray-600 mt-1">Kotaldi, Near Oriya baba Ashram</p>
+                            <p class="text-gray-600">Pin no - 723156</p>
+                            <p class="text-gray-600">Purulia, West Bengal</p>
+                        </div>
+                    </div>
+                `;
+            } else if (page === 'terms') {
+                titleEl.innerText = "Terms & Conditions";
+                bodyEl.innerHTML = `
+                    <p class="text-xs text-gray-400 mb-4 italic">Last Updated: May 2026</p>
+                    
+                    <h4 class="font-black text-gray-800 text-base mb-1">1. Acceptance of Terms</h4>
+                    <p class="text-gray-600 mb-4 leading-relaxed">By accessing and using the Gramzo app and website, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.</p>
+                    
+                    <h4 class="font-black text-gray-800 text-base mb-1">2. Platform as a Facilitator</h4>
+                    <p class="text-gray-600 mb-4 leading-relaxed">Gramzo acts as a technology platform connecting independent local restaurants, delivery partners, and consumers. Gramzo is not a restaurant or food preparation entity. The respective partner restaurants are solely responsible for the quality, safety, and preparation of the food.</p>
+                    
+                    <h4 class="font-black text-gray-800 text-base mb-1">3. User Accounts & Responsibilities</h4>
+                    <p class="text-gray-600 mb-4 leading-relaxed">You are responsible for maintaining the confidentiality of your account credentials (phone number and PIN). You agree to accept responsibility for all activities that occur under your account. Gramzo reserves the right to suspend or terminate accounts that violate our policies or exhibit fraudulent behavior.</p>
+                    
+                    <h4 class="font-black text-gray-800 text-base mb-1">4. Orders, Cancellations & Pricing</h4>
+                    <p class="text-gray-600 mb-4 leading-relaxed">All prices listed on the platform are determined by the restaurant partners. Gramzo applies a standard platform/handling fee for service maintenance. Once an order is placed and accepted by the restaurant, it cannot be canceled by the user. Refunds are subject to the restaurant's policies and Gramzo's sole discretion in cases of missing items or defective delivery.</p>
+                    
+                    <h4 class="font-black text-gray-800 text-base mb-1">5. Delivery</h4>
+                    <p class="text-gray-600 mb-4 leading-relaxed">Delivery times shown are estimates and may vary based on weather, traffic, and restaurant preparation times. Gramzo strives to provide the fastest delivery possible through our rider network but does not guarantee exact timeframes.</p>
+                    
+                    <h4 class="font-black text-gray-800 text-base mb-1">6. Limitation of Liability</h4>
+                    <p class="text-gray-600 mb-4 leading-relaxed">In no event shall Gramzo be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of or inability to use the service, including but not limited to food quality issues, delivery delays, or allergic reactions.</p>
+                    
+                    <h4 class="font-black text-gray-800 text-base mb-1">7. Modifications</h4>
+                    <p class="text-gray-600 mb-4 leading-relaxed">Gramzo reserves the right to modify these terms at any time. Continued use of the platform after changes constitutes acceptance of the new terms.</p>
+                `;
+            } else if (page === 'privacy') {
+                titleEl.innerText = "Privacy Policy & Data Deletion";
+                bodyEl.innerHTML = `
+                    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #333;">
+                        <p><strong>Last Updated:</strong> ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                        <p>This Privacy Policy explains how Gramzo ("we," "us," or "our") collects, uses, and protects your information when you use our mobile application.</p>
+
+                        <h2 style="color: #444; margin-top: 20px; font-weight: bold;">1. Information We Collect</h2>
+                        <p>When you create an account, we collect information you provide directly to us, such as your username, email address, and password. We also use Firebase for backend services, which may collect basic app usage data to ensure the app functions correctly and securely.</p>
+
+                        <h2 style="color: #444; margin-top: 20px; font-weight: bold;">2. How We Use Your Information</h2>
+                        <p>We use the information we collect to operate, maintain, and provide the features and functionality of Gramzo, as well as to communicate directly with you.</p>
+
+                        <h2 style="color: #444; margin-top: 20px; font-weight: bold;">3. Security</h2>
+                        <p>All data transmitted between your device and our servers (via Firebase) is encrypted in transit. We take reasonable measures to protect your information from unauthorized access.</p>
+
+                        <div style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-left: 5px solid #007bff; padding: 15px; margin: 20px 0; border-radius: 4px;">
+                            <h2 style="margin-top: 0; color: #007bff; font-weight: bold;">4. Account and Data Deletion (Your Rights)</h2>
+                            <p>If you wish to permanently delete your Gramzo account and all associated personal data, you have the right to do so at any time. To request data deletion, please follow these steps:</p>
+                            <ol style="margin-left: 20px; margin-top: 10px;">
+                                <li>Send an email to <strong>support@gramzo.in</strong>.</li>
+                                <li>You must include the exact user ID (Phone Number) you used to register your Gramzo account.</li>
+                                <li>Use the subject line: <strong>"Account Deletion Request"</strong>.</li>
+                                <li>In the body of the email, state your Gramzo phone number and explicitly ask for your account and data to be deleted.</li>
+                            </ol>
+                            <p style="margin-top: 10px;">Upon receiving your request, we will verify your identity and permanently delete your account, credentials, and associated data from our active databases within 14 days.</p>
+                        </div>
+
+                        <h2 style="color: #444; margin-top: 20px; font-weight: bold;">5. Changes to This Policy</h2>
+                        <p>We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page.</p>
+
+                        <h2 style="color: #444; margin-top: 20px; font-weight: bold;">6. Contact Us</h2>
+                        <p>If you have any questions about this Privacy Policy, please contact us at <strong>support@gramzo.in</strong>.</p>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('info-modal').classList.add('active');
         };
 
-        window.handleRestaurantSearch = () => {
-            window.currentSearchQuery = document.getElementById('restaurant-search').value.toLowerCase();
+        window.handleSearchInput = () => {
+            window.currentSearchQuery = document.getElementById('global-search').value.toLowerCase();
             window.loadMarketplaceData();
         };
 
@@ -1486,283 +1569,27 @@
 
         if (window.isGoogleMapsLoaded) window.setupMapsFeatures();
 
+        window.handleRideTypeChange = () => {
+            const searchType = document.getElementById('ride-search-type').value;
+            const roundTripContainer = document.getElementById('round-trip-container');
+            const roundTripCheckbox = document.getElementById('ride-round-trip');
+            const roundTripLabelText = document.getElementById('round-trip-label-text');
 
-        const renderProducts = (items) => {
-            const listEl = document.getElementById('market-list');
-            const chipsEl = document.getElementById('food-category-chips');
-            
-            if (!listEl) return;
-            
-            if (currentRestaurantFilter && chipsEl) {
-                const restaurantItems = items.filter(i => i.partnerId === currentRestaurantFilter);
-                const uniqueCategories = [...new Set(restaurantItems.map(i => i.category || 'Others'))];
-                
-                if (uniqueCategories.length > 0) {
-                    chipsEl.classList.remove('hidden');
-                    chipsEl.innerHTML = `
-                        <button onclick="window.filterFoodCategory(null)" class="px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors border ${!currentFoodCategoryFilter ? 'bg-red-600 text-white border-red-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}">All Items</button>
-                        ${uniqueCategories.map(cat => `
-                            <button onclick="window.filterFoodCategory('${cat}')" class="px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors border ${currentFoodCategoryFilter === cat ? 'bg-red-600 text-white border-red-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}">${cat}</button>
-                        `).join('')}
-                    `;
-                } else {
-                    chipsEl.classList.add('hidden');
-                }
-            } else if (chipsEl) {
-                chipsEl.classList.add('hidden');
-            }
-            
-            const filtered = items.filter(i => {
-                const pShopCat = i.shopCategory || 'Food Owner'; 
-                if (pShopCat !== window.currentUserMainCategory) return false;
-                if (currentRestaurantFilter && i.partnerId !== currentRestaurantFilter) return false;
-                if (currentFoodCategoryFilter && i.category !== currentFoodCategoryFilter) return false;
-                
-                // If not filtered by restaurant, but it's the "Top Rated" section:
-                // Only show items with tags or adminDiscount > 0
-                if (!currentRestaurantFilter) {
-                    const hasTag = i.tag && i.tag.trim() !== '';
-                    const hasDiscount = i.adminDiscount && i.adminDiscount > 0;
-                    if (!hasTag && !hasDiscount && window.currentSearchQuery === '') {
-                         return false; 
-                    }
-                }
-
-                if (window.currentSearchQuery) {
-                    const q = window.currentSearchQuery.toLowerCase();
-                    return i.name.toLowerCase().includes(q) || (i.shopName && i.shopName.toLowerCase().includes(q));
-                }
-                return true;
-            });
-            
-            listEl.className = "grid grid-cols-1 md:grid-cols-2 gap-4 pb-6";
-
-            if (filtered.length === 0) {
-                listEl.innerHTML = '<div class="col-span-full py-10 text-center text-gray-400 font-medium text-sm border border-gray-200 rounded-3xl w-full">No items found here.</div>';
-                return;
-            }
-
-            listEl.innerHTML = filtered.map(p => {
-                const hasVariants = p.variants && p.variants.length > 0;
-                
-                // Calculate Final Price (considering Admin Discount)
-                let origPrice = hasVariants ? p.variants[0].price : p.price;
-                let finalPrice = origPrice;
-                let adminDiscountBadge = '';
-                
-                if (p.adminDiscount && p.adminDiscount > 0) {
-                    finalPrice = Math.round(origPrice - (origPrice * p.adminDiscount / 100));
-                    adminDiscountBadge = `<span class="bg-blue-100 text-blue-700 text-[8px] px-1.5 py-0.5 rounded font-black ml-2">${p.adminDiscount}% OFF</span>`;
-                }
-
-                const isClosed = p.shopStatus === 'Closed' || p.shopStatus === 'Offline';
-                const isOutOfStock = p.inStock === false;
-                
-                let addressDisplay = '';
-                if (!currentRestaurantFilter) {
-                    addressDisplay = `<p class="text-[10px] text-gray-500 truncate mt-1.5 font-bold"><i class="fa-solid fa-store mr-1 text-gray-400"></i> ${p.shopName || 'Partner'}</p>`;
-                }
-                
-                let qtyDisplay = '';
-                if (hasVariants) {
-                    const options = p.variants.map((v, i) => {
-                        let vPrice = v.price;
-                        if (p.adminDiscount && p.adminDiscount > 0) vPrice = Math.round(v.price - (v.price * p.adminDiscount / 100));
-                        return `<option value="${i}" data-price="${vPrice}">${v.qty}</option>`;
-                    }).join('');
-                    qtyDisplay = `
-                        <select onchange="window.updatePriceDisplay(this, 'price-${p.id}')" id="sel-${p.id}" class="text-[10px] bg-gray-50 border border-gray-200 rounded-lg p-1 outline-none focus:ring-1 ring-red-500 font-medium text-gray-700 w-full mt-2">
-                            ${options}
-                        </select>
-                    `;
-                }
-
-                let tagHtml = '';
-                if (p.tag || (p.adminDiscount && p.adminDiscount > 0)) {
-                    let displayTag = p.tag || 'Offered';
-                    tagHtml = `<div class="mt-1"><span class="text-[9px] font-bold text-orange-600 bg-orange-50 border border-orange-100 px-1.5 py-0.5 rounded uppercase tracking-wider"><i class="fa-solid fa-star"></i> ${displayTag}</span></div>`;
-                }
-
-                let actionHtml = '';
-                if (isClosed) {
-                    actionHtml = `<span class="text-[9px] font-black text-red-500 uppercase bg-white border border-red-200 px-2 py-1 rounded shadow-sm whitespace-nowrap">CLOSED</span>`;
-                } else if (isOutOfStock) {
-                    actionHtml = `<span class="text-[9px] font-black text-gray-500 uppercase bg-white border border-gray-200 px-2 py-1 rounded shadow-sm whitespace-nowrap">NO STOCK</span>`;
-                } else {
-                    let inCartQty = 0;
-                    let cartIndex = -1;
-                    if (!hasVariants) {
-                        cartIndex = window.cart.findIndex(ci => ci.name === p.name && ci.partnerId === p.partnerId);
-                        if (cartIndex > -1) inCartQty = window.cart[cartIndex].quantity;
-                    }
-
-                    if (inCartQty > 0) {
-                        actionHtml = `
-                            <div class="bg-red-50 text-red-600 border border-red-200 shadow-md font-black text-xs px-2 py-1 rounded-lg flex items-center justify-between w-[80px]">
-                                <button type="button" onclick="window.removeFromCart(${cartIndex})" class="px-2 active:scale-90"><i class="fa-solid fa-minus"></i></button>
-                                <span>${inCartQty}</span>
-                                <button type="button" onclick="window.addToCartStandard('${p.id}', '${p.name.replace(/'/g, "\\'")}', ${finalPrice}, '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')" class="px-2 active:scale-90"><i class="fa-solid fa-plus"></i></button>
-                            </div>
-                        `;
-                    } else {
-                        actionHtml = `
-                            <button type="button" onclick="${hasVariants ? `window.addToCartVariant('${p.id}', '${p.name.replace(/'/g, "\\'")}', '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')` : `window.addToCartStandard('${p.id}', '${p.name.replace(/'/g, "\\'")}', ${finalPrice}, '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')`}" class="bg-red-50 text-red-600 border border-red-200 shadow-md font-black text-xs px-6 py-1.5 rounded-lg uppercase tracking-wider hover:bg-red-100 transition active:scale-95 text-center whitespace-nowrap">ADD</button>
-                        `;
-                    }
-                }
-
-                return `
-                    <div class="bg-white rounded-2xl p-3 shadow-sm border border-gray-100 flex gap-3 transition-all hover:shadow-md w-full relative ${isClosed || isOutOfStock ? 'opacity-60 grayscale-[0.5]' : ''}">
-                        <div class="flex-1 flex flex-col justify-start pr-1">
-                            <h4 class="font-bold text-gray-900 text-sm leading-tight mb-1">${p.name}</h4>
-                            <div class="flex items-center">
-                                <span id="price-${p.id}" class="text-sm font-black text-gray-900">₹${finalPrice}</span>
-                                ${adminDiscountBadge}
-                                ${origPrice !== finalPrice ? `<span class="text-[10px] text-gray-400 line-through ml-1">₹${origPrice}</span>` : ''}
-                            </div>
-                            ${tagHtml}
-                            ${addressDisplay}
-                            <div class="mt-1.5 text-[9px] text-gray-500 line-clamp-2">
-                                ${p.category || ''} ${p.prepTime ? ` • ${p.prepTime} mins` : ''}
-                            </div>
-                            ${hasVariants ? `<div class="w-3/4">${qtyDisplay}</div>` : ''}
-                        </div>
-
-                        <div class="w-28 h-28 shrink-0 relative rounded-xl overflow-visible bg-gray-50 mb-3">
-                            <img src="${p.image}" class="w-full h-full object-cover rounded-xl border border-gray-100 shadow-inner" onerror="this.src='https://placehold.co/400x300/f3f4f6/a1a1aa?text=Image'">
-                            <div class="zomato-add-btn-wrapper">
-                                ${actionHtml}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        };
-
-        window.renderRestaurants = (restaurants) => {
-            const carousel = document.getElementById('restaurant-list-carousel');
-            if (!carousel) return;
-            if(restaurants.length === 0) {
-                carousel.innerHTML = '<p class="text-xs text-gray-400">No stores available.</p>';
-                return;
-            }
-            
-            carousel.innerHTML = restaurants.map(r => {
-                const isActive = currentRestaurantFilter === r.partnerId;
-                const isOffline = r.shopStatus === 'Closed' || r.shopStatus === 'Offline';
-                return `
-                <div class="cursor-pointer group shrink-0 flex flex-col items-center w-24 relative bg-white border ${isActive ? 'border-red-500 shadow-md' : 'border-gray-100 shadow-sm'} rounded-xl p-2 transition-all hover:border-red-300" onclick="window.filterRestaurant('${r.partnerId}', '${r.shopName.replace(/'/g, "\\'")}', '${(r.shopAddress || '').replace(/'/g, "\\'")}', '${r.partnerId}')">
-                    <div class="w-full h-12 rounded-lg flex items-center justify-center overflow-hidden mb-1.5 ${isOffline ? 'grayscale opacity-60' : ''}">
-                        <img src="${r.image}" class="w-full h-full object-cover" alt="${r.shopName}">
-                    </div>
-                    ${isOffline ? `<span class="absolute -top-2 -right-2 bg-red-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded shadow-sm z-10">CLOSED</span>` : ''}
-                    <p class="text-center text-[10px] font-bold ${isActive ? 'text-red-600' : 'text-gray-700'} leading-tight w-full line-clamp-2 ${isOffline ? 'opacity-60' : ''}">${r.shopName}</p>
-                </div>`;
-            }).join('');
-        };
-
-        const extractRestaurants = async () => {
-            try {
-                const snap = await window.dbCall(getDocs(getCol('users')), 5000);
-                const approvedPartners = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(u => u.role === 'Partner' && u.approvalStatus === 'Approved' && (u.category === window.currentUserMainCategory));
-                
-                const prodSnap = await window.dbCall(getDocs(getCol('products')), 5000);
-                const products = prodSnap.docs.map(d => d.data());
-
-                const uniqueRestaurants = approvedPartners.map(p => {
-                    const shopProducts = products.filter(prod => prod.partnerId === p.id);
-                    let displayImage = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&q=80';
-                    if (window.currentUserMainCategory === 'Grocery Shop') displayImage = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=200&q=80';
-                    if (shopProducts.length > 0 && shopProducts[0].image) displayImage = shopProducts[0].image;
-
-                    return {
-                        partnerId: p.id, 
-                        shopName: p.shopName || p.name, 
-                        shopAddress: p.shopAddress || '',
-                        shopStatus: p.shopStatus || 'Closed',
-                        image: displayImage
-                    };
-                });
-                
-                window.renderRestaurants(uniqueRestaurants);
-            } catch(e) { console.error("Error extracting restaurants:", e); }
-        };
-
-        window.loadMarketplaceData = () => {
-            const defaultMarqueeText = "🚀 খাবার অর্ডার করুন ঘরে বসেই - সার্ভিস অ্যাভেইলেবল অ্যাট কোটালডিহ, কিনাইডিহ, লালগড়, কৃষ্ণপুর, রামচন্দ্রপুর, মুরাডি, গাংপুর, যশপুর এবং বড়ন্তি এলাকা 🚀";
-
-            onSnapshot(getDocRef('settings', 'app_config'), (snap) => {
-                const marqueeContainer = document.getElementById('marquee-container');
-                const marqueeEl = document.getElementById('dynamic-marquee');
-                
-                if (snap.exists()) {
-                    const data = snap.data();
-                    if (data.marqueeText && data.marqueeText.trim() !== '') {
-                        if(marqueeContainer) marqueeContainer.classList.remove('hidden');
-                        if(marqueeEl) marqueeEl.innerHTML = `${data.marqueeText} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${data.marqueeText}`;
-                    } else {
-                        if(marqueeContainer) marqueeContainer.classList.remove('hidden');
-                        if(marqueeEl) marqueeEl.innerHTML = `${defaultMarqueeText} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${defaultMarqueeText}`;
-                    }
-                } else {
-                    if(marqueeContainer) marqueeContainer.classList.remove('hidden');
-                    if(marqueeEl) marqueeEl.innerHTML = `${defaultMarqueeText} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${defaultMarqueeText}`;
-                }
-            }, (err) => console.error(err));
-
-            onSnapshot(getCol('products'), (snap) => {
-                let items = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
-                
-                extractRestaurants(); 
-                renderProducts(items);
-            }, (err) => {
-                if (err.code === 'permission-denied') window.showToast("Firebase Permissions Denied! Check rules.", "error");
-            });
-        };
-
-        window.filterRestaurant = (partnerId, shopName, shopAddress = '', shopPhone = '') => {
-            const banner = document.getElementById('active-restaurant-banner');
-            const marketplaceRow = document.getElementById('marketplace-header-row');
-            const topRatedTitle = document.getElementById('top-rated-title');
-
-            if (currentRestaurantFilter === partnerId || !partnerId) {
-                currentRestaurantFilter = null;
-                currentFoodCategoryFilter = null;
-                document.getElementById('marketplace-title').innerText = window.currentUserMainCategory === 'Food Owner' ? 'Restaurants Near You' : 'Grocery Stores Near You';
-                document.getElementById('btn-clear-filter').classList.add('hidden');
-                
-                if (banner) banner.classList.add('hidden');
-                if (marketplaceRow) marketplaceRow.classList.remove('hidden');
-                if (topRatedTitle) {
-                    topRatedTitle.innerText = 'Offered / top rated / fav items near you';
-                    topRatedTitle.style.display = 'block';
-                }
+            if (searchType.startsWith('Car')) {
+                roundTripContainer.style.display = 'flex';
+                roundTripCheckbox.checked = true;
+                roundTripCheckbox.disabled = true; // Force checked
+                roundTripLabelText.innerText = "Round Trip (Mandatory for Car)";
+                roundTripLabelText.classList.add('text-red-600');
+            } else if (searchType === 'Toto') {
+                roundTripContainer.style.display = 'flex';
+                roundTripCheckbox.disabled = false; // Optional
+                roundTripLabelText.innerText = "Round Trip (Optional)";
+                roundTripLabelText.classList.remove('text-red-600');
             } else {
-                currentRestaurantFilter = partnerId;
-                currentFoodCategoryFilter = null;
-                document.getElementById('marketplace-title').innerText = `${shopName} Menu`;
-                document.getElementById('btn-clear-filter').classList.remove('hidden');
-                
-                if (banner) {
-                    document.getElementById('banner-restaurant-name').innerText = shopName;
-                    document.getElementById('banner-restaurant-address').innerHTML = `<i class="fa-solid fa-location-dot mr-1"></i> ${shopAddress || 'Local Partner'}`;
-                    document.getElementById('banner-call-btn').href = `tel:${shopPhone}`;
-                    banner.classList.remove('hidden');
-                }
-                if (marketplaceRow) marketplaceRow.classList.add('hidden');
-                if (topRatedTitle) topRatedTitle.style.display = 'none';
+                roundTripContainer.style.display = 'none';
+                roundTripCheckbox.checked = false;
             }
-            window.loadMarketplaceData();
-        };
-
-        window.filterFoodCategory = (categoryName) => {
-            currentFoodCategoryFilter = categoryName;
-            window.loadMarketplaceData();
-        };
-
-        window.updatePriceDisplay = (selectEl, priceId) => {
-            const price = selectEl.options[selectEl.selectedIndex].dataset.price;
-            document.getElementById(priceId).innerText = `₹${price}`;
         };
 
         window.calculateDistance = (origin, dest) => {
@@ -1950,204 +1777,761 @@
             }
         };
 
-        window.loadAdminOfferItems = async () => {
-            const partnerId = document.getElementById('admin-offer-partner').value;
-            const container = document.getElementById('admin-offer-items-container');
-            if(!partnerId) { container.classList.add('hidden'); return; }
-
-            container.classList.remove('hidden');
-            const itemSelect = document.getElementById('admin-offer-item');
-            itemSelect.innerHTML = '<option value="">Loading items...</option>';
-
-            try {
-                const snap = await window.dbCall(getDocs(getCol('products')), 5000);
-                const items = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(p => p.partnerId === partnerId);
-
-                if(items.length === 0) {
-                    itemSelect.innerHTML = '<option value="">No items found for this partner</option>';
-                } else {
-                    itemSelect.innerHTML = '<option value="">Select an Item</option>' + items.map(i => `<option value="${i.id}">${i.name} (₹${i.price}) ${i.adminDiscount ? `[${i.adminDiscount}% OFF]` : ''}</option>`).join('');
-                }
-            } catch(e) {
-                itemSelect.innerHTML = '<option value="">Error loading items</option>';
-            }
-        };
-
-        window.applyAdminItemDiscount = async () => {
-            const itemId = document.getElementById('admin-offer-item').value;
-            const discountStr = document.getElementById('admin-offer-discount').value;
-            const discount = parseInt(discountStr);
-
-            if(!itemId) return window.showToast("Select an item first.", "error");
-            if(isNaN(discount) || discount < 0 || discount > 100) return window.showToast("Enter a valid discount percentage (0-100).", "error");
-
-            try {
-                await window.dbCall(updateDoc(getDocRef('products', itemId), { adminDiscount: discount }), 5000);
-                window.showToast(`Applied ${discount}% discount to item!`, "success");
-                document.getElementById('admin-offer-discount').value = '';
-                window.loadAdminOfferItems(); // reload
-            } catch(e) {
-                window.showToast("Failed to apply discount.", "error");
-            }
-        };
-
-        window.addPartnerProduct = async () => {
-            if(!currentUser) return;
-            if(currentUser.approvalStatus !== 'Approved') return window.showToast("Store not approved yet.", "error");
-
-            const name = document.getElementById('prod-name').value.trim();
-            const prepTime = document.getElementById('prod-prep-time').value.trim() || '15';
-            const itemCatEl = document.getElementById('prod-item-category');
-            const itemCategory = itemCatEl ? itemCatEl.value : 'Others';
-            const tagEl = document.getElementById('prod-tag');
-            const itemTag = tagEl ? tagEl.value : '';
+        window.driverAcceptRide = async (orderId) => {
+            if (!auth.currentUser) return;
             
-            if(!name) return window.showToast("Enter item name.", "error");
+            const confirmed = await window.customConfirm("Accept Ride", "Are you sure you want to accept this ride at the system-calculated fare?", "Accept Ride");
+            if(!confirmed) return;
 
-            const rows = document.querySelectorAll('.variant-row');
-            let variants = [];
-            rows.forEach(row => {
-                const qty = row.querySelector('.var-qty').value.trim();
-                const price = parseInt(row.querySelector('.var-price').value);
-                if(qty && !isNaN(price)) variants.push({ qty, price });
+            try {
+                await window.dbCall(updateDoc(getDocRef('orders', orderId), { 
+                    status: 'Confirmed', 
+                    riderId: currentUser.phone,
+                    riderName: currentUser.name,
+                    riderPhone: currentUser.phone,
+                    carModel: currentUser.carModel || '',
+                    carNum: currentUser.carNum || ''
+                }), 10000);
+                window.showToast("Ride Accepted! Assigned to you.", "success");
+            } catch(e) { window.showToast("Failed to accept ride.", "error"); }
+        };
+
+        window.markRideStarted = async (orderId) => {
+            try {
+                await window.dbCall(updateDoc(getDocRef('orders', orderId), { status: 'Started' }), 10000);
+                window.showToast("Ride Started!", "success");
+            } catch(e) { window.showToast("Failed to start ride.", "error"); }
+        };
+
+        window.completeRide = async (orderId) => {
+            const deductPoints = ['Car', 'Car_Mini', 'Car_SUV'].includes(currentUser.vehicleType) ? 50 : 5;
+            
+            const confirmed = await window.customConfirm("Complete Ride", `Are you sure you have completed the ride and collected payment? ${deductPoints} Gramzo Points will be deducted.`, "Complete Ride");
+            if (!confirmed) return;
+
+            if((currentUser.walletPoints || 0) < deductPoints) {
+                return window.showToast(`Insufficient Gramzo Points (${deductPoints} needed) to complete this ride. Contact Admin.`, "error");
+            }
+
+            try {
+                const newPoints = (currentUser.walletPoints || 0) - deductPoints;
+                
+                await window.dbCall(updateDoc(getDocRef('orders', orderId), { status: 'Completed' }), 10000);
+                await window.dbCall(updateDoc(getDocRef('users', currentUser.phone), { walletPoints: newPoints }), 10000);
+                
+                currentUser.walletPoints = newPoints;
+                const pointDisplay = document.getElementById('wallet-points-display');
+                if(pointDisplay) pointDisplay.innerText = newPoints;
+
+                window.showToast("Ride Completed successfully!", "success");
+            } catch(e) { window.showToast("Failed to end ride.", "error"); }
+        };
+
+        window.adminAddPoints = async (userId, currentPoints) => {
+            const amountStr = await window.customPrompt("Add Points", `Current Points: ${currentPoints}\nEnter amount of points to add:`, "amount", "number");
+            if(!amountStr) return;
+            const pointsToAdd = parseInt(amountStr);
+            if(isNaN(pointsToAdd) || pointsToAdd <= 0) return window.showToast("Invalid points amount.", "error");
+
+            try {
+                await window.dbCall(updateDoc(getDocRef('users', userId), {
+                    walletPoints: (currentPoints || 0) + pointsToAdd
+                }), 10000);
+                window.showToast("Points added successfully!", "success");
+            } catch(e) { window.showToast("Failed to add points.", "error"); }
+        };
+
+        window.getCurrentLocation = (inputId) => {
+            const inputEl = document.getElementById(inputId);
+            let locationFound = false;
+            inputEl.value = "Fetching your location...";
+            const fallbackTimer = setTimeout(() => {
+                if (locationFound) return;
+                inputEl.value = "";
+                window.showToast("Could not access Maps API. Please type your address.", "error");
+            }, 6000);
+            
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(async (pos) => {
+                    locationFound = true;
+                    clearTimeout(fallbackTimer);
+                    try {
+                        const geocoder = new google.maps.Geocoder();
+                        geocoder.geocode({ location: { lat: pos.coords.latitude, lng: pos.coords.longitude } }, (results, status) => {
+                            if (status === "OK" && results[0]) {
+                                inputEl.value = results[0].formatted_address;
+                                window.showToast("Location detected successfully!", "success");
+                            } else {
+                                inputEl.value = "";
+                                window.showToast("Location text unreadable. Please type it.", "error");
+                            }
+                        });
+                    } catch(e) { 
+                        inputEl.value = ""; 
+                        window.showToast("Google Maps failed to load. Please type address.", "error");
+                    }
+                }, (error) => {
+                    locationFound = true;
+                    clearTimeout(fallbackTimer);
+                    inputEl.value = "";
+                    let msg = "Failed to get location.";
+                    if (error.code == error.PERMISSION_DENIED) msg = "Location permission denied by user.";
+                    window.showToast(msg, "error");
+                }, { timeout: 10000, enableHighAccuracy: true });
+            } else {
+                clearTimeout(fallbackTimer);
+                inputEl.value = "";
+                window.showToast("Geolocation not supported by browser.", "error");
+            }
+        };
+
+        // --- CLEANED AUTH UI LOGIC ---
+        window.openAuthModal = (role = 'User') => {
+            currentAuthRole = role;
+            document.getElementById('auth-overlay').classList.add('active');
+            window.switchAuthView('login'); 
+        };
+        window.closeAuthModal = () => document.getElementById('auth-overlay').classList.remove('active');
+        window.openAdminModal = () => document.getElementById('admin-auth-overlay').classList.add('active');
+        window.closeAdminModal = () => document.getElementById('admin-auth-overlay').classList.remove('active');
+
+        window.switchAuthView = (view) => {
+            document.getElementById('auth-view-login').style.display = view === 'login' ? 'block' : 'none';
+            document.getElementById('auth-view-register').style.display = view === 'register' ? 'block' : 'none';
+            document.getElementById('auth-title').innerText = view === 'login' ? `${currentAuthRole} Login` : `Join as ${currentAuthRole}`;
+            document.getElementById('partner-fields').style.display = (view === 'register' && currentAuthRole === 'Partner') ? 'block' : 'none';
+            document.getElementById('auth-msg').classList.add('hidden');
+        };
+
+        window.togglePartnerRegFields = () => {
+            const cat = document.getElementById('reg-partner-category').value;
+            const restFields = document.getElementById('reg-restaurant-fields');
+            const rideFields = document.getElementById('reg-ride-fields');
+            
+            restFields.classList.add('hidden');
+            if(rideFields) rideFields.classList.add('hidden');
+
+            if (['Food Owner', 'Grocery Shop'].includes(cat)) {
+                restFields.classList.remove('hidden');
+            } else if (cat === 'Rider' || cat === 'Ride Partner') {
+                if(rideFields) rideFields.classList.remove('hidden');
+            }
+        };
+
+        window.toggleProfileMenu = () => document.getElementById('profile-menu').classList.toggle('hidden');
+
+        window.switchMainView = (viewName) => {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            
+            const targetView = document.getElementById(`view-${viewName}`);
+            if (targetView) targetView.classList.add('active');
+            
+            window.scrollTo(0,0);
+            
+            const cta = document.getElementById('partner-cta');
+            if(cta) cta.style.display = currentUser ? 'none' : 'flex';
+            
+            document.querySelectorAll('.b-nav-item').forEach(el => {
+                el.classList.remove('text-red-600', 'font-black');
+                el.classList.add('text-gray-400', 'font-medium');
             });
+            const activeNav = document.getElementById(`nav-btn-${viewName}`);
+            if (activeNav) {
+                activeNav.classList.remove('text-gray-400', 'font-medium');
+                activeNav.classList.add('text-red-600', 'font-black');
+            }
 
-            if(variants.length === 0) return window.showToast("Add at least one size and price.", "error");
+            if (viewName === 'Cart') window.renderCartUI();
+        };
+        
+        window.logout = async () => {
+            document.getElementById('profile-menu').classList.add('hidden');
+            if(auth.currentUser) {
+                try { await window.dbCall(deleteDoc(getDocRef('sessions', auth.currentUser.uid)), 5000); } catch(e) {}
+                try { await signOut(auth); } catch(e) {}
+            }
+            currentUser = null;
+            window.cart = [];
+            localStorage.removeItem('gramzo_cart');
+            window.appliedPromo = 0;
+            window.promoCode = '';
+            window.lastKnownOrders = {};
+            window.showToast("Signing out...", "info");
+            setTimeout(() => window.location.reload(), 800);
+        };
 
-            if(!currentUser.shopName) {
-                window.showToast("Please setup and Save your Business Profile first.", "error");
-                document.getElementById('partner-shop-name').focus();
+        window.handleAdminLogin = async () => {
+            const btn = document.querySelector('#admin-auth-overlay button');
+            const orig = btn.innerText; btn.innerText = "Verifying..."; btn.disabled = true;
+
+            try {
+                if (!auth.currentUser) await window.dbCall(signInAnonymously(auth), 4000);
+                const id = document.getElementById('admin-id-input').value.trim();
+                const pass = document.getElementById('admin-pass-input').value.trim();
+
+                if (id === 'Gramzo_admin' && pass === '1234') {
+                    currentUser = { name: 'Super Admin', role: 'Admin', phone: 'Admin', docId: 'admin_session', uid: auth.currentUser?.uid || 'admin' };
+                    if(auth.currentUser) window.dbCall(setDoc(getDocRef('sessions', auth.currentUser.uid), { phone: 'admin_session' }, { merge: true }), 3000).catch(e=>{});
+                    window.finalizeLoginSequence();
+                } else {
+                    window.showToast("Invalid Admin Credentials.", "error");
+                }
+            } catch (e) { window.showToast("System error.", "error"); } 
+            finally { btn.innerText = orig; btn.disabled = false; }
+        };
+
+        window.handleAuth = async (type) => {
+            const msgEl = document.getElementById('auth-msg');
+            msgEl.classList.remove('hidden');
+            msgEl.className = "text-xs text-center font-bold mb-4 px-4 rounded-lg py-2 bg-blue-50 text-blue-600 block";
+            msgEl.innerText = "Processing..."; 
+            
+            const btn = document.getElementById(type === 'register' ? 'submit-register' : 'submit-login');
+            const originalText = btn.innerText; btn.innerText = "Please wait..."; btn.disabled = true;
+
+            try {
+                if (!auth.currentUser) await window.dbCall(signInAnonymously(auth), 4000);
+
+                if (type === 'register') {
+                    const name = document.getElementById('reg-name').value.trim();
+                    const phone = document.getElementById('reg-phone').value.trim();
+                    const pass = document.getElementById('reg-pass').value.trim();
+
+                    if (!/^\d{10}$/.test(phone)) throw new Error("Please enter a valid 10-digit mobile number.");
+                    if (!name || pass.length < 3) throw new Error("Please enter valid name and password.");
+
+                    const userRef = getDocRef('users', phone);
+                    let snap = null;
+                    try { snap = await window.dbCall(getDoc(userRef), 4000); } catch (e) {}
+
+                    if (snap && snap.exists()) throw new Error("Number already registered.");
+
+                    let partnerCategory = null, shopName = null, shopAddress = null;
+                    let carNum = null, carModel = null, seater = null, vehicleType = null;
+
+                    if (currentAuthRole === 'Partner') {
+                        const catEl = document.getElementById('reg-partner-category');
+                        partnerCategory = catEl ? catEl.value : 'Food Owner';
+                        
+                        if (['Food Owner', 'Grocery Shop'].includes(partnerCategory)) {
+                            shopName = document.getElementById('reg-shop-name').value.trim();
+                            shopAddress = document.getElementById('reg-shop-address').value.trim();
+                        } else if (['Rider', 'Ride Partner'].includes(partnerCategory)) {
+                            carNum = document.getElementById('reg-car-num').value.trim();
+                            carModel = document.getElementById('reg-car-model').value.trim();
+                            vehicleType = document.getElementById('reg-vehicle-type').value;
+                            seater = vehicleType === 'Bike' ? '1' : (vehicleType === 'Toto' ? '4' : document.getElementById('reg-car-seater').value);
+                            shopName = carModel;
+                            
+                            if(!carNum || !carModel) throw new Error("Vehicle Registration and Model are required.");
+                        } else {
+                            const vehEl = document.getElementById('reg-vehicle-name');
+                            shopName = vehEl ? vehEl.value.trim() : 'Delivery Rider';
+                            shopAddress = '';
+                        }
+                    }
+
+                    const userData = { 
+                        name, phone, pin: pass, role: currentAuthRole, shopStatus: ['Rider', 'Ride Partner'].includes(partnerCategory) ? 'Offline' : 'Open',
+                        approvalStatus: currentAuthRole === 'Partner' ? 'Pending' : 'Approved',
+                        uid: auth?.currentUser?.uid || 'unknown',
+                        created: new Date().toISOString(),
+                        ...(currentAuthRole === 'Partner' && { 
+                            category: partnerCategory, 
+                            shopName: ['Food Owner', 'Grocery Shop'].includes(partnerCategory) ? (shopName || name + "'s Shop") : (shopName || 'Vehicle'),
+                            shopAddress: ['Food Owner', 'Grocery Shop'].includes(partnerCategory) ? shopAddress : null,
+                            fssaiNumber: null,
+                            codEnabled: true, qrCode: null,
+                            ...(['Rider', 'Ride Partner'].includes(partnerCategory) && {
+                                vehicleType: vehicleType,
+                                carNum: carNum,
+                                carModel: carModel,
+                                seater: seater,
+                                walletPoints: 20,
+                                currentLocation: ''
+                            })
+                        })
+                    };
+                    
+                    window.dbCall(setDoc(userRef, userData, { merge: true }), 4000).catch(e=>{});
+                    if(auth.currentUser) window.dbCall(setDoc(getDocRef('sessions', auth.currentUser.uid), { phone }, { merge: true }), 3000).catch(e=>{});
+                    
+                    currentUser = { ...userData, docId: phone };
+                    window.finalizeLoginSequence();
+                } else if (type === 'login') {
+                    const phone = document.getElementById('login-phone').value.trim();
+                    const pass = document.getElementById('login-pass').value.trim();
+
+                    if (!/^\d{10}$/.test(phone)) throw new Error("Please enter a valid 10-digit mobile number.");
+                    if (!pass) throw new Error("Please enter your password.");
+
+                    const userRef = getDocRef('users', phone);
+                    const snap = await window.dbCall(getDoc(userRef), 6000);
+                    
+                    if (!snap || !snap.exists()) throw new Error("Account not found. Please register.");
+                    const data = snap.data();
+                    if (data.pin !== pass) throw new Error("Incorrect password.");
+
+                    currentUser = { ...data, docId: phone };
+                    if(auth.currentUser) window.dbCall(setDoc(getDocRef('sessions', auth.currentUser.uid), { phone }, { merge: true }), 3000).catch(e=>{});
+                    window.finalizeLoginSequence();
+                }
+            } catch (e) {
+                msgEl.className = "text-xs text-center font-bold mb-4 px-4 rounded-lg py-2 bg-red-50 text-red-600 block";
+                msgEl.innerText = e.message || "Connection failed.";
+            } finally { btn.innerText = originalText; btn.disabled = false; }
+        };
+
+        // --- UI FINALIZATION (CLEANED) ---
+        window.finalizeLoginSequence = (isSessionRestore = false) => {
+            if(!isSessionRestore) window.closeAuthModal();
+
+            window.showToast(`Welcome back, ${currentUser.name.split(' ')[0]}!`, "success");
+
+            document.getElementById('btn-partner-login-trigger').classList.add('hidden');
+            document.getElementById('btn-login-trigger').classList.add('hidden');
+            document.getElementById('profile-trigger').classList.remove('hidden');
+            
+            document.getElementById('nav-initial').innerText = currentUser.name.charAt(0).toUpperCase();
+            document.getElementById('nav-name').innerText = currentUser.name;
+            document.getElementById('nav-role').innerText = currentUser.role;
+            document.getElementById('nav-role').className = `text-[8px] font-bold uppercase ${currentUser.role === 'Admin' ? 'text-purple-500' : currentUser.role === 'Partner' ? 'text-orange-500' : 'text-blue-500'}`;
+            document.getElementById('menu-name').innerText = currentUser.name;
+            document.getElementById('menu-phone').innerText = currentUser.phone;
+
+            window.setupBottomNav(currentUser.role);
+            window.switchMainView(currentUser.role === 'Admin' ? 'Admin' : currentUser.role === 'Partner' ? 'Partner' : 'User');
+
+            if (['Partner', 'Admin'].includes(currentUser.role)) {
+                window.requestWakeLock();
+            }
+
+            if (currentUser.role === 'Partner') {
+                const isShop = ['Food Owner', 'Grocery Shop'].includes(currentUser.category);
+                const isRide = ['Rider', 'Ride Partner'].includes(currentUser.category);
+                const isApproved = currentUser.approvalStatus === 'Approved';
+
+                document.getElementById('partner-food-settings').classList.add('hidden');
+                document.getElementById('add-product-container').classList.add('hidden');
+                document.getElementById('partner-catalog-list-container').classList.add('hidden');
+                document.getElementById('partner-ride-setup-form').classList.add('hidden');
+                
+                document.getElementById('rider-top-dashboard').classList.add('hidden');
+                document.getElementById('shop-top-dashboard').classList.add('hidden');
+
+                const warningBanner = document.getElementById('partner-pending-warning');
+                if (!isApproved) {
+                    warningBanner.classList.remove('hidden');
+                } else {
+                    warningBanner.classList.add('hidden');
+                }
+
+                if(isShop) {
+                    document.getElementById('shop-top-dashboard').classList.remove('hidden');
+                    document.getElementById('partner-welcome').innerText = `Welcome, ${currentUser.name.split(' ')[0]}!`;
+                    
+                    if (isApproved) {
+                        document.getElementById('partner-food-settings').classList.remove('hidden');
+                        document.getElementById('add-product-container').classList.remove('hidden');
+                        document.getElementById('partner-catalog-list-container').classList.remove('hidden');
+                        document.getElementById('add-product-title').innerText = currentUser.category === 'Grocery Shop' ? 'Add Grocery Item' : 'Add Menu Item';
+                        document.getElementById('status-toggle-title').innerText = 'Accepting Orders';
+                    }
+                } else if (isRide) {
+                    document.getElementById('rider-top-dashboard').classList.remove('hidden');
+                    document.getElementById('rider-welcome').innerText = `Welcome, ${currentUser.name.split(' ')[0]}!`;
+                    document.getElementById('rider-vehicle-info').innerText = `${currentUser.carModel || 'Vehicle'} - ${currentUser.carNum || 'N/A'}`;
+                    document.getElementById('wallet-points-display').innerText = currentUser.walletPoints || 0;
+                    
+                    if (isApproved) {
+                        document.getElementById('partner-ride-setup-form').classList.remove('hidden');
+                        if(currentUser.currentLocation) document.getElementById('rider-current-loc-input').value = currentUser.currentLocation;
+                    }
+                }
+
+                if(currentUser.shopName) document.getElementById('hub-name-val').innerText = currentUser.shopName;
+                if(currentUser.shopAddress) {
+                    document.getElementById('hub-address-row').classList.remove('hidden');
+                    document.getElementById('hub-address-val').innerText = currentUser.shopAddress;
+                    document.getElementById('partner-shop-address').value = currentUser.shopAddress;
+                }
+                if(currentUser.shopName) document.getElementById('partner-shop-name').value = currentUser.shopName;
+                if(currentUser.openTime) document.getElementById('partner-open-time').value = currentUser.openTime;
+                if(currentUser.closeTime) document.getElementById('partner-close-time').value = currentUser.closeTime;
+                
+                if (isRide) {
+                    document.getElementById('shop-status-container').classList.add('hidden');
+                    if(currentUser.vehicleType) {
+                        document.getElementById('partner-vehicle-type').value = currentUser.vehicleType;
+                        document.getElementById('partner-ride-seater').style.display = currentUser.vehicleType === 'Car' ? 'block' : 'none';
+                    }
+                    if(currentUser.carNum) document.getElementById('partner-ride-num').value = currentUser.carNum;
+                    if(currentUser.carModel) document.getElementById('partner-ride-model').value = currentUser.carModel;
+                    if(currentUser.seater) document.getElementById('partner-ride-seater').value = currentUser.seater;
+                    if(currentUser.currentLocation) document.getElementById('partner-ride-location').value = currentUser.currentLocation;
+                } else {
+                    document.getElementById('shop-status-container').classList.remove('hidden');
+                }
+
+                const statusToggleShop = document.getElementById('partner-status-toggle');
+                const statusToggleRider = document.getElementById('rider-status-toggle');
+                const isCurrentlyOpen = ['Open', 'Online'].includes(currentUser.shopStatus);
+
+                if (statusToggleShop) statusToggleShop.checked = isCurrentlyOpen;
+                if (statusToggleRider) statusToggleRider.checked = isCurrentlyOpen;
+                
+                const shopStatusTxt = document.getElementById('shop-status-text');
+                if(shopStatusTxt) shopStatusTxt.innerText = `Currently ${isCurrentlyOpen ? 'Open' : 'Closed'}`;
+                
+                const riderStatusTxt = document.getElementById('rider-status-text');
+                if(riderStatusTxt) riderStatusTxt.innerText = isCurrentlyOpen ? 'You are ONLINE' : 'You are OFFLINE';
+
+                const codToggle = document.getElementById('partner-cod-toggle-setup');
+                if (codToggle && currentUser.codEnabled !== undefined) codToggle.checked = currentUser.codEnabled;
+                
+                const onlineToggle = document.getElementById('partner-online-toggle-setup');
+                const qrSection = document.getElementById('qr-upload-section');
+                if (onlineToggle && currentUser.onlineEnabled !== undefined) {
+                    onlineToggle.checked = currentUser.onlineEnabled;
+                    if (qrSection) qrSection.classList.toggle('hidden', !currentUser.onlineEnabled);
+                }
+
+                const qrPreview = document.getElementById('partner-qr-preview');
+                if(currentUser.qrCode && qrPreview) {
+                    qrPreview.src = currentUser.qrCode;
+                    qrPreview.classList.remove('hidden');
+                }
+            }
+
+            if (messaging) {
+                onMessage(messaging, (payload) => {
+                    console.log('Foreground Push Notification received: ', payload);
+                    window.sendAlert(
+                        payload.notification?.title || "Gramzo Alert", 
+                        payload.notification?.body || "You have a new update."
+                    );
+                    window.speakAlert(payload.notification?.body || "New notification");
+                });
+            }
+
+            window.initRoleListeners();
+            window.loadMarketplaceData();
+
+            // TRIGGER NOTIFICATION REGISTRATION
+            setTimeout(() => {
+                if (currentUser && currentUser.phone && currentUser.phone !== 'Admin') {
+                    window.registerDeviceForNotifications(currentUser.phone);
+                }
+            }, 3000);
+        };
+
+        // --- NEW ISOLATED NOTIFICATION REGISTRATION ---
+        window.registerDeviceForNotifications = async () => {
+            console.log("DEBUG: Registering device for role:", currentUser ? currentUser.role : "Unknown");
+            
+            if ('serviceWorker' in navigator && messaging) {
+                try {
+                    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+                    const permission = await Notification.requestPermission();
+                    
+                    if (permission === 'granted') {
+                        const token = await getToken(messaging, { 
+                            vapidKey: 'BM4kAcfdUnR_a3T_4akm1Y-VsebvaZ8kTCShHLFqoCxGjHIOfILQP0QhpYHLtNXXIOXAqF8RiE9iUZ8YuWSU7MU',
+                            serviceWorkerRegistration: registration 
+                        });
+                        
+                        if (token && currentUser && currentUser.phone) {
+                            await window.dbCall(setDoc(getDocRef('users', currentUser.phone), { fcmToken: token }, { merge: true }), 5000);
+                            console.log("DEBUG: Token saved for role:", currentUser.role);
+                        }
+                    }
+                } catch (err) {
+                    console.error("DEBUG: Registration failed:", err);
+                }
+            }
+        };
+
+        const renderProducts = (items) => {
+            const listEl = document.getElementById('market-list');
+            const chipsEl = document.getElementById('food-category-chips');
+            
+            if (!listEl) return;
+            
+            if (currentRestaurantFilter && window.currentUserMainCategory === 'Food Owner' && chipsEl) {
+                const restaurantItems = items.filter(i => i.partnerId === currentRestaurantFilter);
+                const uniqueCategories = [...new Set(restaurantItems.map(i => i.category || 'Others'))];
+                
+                if (uniqueCategories.length > 0) {
+                    chipsEl.classList.remove('hidden');
+                    chipsEl.innerHTML = `
+                        <button onclick="window.filterFoodCategory(null)" class="px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors border ${!currentFoodCategoryFilter ? 'bg-red-600 text-white border-red-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}">All Items</button>
+                        ${uniqueCategories.map(cat => `
+                            <button onclick="window.filterFoodCategory('${cat}')" class="px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors border ${currentFoodCategoryFilter === cat ? 'bg-red-600 text-white border-red-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}">${cat}</button>
+                        `).join('')}
+                    `;
+                } else {
+                    chipsEl.classList.add('hidden');
+                }
+            } else if (chipsEl) {
+                chipsEl.classList.add('hidden');
+            }
+            
+            const filtered = items.filter(i => {
+                const pShopCat = i.shopCategory || 'Food Owner'; 
+                if (pShopCat !== window.currentUserMainCategory) return false;
+                if (currentRestaurantFilter && i.partnerId !== currentRestaurantFilter) return false;
+                if (currentFoodCategoryFilter && i.category !== currentFoodCategoryFilter) return false;
+                
+                if (window.currentSearchQuery) {
+                    const q = window.currentSearchQuery.toLowerCase();
+                    return i.name.toLowerCase().includes(q) || (i.shopName && i.shopName.toLowerCase().includes(q));
+                }
+
+                // If on Home View and no search query, ONLY show items that are tagged or have an active Admin Promo
+                if (!currentRestaurantFilter && !window.currentSearchQuery) {
+                    const hasTag = i.tag && ['Top Rated', 'Offered', 'Favorite'].includes(i.tag);
+                    const hasPromo = window.activePromos && window.activePromos.some(p => p.isActive && (p.restaurantId === 'Global' || p.restaurantId === i.partnerId));
+                    return hasTag || hasPromo;
+                }
+
+                return true;
+            });
+            
+            listEl.className = "grid grid-cols-1 md:grid-cols-2 gap-4 pb-6";
+
+            if (filtered.length === 0) {
+                listEl.innerHTML = '<div class="col-span-full py-10 text-center text-gray-400 font-medium text-sm border border-gray-200 rounded-3xl w-full shadow-sm bg-white">No items found. Try a different search or filter.</div>';
                 return;
             }
 
-            let defaultImg = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80';
-            const imgInput = document.getElementById('prod-image-upload');
-            
-            const btn = document.getElementById('btn-add-prod');
-            const originalText = btn.innerText;
-            btn.innerText = "Saving...";
-            btn.disabled = true;
-
-            try {
-                let imgUrl = defaultImg;
+            listEl.innerHTML = filtered.map(p => {
+                const hasVariants = p.variants && p.variants.length > 0;
+                const displayPrice = hasVariants ? p.variants[0].price : p.price;
+                const isClosed = p.shopStatus === 'Closed' || p.shopStatus === 'Offline';
+                const isOutOfStock = p.inStock === false;
                 
-                if (window.editingProductId) {
-                    try {
-                        const existingSnap = await window.dbCall(getDoc(getDocRef('products', window.editingProductId)), 5000);
-                        if (existingSnap.exists() && existingSnap.data().image) {
-                            imgUrl = existingSnap.data().image;
-                        }
-                    } catch(e){}
+                const hasPromo = window.activePromos && window.activePromos.some(promo => promo.isActive && (promo.restaurantId === 'Global' || promo.restaurantId === p.partnerId));
+                
+                let qtyDisplay = p.qty ? `<p class="text-[10px] text-gray-500 font-medium mb-1">${p.qty}</p>` : '';
+                
+                if (hasVariants) {
+                    const options = p.variants.map((v, i) => `<option value="${i}" data-price="${v.price}">${v.qty}</option>`).join('');
+                    qtyDisplay = `
+                        <div class="mb-1 w-full max-w-[120px]">
+                            <select onchange="window.updatePriceDisplay(this, 'price-${p.id}')" id="sel-${p.id}" class="text-[10px] bg-gray-50 border border-gray-200 rounded p-1 outline-none w-full font-medium text-gray-700 focus:border-red-400">
+                                ${options}
+                            </select>
+                        </div>
+                    `;
                 }
 
-                if (imgInput && imgInput.files.length > 0) {
-                    imgUrl = await window.resizeImage(imgInput.files[0], 400);
-                }
-
-                const productData = {
-                    name, 
-                    variants,
-                    price: variants[0].price, 
-                    qty: variants[0].qty,     
-                    prepTime: prepTime,
-                    category: itemCategory, 
-                    tag: itemTag,
-                    partnerId: currentUser.phone,
-                    shopName: currentUser.shopName,
-                    shopAddress: currentUser.shopAddress || '',
-                    shopCategory: currentUser.category || 'Food Owner',
-                    openTime: currentUser.openTime || '',
-                    closeTime: currentUser.closeTime || '',
-                    image: imgUrl,
-                    inStock: true,
-                    shopStatus: currentUser.shopStatus || 'Open'
-                };
-
-                if (window.editingProductId) {
-                    await window.dbCall(updateDoc(getDocRef('products', window.editingProductId), productData), 15000);
-                    window.showToast("Successfully updated Menu Item!", "success");
-                    window.editingProductId = null;
+                let actionHtml = '';
+                if (isClosed) {
+                    actionHtml = `<div class="bg-gray-100 border border-gray-200 text-gray-500 w-full text-center py-1.5 rounded-lg text-[10px] font-black uppercase shadow-sm">Closed</div>`;
+                } else if (isOutOfStock) {
+                    actionHtml = `<div class="bg-orange-50 border border-orange-200 text-orange-500 w-full text-center py-1.5 rounded-lg text-[10px] font-black uppercase shadow-sm">No Stock</div>`;
                 } else {
-                    productData.created = new Date().toISOString();
-                    await window.dbCall(addDoc(getCol('products'), productData), 15000);
-                    window.showToast("Successfully added to Menu!", "success");
+                    const clickFn = hasVariants 
+                        ? `window.addToCartVariant('${p.id}', '${p.name.replace(/'/g, "\\'")}', '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')` 
+                        : `window.addToCartStandard('${p.id}', '${p.name.replace(/'/g, "\\'")}', ${p.price}, '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')`;
+                    actionHtml = `<button type="button" onclick="${clickFn}" class="relative w-full bg-white text-red-600 border border-red-200 shadow-sm rounded-lg py-1.5 font-black text-xs uppercase hover:bg-red-50 hover:shadow-md transition tracking-wider">ADD <span class="absolute top-0.5 right-1.5 text-[10px]">+</span></button>`;
                 }
-                
-                document.getElementById('prod-name').value = '';
-                document.getElementById('prod-prep-time').value = '';
-                if(imgInput) imgInput.value = '';
-                if(tagEl) tagEl.value = '';
-                document.getElementById('variant-container').innerHTML = `
-                    <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Portion & Price</label>
-                    <div class="flex gap-2 variant-row">
-                        <input class="input-field w-1/2 var-qty" placeholder="Size (e.g. Full)">
-                        <input type="number" class="input-field w-1/2 var-price" placeholder="Price (₹)">
+
+                return `
+                    <div class="bg-white rounded-2xl p-3 shadow-sm border border-gray-100 flex gap-3 transform transition hover:-translate-y-1 hover:shadow-md w-full relative ${isClosed || isOutOfStock ? 'opacity-60 grayscale-[0.5]' : ''}">
+                        <div class="flex-1 flex flex-col justify-center min-w-0 pr-2">
+                            <p class="text-[9px] font-bold text-gray-500 truncate mb-1"><i class="fa-solid fa-store text-red-400 mr-1"></i> ${p.shopName || 'Gramzo Partner'}</p>
+                            <div class="flex items-start gap-1 mb-1">
+                                <i class="fa-solid fa-square-caret-up text-emerald-500 mt-0.5 text-[10px] shrink-0"></i>
+                                <h4 class="font-black text-gray-900 text-sm sm:text-base leading-tight break-words">${p.name}</h4>
+                            </div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span id="price-${p.id}" class="text-sm font-bold text-gray-800">₹${displayPrice}</span>
+                                ${hasPromo ? `<span class="text-[8px] bg-red-50 text-red-600 px-1 py-0.5 rounded font-bold border border-red-100 uppercase tracking-widest">Offer Applied</span>` : ''}
+                            </div>
+                            ${qtyDisplay}
+                            ${p.prepTime ? `<p class="text-[9px] text-orange-500 font-bold mt-1"><i class="fa-regular fa-clock mr-1"></i> ${p.prepTime} mins</p>` : ''}
+                        </div>
+                        
+                        <div class="w-[100px] shrink-0 flex flex-col items-center relative h-[100px]">
+                            <div class="w-full h-full rounded-xl overflow-hidden bg-gray-100 shadow-sm relative border border-gray-100">
+                                <img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x400/f3f4f6/a1a1aa?text=Item'">
+                                ${p.tag && p.tag !== 'None' ? `<span class="absolute top-0 left-0 bg-red-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-br-lg uppercase shadow-sm">${p.tag}</span>` : ''}
+                            </div>
+                            <div class="absolute -bottom-3 w-[85%] z-10 mx-auto left-0 right-0">
+                                ${actionHtml}
+                            </div>
+                        </div>
                     </div>
                 `;
-            } catch(e) {
-                window.showToast("Network delayed. Saving in background.", "info");
-            } finally {
-                btn.innerText = "Save to Menu";
-                btn.disabled = false;
-            }
+            }).join('');
         };
 
-        window.editPartnerProduct = async (id) => {
+        window.renderRestaurants = (restaurants) => {
+            const carousel = document.getElementById('restaurant-list-carousel');
+            if (!carousel) return;
+            if(restaurants.length === 0) {
+                carousel.innerHTML = '<p class="text-xs text-gray-400">No stores available.</p>';
+                return;
+            }
+            
+            carousel.innerHTML = restaurants.map(r => {
+                const isActive = currentRestaurantFilter === r.partnerId;
+                const isOffline = r.shopStatus === 'Closed' || r.shopStatus === 'Offline';
+                return `
+                <div class="cursor-pointer group shrink-0 flex flex-col items-center w-24 relative bg-white border ${isActive ? 'border-red-500 shadow-md' : 'border-gray-100 shadow-sm'} rounded-xl p-2 transition-all hover:border-red-300" onclick="window.filterRestaurant('${r.partnerId}', '${r.shopName.replace(/'/g, "\\'")}', '${(r.shopAddress || '').replace(/'/g, "\\'")}', '${r.partnerId}')">
+                    <div class="w-full h-12 rounded-lg flex items-center justify-center overflow-hidden mb-1.5 ${isOffline ? 'grayscale opacity-60' : ''}">
+                        <img src="${r.image}" class="w-full h-full object-cover" alt="${r.shopName}">
+                    </div>
+                    ${isOffline ? `<span class="absolute -top-2 -right-2 bg-red-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded shadow-sm z-10">CLOSED</span>` : ''}
+                    <p class="text-center text-[10px] font-bold ${isActive ? 'text-red-600' : 'text-gray-700'} leading-tight w-full line-clamp-2 ${isOffline ? 'opacity-60' : ''}">${r.shopName}</p>
+                </div>`;
+            }).join('');
+        };
+
+        const extractRestaurants = async () => {
             try {
-                const snap = await window.dbCall(getDoc(getDocRef('products', id)), 5000);
-                if(!snap.exists()) return;
-                const p = snap.data();
+                const snap = await window.dbCall(getDocs(getCol('users')), 5000);
+                const approvedPartners = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(u => u.role === 'Partner' && u.approvalStatus === 'Approved' && (u.category === window.currentUserMainCategory));
                 
-                window.editingProductId = id;
-                document.getElementById('prod-name').value = p.name || '';
-                document.getElementById('prod-prep-time').value = p.prepTime || '';
-                if(p.category && document.getElementById('prod-item-category')) {
-                    document.getElementById('prod-item-category').value = p.category;
-                }
-                if(p.tag && document.getElementById('prod-tag')) {
-                    document.getElementById('prod-tag').value = p.tag;
-                } else if (document.getElementById('prod-tag')) {
-                    document.getElementById('prod-tag').value = '';
-                }
-                
-                const container = document.getElementById('variant-container');
-                container.innerHTML = '<label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Portion & Price</label>';
-                
-                let variants = p.variants && p.variants.length > 0 ? p.variants : [{qty: p.qty || 'Full', price: p.price || 0}];
-                
-                variants.forEach((v, index) => {
-                    const row = document.createElement('div');
-                    row.className = "flex gap-2 variant-row" + (index > 0 ? " mt-3" : "");
-                    row.innerHTML = `
-                        <input class="input-field w-1/2 var-qty" placeholder="Size (e.g. Full)" value="${v.qty}">
-                        <input type="number" class="input-field w-1/2 var-price" placeholder="Price (₹)" value="${v.price}">
-                        ${index > 0 ? `<button type="button" onclick="this.parentElement.remove()" class="w-12 shrink-0 bg-gray-100 text-gray-500 rounded-xl flex justify-center items-center hover:bg-red-50 hover:text-red-500 transition border border-gray-200"><i class="fa-solid fa-xmark"></i></button>` : ''}
-                    `;
-                    container.appendChild(row);
+                const prodSnap = await window.dbCall(getDocs(getCol('products')), 5000);
+                const products = prodSnap.docs.map(d => d.data());
+
+                const uniqueRestaurants = approvedPartners.map(p => {
+                    const shopProducts = products.filter(prod => prod.partnerId === p.id);
+                    let displayImage = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&q=80';
+                    if (window.currentUserMainCategory === 'Grocery Shop') displayImage = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=200&q=80';
+                    if (shopProducts.length > 0 && shopProducts[0].image) displayImage = shopProducts[0].image;
+
+                    return {
+                        partnerId: p.id, 
+                        shopName: p.shopName || p.name, 
+                        shopAddress: p.shopAddress || '',
+                        shopStatus: p.shopStatus || 'Closed',
+                        image: displayImage
+                    };
                 });
                 
-                document.getElementById('btn-add-prod').innerText = "Update Item";
-                window.scrollTo({ top: document.getElementById('add-product-container').offsetTop - 60, behavior: 'smooth' });
-                window.showToast("Edit mode enabled. Make your changes and click update.", "info");
-            } catch(e) { window.showToast("Failed to load product details.", "error"); }
+                window.renderRestaurants(uniqueRestaurants);
+            } catch(e) { console.error("Error extracting restaurants:", e); }
         };
 
-        window.deletePartnerProduct = async (id) => {
-            const confirmed = await window.customConfirm("Delete Item", "Are you sure you want to delete this menu item?", "Delete");
-            if (!confirmed) return;
-            try {
-                await window.dbCall(deleteDoc(getDocRef('products', id)), 10000);
-                window.showToast("Product deleted.", "success");
-            } catch(e) { window.showToast("Failed to delete.", "error"); }
+        window.loadMarketplaceData = () => {
+            const defaultMarqueeText = "🚀 খাবার অর্ডার করুন ঘরে বসেই - সার্ভিস অ্যাভেইলেবল অ্যাট কোটালডিহ, কিনাইডিহ, লালগড়, কৃষ্ণপুর, রামচন্দ্রপুর, মুরাডি, গাংপুর, যশপুর এবং বড়ন্তি এলাকা 🚀";
+
+            onSnapshot(getDocRef('settings', 'app_config'), (snap) => {
+                const marqueeContainer = document.getElementById('marquee-container');
+                const marqueeEl = document.getElementById('dynamic-marquee');
+                
+                if (snap.exists()) {
+                    const data = snap.data();
+                    if (data.marqueeText && data.marqueeText.trim() !== '') {
+                        if(marqueeContainer) marqueeContainer.classList.remove('hidden');
+                        if(marqueeEl) marqueeEl.innerHTML = `${data.marqueeText} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${data.marqueeText}`;
+                    } else {
+                        if(marqueeContainer) marqueeContainer.classList.remove('hidden');
+                        if(marqueeEl) marqueeEl.innerHTML = `${defaultMarqueeText} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${defaultMarqueeText}`;
+                    }
+                } else {
+                    if(marqueeContainer) marqueeContainer.classList.remove('hidden');
+                    if(marqueeEl) marqueeEl.innerHTML = `${defaultMarqueeText} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${defaultMarqueeText}`;
+                }
+            }, (err) => console.error(err));
+
+            onSnapshot(getCol('promos'), (snap) => {
+                window.activePromos = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(p => p.isActive);
+                // Triggered simultaneously with products below
+            });
+
+            onSnapshot(getCol('products'), (snap) => {
+                let items = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
+                
+                extractRestaurants(); 
+                renderProducts(items);
+            }, (err) => {
+                if (err.code === 'permission-denied') window.showToast("Firebase Permissions Denied! Check rules.", "error");
+            });
         };
 
-        window.togglePartnerStock = async (productId, currentInStock) => {
-            try {
-                await window.dbCall(updateDoc(getDocRef('products', productId), { inStock: !currentInStock }), 10000);
-                window.showToast(currentInStock ? "Marked Out of Stock" : "Marked In Stock", "success");
-            } catch(e) {
-                window.showToast("Error updating stock", "error");
+        window.filterRestaurant = (partnerId, shopName, shopAddress = '', shopPhone = '') => {
+            const banner = document.getElementById('active-restaurant-banner');
+            const marketplaceRow = document.getElementById('marketplace-header-row');
+            const searchInput = document.getElementById('global-search');
+            const listTitle = document.getElementById('market-list-title');
+
+            if (currentRestaurantFilter === partnerId || !partnerId) {
+                currentRestaurantFilter = null;
+                currentFoodCategoryFilter = null;
+                document.getElementById('marketplace-title').innerText = window.currentUserMainCategory === 'Food Owner' ? 'Restaurants Near You' : 'Grocery Stores Near You';
+                document.getElementById('btn-clear-filter').classList.add('hidden');
+                if (searchInput) searchInput.placeholder = "Search items or shops...";
+                if (listTitle) listTitle.classList.remove('hidden');
+                
+                if (banner) banner.classList.add('hidden');
+                if (marketplaceRow) marketplaceRow.classList.remove('hidden');
+            } else {
+                currentRestaurantFilter = partnerId;
+                currentFoodCategoryFilter = null;
+                document.getElementById('marketplace-title').innerText = `${shopName} Menu`;
+                document.getElementById('btn-clear-filter').classList.remove('hidden');
+                if (searchInput) searchInput.placeholder = `Search in ${shopName}...`;
+                if (listTitle) listTitle.classList.add('hidden');
+                
+                if (banner) {
+                    document.getElementById('banner-restaurant-name').innerText = shopName;
+                    document.getElementById('banner-restaurant-address').innerHTML = `<i class="fa-solid fa-location-dot mr-1"></i> ${shopAddress || 'Local Partner'}`;
+                    document.getElementById('banner-call-btn').href = `tel:${shopPhone}`;
+                    banner.classList.remove('hidden');
+                }
+                if (marketplaceRow) marketplaceRow.classList.add('hidden');
             }
+            window.loadMarketplaceData();
+        };
+
+        window.filterFoodCategory = (categoryName) => {
+            currentFoodCategoryFilter = categoryName;
+            window.loadMarketplaceData();
+        };
+
+        window.updatePriceDisplay = (selectEl, priceId) => {
+            const price = selectEl.options[selectEl.selectedIndex].dataset.price;
+            document.getElementById(priceId).innerText = `₹${price}`;
+        };
+
+        window.setupBottomNav = (role) => {
+            const bNav = document.getElementById('bottom-nav');
+            bNav.classList.remove('hidden');
+            const container = bNav.querySelector('div');
+            container.innerHTML = ''; 
+
+            const totalCartItems = window.cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+
+            const createNavItem = (id, icon, label, targetView) => `
+                <button type="button" id="nav-btn-${id}" onclick="window.switchMainView('${targetView}')" class="b-nav-item flex flex-col items-center gap-1 w-16 text-gray-400 font-medium transition-colors relative">
+                    <i class="${icon} text-xl mb-0.5"></i>
+                    <span class="text-[10px] tracking-wide">${label}</span>
+                    ${id === 'Cart' && totalCartItems > 0 ? `<span class="absolute -top-1 right-2 bg-red-600 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-sm">${totalCartItems}</span>` : ''}
+                </button>
+            `;
+
+            if (role === 'User') {
+                container.innerHTML += createNavItem('User', 'fa-solid fa-house', 'Home', 'User');
+                container.innerHTML += createNavItem('Cart', 'fa-solid fa-basket-shopping', 'Cart', 'Cart');
+                container.innerHTML += createNavItem('Orders', 'fa-solid fa-receipt', 'History', 'Orders'); 
+            } else if (role === 'Partner') {
+                container.innerHTML += createNavItem('Partner', 'fa-solid fa-utensils', 'Tasks', 'Partner');
+                container.innerHTML += createNavItem('Partner-Profile', 'fa-solid fa-store', 'Settings', 'Partner-Profile');
+            } else if (role === 'Admin') {
+                container.innerHTML += createNavItem('Admin', 'fa-solid fa-chart-line', 'Dashboard', 'Admin');
+            }
+            
+            setTimeout(() => {
+                const activeNav = document.getElementById(`nav-btn-${role === 'Admin' ? 'Admin' : role === 'Partner' ? 'Partner' : 'User'}`);
+                if (activeNav) {
+                    activeNav.classList.remove('text-gray-400', 'font-medium');
+                    activeNav.classList.add('text-red-600', 'font-black');
+                }
+            }, 100);
         };
 
         window.applyPromo = async () => {
@@ -2218,40 +2602,8 @@
 
             localStorage.setItem('gramzo_cart', JSON.stringify(window.cart));
             window.renderCartUI();
-            
-            // Re-render market place list to show updated counters
-            window.loadMarketplaceData();
-            
             window.showToast(`${name} added!`, "success");
             window.setupBottomNav(currentUser.role);
-        };
-
-        window.removeFromCart = (idx) => { 
-            if (window.cart[idx].quantity > 1) {
-                window.cart[idx].quantity -= 1;
-            } else {
-                window.cart.splice(idx, 1);
-            }
-
-            if(window.cart.length === 0) {
-                window.appliedPromo = 0;
-                window.promoCode = '';
-                const promoInput = document.getElementById('promo-code-input');
-                if(promoInput) promoInput.value = '';
-                const villageSelect = document.getElementById('cart-village');
-                if(villageSelect) villageSelect.value = '';
-                const otherInput = document.getElementById('cart-other-village');
-                if(otherInput) {
-                    otherInput.value = '';
-                    otherInput.classList.add('hidden');
-                }
-            }
-            
-            localStorage.setItem('gramzo_cart', JSON.stringify(window.cart));
-            window.renderCartUI(); 
-            // Re-render market place list to show updated counters
-            window.loadMarketplaceData();
-            window.setupBottomNav(currentUser?.role);
         };
 
         window.renderCartUI = async () => {
@@ -2379,6 +2731,32 @@
             }
         };
 
+        window.removeFromCart = (idx) => { 
+            if (window.cart[idx].quantity > 1) {
+                window.cart[idx].quantity -= 1;
+            } else {
+                window.cart.splice(idx, 1);
+            }
+
+            if(window.cart.length === 0) {
+                window.appliedPromo = 0;
+                window.promoCode = '';
+                const promoInput = document.getElementById('promo-code-input');
+                if(promoInput) promoInput.value = '';
+                const villageSelect = document.getElementById('cart-village');
+                if(villageSelect) villageSelect.value = '';
+                const otherInput = document.getElementById('cart-other-village');
+                if(otherInput) {
+                    otherInput.value = '';
+                    otherInput.classList.add('hidden');
+                }
+            }
+            
+            localStorage.setItem('gramzo_cart', JSON.stringify(window.cart));
+            window.renderCartUI(); 
+            window.setupBottomNav(currentUser?.role);
+        };
+
         window.placeOrder = async () => {
             if(window.cart.length === 0) return;
             
@@ -2504,56 +2882,6 @@
             } catch(e) { window.showToast("Failed to update.", "error"); }
         };
 
-        window.driverAcceptRide = async (orderId) => {
-            if (!auth.currentUser) return;
-            
-            const confirmed = await window.customConfirm("Accept Ride", "Are you sure you want to accept this ride at the system-calculated fare?", "Accept Ride");
-            if(!confirmed) return;
-
-            try {
-                await window.dbCall(updateDoc(getDocRef('orders', orderId), { 
-                    status: 'Confirmed', 
-                    riderId: currentUser.phone,
-                    riderName: currentUser.name,
-                    riderPhone: currentUser.phone,
-                    carModel: currentUser.carModel || '',
-                    carNum: currentUser.carNum || ''
-                }), 10000);
-                window.showToast("Ride Accepted! Assigned to you.", "success");
-            } catch(e) { window.showToast("Failed to accept ride.", "error"); }
-        };
-
-        window.markRideStarted = async (orderId) => {
-            try {
-                await window.dbCall(updateDoc(getDocRef('orders', orderId), { status: 'Started' }), 10000);
-                window.showToast("Ride Started!", "success");
-            } catch(e) { window.showToast("Failed to start ride.", "error"); }
-        };
-
-        window.completeRide = async (orderId) => {
-            const deductPoints = ['Car', 'Car_Mini', 'Car_SUV'].includes(currentUser.vehicleType) ? 50 : 5;
-            
-            const confirmed = await window.customConfirm("Complete Ride", `Are you sure you have completed the ride and collected payment? ${deductPoints} Gramzo Points will be deducted.`, "Complete Ride");
-            if (!confirmed) return;
-
-            if((currentUser.walletPoints || 0) < deductPoints) {
-                return window.showToast(`Insufficient Gramzo Points (${deductPoints} needed) to complete this ride. Contact Admin.`, "error");
-            }
-
-            try {
-                const newPoints = (currentUser.walletPoints || 0) - deductPoints;
-                
-                await window.dbCall(updateDoc(getDocRef('orders', orderId), { status: 'Completed' }), 10000);
-                await window.dbCall(updateDoc(getDocRef('users', currentUser.phone), { walletPoints: newPoints }), 10000);
-                
-                currentUser.walletPoints = newPoints;
-                const pointDisplay = document.getElementById('wallet-points-display');
-                if(pointDisplay) pointDisplay.innerText = newPoints;
-
-                window.showToast("Ride Completed successfully!", "success");
-            } catch(e) { window.showToast("Failed to end ride.", "error"); }
-        };
-
         window.acceptDelivery = async (orderId) => {
             if(!currentUser) return;
             try {
@@ -2619,6 +2947,455 @@
             }
         };
 
+        window.togglePartnerStock = async (productId, currentInStock) => {
+            try {
+                await window.dbCall(updateDoc(getDocRef('products', productId), { inStock: !currentInStock }), 10000);
+                window.showToast(currentInStock ? "Marked Out of Stock" : "Marked In Stock", "success");
+            } catch(e) {
+                window.showToast("Error updating stock", "error");
+            }
+        };
+
+        window.addVariantRow = () => {
+            const container = document.getElementById('variant-container');
+            const row = document.createElement('div');
+            row.className = "flex gap-2 variant-row mt-3";
+            row.innerHTML = `
+                <input class="input-field w-1/2 var-qty" placeholder="Size (e.g. Half)">
+                <input type="number" class="input-field w-1/2 var-price" placeholder="Price (₹)">
+                <button type="button" onclick="this.parentElement.remove()" class="w-12 shrink-0 bg-gray-100 text-gray-500 rounded-xl flex justify-center items-center hover:bg-red-50 hover:text-red-500 transition border border-gray-200"><i class="fa-solid fa-xmark"></i></button>
+            `;
+            container.appendChild(row);
+        };
+
+        window.deletePartnerProduct = async (id) => {
+            const confirmed = await window.customConfirm("Delete Item", "Are you sure you want to delete this menu item?", "Delete");
+            if (!confirmed) return;
+            try {
+                await window.dbCall(deleteDoc(getDocRef('products', id)), 10000);
+                window.showToast("Product deleted.", "success");
+            } catch(e) { window.showToast("Failed to delete.", "error"); }
+        };
+
+        window.editPartnerProduct = async (id) => {
+            try {
+                const snap = await window.dbCall(getDoc(getDocRef('products', id)), 5000);
+                if(!snap.exists()) return;
+                const p = snap.data();
+                
+                window.editingProductId = id;
+                document.getElementById('prod-name').value = p.name || '';
+                document.getElementById('prod-prep-time').value = p.prepTime || '';
+                if(p.category && document.getElementById('prod-item-category')) {
+                    document.getElementById('prod-item-category').value = p.category;
+                }
+                if(document.getElementById('prod-item-tag')) {
+                    document.getElementById('prod-item-tag').value = p.tag || 'None';
+                }
+                
+                const container = document.getElementById('variant-container');
+                container.innerHTML = '<label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Portion & Price</label>';
+                
+                let variants = p.variants && p.variants.length > 0 ? p.variants : [{qty: p.qty || 'Full', price: p.price || 0}];
+                
+                variants.forEach((v, index) => {
+                    const row = document.createElement('div');
+                    row.className = "flex gap-2 variant-row" + (index > 0 ? " mt-3" : "");
+                    row.innerHTML = `
+                        <input class="input-field w-1/2 var-qty" placeholder="Size (e.g. Full)" value="${v.qty}">
+                        <input type="number" class="input-field w-1/2 var-price" placeholder="Price (₹)" value="${v.price}">
+                        ${index > 0 ? `<button type="button" onclick="this.parentElement.remove()" class="w-12 shrink-0 bg-gray-100 text-gray-500 rounded-xl flex justify-center items-center hover:bg-red-50 hover:text-red-500 transition border border-gray-200"><i class="fa-solid fa-xmark"></i></button>` : ''}
+                    `;
+                    container.appendChild(row);
+                });
+                
+                document.getElementById('btn-add-prod').innerText = "Update Item";
+                window.scrollTo({ top: document.getElementById('add-product-container').offsetTop - 60, behavior: 'smooth' });
+                window.showToast("Edit mode enabled. Make your changes and click update.", "info");
+            } catch(e) { window.showToast("Failed to load product details.", "error"); }
+        };
+
+        window.addPartnerProduct = async () => {
+            if(!currentUser) return;
+            if(currentUser.approvalStatus !== 'Approved') return window.showToast("Store not approved yet.", "error");
+
+            const name = document.getElementById('prod-name').value.trim();
+            const prepTime = document.getElementById('prod-prep-time').value.trim() || '15';
+            const itemCatEl = document.getElementById('prod-item-category');
+            const itemCategory = itemCatEl ? itemCatEl.value : 'Others';
+            const tagEl = document.getElementById('prod-item-tag');
+            const tag = tagEl ? tagEl.value : 'None';
+            
+            if(!name) return window.showToast("Enter item name.", "error");
+
+            const rows = document.querySelectorAll('.variant-row');
+            let variants = [];
+            rows.forEach(row => {
+                const qty = row.querySelector('.var-qty').value.trim();
+                const price = parseInt(row.querySelector('.var-price').value);
+                if(qty && !isNaN(price)) variants.push({ qty, price });
+            });
+
+            if(variants.length === 0) return window.showToast("Add at least one size and price.", "error");
+
+            if(!currentUser.shopName) {
+                window.showToast("Please setup and Save your Business Profile first.", "error");
+                document.getElementById('partner-shop-name').focus();
+                return;
+            }
+
+            let defaultImg = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80';
+            const imgInput = document.getElementById('prod-image-upload');
+            
+            const btn = document.getElementById('btn-add-prod');
+            const originalText = btn.innerText;
+            btn.innerText = "Saving...";
+            btn.disabled = true;
+
+            try {
+                let imgUrl = defaultImg;
+                
+                if (window.editingProductId) {
+                    try {
+                        const existingSnap = await window.dbCall(getDoc(getDocRef('products', window.editingProductId)), 5000);
+                        if (existingSnap.exists() && existingSnap.data().image) {
+                            imgUrl = existingSnap.data().image;
+                        }
+                    } catch(e){}
+                }
+
+                if (imgInput && imgInput.files.length > 0) {
+                    imgUrl = await window.resizeImage(imgInput.files[0], 400);
+                }
+
+                const productData = {
+                    name, 
+                    variants,
+                    price: variants[0].price, 
+                    qty: variants[0].qty,     
+                    prepTime: prepTime,
+                    category: itemCategory, 
+                    tag: tag,
+                    partnerId: currentUser.phone,
+                    shopName: currentUser.shopName,
+                    shopAddress: currentUser.shopAddress || '',
+                    shopCategory: currentUser.category || 'Food Owner',
+                    openTime: currentUser.openTime || '',
+                    closeTime: currentUser.closeTime || '',
+                    image: imgUrl,
+                    inStock: true,
+                    shopStatus: currentUser.shopStatus || 'Open'
+                };
+
+                if (window.editingProductId) {
+                    await window.dbCall(updateDoc(getDocRef('products', window.editingProductId), productData), 15000);
+                    window.showToast("Successfully updated Menu Item!", "success");
+                    window.editingProductId = null;
+                } else {
+                    productData.created = new Date().toISOString();
+                    await window.dbCall(addDoc(getCol('products'), productData), 15000);
+                    window.showToast("Successfully added to Menu!", "success");
+                }
+                
+                document.getElementById('prod-name').value = '';
+                document.getElementById('prod-prep-time').value = '';
+                if(imgInput) imgInput.value = '';
+                if(tagEl) tagEl.value = 'None';
+                document.getElementById('variant-container').innerHTML = `
+                    <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Portion & Price</label>
+                    <div class="flex gap-2 variant-row">
+                        <input class="input-field w-1/2 var-qty" placeholder="Size (e.g. Full)">
+                        <input type="number" class="input-field w-1/2 var-price" placeholder="Price (₹)">
+                    </div>
+                `;
+            } catch(e) {
+                window.showToast("Network delayed. Saving in background.", "info");
+            } finally {
+                btn.innerText = "Save to Menu";
+                btn.disabled = false;
+            }
+        };
+
+        window.submitRideProfile = async () => {
+            if(!currentUser || !['Rider', 'Ride Partner'].includes(currentUser.category)) return;
+
+            const carNum = document.getElementById('partner-ride-num').value.trim();
+            const carModel = document.getElementById('partner-ride-model').value.trim();
+            const vehicleType = document.getElementById('partner-vehicle-type').value;
+            const seater = vehicleType === 'Bike' ? '1' : (vehicleType === 'Toto' ? '4' : document.getElementById('partner-ride-seater').value);
+
+            if(!carNum || !carModel) return window.showToast("Vehicle Registration and Model are required.", "error");
+
+            const btn = document.getElementById('btn-submit-ride-profile');
+            const orig = btn.innerText;
+            btn.innerText = "Updating...";
+            btn.disabled = true;
+
+            try {
+                const updateData = {
+                    carNum,
+                    carModel,
+                    vehicleType,
+                    seater,
+                    shopName: carModel
+                };
+
+                await window.dbCall(setDoc(getDocRef('users', currentUser.phone), updateData, { merge: true }), 10000);
+                
+                currentUser.carNum = carNum;
+                currentUser.carModel = carModel;
+                currentUser.vehicleType = vehicleType;
+                currentUser.seater = seater;
+                currentUser.shopName = carModel;
+
+                window.showToast("Vehicle Details Updated!", "success");
+            } catch(e) {
+                window.showToast("Error updating details.", "error");
+            } finally {
+                btn.innerText = orig;
+                btn.disabled = false;
+            }
+        };
+
+        window.submitPartnerProfile = async () => {
+            if(!currentUser || !currentUser.phone) return;
+            
+            const shopNameInput = document.getElementById('partner-shop-name');
+            const shopAddressInput = document.getElementById('partner-shop-address');
+            const openTimeInput = document.getElementById('partner-open-time');
+            const closeTimeInput = document.getElementById('partner-close-time');
+            
+            const shopName = shopNameInput ? shopNameInput.value.trim() : null;
+            const shopAddress = shopAddressInput ? shopAddressInput.value.trim() : '';
+            const openTime = openTimeInput ? openTimeInput.value : '';
+            const closeTime = closeTimeInput ? closeTimeInput.value : '';
+            const codEnabled = document.getElementById('partner-cod-toggle-setup').checked;
+            const onlineEnabled = document.getElementById('partner-online-toggle-setup').checked;
+            const qrInput = document.getElementById('partner-qr-upload');
+
+            if (!shopName) return window.showToast("Enter a business name.", "error");
+            if (!shopAddress) return window.showToast("Enter business address.", "error");
+            
+            const btn = document.getElementById('btn-submit-profile');
+            const orig = btn.innerText;
+            btn.innerText = "Submitting...";
+            btn.disabled = true;
+
+            let qrBase64 = currentUser.qrCode || null;
+
+            try {
+                if (onlineEnabled && qrInput && qrInput.files.length > 0) {
+                    qrBase64 = await window.resizeImage(qrInput.files[0], 600);
+                }
+                if(!onlineEnabled) qrBase64 = null; 
+
+                const updateData = { 
+                    shopName: shopName, 
+                    shopAddress: shopAddress,
+                    openTime: openTime,
+                    closeTime: closeTime,
+                    codEnabled: codEnabled,
+                    onlineEnabled: onlineEnabled,
+                    qrCode: qrBase64
+                };
+
+                try {
+                    await window.dbCall(setDoc(getDocRef('users', currentUser.phone), updateData, { merge: true }), 10000);
+                    
+                    const snap = await window.dbCall(getDocs(getCol('products')), 10000);
+                    const myProducts = snap.docs.filter(d => d.data().partnerId === currentUser.phone);
+                    myProducts.forEach(d => {
+                        updateDoc(getDocRef('products', d.id), { shopName, shopAddress, openTime, closeTime });
+                    });
+
+                } catch(dbErr) {
+                    console.warn("DB Write timeout/failed.", dbErr);
+                }
+
+                currentUser.shopName = shopName;
+                currentUser.shopAddress = shopAddress;
+                currentUser.openTime = openTime;
+                currentUser.closeTime = closeTime;
+                currentUser.codEnabled = codEnabled;
+                currentUser.onlineEnabled = onlineEnabled;
+                currentUser.qrCode = qrBase64;
+                
+                window.showToast("Profile saved!", "success");
+                window.finalizeLoginSequence(true); 
+            } catch(e) {
+                console.error(e);
+                window.showToast("Network error. Try again.", "error");
+            } finally { 
+                btn.innerText = orig; 
+                btn.disabled = false; 
+            }
+        };
+
+        window.switchUserTab = (tab) => {
+            window.adminCurrentUserTab = tab;
+            window.adminUsersLoaded = true; 
+            document.querySelectorAll('.admin-user-tab').forEach(el => {
+                el.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
+                el.classList.add('text-gray-500');
+            });
+            const activeEl = document.getElementById(`tab-user-${tab.replace(/\s+/g, '')}`);
+            if(activeEl) {
+                activeEl.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
+                activeEl.classList.remove('text-gray-500');
+            }
+            window.renderAdminUsers();
+        };
+
+        window.openAdminUserEdit = (phone, name, shopName) => {
+            document.getElementById('edit-u-phone').value = phone;
+            document.getElementById('edit-u-name').value = name;
+            document.getElementById('edit-u-shop').value = shopName && shopName !== 'null' && shopName !== 'undefined' ? shopName : '';
+            document.getElementById('admin-edit-user-modal').classList.add('active');
+        };
+
+        window.submitAdminUserEdit = async () => {
+            const phone = document.getElementById('edit-u-phone').value;
+            const newName = document.getElementById('edit-u-name').value.trim();
+            const newShop = document.getElementById('edit-u-shop').value.trim();
+
+            if(!phone || !newName) return window.showToast("Name cannot be empty.", "error");
+
+            try {
+                await window.dbCall(setDoc(getDocRef('users', phone), {
+                    name: newName,
+                    shopName: newShop || null
+                }, { merge: true }), 10000);
+                window.showToast("User profile updated!", "success");
+                document.getElementById('admin-edit-user-modal').classList.remove('active');
+            } catch(e) {
+                window.showToast("Failed to update.", "error");
+            }
+        };
+
+        window.adminReviewPartner = async (partnerPhone, status) => {
+            if(currentUser.role !== 'Admin') return;
+            const actionVerb = status === 'Approved' ? "Approve" : "Revoke";
+            const confirmed = await window.customConfirm(`${actionVerb} Partner`, `Are you sure you want to ${actionVerb.toLowerCase()} this partner's registration?`, `Yes, ${actionVerb}`);
+            if(!confirmed) return;
+
+            try {
+                await window.dbCall(setDoc(getDocRef('users', partnerPhone), { approvalStatus: status }, { merge: true }), 10000);
+                window.showToast(`Partner status changed to ${status}!`, "success");
+            } catch(e) {
+                window.showToast("Error updating status.", "error");
+            }
+        };
+
+        window.adminToggleUserVisibility = async (partnerPhone, currentStatus) => {
+            if(currentUser.role !== 'Admin') return;
+            const newStatus = currentStatus === 'Closed' || currentStatus === 'Offline' ? 'Open' : 'Closed'; 
+            
+            try {
+                await window.dbCall(setDoc(getDocRef('users', partnerPhone), { shopStatus: newStatus }, { merge: true }), 10000);
+                
+                const snap = await window.dbCall(getDocs(getCol('products')), 10000);
+                const myProducts = snap.docs.filter(d => d.data().partnerId === partnerPhone);
+                myProducts.forEach(d => {
+                    updateDoc(getDocRef('products', d.id), { shopStatus: newStatus });
+                });
+                
+                window.showToast(`Partner visibility forced ${newStatus}.`, "success");
+            } catch(e) { window.showToast("Error toggling visibility.", "error"); }
+        };
+
+        window.renderAdminUsers = () => {
+            const usersBody = document.getElementById('admin-users-body');
+            if(!usersBody) return;
+
+            if (!window.adminUsersLoaded) {
+                usersBody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-gray-400 font-bold text-xs"><i class="fa-solid fa-hand-pointer mb-2 text-2xl block opacity-30"></i>Click a tab above to load directory data.</td></tr>';
+                return;
+            }
+
+            let filteredUsers = window.adminUsersData.filter(u => {
+                if (window.adminCurrentUserTab === 'All') return true;
+                if (window.adminCurrentUserTab === 'User') return u.role === 'User';
+                if (window.adminCurrentUserTab === 'Food Owner') return u.role === 'Partner' && u.category === 'Food Owner';
+                if (window.adminCurrentUserTab === 'Grocery Shop') return u.role === 'Partner' && u.category === 'Grocery Shop';
+                if (window.adminCurrentUserTab === 'Rider') return u.role === 'Partner' && ['Rider', 'Ride Partner'].includes(u.category);
+                return true;
+            });
+
+            if(filteredUsers.length === 0) {
+                usersBody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-gray-400 text-xs italic">No users found in this category.</td></tr>';
+                return;
+            }
+
+            usersBody.innerHTML = filteredUsers.map(u => {
+                let displayPhone = u.phone ? String(u.phone) : '';
+                if(displayPhone.includes('@')) displayPhone = displayPhone.split('@')[0] + '@...';
+                
+                let detailsHtml = '';
+                let approvalControlsHtml = '';
+                let visibilityToggleHtml = '';
+
+                if(u.role === 'Partner') {
+                    const isApproved = u.approvalStatus === 'Approved';
+                    const isOffline = u.shopStatus === 'Closed' || u.shopStatus === 'Offline';
+                    
+                    approvalControlsHtml = isApproved 
+                        ? `<button onclick="window.adminReviewPartner('${u.phone}', 'Pending')" class="text-[9px] font-bold bg-orange-50 text-orange-600 px-2 py-1 rounded border border-orange-100 mt-1 w-full text-center">Revoke Approval</button>`
+                        : `<button onclick="window.adminReviewPartner('${u.phone}', 'Approved')" class="text-[9px] font-bold bg-emerald-50 text-emerald-600 px-2 py-1 rounded border border-emerald-100 mt-1 w-full text-center">Approve Now</button>`;
+                    
+                    visibilityToggleHtml = `
+                        <div class="mt-2 flex items-center justify-between bg-gray-50 p-1.5 rounded-lg border border-gray-100">
+                            <span class="text-[8px] font-bold text-gray-500 uppercase">App Visible</span>
+                            <label class="relative inline-flex items-center cursor-pointer transform scale-75">
+                                <input type="checkbox" class="sr-only peer" ${!isOffline ? 'checked' : ''} onchange="window.adminToggleUserVisibility('${u.phone}', '${u.shopStatus}')">
+                                <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                            </label>
+                        </div>
+                    `;
+
+                    if(['Rider', 'Ride Partner'].includes(u.category)) {
+                        detailsHtml = `<span class="font-bold text-gray-700">Vehicle:</span> ${u.carModel || 'N/A'} (${u.carNum || 'N/A'})<br/><span class="font-bold text-gray-700">Wallet:</span> ${u.walletPoints || 0} pts`;
+                    } else {
+                        detailsHtml = `<span class="font-bold text-gray-700">Shop:</span> ${u.shopName || 'N/A'}<br/><span class="font-bold text-gray-700">Status:</span> <span class="${isApproved ? 'text-emerald-500' : 'text-orange-500'} font-bold">${u.approvalStatus || 'Pending'}</span>`;
+                    }
+                } else {
+                    detailsHtml = `Verified User`;
+                }
+
+                let actionsHtml = `<span class="cursor-pointer font-black text-gray-400 bg-gray-100 px-2 py-0.5 rounded" onclick="this.innerText='${u.pin}'" title="Click to reveal">***</span>`;
+                
+                let editBtn = `<button onclick="window.openAdminUserEdit('${u.phone}', '${u.name.replace(/'/g, "\\'")}', '${(u.shopName || '').replace(/'/g, "\\'")}')" class="text-blue-500 hover:text-blue-700 ml-2" title="Edit User"><i class="fa-solid fa-pen"></i></button>`;
+
+                if (['Rider', 'Ride Partner'].includes(u.category)) {
+                    actionsHtml += `<br/><button onclick="window.adminAddPoints('${u.phone}', ${u.walletPoints || 0})" class="bg-blue-50 text-blue-600 px-2 py-1 mt-1 rounded border border-blue-100 text-[9px] font-bold w-full">+ Points</button>`;
+                }
+
+                return `
+                <tr class="hover:bg-gray-50 transition-colors border-b border-gray-50">
+                    <td class="p-3 font-bold text-xs align-top pt-4">
+                        <span class="px-2 py-0.5 rounded text-[9px] uppercase tracking-widest block text-center mb-2 ${u.role === 'Admin' ? 'bg-purple-100 text-purple-700' : u.role === 'Partner' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'}">${u.category || u.role || 'USER'}</span>
+                        ${approvalControlsHtml}
+                    </td>
+                    <td class="p-3 font-bold text-gray-900 text-xs align-top pt-4">${u.name || 'N/A'} ${editBtn}<br/><span class="font-mono font-normal text-[10px] text-gray-500">${displayPhone || 'N/A'}</span></td>
+                    <td class="p-3 text-[10px] text-gray-500 align-top pt-4">${detailsHtml}${visibilityToggleHtml}</td>
+                    <td class="p-3 text-right font-mono text-gray-900 text-xs align-top pt-4">${actionsHtml}</td>
+                </tr>`;
+            }).join('');
+        };
+
+        window.switchOrderTab = (tab) => {
+            window.adminCurrentOrderTab = tab;
+            document.querySelectorAll('.admin-order-tab').forEach(el => {
+                el.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
+                el.classList.add('text-gray-500');
+            });
+            const activeEl = document.getElementById(`tab-order-${tab}`);
+            if(activeEl) {
+                activeEl.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
+                activeEl.classList.remove('text-gray-500');
+            }
+            window.renderAdminOrders();
+        };
+
         window.renderAdminOrders = () => {
             const adminLog = document.getElementById('admin-log-body');
             if(!adminLog) return;
@@ -2648,8 +3425,8 @@
                 const addressDisplay = o.type === 'Ride' 
                     ? `<span class="text-blue-500 font-medium">From:</span> ${o.pickup || 'N/A'}<br/><span class="text-emerald-500 font-medium">To:</span> ${o.address || 'N/A'}` 
                     : o.address || 'N/A';
-
-                const itemsStr = o.items ? o.items.map(i => `<span class="font-bold text-gray-700">${i.name}</span> <span class="text-gray-500">x${i.quantity || 1}</span>`).join('<br/>') : '';
+                    
+                const itemsStr = o.items ? o.items.map(i => `${i.name} ${i.quantity && i.quantity > 1 ? '(x'+i.quantity+')' : ''}`.trim()).join(', ') : '';
 
                 html += `
                     <tr class="hover:bg-gray-50 transition-colors border-b border-gray-50">
@@ -2658,7 +3435,7 @@
                             ${o.customer || 'Unknown'} <span class="font-normal text-[9px] text-gray-500 bg-gray-100 px-1 rounded ml-1">${displayType}</span><br/>
                             <a href="tel:${o.phone}" class="font-mono font-normal text-[10px] text-blue-600 hover:underline inline-block mt-0.5"><i class="fa-solid fa-phone text-[8px]"></i> ${o.phone || 'N/A'}</a><br/>
                             <span class="font-normal text-[10px] text-gray-500 leading-snug mt-1 inline-block"><i class="fa-solid fa-location-dot text-[8px] text-red-400"></i> ${addressDisplay}</span>
-                            ${o.type !== 'Ride' && itemsStr ? `<div class="mt-2 bg-gray-50 p-2 rounded-lg border border-gray-200 text-[10px] max-h-24 overflow-y-auto leading-relaxed"><p class="text-gray-400 font-bold uppercase mb-1 border-b border-gray-200 pb-1">Items Ordered:</p>${itemsStr}</div>` : ''}
+                            ${o.type !== 'Ride' && itemsStr ? `<br/><span class="font-normal text-[10px] text-gray-600 leading-snug mt-1.5 block bg-gray-50 p-2 rounded-lg border border-gray-100"><i class="fa-solid fa-clipboard-list text-[8px] text-gray-400 mr-1"></i> ${itemsStr}</span>` : ''}
                         </td>
                         <td class="p-3 font-medium text-gray-600 text-xs align-top pt-4">${o.type === 'Ride' ? (o.riderName || 'Pending') : (o.restaurantName || '-')}</td>
                         <td class="p-3 font-black text-gray-900 text-xs align-top pt-4">₹${o.total ? o.total.toFixed(2) : (o.amount || 0)}</td>
@@ -2815,6 +3592,56 @@
                 listEl.innerHTML = html;
         };
 
+        window.adminCreatePromo = async () => {
+            if(currentUser.role !== 'Admin') return;
+            const code = document.getElementById('admin-promo-code').value.trim().toUpperCase();
+            const discount = parseInt(document.getElementById('admin-promo-discount').value);
+            const selectEl = document.getElementById('admin-promo-restaurant');
+            const restaurantId = selectEl.value;
+            const restaurantName = selectEl.options[selectEl.selectedIndex].text;
+
+            if(!code || isNaN(discount) || discount <= 0 || discount > 100) return window.showToast("Enter valid code and discount %", "error");
+
+            try {
+                await window.dbCall(addDoc(getCol('promos'), {
+                    code, discount, restaurantId, restaurantName: restaurantId === 'Global' ? 'All Restaurants' : restaurantName, isActive: true
+                }), 10000);
+                document.getElementById('admin-promo-code').value = '';
+                document.getElementById('admin-promo-discount').value = '';
+                window.showToast("Promo Created!", "success");
+            } catch(e) { window.showToast("Failed to create", "error"); }
+        };
+
+        window.togglePromo = async (id, currentStatus) => {
+            try { await window.dbCall(updateDoc(getDocRef('promos', id), {isActive: !currentStatus}), 10000); } catch(e){}
+        };
+
+        window.deletePromo = async (id) => {
+            try { await window.dbCall(deleteDoc(getDocRef('promos', id)), 10000); window.showToast("Promo Deleted", "info"); } catch(e){}
+        };
+
+        window.adminUpdateMarquee = async () => {
+            if(currentUser.role !== 'Admin') return;
+            const text = document.getElementById('admin-marquee-text').value.trim();
+            if(!text) return window.showToast("Please enter marquee text.", "error");
+
+            const btn = document.getElementById('btn-update-marquee');
+            const orig = btn.innerText;
+            btn.innerText = "Updating...";
+            btn.disabled = true;
+
+            try {
+                await window.dbCall(setDoc(getDocRef('settings', 'app_config'), { marqueeText: text }, { merge: true }), 10000);
+                window.showToast("Marquee Updated!", "success");
+                document.getElementById('admin-marquee-text').value = "";
+            } catch(e) {
+                window.showToast("Error updating marquee.", "error");
+            } finally {
+                btn.innerText = orig;
+                btn.disabled = false;
+            }
+        };
+
         window.initRoleListeners = () => {
             if (!auth.currentUser || !currentUser) return;
 
@@ -2871,13 +3698,8 @@
                     
                     const partners = allUsers.filter(u => u.role === 'Partner' && u.approvalStatus === 'Approved');
                     const promoSelect = document.getElementById('admin-promo-restaurant');
-                    const offerSelect = document.getElementById('admin-offer-partner'); 
-
                     if(promoSelect) {
                         promoSelect.innerHTML = '<option value="Global">All Restaurants (Global)</option>' + partners.map(p => `<option value="${p.id}">${p.shopName || p.name}</option>`).join('');
-                    }
-                    if(offerSelect) {
-                        offerSelect.innerHTML = '<option value="">Select Restaurant/Partner</option>' + partners.map(p => `<option value="${p.id}">${p.shopName || p.name}</option>`).join('');
                     }
 
                     window.adminUsersData = allUsers;
