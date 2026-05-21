@@ -20,7 +20,7 @@
                     return; 
                 }
 
-                const APP_VERSION = "11.28.1"; // Live Network Sync Update
+                const APP_VERSION = "11.29.0"; // Live Network Sync Update
                 
                 const clearAllCachesAndReload = () => {
                     console.log("Wiping Service Workers and Caches for update...");
@@ -157,6 +157,13 @@
         
         .hide-scroll::-webkit-scrollbar { display: none; }
         .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;  
+            overflow: hidden;
+        }
     </style>
 </head>
 <body>
@@ -291,9 +298,9 @@
                     </div>
 
                     <div>
-                        <h3 class="font-black text-xl text-gray-900 mb-4 tracking-tight">Top rated near you</h3>
-                        <div id="market-list" class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 pb-6">
-                            <div class="col-span-full py-10 text-center text-gray-400 font-medium text-sm animate-pulse border border-gray-200 rounded-3xl bg-white">Loading catalogue...</div>
+                        <h3 class="font-black text-xl text-gray-900 mb-4 tracking-tight" id="offered-items-title">Offered / Top Rated / Fav Items</h3>
+                        <div id="market-list" class="flex flex-col gap-2 pb-6">
+                            <div class="py-10 text-center text-gray-400 font-medium text-sm animate-pulse border border-gray-200 rounded-3xl bg-white w-full">Loading catalogue...</div>
                         </div>
                     </div>
                 </div>
@@ -396,7 +403,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.28.1 - Live Network Sync</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.29.0 - Live Network Sync</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right">
                             <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
@@ -595,6 +602,14 @@
                     <p class="text-xs text-orange-700 font-medium">Your account is pending approval by the Admin. You cannot receive orders until approved.</p>
                 </div>
 
+                <!-- PARTNER SALES DASHBOARD -->
+                <div id="partner-sales-dashboard" class="hidden bg-white rounded-3xl p-5 shadow-sm border border-gray-200 mb-6">
+                    <h3 class="font-bold text-gray-900 border-b border-gray-100 pb-2 mb-3"><i class="fa-solid fa-chart-pie text-emerald-500 mr-1"></i> Sales & Earnings Dashboard</h3>
+                    <div id="partner-sales-content" class="grid grid-cols-2 gap-3">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
                 <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="font-bold text-gray-900">Business Profile</h3>
@@ -695,17 +710,43 @@
                             <input id="prod-name" class="input-field mt-1" placeholder="E.g. Item Name">
                         </div>
                         
-                        <!-- Item Category Dropdown -->
+                        <!-- NEW: Tags Input -->
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Special Tags (Optional)</label>
+                            <select id="prod-item-tag" class="input-field mt-1 bg-white text-xs">
+                                <option value="">None (Standard Item)</option>
+                                <option value="Offered">🏷️ Offered</option>
+                                <option value="Top Rated">⭐ Top Rated</option>
+                                <option value="Fav Item">❤️ Fav Item</option>
+                            </select>
+                        </div>
+
+                        <!-- Item Category Dropdown - Massively Expanded -->
                         <div>
                             <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Category</label>
-                            <select id="prod-item-category" class="input-field mt-1 bg-white">
-                                <option value="Main Course">Main Course</option>
-                                <option value="Starters">Starters & Snacks</option>
-                                <option value="Beverages">Beverages</option>
-                                <option value="Desserts">Desserts</option>
-                                <option value="Breads">Breads & Roti</option>
-                                <option value="Groceries">General Groceries</option>
-                                <option value="Essentials">Daily Essentials</option>
+                            <select id="prod-item-category" class="input-field mt-1 bg-white text-xs">
+                                <optgroup label="Food Menu Categories">
+                                    <option value="Starters">Starters & Appetizers</option>
+                                    <option value="Main Course">Main Course</option>
+                                    <option value="Thali">Thali & Combo</option>
+                                    <option value="Breads">Breads & Roti</option>
+                                    <option value="Rice & Biryani">Rice & Biryani</option>
+                                    <option value="Fast Food">Fast Food & Pizza</option>
+                                    <option value="Snacks">Snacks & Chaat</option>
+                                    <option value="Beverages">Beverages & Shakes</option>
+                                    <option value="Desserts">Desserts & Sweets</option>
+                                </optgroup>
+                                <optgroup label="Grocery Categories">
+                                    <option value="Atta, Rice & Dals">Atta, Rice & Dals</option>
+                                    <option value="Oil & Ghee">Oil & Ghee</option>
+                                    <option value="Masala & Spices">Masala & Spices</option>
+                                    <option value="Snacks & Biscuits">Snacks & Biscuits</option>
+                                    <option value="Beverages & Tea">Beverages & Tea</option>
+                                    <option value="Dairy & Bakery">Dairy & Bakery</option>
+                                    <option value="Cleaning & Household">Cleaning & Household</option>
+                                    <option value="Personal Care">Personal Care</option>
+                                    <option value="Baby Care">Baby Care</option>
+                                </optgroup>
                                 <option value="Others">Others</option>
                             </select>
                         </div>
@@ -715,7 +756,7 @@
                                 <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Prep Time (Mins)</label>
                                 <input type="number" id="prod-prep-time" class="input-field mt-1" placeholder="E.g. 15">
                             </div>
-                            <div class="flex-1">
+                            <div class="flex-[1.5]">
                                 <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Item Image</label>
                                 <input type="file" id="prod-image-upload" accept="image/*" class="w-full text-[10px] text-gray-500 border border-gray-200 rounded-xl p-1.5 bg-gray-50 mt-1">
                             </div>
@@ -918,7 +959,11 @@
             <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Name</label>
             <input id="edit-u-name" type="text" class="input-field mb-3 !py-2.5" placeholder="User Name">
             <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Shop / Vehicle Name</label>
-            <input id="edit-u-shop" type="text" class="input-field mb-4 !py-2.5" placeholder="Shop Name (If Partner)">
+            <input id="edit-u-shop" type="text" class="input-field mb-3 !py-2.5" placeholder="Shop Name (If Partner)">
+            
+            <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Store Discount (%) - Optional</label>
+            <input id="edit-u-discount" type="number" class="input-field mb-4 !py-2.5" placeholder="e.g. 10 (Applies to all items)">
+
             <div class="flex gap-2">
                 <button onclick="document.getElementById('admin-edit-user-modal').classList.remove('active')" class="flex-1 bg-gray-100 text-gray-600 py-3 rounded-xl font-bold text-sm hover:bg-gray-200">Cancel</button>
                 <button onclick="window.submitAdminUserEdit()" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-blue-700">Save</button>
@@ -1104,6 +1149,7 @@
         window.adminCurrentOrderTab = 'Live';
         window.adminUsersData = [];
         window.adminOrdersData = [];
+        window.adminDiscountMap = {}; // Tracks admin discounts per partner
 
         // PARTNER TABS STATE
         window.partnerCurrentOrderTab = 'Live';
@@ -1223,6 +1269,11 @@
                 window.currentFoodCategoryFilter = null;
                 document.getElementById('active-restaurant-banner').classList.add('hidden');
                 document.getElementById('food-category-chips').classList.add('hidden');
+                
+                const titleEl = document.getElementById('marketplace-title');
+                if (titleEl) titleEl.classList.remove('hidden');
+                document.getElementById('offered-items-title').classList.remove('hidden');
+                
                 document.getElementById('marketplace-title').innerText = cat === 'Food Owner' ? 'Restaurants Near You' : 'Grocery Stores Near You';
                 document.getElementById('btn-clear-filter').classList.add('hidden');
                 window.loadMarketplaceData();
@@ -2196,31 +2247,31 @@
             }, 3000);
         };
 
-        // --- NEW ISOLATED NOTIFICATION REGISTRATION ---
         window.registerDeviceForNotifications = async () => {
-    console.log("DEBUG: Registering device for role:", currentUser ? currentUser.role : "Unknown");
-    
-    if ('serviceWorker' in navigator && messaging) {
-        try {
-            const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-            const permission = await Notification.requestPermission();
+            console.log("DEBUG: Registering device for role:", currentUser ? currentUser.role : "Unknown");
             
-            if (permission === 'granted') {
-                const token = await getToken(messaging, { 
-                    vapidKey: 'BM4kAcfdUnR_a3T_4akm1Y-VsebvaZ8kTCShHLFqoCxGjHIOfILQP0QhpYHLtNXXIOXAqF8RiE9iUZ8YuWSU7MU',
-                    serviceWorkerRegistration: registration 
-                });
-                
-                if (token && currentUser && currentUser.phone) {
-                    await window.dbCall(setDoc(getDocRef('users', currentUser.phone), { fcmToken: token }, { merge: true }), 5000);
-                    console.log("DEBUG: Token saved for role:", currentUser.role);
+            if ('serviceWorker' in navigator && messaging) {
+                try {
+                    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+                    const permission = await Notification.requestPermission();
+                    
+                    if (permission === 'granted') {
+                        const token = await getToken(messaging, { 
+                            vapidKey: 'BM4kAcfdUnR_a3T_4akm1Y-VsebvaZ8kTCShHLFqoCxGjHIOfILQP0QhpYHLtNXXIOXAqF8RiE9iUZ8YuWSU7MU',
+                            serviceWorkerRegistration: registration 
+                        });
+                        
+                        if (token && currentUser && currentUser.phone) {
+                            await window.dbCall(setDoc(getDocRef('users', currentUser.phone), { fcmToken: token }, { merge: true }), 5000);
+                            console.log("DEBUG: Token saved for role:", currentUser.role);
+                        }
+                    }
+                } catch (err) {
+                    console.error("DEBUG: Registration failed:", err);
                 }
             }
-        } catch (err) {
-            console.error("DEBUG: Registration failed:", err);
-        }
-    }
-};
+        };
+
         const renderProducts = (items) => {
             const listEl = document.getElementById('market-list');
             const chipsEl = document.getElementById('food-category-chips');
@@ -2249,9 +2300,18 @@
             const filtered = items.filter(i => {
                 const pShopCat = i.shopCategory || 'Food Owner'; 
                 if (pShopCat !== window.currentUserMainCategory) return false;
+                
                 if (currentRestaurantFilter && i.partnerId !== currentRestaurantFilter) return false;
                 if (currentFoodCategoryFilter && i.category !== currentFoodCategoryFilter) return false;
                 
+                // When on home screen (no restaurant selected), prioritize items with tags for "Offered / Top Rated"
+                if (!currentRestaurantFilter && !window.currentSearchQuery) {
+                    if (window.currentUserMainCategory === 'Food Owner' || window.currentUserMainCategory === 'Grocery Shop') {
+                        // Only show tagged items if any exist globally, else show all
+                        // We filter below during map if needed, but here we just pass all and sort/filter
+                    }
+                }
+
                 if (window.currentSearchQuery) {
                     const q = window.currentSearchQuery.toLowerCase();
                     return i.name.toLowerCase().includes(q) || (i.shopName && i.shopName.toLowerCase().includes(q));
@@ -2259,13 +2319,13 @@
                 return true;
             });
             
-            const isCompact = currentRestaurantFilter || window.currentUserMainCategory === 'Grocery Shop';
-
-            if (isCompact) {
-                // CHANGED: Use a 1-column grid on mobile for compact list view, 2-col on larger screens
-                listEl.className = "grid grid-cols-1 sm:grid-cols-2 gap-3 pb-6";
-            } else {
-                listEl.className = "flex gap-4 overflow-x-auto pb-6 no-scrollbar snap-x";
+            // If we are on the main screen, maybe sort tagged items to the top
+            if (!currentRestaurantFilter && !window.currentSearchQuery) {
+                filtered.sort((a, b) => {
+                    const aTag = a.tag ? 1 : 0;
+                    const bTag = b.tag ? 1 : 0;
+                    return bTag - aTag;
+                });
             }
 
             if (filtered.length === 0) {
@@ -2275,17 +2335,31 @@
 
             listEl.innerHTML = filtered.map(p => {
                 const hasVariants = p.variants && p.variants.length > 0;
-                const displayPrice = hasVariants ? p.variants[0].price : p.price;
+                let basePrice = hasVariants ? p.variants[0].price : p.price;
+                
+                // Apply Admin Store Discount if exists
+                let displayPrice = basePrice;
+                let originalPriceDisplay = '';
+                const storeDiscount = window.adminDiscountMap[p.partnerId] || 0;
+                if (storeDiscount > 0) {
+                    displayPrice = Math.round(basePrice - (basePrice * (storeDiscount / 100)));
+                    originalPriceDisplay = `<span class="text-[9px] text-gray-400 line-through mr-1">₹${basePrice}</span>`;
+                }
+
                 const isClosed = p.shopStatus === 'Closed' || p.shopStatus === 'Offline';
                 const isOutOfStock = p.inStock === false;
                 
-                let qtyDisplay = `<p class="text-[10px] text-gray-500 uppercase tracking-wide font-medium mt-1">${p.qty || ''}</p>`;
+                let qtyDisplay = `<p class="text-[9px] text-gray-500 uppercase tracking-wide font-medium mt-1 mb-1">${p.qty || ''}</p>`;
                 
                 if (hasVariants) {
-                    const options = p.variants.map((v, i) => `<option value="${i}" data-price="${v.price}">${v.qty}</option>`).join('');
+                    const options = p.variants.map((v, i) => {
+                        let vPrice = v.price;
+                        if(storeDiscount > 0) vPrice = Math.round(vPrice - (vPrice * (storeDiscount / 100)));
+                        return `<option value="${i}" data-price="${vPrice}">${v.qty}</option>`;
+                    }).join('');
                     qtyDisplay = `
-                        <div class="mt-1">
-                            <select onchange="window.updatePriceDisplay(this, 'price-${p.id}')" id="sel-${p.id}" class="text-[10px] bg-gray-50 border border-gray-200 rounded p-1 outline-none focus:ring-1 ring-red-500 font-medium text-gray-700 w-auto max-w-[120px]">
+                        <div class="mt-1 mb-1">
+                            <select onchange="window.updatePriceDisplay(this, 'price-${p.id}')" id="sel-${p.id}" class="text-[10px] bg-gray-50 border border-gray-200 rounded p-1 outline-none focus:ring-1 ring-red-500 font-medium text-gray-700 w-full max-w-[100px]">
                                 ${options}
                             </select>
                         </div>
@@ -2294,82 +2368,56 @@
 
                 const actionBtnCode = hasVariants 
                     ? `window.addToCartVariant('${p.id}', '${p.name.replace(/'/g, "\\'")}', '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')` 
-                    : `window.addToCartStandard('${p.id}', '${p.name.replace(/'/g, "\\'")}', ${p.price}, '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')`;
+                    : `window.addToCartStandard('${p.id}', '${p.name.replace(/'/g, "\\'")}', ${displayPrice}, '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')`;
 
-                let actionCompact = '';
-                let actionVertical = '';
+                let actionHtml = '';
 
                 if (isClosed) {
-                    const badge = `<span class="text-[9px] font-black text-red-500 uppercase tracking-widest bg-red-50 px-1.5 py-1 rounded whitespace-nowrap border border-red-100">Closed</span>`;
-                    actionCompact = badge; actionVertical = badge;
+                    actionHtml = `<span class="text-[8px] font-black text-red-500 uppercase tracking-widest bg-red-50 px-1.5 py-1 rounded whitespace-nowrap border border-red-100">Closed</span>`;
                 } else if (isOutOfStock) {
-                    const badge = `<span class="text-[9px] font-black text-orange-500 uppercase tracking-widest bg-orange-50 px-1.5 py-1 rounded whitespace-nowrap border border-orange-100">No Stock</span>`;
-                    actionCompact = badge; actionVertical = badge;
+                    actionHtml = `<span class="text-[8px] font-black text-orange-500 uppercase tracking-widest bg-orange-50 px-1.5 py-1 rounded whitespace-nowrap border border-orange-100">No Stock</span>`;
                 } else {
-                    actionCompact = `
-                        <div class="flex flex-col items-center gap-1.5">
-                            <span id="price-${p.id}" class="text-sm font-black text-gray-900 tracking-tight">₹${displayPrice}</span>
-                            <button type="button" onclick="${actionBtnCode}" class="px-4 py-1.5 rounded-lg bg-red-50 text-red-600 font-black text-[10px] hover:bg-red-600 hover:text-white transition-colors active:scale-95 border border-red-100 shadow-sm whitespace-nowrap">
+                    actionHtml = `
+                        <div class="flex flex-col items-end gap-1">
+                            <div>${originalPriceDisplay}<span id="price-${p.id}" class="text-xs font-black text-gray-900 tracking-tight">₹${displayPrice}</span></div>
+                            <button type="button" onclick="${actionBtnCode}" class="px-3 py-1 rounded-lg bg-red-50 text-red-600 font-black text-[9px] hover:bg-red-600 hover:text-white transition-colors active:scale-95 border border-red-100 shadow-sm whitespace-nowrap">
                                 ADD <i class="fa-solid fa-plus ml-0.5"></i>
                             </button>
                         </div>
                     `;
-                    actionVertical = `
-                        <span id="price-${p.id}" class="text-lg font-black text-gray-900 tracking-tight">₹${displayPrice}</span>
-                        <button type="button" onclick="${actionBtnCode}" class="w-8 h-8 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition-colors active:scale-90 shrink-0 border border-red-100">
-                            <i class="fa-solid fa-plus text-xs"></i>
-                        </button>
-                    `;
                 }
 
-                const dummyRating = `4.${Math.floor(Math.random() * 5) + 1}`;
-
-                if (isCompact) {
-                    // NEW COMPACT RECTANGULAR LAYOUT
-                    return `
-                        <div class="bg-white rounded-2xl p-2.5 shadow-sm border border-gray-100 flex items-center gap-3 w-full transform transition hover:shadow-md ${isClosed || isOutOfStock ? 'opacity-60 grayscale-[0.5]' : ''}">
-                            <div class="w-20 h-20 shrink-0 rounded-xl overflow-hidden bg-gray-50 relative border border-gray-100">
-                                <img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x300/f3f4f6/a1a1aa?text=Image'">
-                                ${p.category ? `<span class="absolute bottom-0 left-0 w-full bg-black/50 backdrop-blur-sm text-[8px] font-bold text-center text-white py-0.5 truncate px-1">${p.category}</span>` : ''}
-                            </div>
-                            <div class="flex-1 min-w-0 flex justify-between items-center gap-2 h-full">
-                                <div class="flex-1 min-w-0 py-0.5 flex flex-col justify-center">
-                                    <h4 class="font-bold text-gray-900 text-sm leading-tight truncate">${p.name}</h4>
-                                    ${p.prepTime ? `<p class="text-[9px] text-orange-600 font-bold mt-0.5"><i class="fa-regular fa-clock mr-0.5"></i> ${p.prepTime} mins</p>` : ''}
-                                    ${qtyDisplay}
-                                </div>
-                                <div class="shrink-0 pl-2 border-l border-gray-50 flex items-center justify-center min-w-[70px] h-full">
-                                    ${actionCompact}
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    // ORIGINAL VERTICAL CARD
-                    let addressDisplay = `<div class="mb-2 mt-1">
-                        <p class="text-[9px] font-bold text-gray-800 truncate bg-gray-50 inline-block px-1.5 py-0.5 rounded border border-gray-100"><i class="fa-solid fa-store text-red-500 mr-1"></i> ${p.shopName || 'Gramzo Partner'}</p>
-                    </div>`;
-
-                    return `
-                        <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex flex-col w-[260px] sm:w-[300px] shrink-0 snap-center transform transition hover:-translate-y-1 hover:shadow-md ${isClosed || isOutOfStock ? 'opacity-60 grayscale-[0.5]' : ''}">
-                            <div class="h-32 bg-gray-100 relative">
-                                <img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x300/f3f4f6/a1a1aa?text=Image'">
-                                ${p.category ? `<span class="absolute top-2 left-2 bg-white/90 backdrop-blur text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded text-gray-800 shadow-sm">${p.category}</span>` : ''}
-                                <span class="absolute bottom-2 right-2 bg-white/95 backdrop-blur text-[9px] font-black px-1.5 py-0.5 rounded text-gray-800 shadow-sm flex items-center gap-1"><i class="fa-solid fa-star text-yellow-500 text-[8px]"></i> ${dummyRating}</span>
-                            </div>
-                            <div class="p-3 flex-1 flex flex-col justify-between">
-                                <div>
-                                    <h4 class="font-bold text-gray-900 text-sm leading-tight truncate">${p.name}</h4>
-                                    ${addressDisplay}
-                                    ${qtyDisplay}
-                                </div>
-                                <div class="flex justify-between items-center mt-3 pt-3 border-t border-gray-50">
-                                    ${actionVertical}
-                                </div>
-                            </div>
-                        </div>
-                    `;
+                let tagHtml = '';
+                if (p.tag) {
+                    let tagColor = 'bg-yellow-100 text-yellow-700';
+                    if(p.tag === 'Offered') tagColor = 'bg-blue-100 text-blue-700';
+                    if(p.tag === 'Fav Item') tagColor = 'bg-pink-100 text-pink-700';
+                    tagHtml = `<span class="text-[8px] ${tagColor} px-1.5 py-0.5 rounded font-black uppercase tracking-wider block w-max mt-0.5 mb-0.5">${p.tag}</span>`;
                 }
+                if (storeDiscount > 0 && !p.tag) {
+                    tagHtml = `<span class="text-[8px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded font-black uppercase tracking-wider block w-max mt-0.5 mb-0.5">${storeDiscount}% OFF</span>`;
+                }
+
+                // NEW EXTREMELY COMPACT LAYOUT FOR ALL ITEMS
+                return `
+                    <div class="bg-white rounded-xl p-1.5 shadow-sm border border-gray-100 flex items-center gap-2 w-full transform transition hover:shadow-md ${isClosed || isOutOfStock ? 'opacity-60 grayscale-[0.5]' : ''}">
+                        <div class="w-14 h-14 shrink-0 rounded-lg overflow-hidden bg-gray-50 relative border border-gray-100 flex items-center justify-center">
+                            <img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/150x150/f3f4f6/a1a1aa?text=Img'">
+                        </div>
+                        <div class="flex-1 min-w-0 flex justify-between items-center gap-1 h-full">
+                            <div class="flex-1 min-w-0 py-0.5 flex flex-col justify-center">
+                                <h4 class="font-bold text-gray-900 text-[11px] leading-tight line-clamp-2 pr-1">${p.name}</h4>
+                                ${tagHtml}
+                                ${p.prepTime ? `<p class="text-[8px] text-orange-600 font-bold mt-0.5"><i class="fa-regular fa-clock mr-0.5"></i> ${p.prepTime}m</p>` : ''}
+                                ${qtyDisplay}
+                                ${!currentRestaurantFilter ? `<p class="text-[8px] font-bold text-gray-500 truncate mt-0.5"><i class="fa-solid fa-store text-gray-300"></i> ${p.shopName || 'Partner'}</p>` : ''}
+                            </div>
+                            <div class="shrink-0 pl-1.5 border-l border-gray-50 flex items-center justify-center min-w-[55px] h-full">
+                                ${actionHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
             }).join('');
         };
 
@@ -2398,12 +2446,20 @@
         const extractRestaurants = async () => {
             try {
                 const snap = await window.dbCall(getDocs(getCol('users')), 5000);
-                const approvedPartners = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(u => u.role === 'Partner' && u.approvalStatus === 'Approved' && (u.category === window.currentUserMainCategory));
+                const approvedPartners = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(u => u.role === 'Partner' && u.approvalStatus === 'Approved');
                 
+                // Track Admin Discounts globally
+                window.adminDiscountMap = {};
+                approvedPartners.forEach(p => {
+                    if (p.adminDiscount) window.adminDiscountMap[p.id] = p.adminDiscount;
+                });
+
+                const relevantPartners = approvedPartners.filter(u => u.category === window.currentUserMainCategory);
+
                 const prodSnap = await window.dbCall(getDocs(getCol('products')), 5000);
                 const products = prodSnap.docs.map(d => d.data());
 
-                const uniqueRestaurants = approvedPartners.map(p => {
+                const uniqueRestaurants = relevantPartners.map(p => {
                     const shopProducts = products.filter(prod => prod.partnerId === p.id);
                     let displayImage = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&q=80';
                     if (window.currentUserMainCategory === 'Grocery Shop') displayImage = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=200&q=80';
@@ -2447,8 +2503,7 @@
             onSnapshot(getCol('products'), (snap) => {
                 let items = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
                 
-                extractRestaurants(); 
-                renderProducts(items);
+                extractRestaurants().then(() => renderProducts(items)); 
             }, (err) => {
                 if (err.code === 'permission-denied') window.showToast("Firebase Permissions Denied! Check rules.", "error");
             });
@@ -2457,6 +2512,7 @@
         window.filterRestaurant = (partnerId, shopName, shopAddress = '', shopPhone = '') => {
             const banner = document.getElementById('active-restaurant-banner');
             const marketplaceRow = document.getElementById('marketplace-header-row');
+            const offeredTitle = document.getElementById('offered-items-title');
 
             if (currentRestaurantFilter === partnerId || !partnerId) {
                 currentRestaurantFilter = null;
@@ -2466,6 +2522,7 @@
                 
                 if (banner) banner.classList.add('hidden');
                 if (marketplaceRow) marketplaceRow.classList.remove('hidden');
+                if (offeredTitle) offeredTitle.classList.remove('hidden'); // Show when globally viewing
             } else {
                 currentRestaurantFilter = partnerId;
                 currentFoodCategoryFilter = null;
@@ -2479,6 +2536,7 @@
                     banner.classList.remove('hidden');
                 }
                 if (marketplaceRow) marketplaceRow.classList.add('hidden');
+                if (offeredTitle) offeredTitle.classList.add('hidden'); // Hide the Offered title when looking at specific shop
             }
             window.loadMarketplaceData();
         };
@@ -2981,8 +3039,13 @@
                 window.editingProductId = id;
                 document.getElementById('prod-name').value = p.name || '';
                 document.getElementById('prod-prep-time').value = p.prepTime || '';
+                
                 if(p.category && document.getElementById('prod-item-category')) {
                     document.getElementById('prod-item-category').value = p.category;
+                }
+                
+                if(document.getElementById('prod-item-tag')) {
+                    document.getElementById('prod-item-tag').value = p.tag || '';
                 }
                 
                 const container = document.getElementById('variant-container');
@@ -3015,6 +3078,9 @@
             const prepTime = document.getElementById('prod-prep-time').value.trim() || '15';
             const itemCatEl = document.getElementById('prod-item-category');
             const itemCategory = itemCatEl ? itemCatEl.value : 'Others';
+            
+            const itemTagEl = document.getElementById('prod-item-tag');
+            const itemTag = itemTagEl ? itemTagEl.value : '';
             
             if(!name) return window.showToast("Enter item name.", "error");
 
@@ -3065,6 +3131,7 @@
                     qty: variants[0].qty,     
                     prepTime: prepTime,
                     category: itemCategory, 
+                    tag: itemTag,
                     partnerId: currentUser.phone,
                     shopName: currentUser.shopName,
                     shopAddress: currentUser.shopAddress || '',
@@ -3088,6 +3155,7 @@
                 
                 document.getElementById('prod-name').value = '';
                 document.getElementById('prod-prep-time').value = '';
+                if(itemTagEl) itemTagEl.value = '';
                 if(imgInput) imgInput.value = '';
                 document.getElementById('variant-container').innerHTML = `
                     <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Portion & Price</label>
@@ -3238,6 +3306,10 @@
             document.getElementById('edit-u-phone').value = phone;
             document.getElementById('edit-u-name').value = name;
             document.getElementById('edit-u-shop').value = shopName && shopName !== 'null' && shopName !== 'undefined' ? shopName : '';
+            
+            const userObj = window.adminUsersData.find(u => String(u.phone) === String(phone));
+            document.getElementById('edit-u-discount').value = userObj && userObj.adminDiscount ? userObj.adminDiscount : '';
+            
             document.getElementById('admin-edit-user-modal').classList.add('active');
         };
 
@@ -3245,13 +3317,20 @@
             const phone = document.getElementById('edit-u-phone').value;
             const newName = document.getElementById('edit-u-name').value.trim();
             const newShop = document.getElementById('edit-u-shop').value.trim();
+            const discountInput = document.getElementById('edit-u-discount').value;
 
             if(!phone || !newName) return window.showToast("Name cannot be empty.", "error");
+
+            let adminDiscount = discountInput !== '' ? parseInt(discountInput) : null;
+            if(adminDiscount !== null && (isNaN(adminDiscount) || adminDiscount < 0 || adminDiscount > 100)) {
+                return window.showToast("Invalid discount percentage", "error");
+            }
 
             try {
                 await window.dbCall(setDoc(getDocRef('users', phone), {
                     name: newName,
-                    shopName: newShop || null
+                    shopName: newShop || null,
+                    adminDiscount: adminDiscount
                 }, { merge: true }), 10000);
                 window.showToast("User profile updated!", "success");
                 document.getElementById('admin-edit-user-modal').classList.remove('active');
@@ -3343,7 +3422,8 @@
                     if(['Rider', 'Ride Partner'].includes(u.category)) {
                         detailsHtml = `<span class="font-bold text-gray-700">Vehicle:</span> ${u.carModel || 'N/A'} (${u.carNum || 'N/A'})<br/><span class="font-bold text-gray-700">Wallet:</span> ${u.walletPoints || 0} pts`;
                     } else {
-                        detailsHtml = `<span class="font-bold text-gray-700">Shop:</span> ${u.shopName || 'N/A'}<br/><span class="font-bold text-gray-700">Status:</span> <span class="${isApproved ? 'text-emerald-500' : 'text-orange-500'} font-bold">${u.approvalStatus || 'Pending'}</span>`;
+                        const discBadge = u.adminDiscount ? `<span class="text-[8px] bg-red-100 text-red-600 px-1 rounded font-bold">${u.adminDiscount}% OFF</span>` : '';
+                        detailsHtml = `<span class="font-bold text-gray-700">Shop:</span> ${u.shopName || 'N/A'} ${discBadge}<br/><span class="font-bold text-gray-700">Status:</span> <span class="${isApproved ? 'text-emerald-500' : 'text-orange-500'} font-bold">${u.approvalStatus || 'Pending'}</span>`;
                     }
                 } else {
                     detailsHtml = `Verified User`;
