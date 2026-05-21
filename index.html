@@ -20,7 +20,7 @@
                     return; 
                 }
 
-                const APP_VERSION = "11.35.0"; // Live Network Sync Update
+                const APP_VERSION = "11.28.1"; // Live Network Sync Update
                 
                 const clearAllCachesAndReload = () => {
                     console.log("Wiping Service Workers and Caches for update...");
@@ -157,14 +157,6 @@
         
         .hide-scroll::-webkit-scrollbar { display: none; }
         .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        /* Required for multi-line clamping */
-        .line-clamp-2 {
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;  
-            overflow: hidden;
-        }
     </style>
 </head>
 <body>
@@ -229,7 +221,9 @@
 
         <main id="main-content" class="px-4 pb-24 max-w-md mx-auto sm:max-w-4xl sm:px-6 pt-6">
             
-            <!-- VIEW: USER -->
+            <!-- ========================================== -->
+            <!-- VIEW: USER                                 -->
+            <!-- ========================================== -->
             <div id="view-User" class="view-section active space-y-6">
                 
                 <div class="flex items-center gap-3">
@@ -297,9 +291,9 @@
                     </div>
 
                     <div>
-                        <h3 class="font-black text-xl text-gray-900 mb-4 tracking-tight" id="offered-items-title">Offered / Top Rated / Fav Items</h3>
+                        <h3 class="font-black text-xl text-gray-900 mb-4 tracking-tight">Top rated near you</h3>
                         <div id="market-list" class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 pb-6">
-                            <div class="col-span-full py-10 text-center text-gray-400 font-medium text-sm animate-pulse border border-gray-200 rounded-3xl bg-white w-full">Loading catalogue...</div>
+                            <div class="col-span-full py-10 text-center text-gray-400 font-medium text-sm animate-pulse border border-gray-200 rounded-3xl bg-white">Loading catalogue...</div>
                         </div>
                     </div>
                 </div>
@@ -402,7 +396,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.35.0 - Live Network Sync</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.28.1 - Live Network Sync</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right">
                             <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
@@ -413,7 +407,9 @@
                 </footer>
             </div>
 
-            <!-- VIEW: CART -->
+            <!-- ========================================== -->
+            <!-- VIEW: CART                                 -->
+            <!-- ========================================== -->
             <div id="view-Cart" class="view-section">
                 <!-- NEW COMPACT ZOMATO-STYLE CART -->
                 <div class="flex items-center gap-3 mb-4 mt-2">
@@ -511,13 +507,17 @@
                 </div>
             </div>
 
-            <!-- VIEW: ORDERS -->
+            <!-- ========================================== -->
+            <!-- VIEW: ORDERS                               -->
+            <!-- ========================================== -->
             <div id="view-Orders" class="view-section space-y-6">
                 <h2 class="text-2xl font-black text-gray-900">My Orders & Rides</h2>
                 <div id="user-orders-list" class="space-y-4"></div>
             </div>
 
-            <!-- VIEW: PARTNER DASHBOARD -->
+            <!-- ========================================== -->
+            <!-- VIEW: PARTNER DASHBOARD                    -->
+            <!-- ========================================== -->
             <div id="view-Partner" class="view-section space-y-6">
                 <!-- Specialized Dashboard for Riders -->
                 <div id="rider-top-dashboard" class="hidden bg-blue-600 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden">
@@ -582,7 +582,9 @@
                 <div id="partner-orders-list" class="space-y-4"></div>
             </div>
 
+            <!-- ========================================== -->
             <!-- VIEW: PARTNER HUB (Profile & Shop Setup)   -->
+            <!-- ========================================== -->
             <div id="view-Partner-Profile" class="view-section space-y-6">
                 <h2 class="text-2xl font-black text-gray-900">Partner Settings</h2>
                 
@@ -591,14 +593,6 @@
                     <i class="fa-solid fa-clock text-4xl text-orange-400 mb-3"></i>
                     <h3 class="font-black text-lg text-orange-800 mb-1">Account Under Review</h3>
                     <p class="text-xs text-orange-700 font-medium">Your account is pending approval by the Admin. You cannot receive orders until approved.</p>
-                </div>
-
-                <!-- PARTNER SALES DASHBOARD -->
-                <div id="partner-sales-dashboard" class="hidden bg-white rounded-3xl p-5 shadow-sm border border-gray-200 mb-6">
-                    <h3 class="font-bold text-gray-900 border-b border-gray-100 pb-2 mb-3"><i class="fa-solid fa-chart-pie text-emerald-500 mr-1"></i> Sales & Earnings Dashboard</h3>
-                    <div id="partner-sales-content" class="grid grid-cols-2 gap-3">
-                        <!-- Populated by JS -->
-                    </div>
                 </div>
 
                 <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100">
@@ -701,43 +695,17 @@
                             <input id="prod-name" class="input-field mt-1" placeholder="E.g. Item Name">
                         </div>
                         
-                        <!-- NEW: Tags Input -->
-                        <div>
-                            <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Special Tags (Optional)</label>
-                            <select id="prod-item-tag" class="input-field mt-1 bg-white text-xs">
-                                <option value="">None (Standard Item)</option>
-                                <option value="Offered">🏷️ Offered</option>
-                                <option value="Top Rated">⭐ Top Rated</option>
-                                <option value="Fav Item">❤️ Fav Item</option>
-                            </select>
-                        </div>
-
-                        <!-- Item Category Dropdown - Massively Expanded -->
+                        <!-- Item Category Dropdown -->
                         <div>
                             <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Category</label>
-                            <select id="prod-item-category" class="input-field mt-1 bg-white text-xs">
-                                <optgroup label="Food Menu Categories">
-                                    <option value="Starters">Starters & Appetizers</option>
-                                    <option value="Main Course">Main Course</option>
-                                    <option value="Thali">Thali & Combo</option>
-                                    <option value="Breads">Breads & Roti</option>
-                                    <option value="Rice & Biryani">Rice & Biryani</option>
-                                    <option value="Fast Food">Fast Food & Pizza</option>
-                                    <option value="Snacks">Snacks & Chaat</option>
-                                    <option value="Beverages">Beverages & Shakes</option>
-                                    <option value="Desserts">Desserts & Sweets</option>
-                                </optgroup>
-                                <optgroup label="Grocery Categories">
-                                    <option value="Atta, Rice & Dals">Atta, Rice & Dals</option>
-                                    <option value="Oil & Ghee">Oil & Ghee</option>
-                                    <option value="Masala & Spices">Masala & Spices</option>
-                                    <option value="Snacks & Biscuits">Snacks & Biscuits</option>
-                                    <option value="Beverages & Tea">Beverages & Tea</option>
-                                    <option value="Dairy & Bakery">Dairy & Bakery</option>
-                                    <option value="Cleaning & Household">Cleaning & Household</option>
-                                    <option value="Personal Care">Personal Care</option>
-                                    <option value="Baby Care">Baby Care</option>
-                                </optgroup>
+                            <select id="prod-item-category" class="input-field mt-1 bg-white">
+                                <option value="Main Course">Main Course</option>
+                                <option value="Starters">Starters & Snacks</option>
+                                <option value="Beverages">Beverages</option>
+                                <option value="Desserts">Desserts</option>
+                                <option value="Breads">Breads & Roti</option>
+                                <option value="Groceries">General Groceries</option>
+                                <option value="Essentials">Daily Essentials</option>
                                 <option value="Others">Others</option>
                             </select>
                         </div>
@@ -747,7 +715,7 @@
                                 <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Prep Time (Mins)</label>
                                 <input type="number" id="prod-prep-time" class="input-field mt-1" placeholder="E.g. 15">
                             </div>
-                            <div class="flex-[1.5]">
+                            <div class="flex-1">
                                 <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Item Image</label>
                                 <input type="file" id="prod-image-upload" accept="image/*" class="w-full text-[10px] text-gray-500 border border-gray-200 rounded-xl p-1.5 bg-gray-50 mt-1">
                             </div>
@@ -770,7 +738,9 @@
                 </div>
             </div>
 
-            <!-- VIEW: ADMIN DASHBOARD -->
+            <!-- ========================================== -->
+            <!-- VIEW: ADMIN DASHBOARD                      -->
+            <!-- ========================================== -->
             <div id="view-Admin" class="view-section space-y-6">
                 <div class="flex justify-between items-center">
                     <h2 class="text-2xl font-black text-gray-900">Admin Control</h2>
@@ -942,41 +912,13 @@
 
     <!-- Admin Edit User Modal -->
     <div id="admin-edit-user-modal" class="modal-overlay z-[200]">
-        <div class="modal-content !max-w-sm">
-            <h3 class="font-black text-xl text-gray-900 mb-4 border-b pb-2">Edit Profile & Store</h3>
+        <div class="modal-content !max-w-xs">
+            <h3 class="font-black text-xl text-gray-900 mb-4 border-b pb-2">Edit Profile</h3>
             <input type="hidden" id="edit-u-phone">
-            
             <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Name</label>
             <input id="edit-u-name" type="text" class="input-field mb-3 !py-2.5" placeholder="User Name">
-            
             <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Shop / Vehicle Name</label>
-            <input id="edit-u-shop" type="text" class="input-field mb-3 !py-2.5" placeholder="Shop Name (If Partner)">
-            
-            <!-- NEW: Item Specific Discount Section -->
-            <div id="admin-item-discount-section" class="hidden mb-4 bg-red-50 p-3 rounded-xl border border-red-100">
-                <p class="text-[10px] font-black text-red-600 uppercase mb-2"><i class="fa-solid fa-tag"></i> Admin Item Offer/Discount</p>
-                
-                <label class="text-[10px] font-bold text-gray-700 uppercase ml-1">Select Item(s)</label>
-                <select id="edit-u-item-select" class="input-field mb-2 !py-2.5 bg-white text-xs">
-                    <option value="ALL">Loading items...</option>
-                </select>
-                
-                <div class="flex gap-2">
-                    <div class="w-1/3">
-                        <label class="text-[10px] font-bold text-gray-700 uppercase ml-1">Type</label>
-                        <select id="edit-u-disc-type" class="input-field !py-2.5 bg-white text-xs">
-                            <option value="%">% Off</option>
-                            <option value="Rs">Flat ₹ Off</option>
-                        </select>
-                    </div>
-                    <div class="w-2/3">
-                        <label class="text-[10px] font-bold text-gray-700 uppercase ml-1">Value (0 to remove)</label>
-                        <input id="edit-u-disc-val" type="number" class="input-field !py-2.5" placeholder="e.g. 10">
-                    </div>
-                </div>
-                <p class="text-[8px] text-gray-500 mt-2 font-medium leading-tight">Note: Setting a discount > 0 automatically displays the "Offered" tag on the user side for these item(s).</p>
-            </div>
-
+            <input id="edit-u-shop" type="text" class="input-field mb-4 !py-2.5" placeholder="Shop Name (If Partner)">
             <div class="flex gap-2">
                 <button onclick="document.getElementById('admin-edit-user-modal').classList.remove('active')" class="flex-1 bg-gray-100 text-gray-600 py-3 rounded-xl font-bold text-sm hover:bg-gray-200">Cancel</button>
                 <button onclick="window.submitAdminUserEdit()" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-blue-700">Save</button>
@@ -1091,7 +1033,6 @@
         </div>
     </div>
 
-    <!-- Toast Notification -->
     <div id="toast-msg" class="fixed top-24 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full text-sm font-bold z-[300] shadow-2xl transition-all duration-300 transform -translate-y-10 opacity-0 pointer-events-none flex items-center gap-2">
         <i class="fa-solid fa-circle-info text-emerald-400"></i>
         <span id="toast-text">Message</span>
@@ -1163,7 +1104,6 @@
         window.adminCurrentOrderTab = 'Live';
         window.adminUsersData = [];
         window.adminOrdersData = [];
-        window.currentEditPartnerItems = []; // Tracks items for discount modal
 
         // PARTNER TABS STATE
         window.partnerCurrentOrderTab = 'Live';
@@ -1283,11 +1223,6 @@
                 window.currentFoodCategoryFilter = null;
                 document.getElementById('active-restaurant-banner').classList.add('hidden');
                 document.getElementById('food-category-chips').classList.add('hidden');
-                
-                const titleEl = document.getElementById('marketplace-title');
-                if (titleEl) titleEl.classList.remove('hidden');
-                document.getElementById('offered-items-title').classList.remove('hidden');
-                
                 document.getElementById('marketplace-title').innerText = cat === 'Food Owner' ? 'Restaurants Near You' : 'Grocery Stores Near You';
                 document.getElementById('btn-clear-filter').classList.add('hidden');
                 window.loadMarketplaceData();
@@ -2118,7 +2053,7 @@
             } finally { btn.innerText = originalText; btn.disabled = false; }
         };
 
-        // --- UI FINALIZATION ---
+        // --- UI FINALIZATION (CLEANED) ---
         window.finalizeLoginSequence = (isSessionRestore = false) => {
             if(!isSessionRestore) window.closeAuthModal();
 
@@ -2261,31 +2196,31 @@
             }, 3000);
         };
 
+        // --- NEW ISOLATED NOTIFICATION REGISTRATION ---
         window.registerDeviceForNotifications = async () => {
-            console.log("DEBUG: Registering device for role:", currentUser ? currentUser.role : "Unknown");
+    console.log("DEBUG: Registering device for role:", currentUser ? currentUser.role : "Unknown");
+    
+    if ('serviceWorker' in navigator && messaging) {
+        try {
+            const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+            const permission = await Notification.requestPermission();
             
-            if ('serviceWorker' in navigator && messaging) {
-                try {
-                    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-                    const permission = await Notification.requestPermission();
-                    
-                    if (permission === 'granted') {
-                        const token = await getToken(messaging, { 
-                            vapidKey: 'BM4kAcfdUnR_a3T_4akm1Y-VsebvaZ8kTCShHLFqoCxGjHIOfILQP0QhpYHLtNXXIOXAqF8RiE9iUZ8YuWSU7MU',
-                            serviceWorkerRegistration: registration 
-                        });
-                        
-                        if (token && currentUser && currentUser.phone) {
-                            await window.dbCall(setDoc(getDocRef('users', currentUser.phone), { fcmToken: token }, { merge: true }), 5000);
-                            console.log("DEBUG: Token saved for role:", currentUser.role);
-                        }
-                    }
-                } catch (err) {
-                    console.error("DEBUG: Registration failed:", err);
+            if (permission === 'granted') {
+                const token = await getToken(messaging, { 
+                    vapidKey: 'BM4kAcfdUnR_a3T_4akm1Y-VsebvaZ8kTCShHLFqoCxGjHIOfILQP0QhpYHLtNXXIOXAqF8RiE9iUZ8YuWSU7MU',
+                    serviceWorkerRegistration: registration 
+                });
+                
+                if (token && currentUser && currentUser.phone) {
+                    await window.dbCall(setDoc(getDocRef('users', currentUser.phone), { fcmToken: token }, { merge: true }), 5000);
+                    console.log("DEBUG: Token saved for role:", currentUser.role);
                 }
             }
-        };
-
+        } catch (err) {
+            console.error("DEBUG: Registration failed:", err);
+        }
+    }
+};
         const renderProducts = (items) => {
             const listEl = document.getElementById('market-list');
             const chipsEl = document.getElementById('food-category-chips');
@@ -2314,7 +2249,6 @@
             const filtered = items.filter(i => {
                 const pShopCat = i.shopCategory || 'Food Owner'; 
                 if (pShopCat !== window.currentUserMainCategory) return false;
-                
                 if (currentRestaurantFilter && i.partnerId !== currentRestaurantFilter) return false;
                 if (currentFoodCategoryFilter && i.category !== currentFoodCategoryFilter) return false;
                 
@@ -2325,13 +2259,13 @@
                 return true;
             });
             
-            // Priority Tag sorting when viewing global feed
-            if (!currentRestaurantFilter && !window.currentSearchQuery) {
-                filtered.sort((a, b) => {
-                    const aTag = (a.tag || (a.adminDiscVal && a.adminDiscVal > 0)) ? 1 : 0;
-                    const bTag = (b.tag || (b.adminDiscVal && b.adminDiscVal > 0)) ? 1 : 0;
-                    return bTag - aTag;
-                });
+            const isCompact = currentRestaurantFilter || window.currentUserMainCategory === 'Grocery Shop';
+
+            if (isCompact) {
+                // CHANGED: Use a 1-column grid on mobile for compact list view, 2-col on larger screens
+                listEl.className = "grid grid-cols-1 sm:grid-cols-2 gap-3 pb-6";
+            } else {
+                listEl.className = "flex gap-4 overflow-x-auto pb-6 no-scrollbar snap-x";
             }
 
             if (filtered.length === 0) {
@@ -2339,44 +2273,19 @@
                 return;
             }
 
-            // Always display in grid format
-            listEl.className = "grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 pb-6";
-            const cardWidthClass = 'col-span-1 w-full';
-
             listEl.innerHTML = filtered.map(p => {
                 const hasVariants = p.variants && p.variants.length > 0;
-                let basePrice = hasVariants ? p.variants[0].price : p.price;
-                
-                // Item Specific Discount Logic applied
-                let displayPrice = basePrice;
-                let originalPriceDisplay = '';
-                
-                if (p.adminDiscVal && p.adminDiscVal > 0) {
-                    if (p.adminDiscType === '%') {
-                        displayPrice = Math.round(basePrice - (basePrice * (p.adminDiscVal / 100)));
-                    } else {
-                        displayPrice = Math.max(0, basePrice - p.adminDiscVal);
-                    }
-                    originalPriceDisplay = `<span class="text-[9px] text-gray-400 line-through mr-1">₹${basePrice}</span>`;
-                }
-
+                const displayPrice = hasVariants ? p.variants[0].price : p.price;
                 const isClosed = p.shopStatus === 'Closed' || p.shopStatus === 'Offline';
                 const isOutOfStock = p.inStock === false;
                 
-                let qtyDisplay = `<p class="text-[9px] text-gray-500 uppercase tracking-wide font-medium mt-1 mb-1">${p.qty || ''}</p>`;
+                let qtyDisplay = `<p class="text-[10px] text-gray-500 uppercase tracking-wide font-medium mt-1">${p.qty || ''}</p>`;
                 
                 if (hasVariants) {
-                    const options = p.variants.map((v, i) => {
-                        let vPrice = v.price;
-                        if(p.adminDiscVal && p.adminDiscVal > 0) {
-                            if (p.adminDiscType === '%') vPrice = Math.round(v.price - (v.price * (p.adminDiscVal / 100)));
-                            else vPrice = Math.max(0, v.price - p.adminDiscVal);
-                        }
-                        return `<option value="${i}" data-price="${vPrice}">${v.qty}</option>`;
-                    }).join('');
+                    const options = p.variants.map((v, i) => `<option value="${i}" data-price="${v.price}">${v.qty}</option>`).join('');
                     qtyDisplay = `
-                        <div class="mt-1 mb-1">
-                            <select onchange="window.updatePriceDisplay(this, 'price-${p.id}')" id="sel-${p.id}" class="text-[10px] bg-gray-50 border border-gray-200 rounded p-1 outline-none focus:ring-1 ring-red-500 font-medium text-gray-700 w-full max-w-[100px]">
+                        <div class="mt-1">
+                            <select onchange="window.updatePriceDisplay(this, 'price-${p.id}')" id="sel-${p.id}" class="text-[10px] bg-gray-50 border border-gray-200 rounded p-1 outline-none focus:ring-1 ring-red-500 font-medium text-gray-700 w-auto max-w-[120px]">
                                 ${options}
                             </select>
                         </div>
@@ -2385,59 +2294,82 @@
 
                 const actionBtnCode = hasVariants 
                     ? `window.addToCartVariant('${p.id}', '${p.name.replace(/'/g, "\\'")}', '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')` 
-                    : `window.addToCartStandard('${p.id}', '${p.name.replace(/'/g, "\\'")}', ${displayPrice}, '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')`;
+                    : `window.addToCartStandard('${p.id}', '${p.name.replace(/'/g, "\\'")}', ${p.price}, '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')`;
 
-                let actionHtml = '';
+                let actionCompact = '';
+                let actionVertical = '';
 
                 if (isClosed) {
-                    actionHtml = `<span class="text-[8px] font-black text-red-500 uppercase tracking-widest bg-red-50 px-1.5 py-1 rounded whitespace-nowrap border border-red-100">Closed</span>`;
+                    const badge = `<span class="text-[9px] font-black text-red-500 uppercase tracking-widest bg-red-50 px-1.5 py-1 rounded whitespace-nowrap border border-red-100">Closed</span>`;
+                    actionCompact = badge; actionVertical = badge;
                 } else if (isOutOfStock) {
-                    actionHtml = `<span class="text-[8px] font-black text-orange-500 uppercase tracking-widest bg-orange-50 px-1.5 py-1 rounded whitespace-nowrap border border-orange-100">No Stock</span>`;
+                    const badge = `<span class="text-[9px] font-black text-orange-500 uppercase tracking-widest bg-orange-50 px-1.5 py-1 rounded whitespace-nowrap border border-orange-100">No Stock</span>`;
+                    actionCompact = badge; actionVertical = badge;
                 } else {
-                    actionHtml = `
-                        <div class="flex flex-col items-end gap-1">
-                            <div>${originalPriceDisplay}<span id="price-${p.id}" class="text-xs font-black text-gray-900 tracking-tight">₹${displayPrice}</span></div>
-                            <button type="button" onclick="${actionBtnCode}" class="px-3 py-1 rounded-lg bg-red-50 text-red-600 font-black text-[9px] hover:bg-red-600 hover:text-white transition-colors active:scale-95 border border-red-100 shadow-sm whitespace-nowrap">
+                    actionCompact = `
+                        <div class="flex flex-col items-center gap-1.5">
+                            <span id="price-${p.id}" class="text-sm font-black text-gray-900 tracking-tight">₹${displayPrice}</span>
+                            <button type="button" onclick="${actionBtnCode}" class="px-4 py-1.5 rounded-lg bg-red-50 text-red-600 font-black text-[10px] hover:bg-red-600 hover:text-white transition-colors active:scale-95 border border-red-100 shadow-sm whitespace-nowrap">
                                 ADD <i class="fa-solid fa-plus ml-0.5"></i>
                             </button>
                         </div>
                     `;
+                    actionVertical = `
+                        <span id="price-${p.id}" class="text-lg font-black text-gray-900 tracking-tight">₹${displayPrice}</span>
+                        <button type="button" onclick="${actionBtnCode}" class="w-8 h-8 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition-colors active:scale-90 shrink-0 border border-red-100">
+                            <i class="fa-solid fa-plus text-xs"></i>
+                        </button>
+                    `;
                 }
 
-                let tagHtml = '';
-                if (p.tag) {
-                    let tagColor = 'bg-yellow-100 text-yellow-700';
-                    if(p.tag === 'Offered') tagColor = 'bg-blue-100 text-blue-700';
-                    if(p.tag === 'Fav Item') tagColor = 'bg-pink-100 text-pink-700';
-                    tagHtml = `<span class="text-[8px] ${tagColor} px-1.5 py-0.5 rounded font-black uppercase tracking-wider block w-max mt-0.5 mb-0.5">${p.tag}</span>`;
-                }
-                
-                // Show auto generated offered tag if Admin set discount and owner didn't manually tag
-                if (p.adminDiscVal && p.adminDiscVal > 0 && !p.tag) {
-                    let tagText = p.adminDiscType === '%' ? `${p.adminDiscVal}% OFF` : `₹${p.adminDiscVal} OFF`;
-                    tagHtml = `<span class="text-[8px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded font-black uppercase tracking-wider block w-max mt-0.5 mb-0.5">${tagText}</span>`;
-                }
+                const dummyRating = `4.${Math.floor(Math.random() * 5) + 1}`;
 
-                // EXTREMELY COMPACT LAYOUT WITH LINE CLAMP
-                return `
-                    <div class="bg-white rounded-xl p-1.5 shadow-sm border border-gray-100 flex items-center gap-2 w-full transform transition hover:shadow-md ${isClosed || isOutOfStock ? 'opacity-60 grayscale-[0.5]' : ''}">
-                        <div class="w-14 h-14 shrink-0 rounded-lg overflow-hidden bg-gray-50 relative border border-gray-100 flex items-center justify-center">
-                            <img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/150x150/f3f4f6/a1a1aa?text=Img'">
-                        </div>
-                        <div class="flex-1 min-w-0 flex justify-between items-center gap-1 h-full">
-                            <div class="flex-1 min-w-0 py-0.5 flex flex-col justify-center">
-                                <h4 class="font-bold text-gray-900 text-[11px] leading-tight line-clamp-2 pr-1">${p.name}</h4>
-                                ${tagHtml}
-                                ${p.prepTime ? `<p class="text-[8px] text-orange-600 font-bold mt-0.5"><i class="fa-regular fa-clock mr-0.5"></i> ${p.prepTime}m</p>` : ''}
-                                ${qtyDisplay}
-                                ${!currentRestaurantFilter ? `<p class="text-[8px] font-bold text-gray-500 truncate mt-0.5"><i class="fa-solid fa-store text-gray-300"></i> ${p.shopName || 'Partner'}</p>` : ''}
+                if (isCompact) {
+                    // NEW COMPACT RECTANGULAR LAYOUT
+                    return `
+                        <div class="bg-white rounded-2xl p-2.5 shadow-sm border border-gray-100 flex items-center gap-3 w-full transform transition hover:shadow-md ${isClosed || isOutOfStock ? 'opacity-60 grayscale-[0.5]' : ''}">
+                            <div class="w-20 h-20 shrink-0 rounded-xl overflow-hidden bg-gray-50 relative border border-gray-100">
+                                <img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x300/f3f4f6/a1a1aa?text=Image'">
+                                ${p.category ? `<span class="absolute bottom-0 left-0 w-full bg-black/50 backdrop-blur-sm text-[8px] font-bold text-center text-white py-0.5 truncate px-1">${p.category}</span>` : ''}
                             </div>
-                            <div class="shrink-0 pl-1.5 border-l border-gray-50 flex items-center justify-center min-w-[55px] h-full">
-                                ${actionHtml}
+                            <div class="flex-1 min-w-0 flex justify-between items-center gap-2 h-full">
+                                <div class="flex-1 min-w-0 py-0.5 flex flex-col justify-center">
+                                    <h4 class="font-bold text-gray-900 text-sm leading-tight truncate">${p.name}</h4>
+                                    ${p.prepTime ? `<p class="text-[9px] text-orange-600 font-bold mt-0.5"><i class="fa-regular fa-clock mr-0.5"></i> ${p.prepTime} mins</p>` : ''}
+                                    ${qtyDisplay}
+                                </div>
+                                <div class="shrink-0 pl-2 border-l border-gray-50 flex items-center justify-center min-w-[70px] h-full">
+                                    ${actionCompact}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                `;
+                    `;
+                } else {
+                    // ORIGINAL VERTICAL CARD
+                    let addressDisplay = `<div class="mb-2 mt-1">
+                        <p class="text-[9px] font-bold text-gray-800 truncate bg-gray-50 inline-block px-1.5 py-0.5 rounded border border-gray-100"><i class="fa-solid fa-store text-red-500 mr-1"></i> ${p.shopName || 'Gramzo Partner'}</p>
+                    </div>`;
+
+                    return `
+                        <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex flex-col w-[260px] sm:w-[300px] shrink-0 snap-center transform transition hover:-translate-y-1 hover:shadow-md ${isClosed || isOutOfStock ? 'opacity-60 grayscale-[0.5]' : ''}">
+                            <div class="h-32 bg-gray-100 relative">
+                                <img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x300/f3f4f6/a1a1aa?text=Image'">
+                                ${p.category ? `<span class="absolute top-2 left-2 bg-white/90 backdrop-blur text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded text-gray-800 shadow-sm">${p.category}</span>` : ''}
+                                <span class="absolute bottom-2 right-2 bg-white/95 backdrop-blur text-[9px] font-black px-1.5 py-0.5 rounded text-gray-800 shadow-sm flex items-center gap-1"><i class="fa-solid fa-star text-yellow-500 text-[8px]"></i> ${dummyRating}</span>
+                            </div>
+                            <div class="p-3 flex-1 flex flex-col justify-between">
+                                <div>
+                                    <h4 class="font-bold text-gray-900 text-sm leading-tight truncate">${p.name}</h4>
+                                    ${addressDisplay}
+                                    ${qtyDisplay}
+                                </div>
+                                <div class="flex justify-between items-center mt-3 pt-3 border-t border-gray-50">
+                                    ${actionVertical}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
             }).join('');
         };
 
@@ -2525,7 +2457,6 @@
         window.filterRestaurant = (partnerId, shopName, shopAddress = '', shopPhone = '') => {
             const banner = document.getElementById('active-restaurant-banner');
             const marketplaceRow = document.getElementById('marketplace-header-row');
-            const offeredTitle = document.getElementById('offered-items-title');
 
             if (currentRestaurantFilter === partnerId || !partnerId) {
                 currentRestaurantFilter = null;
@@ -2535,7 +2466,6 @@
                 
                 if (banner) banner.classList.add('hidden');
                 if (marketplaceRow) marketplaceRow.classList.remove('hidden');
-                if (offeredTitle) offeredTitle.classList.remove('hidden'); 
             } else {
                 currentRestaurantFilter = partnerId;
                 currentFoodCategoryFilter = null;
@@ -2549,7 +2479,6 @@
                     banner.classList.remove('hidden');
                 }
                 if (marketplaceRow) marketplaceRow.classList.add('hidden');
-                if (offeredTitle) offeredTitle.classList.add('hidden'); 
             }
             window.loadMarketplaceData();
         };
@@ -3052,13 +2981,8 @@
                 window.editingProductId = id;
                 document.getElementById('prod-name').value = p.name || '';
                 document.getElementById('prod-prep-time').value = p.prepTime || '';
-                
                 if(p.category && document.getElementById('prod-item-category')) {
                     document.getElementById('prod-item-category').value = p.category;
-                }
-                
-                if(document.getElementById('prod-item-tag')) {
-                    document.getElementById('prod-item-tag').value = p.tag || '';
                 }
                 
                 const container = document.getElementById('variant-container');
@@ -3091,9 +3015,6 @@
             const prepTime = document.getElementById('prod-prep-time').value.trim() || '15';
             const itemCatEl = document.getElementById('prod-item-category');
             const itemCategory = itemCatEl ? itemCatEl.value : 'Others';
-            
-            const itemTagEl = document.getElementById('prod-item-tag');
-            const itemTag = itemTagEl ? itemTagEl.value : '';
             
             if(!name) return window.showToast("Enter item name.", "error");
 
@@ -3144,7 +3065,6 @@
                     qty: variants[0].qty,     
                     prepTime: prepTime,
                     category: itemCategory, 
-                    tag: itemTag,
                     partnerId: currentUser.phone,
                     shopName: currentUser.shopName,
                     shopAddress: currentUser.shopAddress || '',
@@ -3168,7 +3088,6 @@
                 
                 document.getElementById('prod-name').value = '';
                 document.getElementById('prod-prep-time').value = '';
-                if(itemTagEl) itemTagEl.value = '';
                 if(imgInput) imgInput.value = '';
                 document.getElementById('variant-container').innerHTML = `
                     <label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Portion & Price</label>
@@ -3315,78 +3234,29 @@
             window.renderAdminUsers();
         };
 
-        window.openAdminUserEdit = async (phone, name, shopName, category) => {
+        window.openAdminUserEdit = (phone, name, shopName) => {
             document.getElementById('edit-u-phone').value = phone;
             document.getElementById('edit-u-name').value = name;
             document.getElementById('edit-u-shop').value = shopName && shopName !== 'null' && shopName !== 'undefined' ? shopName : '';
-            
-            const discSection = document.getElementById('admin-item-discount-section');
-            if (['Food Owner', 'Grocery Shop'].includes(category)) {
-                discSection.classList.remove('hidden');
-                const selectEl = document.getElementById('edit-u-item-select');
-                selectEl.innerHTML = '<option value="ALL">Loading items...</option>';
-                document.getElementById('admin-edit-user-modal').classList.add('active');
-                
-                try {
-                    const snap = await window.dbCall(getDocs(getCol('products')), 5000);
-                    const partnerItems = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(p => p.partnerId === String(phone));
-                    window.currentEditPartnerItems = partnerItems;
-
-                    let opts = '<option value="ALL">Apply to All Items</option>';
-                    partnerItems.forEach(item => {
-                        opts += `<option value="${item.id}">${item.name}</option>`;
-                    });
-                    selectEl.innerHTML = opts;
-                    document.getElementById('edit-u-disc-val').value = '';
-                } catch (e) {
-                    selectEl.innerHTML = '<option value="ALL">Error loading items</option>';
-                }
-            } else {
-                discSection.classList.add('hidden');
-                document.getElementById('admin-edit-user-modal').classList.add('active');
-            }
+            document.getElementById('admin-edit-user-modal').classList.add('active');
         };
 
         window.submitAdminUserEdit = async () => {
             const phone = document.getElementById('edit-u-phone').value;
             const newName = document.getElementById('edit-u-name').value.trim();
             const newShop = document.getElementById('edit-u-shop').value.trim();
-            const discType = document.getElementById('edit-u-disc-type').value;
-            const discVal = parseFloat(document.getElementById('edit-u-disc-val').value) || 0;
-            const targetItem = document.getElementById('edit-u-item-select').value;
-            const discSectionHidden = document.getElementById('admin-item-discount-section').classList.contains('hidden');
 
             if(!phone || !newName) return window.showToast("Name cannot be empty.", "error");
-
-            const btn = document.querySelector('#admin-edit-user-modal button:last-child');
-            const orig = btn.innerText; btn.innerText = "Saving..."; btn.disabled = true;
 
             try {
                 await window.dbCall(setDoc(getDocRef('users', phone), {
                     name: newName,
                     shopName: newShop || null
                 }, { merge: true }), 10000);
-                
-                // If Discount is set, apply to products
-                if (!discSectionHidden && document.getElementById('edit-u-disc-val').value !== '') {
-                    const itemsToUpdate = targetItem === 'ALL' ? window.currentEditPartnerItems : window.currentEditPartnerItems.filter(i => i.id === targetItem);
-                    
-                    if (itemsToUpdate && itemsToUpdate.length > 0) {
-                        for (let item of itemsToUpdate) {
-                            await window.dbCall(updateDoc(getDocRef('products', item.id), {
-                                adminDiscType: discType,
-                                adminDiscVal: discVal
-                            }), 5000);
-                        }
-                    }
-                }
-
-                window.showToast("Profile updated successfully!", "success");
+                window.showToast("User profile updated!", "success");
                 document.getElementById('admin-edit-user-modal').classList.remove('active');
             } catch(e) {
                 window.showToast("Failed to update.", "error");
-            } finally {
-                btn.innerText = orig; btn.disabled = false;
             }
         };
 
@@ -3481,7 +3351,7 @@
 
                 let actionsHtml = `<span class="cursor-pointer font-black text-gray-400 bg-gray-100 px-2 py-0.5 rounded" onclick="this.innerText='${u.pin}'" title="Click to reveal">***</span>`;
                 
-                let editBtn = `<button onclick="window.openAdminUserEdit('${u.phone}', '${u.name.replace(/'/g, "\\'")}', '${(u.shopName || '').replace(/'/g, "\\'")}', '${u.category}')" class="text-blue-500 hover:text-blue-700 ml-2" title="Edit User"><i class="fa-solid fa-pen"></i></button>`;
+                let editBtn = `<button onclick="window.openAdminUserEdit('${u.phone}', '${u.name.replace(/'/g, "\\'")}', '${(u.shopName || '').replace(/'/g, "\\'")}')" class="text-blue-500 hover:text-blue-700 ml-2" title="Edit User"><i class="fa-solid fa-pen"></i></button>`;
 
                 if (['Rider', 'Ride Partner'].includes(u.category)) {
                     actionsHtml += `<br/><button onclick="window.adminAddPoints('${u.phone}', ${u.walletPoints || 0})" class="bg-blue-50 text-blue-600 px-2 py-1 mt-1 rounded border border-blue-100 text-[9px] font-bold w-full">+ Points</button>`;
