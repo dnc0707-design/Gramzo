@@ -271,7 +271,7 @@
 
                     <div>
                         <!-- Updated section heading to Favourite Items near you -->
-                        <h3 id="market-list-title" class="font-black text-xl text-gray-900 mb-4 tracking-tight">Favourite Items near you</h3>
+                        <h3 id="market-list-title" class="font-black text-xl text-gray-900 mb-4 tracking-tight uppercase">FAV ITEMS</h3>
                         <!-- Container defaults to horizontal grid which is set via JS based on filters -->
                         <div id="market-list" class="flex gap-3 overflow-x-auto hide-scroll pb-6 snap-x">
                             <div class="w-full py-10 text-center text-gray-400 font-medium text-sm animate-pulse border border-gray-200 rounded-3xl shadow-sm bg-white">Loading catalogue...</div>
@@ -1090,7 +1090,7 @@
                 const listTitle = document.getElementById('market-list-title');
                 if (listTitle) {
                     listTitle.classList.remove('hidden');
-                    listTitle.innerText = "Favourite Items near you";
+                    listTitle.innerText = "FAV ITEMS";
                 }
 
                 window.loadMarketplaceData();
@@ -1944,7 +1944,7 @@
                 if(chipsEl) chipsEl.classList.add('hidden');
                 if(listTitle) {
                     listTitle.classList.remove('hidden');
-                    listTitle.innerText = window.currentSearchQuery ? "Search Results" : "Favourite Items near you";
+                    listTitle.innerText = window.currentSearchQuery ? "Search Results" : "FAV ITEMS";
                 }
             }
             
@@ -1984,13 +1984,15 @@
                 let displayPrice = basePrice;
 
                 const itemPromo = window.activePromos?.find(promo => promo.isActive && promo.itemId === p.id);
-                let promoHtml = '';
+                let imageOverlayHtml = '';
+                
                 if (itemPromo) {
                     if (itemPromo.discountType === 'percentage') displayPrice = Math.floor(basePrice * (1 - itemPromo.discount / 100));
                     else if (itemPromo.discountType === 'flat') displayPrice = Math.max(0, basePrice - itemPromo.discount);
-                    promoHtml = `<span class="text-[9px] bg-blue-50 text-blue-600 px-1 py-0.5 rounded font-bold border border-blue-100 uppercase tracking-widest mt-1 inline-block whitespace-nowrap"><i class="fa-solid fa-tag"></i> ${itemPromo.discount}${itemPromo.discountType === 'percentage' ? '%' : '₹'} OFF</span>`;
+                    let discountStr = itemPromo.discountType === 'percentage' ? `${itemPromo.discount}% OFF` : `₹${itemPromo.discount} OFF`;
+                    imageOverlayHtml = `<div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-blue-600 to-blue-500/90 text-white text-[8px] sm:text-[9px] font-black uppercase text-center py-0.5 shadow-sm leading-tight"><i class="fa-solid fa-tag mr-0.5"></i> ${discountStr}</div>`;
                 } else if (p.tag && p.tag !== 'None') {
-                    promoHtml = `<span class="text-[9px] bg-red-50 text-red-600 px-1 py-0.5 rounded font-bold border border-red-100 uppercase tracking-widest mt-1 inline-block whitespace-nowrap"><i class="fa-solid fa-fire"></i> ${p.tag}</span>`;
+                    imageOverlayHtml = `<div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-red-600 to-red-500/90 text-white text-[8px] sm:text-[9px] font-black uppercase text-center py-0.5 shadow-sm leading-tight"><i class="fa-solid fa-fire mr-0.5"></i> ${p.tag}</div>`;
                 }
 
                 const isClosed = p.shopStatus === 'Closed' || p.shopStatus === 'Offline';
@@ -2022,27 +2024,27 @@
 
                 let actionHtml = '';
                 if (isClosed) {
-                    actionHtml = `<div class="bg-gray-100 border border-gray-200 text-gray-500 w-full text-center py-1 rounded-lg text-[10px] font-black uppercase shadow-sm">Closed</div>`;
+                    actionHtml = `<div class="bg-gray-100 border border-gray-200 text-gray-500 w-full text-center py-1 rounded-md text-[9px] font-black uppercase shadow-sm">Closed</div>`;
                 } else if (isOutOfStock) {
-                    actionHtml = `<div class="bg-orange-50 border border-orange-200 text-orange-500 w-full text-center py-1 rounded-lg text-[10px] font-black uppercase shadow-sm">No Stock</div>`;
+                    actionHtml = `<div class="bg-orange-50 border border-orange-200 text-orange-500 w-full text-center py-1 rounded-md text-[9px] font-black uppercase shadow-sm">No Stock</div>`;
                 } else {
-                    actionHtml = `<button type="button" onclick="${clickFn}" class="relative w-full bg-white text-red-600 border border-red-200 shadow-sm rounded-lg py-1.5 font-black text-xs uppercase hover:bg-red-50 hover:shadow-md transition tracking-wider">ADD</button>`;
+                    actionHtml = `<button type="button" onclick="${clickFn}" class="relative w-full bg-white text-red-600 border border-red-200 shadow-sm rounded-md py-1 font-black text-[9px] sm:text-xs uppercase hover:bg-red-50 hover:shadow-md transition tracking-wider">ADD</button>`;
                 }
 
                 const priceHtml = itemPromo
-                    ? `<span class="text-xs text-gray-400 line-through mr-1" id="orig-${p.id}">₹${originalPrice}</span><span id="price-${p.id}" class="text-sm font-black text-gray-900">₹${displayPrice}</span>`
-                    : `<span id="price-${p.id}" class="text-sm font-black text-gray-900">₹${displayPrice}</span>`;
+                    ? `<span class="text-[10px] sm:text-xs text-gray-400 line-through mr-1" id="orig-${p.id}">₹${originalPrice}</span><span id="price-${p.id}" class="text-[11px] sm:text-sm font-black text-gray-900">₹${displayPrice}</span>`
+                    : `<span id="price-${p.id}" class="text-[11px] sm:text-sm font-black text-gray-900">₹${displayPrice}</span>`;
 
                 if (isHorizontal) {
                     return `
-                        <div class="bg-white rounded-2xl p-2.5 shadow-sm border border-gray-100 w-[120px] shrink-0 snap-center relative flex flex-col transform transition hover:-translate-y-1 hover:shadow-md ${isClosed || isOutOfStock ? 'opacity-60 grayscale-[0.5]' : ''}">
-                            <div class="w-full h-[90px] rounded-xl overflow-hidden bg-gray-50 mb-2 border border-gray-100 relative">
+                        <div class="bg-white rounded-xl p-2 shadow-sm border border-gray-100 w-[100px] shrink-0 snap-center relative flex flex-col transform transition hover:-translate-y-1 hover:shadow-md ${isClosed || isOutOfStock ? 'opacity-60 grayscale-[0.5]' : ''}">
+                            <div class="w-full h-[80px] rounded-lg overflow-hidden bg-gray-50 mb-1.5 border border-gray-100 relative">
                                 <img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/200x200/f3f4f6/a1a1aa?text=Item'">
+                                ${imageOverlayHtml}
                             </div>
-                            <h4 class="font-bold text-gray-900 text-[11px] leading-tight mb-0.5 truncate w-full">${p.name}</h4>
-                            <div class="flex items-center gap-1 mb-1 truncate w-full text-[11px]">${priceHtml}</div>
-                            ${promoHtml ? promoHtml : ''}
-                            <div class="mt-auto pt-2">${actionHtml}</div>
+                            <h4 class="font-bold text-gray-900 text-[10px] leading-tight mb-0.5 truncate w-full">${p.name}</h4>
+                            <div class="flex items-center gap-1 mb-1 truncate w-full text-[10px]">${priceHtml}</div>
+                            <div class="mt-auto pt-1.5">${actionHtml}</div>
                         </div>
                     `;
                 } else {
@@ -2056,13 +2058,13 @@
                                 ${vegIcon}
                                 <h4 class="font-black text-gray-900 text-[15px] leading-tight mb-1 break-words pr-2">${p.name}</h4>
                                 <div class="flex items-center gap-2 mb-1.5">${priceHtml}</div>
-                                ${promoHtml}
                                 <div class="mt-1 w-2/3">${qtyDisplay}</div>
                                 ${p.prepTime ? `<p class="text-[10px] text-gray-400 font-medium mt-1"><i class="fa-regular fa-clock"></i> ${p.prepTime} mins</p>` : ''}
                             </div>
                             
-                            <div class="w-[100px] h-[100px] sm:w-[120px] sm:h-[120px] shrink-0 flex flex-col items-center relative rounded-2xl bg-gray-50 border border-gray-100">
-                                <img src="${p.image}" class="w-full h-full object-cover rounded-2xl" onerror="this.src='https://placehold.co/400x400/f3f4f6/a1a1aa?text=Item'">
+                            <div class="w-[100px] h-[100px] sm:w-[120px] sm:h-[120px] shrink-0 flex flex-col items-center relative rounded-2xl bg-gray-50 border border-gray-100 overflow-hidden">
+                                <img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x400/f3f4f6/a1a1aa?text=Item'">
+                                ${imageOverlayHtml}
                                 <div class="absolute -bottom-2 w-[85%] z-10 mx-auto left-0 right-0 shadow-[0_4px_10px_rgba(0,0,0,0.1)] rounded-lg">
                                     ${actionHtml}
                                 </div>
@@ -2556,7 +2558,8 @@
 
             const code = codeInput || (itemId ? `OFFER-${Date.now().toString().slice(-6)}` : '');
 
-            if(!code || isNaN(discount) || discount <= 0) return window.showToast("Enter valid discount.", "error");
+            if(!itemId && !codeInput) return window.showToast("Promo Code is mandatory for Store-wide offers.", "error");
+            if(isNaN(discount) || discount <= 0) return window.showToast("Enter a valid discount amount.", "error");
             if(discountType === 'percentage' && discount > 100) return window.showToast("Percentage cannot exceed 100", "error");
 
             try {
@@ -3249,14 +3252,16 @@
                     if(!promoList) return;
                     const promos = snap.docs.map(d => ({id: d.id, ...d.data()}));
                     if(promos.length === 0) {
-                        promoList.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-400">No promo codes active.</td></tr>';
+                        promoList.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-400">No offers active.</td></tr>';
                         return;
                     }
                     promoList.innerHTML = promos.map(p => `
                         <tr class="border-b border-gray-50">
-                            <td class="p-2 font-bold text-gray-900 uppercase">${p.code}</td>
-                            <td class="p-2 font-black text-red-600">${p.discount}%</td>
-                            <td class="p-2 text-gray-500 text-[10px] truncate max-w-[100px]">${p.restaurantName || 'All Restaurants'}</td>
+                            <td class="p-2 font-bold text-gray-900 uppercase">
+                                ${p.isItemOffer ? '<i class="fa-solid fa-cube text-blue-500 mr-1"></i> Item Offer' : `<i class="fa-solid fa-ticket text-emerald-500 mr-1"></i> ${p.code}`}
+                            </td>
+                            <td class="p-2 font-black text-red-600">${p.discountType === 'flat' ? '₹' : ''}${p.discount}${p.discountType === 'percentage' ? '%' : ''} OFF</td>
+                            <td class="p-2 text-gray-500 text-[10px] truncate max-w-[100px]">${p.itemName || p.restaurantName || 'All Restaurants'}</td>
                             <td class="p-2 text-right">
                                 <button onclick="window.togglePromo('${p.id}', ${p.isActive})" class="px-2 py-1 rounded text-[10px] font-bold ${p.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'}">${p.isActive ? 'Active' : 'Disabled'}</button>
                                 <button onclick="window.deletePromo('${p.id}')" class="px-2 py-1 rounded text-[10px] font-bold bg-red-100 text-red-700 ml-1"><i class="fa-solid fa-trash"></i></button>
