@@ -1948,7 +1948,7 @@
                 }
             }
             
-            const filtered = items.filter(i => {
+            let filtered = items.filter(i => {
                 const pShopCat = i.shopCategory || 'Food Owner'; 
                 if (pShopCat !== window.currentUserMainCategory) return false;
                 if (currentRestaurantFilter && i.partnerId !== currentRestaurantFilter) return false;
@@ -1966,6 +1966,17 @@
                 }
 
                 return true;
+            });
+
+            // Sort: Promos first, then Top Rated/Offered, then generic Favorites
+            filtered.sort((a, b) => {
+                const getScore = (item) => {
+                    if (window.activePromos?.some(promo => promo.isActive && promo.itemId === item.id)) return 3;
+                    if (item.tag === 'Offered' || item.tag === 'Top Rated') return 2;
+                    if (item.tag === 'Favorite') return 1;
+                    return 0;
+                };
+                return getScore(b) - getScore(a);
             });
 
             if (filtered.length === 0) {
@@ -1990,15 +2001,15 @@
                     if (itemPromo.discountType === 'percentage') displayPrice = Math.floor(basePrice * (1 - itemPromo.discount / 100));
                     else if (itemPromo.discountType === 'flat') displayPrice = Math.max(0, basePrice - itemPromo.discount);
                     let discountStr = itemPromo.discountType === 'percentage' ? `${itemPromo.discount}% OFF` : `₹${itemPromo.discount} OFF`;
-                    imageOverlayHtml = `<div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-blue-600 to-blue-500/90 text-white text-[8px] sm:text-[9px] font-black uppercase text-center py-0.5 shadow-sm leading-tight"><i class="fa-solid fa-tag mr-0.5"></i> ${discountStr}</div>`;
+                    imageOverlayHtml = `<div class="absolute top-0 left-0 bg-blue-600 text-white text-[10px] font-black px-2 py-1 rounded-br-xl z-20 shadow-md border-b border-r border-blue-700">${discountStr}</div>`;
                 } else if (p.tag && p.tag !== 'None') {
-                    imageOverlayHtml = `<div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-red-600 to-red-500/90 text-white text-[8px] sm:text-[9px] font-black uppercase text-center py-0.5 shadow-sm leading-tight"><i class="fa-solid fa-fire mr-0.5"></i> ${p.tag}</div>`;
+                    imageOverlayHtml = `<div class="absolute top-0 left-0 bg-red-600 text-white text-[9px] font-black px-2 py-1 rounded-br-xl z-20 shadow-md"><i class="fa-solid fa-fire mr-0.5"></i> ${p.tag}</div>`;
                 }
 
                 const isClosed = p.shopStatus === 'Closed' || p.shopStatus === 'Offline';
                 const isOutOfStock = p.inStock === false;
                 
-                let qtyDisplay = p.qty ? `<p class="text-[10px] text-gray-500 font-medium mb-1">${p.qty}</p>` : '';
+                let qtyDisplay = `<p class="text-[9px] sm:text-[10px] text-gray-500 uppercase tracking-wide font-medium mb-1 truncate">${p.qty || ''}</p>`;
                 
                 if (hasVariants) {
                     const options = p.variants.map((v, i) => {
@@ -2010,8 +2021,8 @@
                         return `<option value="${i}" data-price="${vPrice}" data-orig="${v.price}">${v.qty}</option>`;
                     }).join('');
                     qtyDisplay = `
-                        <div class="mb-1 w-full max-w-[120px]">
-                            <select onchange="window.updatePriceDisplay(this, 'price-${p.id}', 'orig-${p.id}')" id="sel-${p.id}" class="text-[10px] bg-gray-50 border border-gray-200 rounded p-1 outline-none w-full font-medium text-gray-700 focus:border-red-400">
+                        <div class="mb-1 w-full relative z-30">
+                            <select onchange="window.updatePriceDisplay(this, 'price-${p.id}', 'orig-${p.id}')" id="sel-${p.id}" class="text-[9px] sm:text-[10px] bg-gray-50 border border-gray-200 rounded p-1 outline-none w-full font-medium text-gray-700 focus:border-red-400">
                                 ${options}
                             </select>
                         </div>
@@ -2024,27 +2035,28 @@
 
                 let actionHtml = '';
                 if (isClosed) {
-                    actionHtml = `<div class="bg-gray-100 border border-gray-200 text-gray-500 w-full text-center py-1 rounded-md text-[9px] font-black uppercase shadow-sm">Closed</div>`;
+                    actionHtml = `<div class="bg-gray-100 border border-gray-200 text-gray-500 w-full text-center py-1.5 rounded-lg text-[10px] font-black uppercase shadow-sm">Closed</div>`;
                 } else if (isOutOfStock) {
-                    actionHtml = `<div class="bg-orange-50 border border-orange-200 text-orange-500 w-full text-center py-1 rounded-md text-[9px] font-black uppercase shadow-sm">No Stock</div>`;
+                    actionHtml = `<div class="bg-orange-50 border border-orange-200 text-orange-500 w-full text-center py-1.5 rounded-lg text-[10px] font-black uppercase shadow-sm">No Stock</div>`;
                 } else {
-                    actionHtml = `<button type="button" onclick="${clickFn}" class="relative w-full bg-white text-red-600 border border-red-200 shadow-sm rounded-md py-1 font-black text-[9px] sm:text-xs uppercase hover:bg-red-50 hover:shadow-md transition tracking-wider">ADD</button>`;
+                    actionHtml = `<button type="button" onclick="${clickFn}" class="relative w-full bg-red-50 text-red-600 border border-red-200 shadow-sm rounded-lg py-1.5 font-black text-[12px] sm:text-[14px] uppercase hover:bg-red-600 hover:text-white transition tracking-wider z-20">ADD</button>`;
                 }
 
                 const priceHtml = itemPromo
-                    ? `<span class="text-[10px] sm:text-xs text-gray-400 line-through mr-1" id="orig-${p.id}">₹${originalPrice}</span><span id="price-${p.id}" class="text-[11px] sm:text-sm font-black text-gray-900">₹${displayPrice}</span>`
-                    : `<span id="price-${p.id}" class="text-[11px] sm:text-sm font-black text-gray-900">₹${displayPrice}</span>`;
+                    ? `<span class="text-[10px] sm:text-xs text-gray-400 line-through mr-1" id="orig-${p.id}">₹${originalPrice}</span><span id="price-${p.id}" class="text-[12px] sm:text-[14px] font-black text-gray-900">₹${displayPrice}</span>`
+                    : `<span id="price-${p.id}" class="text-[12px] sm:text-[14px] font-black text-gray-900">₹${displayPrice}</span>`;
 
                 if (isHorizontal) {
                     return `
-                        <div class="bg-white rounded-xl p-2 shadow-sm border border-gray-100 w-[100px] shrink-0 snap-center relative flex flex-col transform transition hover:-translate-y-1 hover:shadow-md ${isClosed || isOutOfStock ? 'opacity-60 grayscale-[0.5]' : ''}">
+                        <div class="bg-white rounded-xl p-2 shadow-sm border border-gray-100 w-[110px] shrink-0 snap-center relative flex flex-col transform transition hover:-translate-y-1 hover:shadow-md ${isClosed || isOutOfStock ? 'opacity-60 grayscale-[0.5]' : ''}">
                             <div class="w-full h-[80px] rounded-lg overflow-hidden bg-gray-50 mb-1.5 border border-gray-100 relative">
                                 <img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/200x200/f3f4f6/a1a1aa?text=Item'">
                                 ${imageOverlayHtml}
                             </div>
-                            <h4 class="font-bold text-gray-900 text-[10px] leading-tight mb-0.5 truncate w-full">${p.name}</h4>
-                            <div class="flex items-center gap-1 mb-1 truncate w-full text-[10px]">${priceHtml}</div>
-                            <div class="mt-auto pt-1.5">${actionHtml}</div>
+                            <h4 class="font-bold text-gray-900 text-[11px] leading-tight mb-0.5 truncate w-full">${p.name}</h4>
+                            <div class="flex items-center gap-1 mb-1 truncate w-full">${priceHtml}</div>
+                            ${qtyDisplay}
+                            <div class="mt-auto pt-1 relative z-20">${actionHtml}</div>
                         </div>
                     `;
                 } else {
@@ -2062,10 +2074,12 @@
                                 ${p.prepTime ? `<p class="text-[10px] text-gray-400 font-medium mt-1"><i class="fa-regular fa-clock"></i> ${p.prepTime} mins</p>` : ''}
                             </div>
                             
-                            <div class="w-[100px] h-[100px] sm:w-[120px] sm:h-[120px] shrink-0 flex flex-col items-center relative rounded-2xl bg-gray-50 border border-gray-100 overflow-hidden">
-                                <img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x400/f3f4f6/a1a1aa?text=Item'">
-                                ${imageOverlayHtml}
-                                <div class="absolute -bottom-2 w-[85%] z-10 mx-auto left-0 right-0 shadow-[0_4px_10px_rgba(0,0,0,0.1)] rounded-lg">
+                            <div class="w-[100px] h-[100px] sm:w-[120px] sm:h-[120px] shrink-0 flex flex-col items-center relative rounded-2xl bg-gray-50 border border-gray-100 mt-1 overflow-visible">
+                                <div class="w-full h-full overflow-hidden rounded-2xl relative">
+                                    <img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x400/f3f4f6/a1a1aa?text=Item'">
+                                    ${imageOverlayHtml}
+                                </div>
+                                <div class="absolute -bottom-3 w-[90%] z-30 mx-auto left-0 right-0 shadow-[0_4px_10px_rgba(0,0,0,0.15)] rounded-lg">
                                     ${actionHtml}
                                 </div>
                             </div>
