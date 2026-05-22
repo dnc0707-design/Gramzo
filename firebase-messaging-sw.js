@@ -12,25 +12,37 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// Firebase AUTOMATICALLY shows the notification if the payload contains 'notification'.
-// Do NOT call showNotification manually here, or Android will block it!
+messaging.onBackgroundMessage((payload) => {
+    console.log('[firebase-messaging-sw.js] Received background message ', payload);
+    
+    // Fallback notification generation if payload lacks automatic display format
+    if (!payload.notification && payload.data) {
+        const notificationTitle = payload.data.title || "Gramzo Update";
+        const notificationOptions = {
+            body: payload.data.body || "New task or status update received.",
+            icon: 'https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/New%20logo%20-Gramzo%20-%206%20may.png',
+            badge: 'https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/New%20logo%20-Gramzo%20-%206%20may.png'
+        };
+        self.registration.showNotification(notificationTitle, notificationOptions);
+    }
+});
 
-// This listener simply ensures that if they tap the notification, it opens the Gramzo app.
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
-            // If Gramzo is already open in a background tab, bring it to the front
+            // Focus on existing tab if open
             for (let i = 0; i < windowClients.length; i++) {
                 const client = windowClients[i];
                 if (client.url.indexOf('/') !== -1 && 'focus' in client) {
                     return client.focus();
                 }
             }
-            // Otherwise, open a new window to the app
+            // Otherwise open a new window
             if (clients.openWindow) {
                 return clients.openWindow('/');
             }
         })
     );
 });
+```
