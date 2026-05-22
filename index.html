@@ -178,16 +178,10 @@
                 <i class="fa-solid fa-chevron-down text-[10px] text-gray-400 ml-1"></i>
             </div>
 
-           <div id="profile-menu" class="hidden absolute right-4 top-[65px] w-48 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden transform origin-top-right transition-all z-50">
+            <div id="profile-menu" class="hidden absolute right-4 top-[65px] w-48 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden transform origin-top-right transition-all z-50">
                 <div class="p-4 border-b border-gray-50 bg-gray-50/50">
                     <p id="menu-name" class="font-bold text-sm text-gray-900">Name</p>
                     <p id="menu-phone" class="text-xs text-gray-500 font-medium">Phone</p>
-                </div>
-                <!-- Push Prompt Container inside Profile Menu -->
-                <div class="p-2 border-b border-gray-50 hidden" id="push-prompt-container">
-                    <button type="button" onclick="window.requestPushPermission()" class="w-full text-left px-4 py-2.5 text-sm font-bold text-blue-600 hover:bg-blue-50 rounded-xl transition-colors flex items-center gap-2">
-                        <i class="fa-solid fa-bell"></i> Enable Notifications
-                    </button>
                 </div>
                 <div class="p-2">
                     <button type="button" onclick="window.logout()" class="w-full text-left px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 rounded-xl transition-colors flex items-center gap-2">
@@ -965,94 +959,12 @@
         window.currentUserMainCategory = 'Food Owner'; // Default to Food
         window.allProducts = []; // For admin promo feature
 
-       // RATING STATE
+        // RATING STATE
         window.currentRatingOrderId = null;
         window.currentRatingPartnerId = null;
         window.selectedRating = 0;
         window.editingProductId = null; // Added to track edit mode
         window.activePromos = [];
-
-
-        // NEW PUSH NOTIFICATION PERMISSION HANDLER
-        window.requestPushPermission = async () => {
-            if (!("Notification" in window)) {
-                window.showToast("Push notifications not supported on this device/app wrapper.", "error");
-                return;
-            }
-            try {
-                const permission = await Notification.requestPermission();
-                if (permission === 'granted') {
-                    const promptContainer = document.getElementById('push-prompt-container');
-                    if (promptContainer) promptContainer.classList.add('hidden');
-                    window.showToast("Notifications Enabled Successfully!", "success");
-                    if (currentUser && currentUser.phone && currentUser.phone !== 'Admin') {
-                        window.registerDeviceForNotifications();
-                    }
-                } else {
-                    window.showToast("Notification permission was denied.", "error");
-                }
-            } catch(e) {
-                console.error("Error requesting notification permission:", e);
-                window.showToast("Could not request permissions.", "error");
-            }
-        };
-
-        window.registerDeviceForNotifications = async () => {
-            if (!('Notification' in window)) {
-                console.warn("Notifications not supported on this browser context.");
-                return;
-            }
-            if ('serviceWorker' in navigator && messaging) {
-                try {
-                    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-                    const permission = Notification.permission;
-                    if (permission === 'granted') {
-                        // Retrieve the device token via VAPID key
-                        const token = await getToken(messaging, { 
-                            vapidKey: 'BM4kAcfdUnR_a3T_4akm1Y-VsebvaZ8kTCShHLFqoCxGjHIOfILQP0QhpYHLtNXXIOXAqF8RiE9iUZ8YuWSU7MU',
-                            serviceWorkerRegistration: registration 
-                        });
-                        
-                        if (token && currentUser && currentUser.phone) {
-                            // Sync this FCM token directly with the user's profile in Firestore
-                            await window.dbCall(setDoc(getDocRef('users', currentUser.phone), { fcmToken: token }, { merge: true }), 5000);
-                            console.log("Device synchronized with database FCM Token:", token);
-                        }
-                    }
-                } catch (err) { 
-                    console.error("Service worker registration or Token fetch failed:", err); 
-                }
-            }
-        };
-
-        window.finalizeLoginSequence = (isSessionRestore = false) => {
-            if(!isSessionRestore) window.closeAuthModal();
-
-            window.showToast(`Welcome back, ${currentUser.name.split(' ')[0]}!`, "success");
-
-            document.getElementById('btn-partner-login-trigger').classList.add('hidden');
-            document.getElementById('btn-login-trigger').classList.add('hidden');
-            document.getElementById('profile-trigger').classList.remove('hidden');
-            
-            document.getElementById('nav-initial').innerText = currentUser.name.charAt(0).toUpperCase();
-            document.getElementById('nav-name').innerText = currentUser.name;
-            document.getElementById('nav-role').innerText = currentUser.role;
-            document.getElementById('nav-role').className = `text-[8px] font-bold uppercase ${currentUser.role === 'Admin' ? 'text-purple-500' : currentUser.role === 'Partner' ? 'text-orange-500' : 'text-blue-500'}`;
-            document.getElementById('menu-name').innerText = currentUser.name;
-            document.getElementById('menu-phone').innerText = currentUser.phone;
-
-
-            // Show prompt to user in Profile Menu only if permission isn't already decided
-            if ("Notification" in window) {
-                const pushPrompt = document.getElementById('push-prompt-container');
-                if (Notification.permission !== "granted" && Notification.permission !== "denied") {
-                    if (pushPrompt) pushPrompt.classList.remove('hidden');
-                } else if (Notification.permission === "granted") {
-                    if (pushPrompt) pushPrompt.classList.add('hidden');
-                }
-            }
-
-            window.setupBottomNav(currentUser.role);
 
         // ADMIN TABS STATE
         window.adminCurrentUserTab = 'All';
@@ -1971,7 +1883,7 @@
                 }
             }
 
-           if (messaging) {
+            if (messaging) {
                 onMessage(messaging, (payload) => {
                     console.log('Foreground Push Notification received: ', payload);
                     window.sendAlert(payload.notification?.title || "Gramzo Alert", payload.notification?.body || "You have a new update.");
@@ -1982,13 +1894,9 @@
             window.initRoleListeners();
             window.loadMarketplaceData();
 
-
             setTimeout(() => {
                 if (currentUser && currentUser.phone && currentUser.phone !== 'Admin') {
-                    // Automatically re-register token in background if user already approved it
-                    if ("Notification" in window && Notification.permission === "granted") {
-                        window.registerDeviceForNotifications();
-                    }
+                    window.registerDeviceForNotifications(currentUser.phone);
                 }
             }, 3000);
         };
