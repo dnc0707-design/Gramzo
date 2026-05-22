@@ -932,11 +932,22 @@
         const db = initializeFirestore(app, { experimentalForceLongPolling: true });
 
         let messaging;
-        try {
-            messaging = getMessaging(app);
-        } catch(e) {
-            console.warn("Firebase Messaging not supported in this browser environment.", e);
-        }
+try {
+    messaging = getMessaging(app);
+} catch(e) {
+    console.warn("Messaging not supported in this environment.", e);
+}
+        if (messaging) {
+    onMessage(messaging, (payload) => {
+        console.log('Foreground Push Notification received: ', payload);
+        // This triggers your app's internal notification UI
+        window.sendAlert(
+            payload.notification?.title || "Gramzo Alert", 
+            payload.notification?.body || "You have a new update."
+        );
+        window.speakAlert(payload.notification?.body || "New notification");
+    });
+}
 
         // GLOBALS & STATE
         let currentUser = null;
@@ -1901,23 +1912,25 @@
             }, 3000);
         };
 
-        window.registerDeviceForNotifications = async () => {
-            if ('serviceWorker' in navigator && messaging) {
-                try {
-                    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-                    const permission = await Notification.requestPermission();
-                    if (permission === 'granted') {
-                        const token = await getToken(messaging, { 
-                            vapidKey: 'BM4kAcfdUnR_a3T_4akm1Y-VsebvaZ8kTCShHLFqoCxGjHIOfILQP0QhpYHLtNXXIOXAqF8RiE9iUZ8YuWSU7MU',
-                            serviceWorkerRegistration: registration 
-                        });
-                        if (token && currentUser && currentUser.phone) {
-                            await window.dbCall(setDoc(getDocRef('users', currentUser.phone), { fcmToken: token }, { merge: true }), 5000);
-                        }
-                    }
-                } catch (err) { console.error("Registration failed:", err); }
+        window.registerDeviceForNotifications = async (phone) => {
+    if ('serviceWorker' in navigator && messaging) {
+        try {
+            const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+            const permission = await Notification.requestPermission();
+            if (permission === 'granted') {
+                const token = await getToken(messaging, { 
+                    vapidKey: 'BM4kAcfdUnR_a3T_4akm1Y-VsebvaZ8kTCShHLFqoCxGjHIOfILQP0QhpYHLtNXXIOXAqF8RiE9iUZ8YuWSU7MU',
+                    serviceWorkerRegistration: registration 
+                });
+                
+                if (token && phone) {
+                    await setDoc(doc(db, 'users', phone), { fcmToken: token }, { merge: true });
+                    console.log("FCM Token synced:", token);
+                }
             }
-        };
+        } catch (err) { console.error("FCM Registration failed:", err); }
+    }
+};
 
         const renderProducts = (items) => {
             const listEl = document.getElementById('market-list');
