@@ -157,12 +157,8 @@
 </head>
 <body>
 
-    <div class="fixed top-0 w-full z-50 bg-white/95 backdrop-blur shadow-sm h-[60px] flex justify-between items-center px-2 sm:px-4">
-        <button type="button" id="btn-partner-login-trigger" onclick="window.openAuthModal('Partner')" class="bg-gray-900 text-white px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl text-[10px] sm:text-xs font-black shadow-md hover:bg-gray-800 transition-colors active:scale-95 flex items-center gap-2 whitespace-nowrap">
-            <i class="fa-solid fa-handshake text-sm sm:text-base"></i> <span class="tracking-wide">Partner Login</span>
-        </button>
-
-        <div class="font-logo text-red-600 font-black text-2xl italic cursor-pointer absolute left-1/2 transform -translate-x-1/2" onclick="location.reload()">
+    <div class="fixed top-0 w-full z-50 bg-white/95 backdrop-blur shadow-sm h-[60px] flex justify-between items-center px-4">
+        <div class="font-logo text-red-600 font-black text-2xl italic cursor-pointer" onclick="location.reload()">
             Gramzo
         </div>
 
@@ -378,9 +374,12 @@
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
                             <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.28.3 - Offer Engine</p>
                         </div>
-                        <div class="mt-4 sm:mt-0 text-center sm:text-right">
-                            <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm active:scale-95">
-                                <i class="fa-solid fa-shield-halved mr-1 text-sm"></i> Secure Admin Portal
+                        <div class="mt-4 sm:mt-0 text-center sm:text-right flex flex-col sm:flex-row gap-3">
+                            <button type="button" id="btn-partner-login-trigger" onclick="window.openAuthModal('Partner')" class="bg-gray-900 text-white hover:bg-gray-800 border px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-handshake"></i> Partner Login
+                            </button>
+                            <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-shield-halved text-sm"></i> Secure Admin
                             </button>
                         </div>
                     </div>
@@ -845,7 +844,10 @@
                 <input id="login-phone" type="tel" class="input-field" placeholder="10-Digit Mobile Number" maxlength="10">
                 <input id="login-pass" type="password" class="input-field" placeholder="Password">
                 <button type="button" id="submit-login" onclick="window.handleAuth('login')" class="w-full bg-red-600 text-white p-4 rounded-2xl font-bold">Secure Login</button>
-                <p class="text-center text-xs font-medium text-gray-500 mt-4">New to Gramzo? <button type="button" onclick="window.switchAuthView('register')" class="text-red-600 font-bold">Create Account</button></p>
+                <div class="text-center mt-6">
+                    <span class="text-sm font-medium text-gray-500 block mb-2">New to Gramzo?</span>
+                    <button type="button" onclick="window.switchAuthView('register')" class="text-red-600 font-black text-xl uppercase hover:underline tracking-tight">First time User - Sign UP</button>
+                </div>
             </div>
 
             <div id="auth-view-register" class="hidden space-y-3 max-h-[60vh] overflow-y-auto px-1 pb-2">
@@ -1971,8 +1973,9 @@
             // Sort: Promos first, then Top Rated/Offered, then generic Favorites
             filtered.sort((a, b) => {
                 const getScore = (item) => {
-                    if (window.activePromos?.some(promo => promo.isActive && promo.itemId === item.id)) return 3;
-                    if (item.tag === 'Offered' || item.tag === 'Top Rated') return 2;
+                    if (window.activePromos && window.activePromos.some(promo => promo.isActive && promo.itemId === item.id)) return 3;
+                    if (item.tag === 'Offered') return 2;
+                    if (item.tag === 'Top Rated') return 1;
                     if (item.tag === 'Favorite') return 1;
                     return 0;
                 };
@@ -2001,9 +2004,9 @@
                     if (itemPromo.discountType === 'percentage') displayPrice = Math.floor(basePrice * (1 - itemPromo.discount / 100));
                     else if (itemPromo.discountType === 'flat') displayPrice = Math.max(0, basePrice - itemPromo.discount);
                     let discountStr = itemPromo.discountType === 'percentage' ? `${itemPromo.discount}% OFF` : `₹${itemPromo.discount} OFF`;
-                    imageOverlayHtml = `<div class="absolute top-0 left-0 bg-blue-600 text-white text-[10px] font-black px-2 py-1 rounded-br-xl z-20 shadow-md border-b border-r border-blue-700">${discountStr}</div>`;
+                    imageOverlayHtml = `<div class="absolute top-0 left-0 bg-blue-600 text-white text-[11px] font-black px-2 py-1 rounded-br-lg z-30 shadow-md border-b border-r border-blue-700 tracking-wide">${discountStr}</div>`;
                 } else if (p.tag && p.tag !== 'None') {
-                    imageOverlayHtml = `<div class="absolute top-0 left-0 bg-red-600 text-white text-[9px] font-black px-2 py-1 rounded-br-xl z-20 shadow-md"><i class="fa-solid fa-fire mr-0.5"></i> ${p.tag}</div>`;
+                    imageOverlayHtml = `<div class="absolute top-0 left-0 bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded-br-lg z-30 shadow-md"><i class="fa-solid fa-fire mr-0.5"></i> ${p.tag}</div>`;
                 }
 
                 const isClosed = p.shopStatus === 'Closed' || p.shopStatus === 'Offline';
@@ -2035,11 +2038,11 @@
 
                 let actionHtml = '';
                 if (isClosed) {
-                    actionHtml = `<div class="bg-gray-100 border border-gray-200 text-gray-500 w-full text-center py-1.5 rounded-lg text-[10px] font-black uppercase shadow-sm">Closed</div>`;
+                    actionHtml = `<div class="bg-gray-100 border border-gray-200 text-gray-500 w-full text-center py-2 rounded-lg text-[10px] font-black uppercase shadow-sm">Closed</div>`;
                 } else if (isOutOfStock) {
-                    actionHtml = `<div class="bg-orange-50 border border-orange-200 text-orange-500 w-full text-center py-1.5 rounded-lg text-[10px] font-black uppercase shadow-sm">No Stock</div>`;
+                    actionHtml = `<div class="bg-orange-50 border border-orange-200 text-orange-500 w-full text-center py-2 rounded-lg text-[10px] font-black uppercase shadow-sm">No Stock</div>`;
                 } else {
-                    actionHtml = `<button type="button" onclick="${clickFn}" class="relative w-full bg-red-50 text-red-600 border border-red-200 shadow-sm rounded-lg py-1.5 font-black text-[12px] sm:text-[14px] uppercase hover:bg-red-600 hover:text-white transition tracking-wider z-20">ADD</button>`;
+                    actionHtml = `<button type="button" onclick="${clickFn}" class="relative w-full bg-red-50 text-red-600 border border-red-200 shadow-sm rounded-lg py-2 font-black text-sm uppercase hover:bg-red-600 hover:text-white transition tracking-wider z-20">ADD</button>`;
                 }
 
                 const priceHtml = itemPromo
@@ -2048,12 +2051,13 @@
 
                 if (isHorizontal) {
                     return `
-                        <div class="bg-white rounded-xl p-2 shadow-sm border border-gray-100 w-[110px] shrink-0 snap-center relative flex flex-col transform transition hover:-translate-y-1 hover:shadow-md ${isClosed || isOutOfStock ? 'opacity-60 grayscale-[0.5]' : ''}">
-                            <div class="w-full h-[80px] rounded-lg overflow-hidden bg-gray-50 mb-1.5 border border-gray-100 relative">
+                        <div class="bg-white rounded-xl p-2 shadow-sm border border-gray-100 w-[120px] shrink-0 snap-center relative flex flex-col transform transition hover:-translate-y-1 hover:shadow-md ${isClosed || isOutOfStock ? 'opacity-60 grayscale-[0.5]' : ''}">
+                            <div class="w-full h-[90px] rounded-lg overflow-hidden bg-gray-50 mb-1.5 border border-gray-100 relative">
                                 <img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/200x200/f3f4f6/a1a1aa?text=Item'">
                                 ${imageOverlayHtml}
                             </div>
-                            <h4 class="font-bold text-gray-900 text-[11px] leading-tight mb-0.5 truncate w-full">${p.name}</h4>
+                            <h4 class="font-bold text-gray-900 text-[11px] leading-tight mb-0.5 truncate w-full" title="${p.name}">${p.name}</h4>
+                            <p class="text-[9px] font-bold text-gray-500 truncate w-full mb-1"><i class="fa-solid fa-store text-gray-300"></i> ${p.shopName || 'Gramzo Partner'}</p>
                             <div class="flex items-center gap-1 mb-1 truncate w-full">${priceHtml}</div>
                             ${qtyDisplay}
                             <div class="mt-auto pt-1 relative z-20">${actionHtml}</div>
@@ -2069,6 +2073,7 @@
                             <div class="flex-1 flex flex-col min-w-0 justify-center py-1">
                                 ${vegIcon}
                                 <h4 class="font-black text-gray-900 text-[15px] leading-tight mb-1 break-words pr-2">${p.name}</h4>
+                                <p class="text-[10px] font-bold text-gray-500 mb-1.5"><i class="fa-solid fa-store text-gray-300"></i> ${p.shopName || 'Gramzo Partner'}</p>
                                 <div class="flex items-center gap-2 mb-1.5">${priceHtml}</div>
                                 <div class="mt-1 w-2/3">${qtyDisplay}</div>
                                 ${p.prepTime ? `<p class="text-[10px] text-gray-400 font-medium mt-1"><i class="fa-regular fa-clock"></i> ${p.prepTime} mins</p>` : ''}
@@ -2286,7 +2291,7 @@
 
         window.addToCartVariant = (id, name, partnerId, shopName) => {
             const selectEl = document.getElementById(`sel-${id}`);
-            if(!selectEl) return;
+            if(!selectEl) { window.showToast("Variant selection error. Try reloading.", "error"); return; }
             const selectedOpt = selectEl.options[selectEl.selectedIndex];
             const price = parseFloat(selectedOpt.dataset.price);
             const qty = selectedOpt.text;
