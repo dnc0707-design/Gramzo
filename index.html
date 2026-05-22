@@ -940,7 +940,16 @@ try {
         if (messaging) {
     onMessage(messaging, (payload) => {
         console.log('Foreground Push Notification received: ', payload);
-        // This triggers your app's internal notification UI
+
+        // 1. Show the NATIVE Browser Notification (this will display your icon)
+        if (Notification.permission === 'granted') {
+            new Notification(payload.notification?.title || "Gramzo Alert", {
+                body: payload.notification?.body || "You have a new update.",
+                icon: 'https://gramzo.web.app/logo.png' // Ensure this matches your logo
+            });
+        }
+
+        // 2. Trigger your existing UI/Audio
         window.sendAlert(
             payload.notification?.title || "Gramzo Alert", 
             payload.notification?.body || "You have a new update."
@@ -1895,12 +1904,25 @@ try {
             }
 
             if (messaging) {
-                onMessage(messaging, (payload) => {
-                    console.log('Foreground Push Notification received: ', payload);
-                    window.sendAlert(payload.notification?.title || "Gramzo Alert", payload.notification?.body || "You have a new update.");
-                    window.speakAlert(payload.notification?.body || "New notification");
-                });
-            }
+    onMessage(messaging, (payload) => {
+        console.log('Foreground Push Notification received: ', payload);
+
+        // 1. Show the NATIVE Browser Notification (this will display your icon)
+        if (Notification.permission === 'granted') {
+            new Notification(payload.notification?.title || "Gramzo Alert", {
+                body: payload.notification?.body || "You have a new update.",
+                icon: 'https://gramzo.web.app/logo.png' // Ensure this matches your logo
+            });
+        }
+
+        // 2. Trigger your existing UI/Audio
+        window.sendAlert(
+            payload.notification?.title || "Gramzo Alert", 
+            payload.notification?.body || "You have a new update."
+        );
+        window.speakAlert(payload.notification?.body || "New notification");
+    });
+}
 
             window.initRoleListeners();
             window.loadMarketplaceData();
