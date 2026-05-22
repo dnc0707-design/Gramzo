@@ -147,7 +147,8 @@
 
         .search-shadow { box-shadow: 0 4px 12px rgba(226, 55, 68, 0.08); }
         .pac-container { border-radius: 1.5rem; border: 1px solid #e5e7eb; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); font-family: 'Outfit', sans-serif; z-index: 9999; padding: 0.5rem; }
-        .pac-item { padding: 12px; font-size: 14px; font-weight: 500; color: #374151; border-bottom: 1px solid #f3f4f6; cursor: pointer; }
+        .pac-item { padding: 12px; font-size: 14px; font-weight: 500; color: #374151; border-bottom: 1px solid #f3f4f6; cursor: pointer; white-space: normal !important; line-height: 1.4; }
+        .pac-item-query { font-size: 15px; font-weight: 700; color: #111827; display: block; margin-bottom: 2px; }
         .pac-item:hover { background-color: #f0fdf4; color: #E23744; }
         select { -webkit-appearance: none; -moz-appearance: none; appearance: none; }
         
@@ -514,7 +515,21 @@
             </div>
 
             <div id="view-Orders" class="view-section space-y-6">
-                <h2 class="text-2xl font-black text-gray-900">My Orders & Rides</h2>
+                <h2 class="text-2xl font-black text-gray-900">My Profile & Orders</h2>
+                
+                <div id="user-profile-card" class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 flex items-center justify-between relative overflow-hidden mb-6">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-red-50 rounded-bl-full -z-10"></div>
+                    <div class="z-10">
+                        <h3 class="text-xl font-black text-gray-900" id="profile-page-name">User Name</h3>
+                        <p class="text-xs text-gray-500 font-medium mt-0.5" id="profile-page-phone">+91 XXXXXXXXXX</p>
+                    </div>
+                    <div class="bg-yellow-50 border border-yellow-200 p-3 rounded-2xl text-center min-w-[80px] shadow-sm z-10">
+                        <p class="text-[9px] font-black text-yellow-600 uppercase tracking-widest mb-1"><i class="fa-solid fa-coins"></i> Coins</p>
+                        <p class="text-2xl font-black text-yellow-500 leading-none" id="profile-page-coins">0</p>
+                    </div>
+                </div>
+
+                <h3 class="font-bold text-gray-800 border-b border-gray-200 pb-2">Recent Orders & Rides</h3>
                 <div id="user-orders-list" class="space-y-4"></div>
             </div>
 
@@ -927,7 +942,7 @@
 
     <!-- Modals -->
     <div id="create-trip-modal" class="modal-overlay z-[200]">
-        <div class="modal-content !max-w-sm">
+        <div class="modal-content !max-w-md">
             <h3 class="font-black text-xl text-gray-900 mb-4">Create Scheduled Trip</h3>
             <input type="text" id="trip-from" class="input-field mb-3 !py-2.5" placeholder="From Location (e.g. Purulia)">
             <input type="text" id="trip-to" class="input-field mb-3 !py-2.5" placeholder="To Location (e.g. Asansol)">
@@ -935,8 +950,8 @@
             <label class="text-[10px] font-bold text-gray-500 uppercase ml-1 block mb-1">Departure Time</label>
             <input type="datetime-local" id="trip-time" class="input-field mb-3 !py-2.5">
             <div class="flex gap-2 mb-4">
-                <input type="number" id="trip-seats" class="input-field !py-2.5 flex-1" placeholder="Seats">
-                <input type="number" id="trip-fare" class="input-field !py-2.5 flex-1" placeholder="Fare/Seat (₹)">
+                <input type="number" id="trip-seats" class="input-field !py-2.5 flex-1" placeholder="Seats (Total)">
+                <input type="number" id="trip-fare" class="input-field !py-2.5 flex-1" placeholder="Total Fare (₹)">
             </div>
             <div class="flex gap-2">
                 <button onclick="document.getElementById('create-trip-modal').classList.remove('active')" class="flex-1 bg-gray-100 py-3 rounded-xl font-bold text-sm">Cancel</button>
@@ -1665,15 +1680,18 @@
                             <p class="text-[10px] font-black text-blue-600 uppercase tracking-wide bg-blue-50 px-2 py-0.5 rounded inline-block mb-1"><i class="fa-solid fa-van-shuttle mr-1"></i> Scheduled Trip</p>
                             <h4 class="font-bold text-gray-900 text-sm mt-1">${t.from} <i class="fa-solid fa-arrow-right text-[10px] text-gray-400 mx-1"></i> ${t.to}</h4>
                         </div>
-                        <span class="text-lg font-black text-emerald-600">₹${t.fare}</span>
+                        <div class="text-right">
+                            <span class="text-lg font-black text-emerald-600 block">₹${t.fare}</span>
+                            <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest block">Total Fare</span>
+                        </div>
                     </div>
                     <div class="bg-gray-50 p-2.5 rounded-xl mt-2 mb-3 border border-gray-100">
                         <p class="text-[10px] font-bold text-gray-700"><i class="fa-regular fa-calendar-check text-blue-400 w-3"></i> Departure: ${displayTime}</p>
                         ${t.stops ? `<p class="text-[10px] font-bold text-gray-700 mt-1.5 leading-tight"><i class="fa-solid fa-route text-blue-400 w-3"></i> En-route: ${t.stops}</p>` : ''}
-                        <p class="text-[10px] font-bold text-gray-700 mt-1.5"><i class="fa-solid fa-chair text-blue-400 w-3"></i> ${t.seats} Seats Available</p>
+                        <p class="text-[10px] font-bold text-gray-700 mt-1.5"><i class="fa-solid fa-chair text-blue-400 w-3"></i> ${t.seats} Seats Remaining</p>
                         <p class="text-[10px] font-bold text-gray-700 mt-1.5"><i class="fa-solid fa-id-card text-blue-400 w-3"></i> Driver: ${t.riderName} <span class="text-gray-400 font-medium">(${t.vehicle})</span></p>
                     </div>
-                    <button type="button" onclick="window.bookTripSeat('${t.id}', '${t.fare}', '${t.riderId}', '${t.riderName.replace(/'/g, "\\'")}')" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl text-xs font-bold shadow-md transition active:scale-95">Book 1 Seat Now</button>
+                    <button type="button" onclick="window.bookTripSeat('${t.id}', '${t.fare}', '${t.riderId}', '${t.riderName.replace(/'/g, "\\'")}')" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl text-xs font-bold shadow-md transition active:scale-95">Book Trip Now</button>
                 </div>
                 `;
             }).join('');
@@ -3295,10 +3313,25 @@
                     let phoneLink = showPhone ? `tel:${o.phone}` : 'javascript:void(0)';
                     let phoneClass = showPhone ? 'text-blue-600' : 'text-gray-400 cursor-not-allowed';
 
-                    let customerInfo = `<div class="mb-3 bg-gray-50 p-2 rounded-xl border border-gray-100">
-                        <p class="text-xs font-black text-gray-800"><i class="fa-solid fa-user text-gray-400 mr-1"></i> ${o.customer}</p>
-                        <p class="text-xs font-bold ${phoneClass} mt-1"><a href="${phoneLink}"><i class="fa-solid fa-phone mr-1"></i> ${displayPhone}</a></p>
-                    </div>`;
+                        let scheduledTimeHtml = '';
+                        if (o.isScheduled && o.scheduledTime) {
+                            const sDate = new Date(o.scheduledTime);
+                            const sTimeStr = sDate.toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
+                            scheduledTimeHtml = `
+                                <div class="mb-3 bg-indigo-50 border border-indigo-100 p-2.5 rounded-xl flex items-center gap-3">
+                                    <div class="w-8 h-8 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center shrink-0"><i class="fa-regular fa-calendar-check text-sm"></i></div>
+                                    <div>
+                                        <p class="text-[9px] font-black uppercase tracking-wider text-indigo-500 mb-0.5">Scheduled Travel Time</p>
+                                        <p class="text-xs font-bold text-indigo-900">${sTimeStr}</p>
+                                    </div>
+                                </div>
+                            `;
+                        }
+
+                        let customerInfo = `<div class="mb-3 bg-gray-50 p-2 rounded-xl border border-gray-100">
+                            <p class="text-xs font-black text-gray-800"><i class="fa-solid fa-user text-gray-400 mr-1"></i> ${o.customer}</p>
+                            <p class="text-xs font-bold ${phoneClass} mt-1"><a href="${phoneLink}"><i class="fa-solid fa-phone mr-1"></i> ${displayPhone}</a></p>
+                        </div>`;
 
                     if (['Rider', 'Ride Partner'].includes(currentUser.category)) {
                         if (o.type === 'Ride') {
@@ -3528,6 +3561,21 @@
                 unsubscribeListeners.push(unsubPromos);
             } 
             else if (currentUser.role === 'User') {
+                
+                // Keep User Profile Coins and Data Synced
+                const userDocUnsub = onSnapshot(getDocRef('users', currentUser.phone), (docSnap) => {
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        currentUser.walletPoints = data.walletPoints || 0;
+                        if(document.getElementById('profile-page-name')) document.getElementById('profile-page-name').innerText = data.name || 'User';
+                        if(document.getElementById('profile-page-phone')) document.getElementById('profile-page-phone').innerText = data.phone || '';
+                        if(document.getElementById('profile-page-coins')) document.getElementById('profile-page-coins').innerText = data.walletPoints || 0;
+                        if(document.getElementById('ride-coin-balance')) document.getElementById('ride-coin-balance').innerText = data.walletPoints || 0;
+                        if(document.getElementById('cart-coin-balance')) document.getElementById('cart-coin-balance').innerText = data.walletPoints || 0;
+                    }
+                });
+                unsubscribeListeners.push(userDocUnsub);
+
                 const unsubUserOrders = onSnapshot(getCol('orders'), (snap) => {
                     const listEl = document.getElementById('user-orders-list');
                     if(!listEl) return;
@@ -3558,6 +3606,21 @@
                         if(o.status === 'Out for Delivery') { statusColor = 'text-yellow-500'; progressWidth = '85%'; statusText = 'OUT FOR DELIVERY.. Reaching soon'; }
                         if(o.status === 'Delivered') { statusColor = 'text-emerald-500'; progressWidth = '100%'; statusText = 'Delivered Successfully'; }
                         if(o.status === 'Rejected') { statusColor = 'text-red-500'; progressWidth = '100%'; statusText = 'Order Rejected'; }
+
+                        let scheduledTimeHtml = '';
+                        if (o.isScheduled && o.scheduledTime) {
+                            const sDate = new Date(o.scheduledTime);
+                            const sTimeStr = sDate.toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
+                            scheduledTimeHtml = `
+                                <div class="mt-3 bg-indigo-50 border border-indigo-100 p-2.5 rounded-xl flex items-center gap-3">
+                                    <div class="w-8 h-8 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center shrink-0"><i class="fa-regular fa-calendar-check text-sm"></i></div>
+                                    <div>
+                                        <p class="text-[9px] font-black uppercase tracking-wider text-indigo-500 mb-0.5">Scheduled Travel Time</p>
+                                        <p class="text-xs font-bold text-indigo-900">${sTimeStr}</p>
+                                    </div>
+                                </div>
+                            `;
+                        }
 
                         const itemsList = o.items ? o.items.map(i => `${i.name} ${i.quantity && i.quantity > 1 ? '(x'+i.quantity+')' : ''}`.trim()).join(', ') : '';
                         const paymentBadge = o.paymentMode === 'Prepaid' ? `<span class="bg-blue-100 text-blue-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">Prepaid</span>` : `<span class="bg-gray-100 text-gray-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">COD</span>`;
@@ -3605,8 +3668,9 @@
                                     <p class="text-[10px] font-medium text-gray-700 pl-5 mb-1.5">From: <b>${o.pickup}</b></p>
                                     <p class="text-[10px] font-medium text-gray-700 pl-5">To: <b>${o.address}</b></p>
                                 </div>
-                                ${fareActionHtml}
-                            </div>`;
+                                ${scheduledTimeHtml}
+                                ${actionButtons}
+                            </div>;
                         } else if (o.status === 'Out for Delivery') {
                             const displayRiderName = o.riderName || 'Restaurant (Self Delivery)';
                             const displayRiderPhone = o.riderPhone || '';
@@ -3668,6 +3732,7 @@
                                     <div class="flex justify-between text-[10px] font-black uppercase tracking-wider mb-2 ${statusColor}"><span>${statusText}</span></div>
                                     <div class="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden"><div class="bg-current h-1.5 rounded-full transition-all duration-1000 ${statusColor.replace('text-', 'bg-')}" style="width: ${progressWidth}"></div></div>
                                 </div>
+                                ${o.type !== 'Ride' && o.isScheduled ? scheduledTimeHtml : ''}
                                 ${trackingHtml}
                                 ${ratingHtml}
                             </div>`;
