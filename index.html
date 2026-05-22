@@ -18,7 +18,7 @@
                     return; 
                 }
 
-                const APP_VERSION = "11.28.3"; // Live Network Sync Update
+                const APP_VERSION = "11.28.6"; // Features Update
                 
                 const clearAllCachesAndReload = () => {
                     console.log("Wiping Service Workers and Caches for update...");
@@ -183,6 +183,11 @@
                     <p id="menu-name" class="font-bold text-sm text-gray-900">Name</p>
                     <p id="menu-phone" class="text-xs text-gray-500 font-medium">Phone</p>
                 </div>
+                <div class="p-2 border-b border-gray-50" id="push-prompt-container">
+                    <button type="button" onclick="window.registerDeviceForNotifications(currentUser?.phone)" class="w-full text-left px-4 py-2.5 text-sm font-bold text-blue-600 hover:bg-blue-50 rounded-xl transition-colors flex items-center gap-2">
+                        <i class="fa-solid fa-bell"></i> Enable Notifications
+                    </button>
+                </div>
                 <div class="p-2">
                     <button type="button" onclick="window.logout()" class="w-full text-left px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 rounded-xl transition-colors flex items-center gap-2">
                         <i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out
@@ -266,9 +271,7 @@
                     </div>
 
                     <div>
-                        <!-- Updated section heading to Favourite Items near you -->
                         <h3 id="market-list-title" class="font-black text-xl text-gray-900 mb-4 tracking-tight uppercase">FAV ITEMS</h3>
-                        <!-- Container defaults to horizontal grid which is set via JS based on filters -->
                         <div id="market-list" class="flex gap-3 overflow-x-auto hide-scroll pb-6 snap-x">
                             <div class="w-full py-10 text-center text-gray-400 font-medium text-sm animate-pulse border border-gray-200 rounded-3xl shadow-sm bg-white">Loading catalogue...</div>
                         </div>
@@ -276,7 +279,13 @@
                 </div>
 
                 <div id="ride-section" class="hidden mt-4 space-y-4">
-                    <div class="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm">
+                    
+                    <div class="flex gap-2 mb-4 bg-gray-100 p-1 rounded-xl">
+                        <button type="button" id="tab-ride-book" onclick="window.switchRideTab('Book')" class="flex-1 bg-white text-gray-900 font-bold py-2 rounded-lg text-xs shadow-sm transition">Book Cab / Bike</button>
+                        <button type="button" id="tab-ride-trips" onclick="window.switchRideTab('Trips')" class="flex-1 text-gray-500 font-bold py-2 rounded-lg text-xs hover:text-gray-900 transition">Available Trips</button>
+                    </div>
+
+                    <div id="ride-booking-form" class="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm">
                         <div class="relative">
                             <div class="absolute top-5 left-3.5 w-2 h-2 rounded-full bg-emerald-500 z-10"></div>
                             <div class="absolute top-8 left-4 w-0.5 h-8 bg-gray-200 z-10"></div>
@@ -305,6 +314,11 @@
                             </div>
                         </div>
 
+                        <div class="mt-3">
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase ml-1 mb-1">Schedule Ride (Optional)</label>
+                            <input type="datetime-local" id="ride-schedule-time" class="w-full bg-gray-50 border border-gray-100 rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-red-400 font-bold text-gray-700">
+                        </div>
+
                         <!-- Round Trip -->
                         <label class="flex items-center gap-2 text-xs font-bold text-gray-700 mt-3" id="round-trip-container" style="display: flex;">
                             <input type="checkbox" id="ride-round-trip" onchange="window.resetRideCalc()" class="w-4 h-4 text-red-600 focus:ring-red-500 rounded border-gray-300 disabled:opacity-50" checked disabled>
@@ -317,6 +331,17 @@
                             <span><b>Terms & Conditions:</b> Gramzo operates strictly as a technology aggregator. Any liability regarding driving, licensing, accidents, or service quality rests entirely with the service provider and the user. Gramzo assumes no corporate or legal liability.</span>
                         </label>
 
+                        <div id="ride-coins-container" class="hidden mt-4 flex justify-between items-center bg-yellow-50 p-3 rounded-xl border border-yellow-100">
+                            <div>
+                                <p class="text-xs font-bold text-gray-800"><i class="fa-solid fa-coins text-yellow-500"></i> Use Gramzo Coins</p>
+                                <p class="text-[9px] text-gray-500">Balance: <span id="ride-coin-balance" class="font-bold text-yellow-700">0</span></p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="ride-use-coins-toggle" class="sr-only peer" onchange="window.calculateRideFares()">
+                                <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-yellow-400"></div>
+                            </label>
+                        </div>
+
                         <button type="button" id="btn-calc-fare" onclick="window.calculateRideFares()" class="w-full bg-gray-900 text-white font-bold py-3.5 rounded-xl mt-4 text-sm hover:bg-gray-800 transition active:scale-95 shadow-md">Calculate Fare</button>
                         
                         <div id="ride-distance-display" class="hidden mt-4 text-center py-3 px-4 bg-blue-50 border border-blue-100 rounded-xl"></div>
@@ -324,7 +349,7 @@
                         <button type="button" id="btn-request-broadcast-ride" onclick="window.requestBroadcastRide()" class="hidden w-full bg-yellow-400 text-gray-900 font-bold py-3.5 rounded-xl mt-4 text-sm hover:bg-yellow-500 transition active:scale-95 shadow-md border border-yellow-500"><i class="fa-solid fa-paper-plane mr-1"></i> Request Ride</button>
                     </div>
 
-                    <div id="ride-results-list" class="space-y-4 pt-2"></div>
+                    <div id="available-trips-list" class="hidden space-y-3 pt-2"></div>
                 </div>
 
                 <div id="partner-cta" class="mt-8 bg-gray-900 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden flex items-center justify-between">
@@ -372,7 +397,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.28.3 - Offer Engine</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.28.6 - Coins & Schedule Engine</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right flex flex-col sm:flex-row gap-3">
                             <button type="button" id="btn-partner-login-trigger" onclick="window.openAuthModal('Partner')" class="bg-gray-900 text-white hover:bg-gray-800 border px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2">
@@ -410,6 +435,17 @@
                         <div class="mt-3 pt-3 border-t border-gray-50 border-dashed flex gap-2">
                             <input type="text" id="promo-code-input" class="w-full bg-gray-50 border border-gray-100 rounded-xl px-3 py-2 text-xs font-bold uppercase outline-none focus:ring-1 focus:ring-red-400 placeholder-gray-400" placeholder="Promo Code (e.g. SAVE50)">
                             <button type="button" onclick="window.applyPromo()" class="bg-gray-900 text-white px-4 py-2 rounded-xl text-xs font-bold active:scale-95 transition">Apply</button>
+                        </div>
+                        
+                        <div id="cart-coins-container" class="hidden mt-3 pt-3 border-t border-gray-50 border-dashed flex justify-between items-center">
+                            <div>
+                                <p class="text-xs font-bold text-gray-800"><i class="fa-solid fa-coins text-yellow-500"></i> Use Gramzo Coins</p>
+                                <p class="text-[9px] text-gray-500">Balance: <span id="cart-coin-balance" class="font-bold text-yellow-600">0</span></p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="cart-use-coins-toggle" class="sr-only peer" onchange="window.renderCartUI()">
+                                <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-yellow-400"></div>
+                            </label>
                         </div>
                     </div>
 
@@ -497,7 +533,9 @@
                             </div>
                         </div>
 
-                        <div class="bg-white/10 rounded-2xl p-3 border border-white/20 mt-2">
+                        <button type="button" onclick="document.getElementById('create-trip-modal').classList.add('active')" class="w-full mt-2 bg-blue-700 hover:bg-blue-800 border border-blue-400 text-white py-2.5 rounded-xl text-xs font-bold shadow-md transition active:scale-95"><i class="fa-solid fa-calendar-plus mr-1"></i> Create Scheduled Trip</button>
+
+                        <div class="bg-white/10 rounded-2xl p-3 border border-white/20 mt-3">
                             <label class="block text-[10px] font-bold text-blue-100 uppercase tracking-wider mb-1">Broadcast Current Location</label>
                             <div class="flex gap-2">
                                 <input type="text" id="rider-current-loc-input" class="w-full bg-white/20 border border-white/30 rounded-xl py-2 px-3 text-sm text-white placeholder-blue-200 outline-none focus:ring-1 focus:ring-white" placeholder="Where are you?">
@@ -562,7 +600,6 @@
                             <p id="hub-address-row" class="hidden"><strong>Location:</strong> <span id="hub-address-val"></span></p>
                         </div>
 
-                        <!-- FOOD / GROCERY SETTINGS -->
                         <div id="partner-setup-form" class="space-y-3 mt-4 border-t border-gray-200 pt-4 hidden">
                             <label class="block text-xs font-bold text-gray-600 mb-1 ml-1">Business Name</label>
                             <input id="partner-shop-name" class="input-field" placeholder="Enter Name">
@@ -603,7 +640,6 @@
                             <button type="button" onclick="window.submitPartnerProfile()" id="btn-submit-profile" class="w-full bg-gray-900 text-white px-6 py-4 rounded-2xl font-bold mt-4">Save Config</button>
                         </div>
 
-                        <!-- RIDE SETTINGS -->
                         <div id="partner-ride-setup-form" class="space-y-3 mt-4 border-t border-gray-200 pt-4 hidden">
                             <label class="block text-xs font-bold text-gray-600 mb-1 ml-1">Vehicle Type</label>
                             <select id="partner-vehicle-type" class="input-field bg-white" onchange="document.getElementById('partner-ride-seater').style.display = this.value === 'Car' ? 'block' : 'none'">
@@ -820,7 +856,7 @@
         <div class="max-w-md mx-auto flex justify-between items-center sm:max-w-4xl px-4"></div>
     </div>
 
-    <!-- Static Info Modal (About, T&C, Contact, Privacy) -->
+    <!-- Modals -->
     <div id="info-modal" class="modal-overlay z-[200]">
         <div class="modal-content !max-w-2xl">
             <div class="flex justify-between items-center mb-4 border-b pb-2">
@@ -831,7 +867,6 @@
         </div>
     </div>
 
-    <!-- Auth Modal -->
     <div id="auth-overlay" class="modal-overlay z-[150]">
         <div class="modal-content">
             <div class="flex justify-between items-center mb-6">
@@ -891,6 +926,25 @@
     </div>
 
     <!-- Modals -->
+    <div id="create-trip-modal" class="modal-overlay z-[200]">
+        <div class="modal-content !max-w-sm">
+            <h3 class="font-black text-xl text-gray-900 mb-4">Create Scheduled Trip</h3>
+            <input type="text" id="trip-from" class="input-field mb-3 !py-2.5" placeholder="From Location (e.g. Purulia)">
+            <input type="text" id="trip-to" class="input-field mb-3 !py-2.5" placeholder="To Location (e.g. Asansol)">
+            <input type="text" id="trip-stops" class="input-field mb-3 !py-2.5" placeholder="En-route Stops (comma separated)">
+            <label class="text-[10px] font-bold text-gray-500 uppercase ml-1 block mb-1">Departure Time</label>
+            <input type="datetime-local" id="trip-time" class="input-field mb-3 !py-2.5">
+            <div class="flex gap-2 mb-4">
+                <input type="number" id="trip-seats" class="input-field !py-2.5 flex-1" placeholder="Seats">
+                <input type="number" id="trip-fare" class="input-field !py-2.5 flex-1" placeholder="Fare/Seat (₹)">
+            </div>
+            <div class="flex gap-2">
+                <button onclick="document.getElementById('create-trip-modal').classList.remove('active')" class="flex-1 bg-gray-100 py-3 rounded-xl font-bold text-sm">Cancel</button>
+                <button onclick="window.submitCreateTrip()" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md">Publish Trip</button>
+            </div>
+        </div>
+    </div>
+
     <div id="admin-edit-user-modal" class="modal-overlay z-[200]"><div class="modal-content !max-w-xs"><h3 class="font-black text-xl text-gray-900 mb-4 border-b pb-2">Edit Profile</h3><input type="hidden" id="edit-u-phone"><label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Name</label><input id="edit-u-name" type="text" class="input-field mb-3 !py-2.5" placeholder="User Name"><label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Shop / Vehicle Name</label><input id="edit-u-shop" type="text" class="input-field mb-4 !py-2.5" placeholder="Shop Name (If Partner)"><div class="flex gap-2"><button onclick="document.getElementById('admin-edit-user-modal').classList.remove('active')" class="flex-1 bg-gray-100 text-gray-600 py-3 rounded-xl font-bold text-sm hover:bg-gray-200">Cancel</button><button onclick="window.submitAdminUserEdit()" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-blue-700">Save</button></div></div></div>
     <div id="custom-prompt-modal" class="modal-overlay z-[600]"><div class="modal-content !max-w-xs"><h3 class="font-black text-xl text-gray-900 mb-2" id="prompt-title">Prompt</h3><p class="text-xs text-gray-500 mb-4" id="prompt-desc">Enter value:</p><input type="text" id="prompt-input" class="input-field mb-4" placeholder="..."><div class="flex gap-2"><button onclick="window.cancelCustomPrompt()" class="flex-1 bg-gray-100 text-gray-600 py-3 rounded-xl font-bold text-sm hover:bg-gray-200">Cancel</button><button onclick="window.submitCustomPrompt()" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-blue-700">Submit</button></div></div></div>
     <div id="custom-confirm-modal" class="modal-overlay z-[600]"><div class="modal-content !max-w-xs"><div class="w-12 h-12 bg-yellow-50 rounded-full flex items-center justify-center mb-3"><i class="fa-solid fa-triangle-exclamation text-xl text-yellow-500"></i></div><h3 class="font-black text-xl text-gray-900 mb-2" id="confirm-title">Confirm Action</h3><p class="text-sm text-gray-600 mb-6 font-medium" id="confirm-desc">Are you sure you want to do this?</p><div class="flex gap-2"><button onclick="window.cancelCustomConfirm()" class="flex-1 bg-gray-100 text-gray-600 py-3 rounded-xl font-bold text-sm hover:bg-gray-200">Cancel</button><button id="btn-confirm-yes" onclick="window.submitCustomConfirm()" class="flex-[1.5] bg-red-600 text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-red-700">Yes</button></div></div></div>
@@ -932,31 +986,27 @@
         const db = initializeFirestore(app, { experimentalForceLongPolling: true });
 
         let messaging;
-try {
-    messaging = getMessaging(app);
-} catch(e) {
-    console.warn("Messaging not supported in this environment.", e);
-}
+        try {
+            messaging = getMessaging(app);
+        } catch(e) {
+            console.warn("Messaging not supported in this environment.", e);
+        }
         if (messaging) {
-    onMessage(messaging, (payload) => {
-        console.log('Foreground Push Notification received: ', payload);
-
-        // 1. Show the NATIVE Browser Notification (this will display your icon)
-        if (Notification.permission === 'granted') {
-            new Notification(payload.notification?.title || "Gramzo Alert", {
-                body: payload.notification?.body || "You have a new update.",
-                icon: 'https://gramzo.web.app/logo.png' // Ensure this matches your logo
+            onMessage(messaging, (payload) => {
+                console.log('Foreground Push Notification received: ', payload);
+                if (Notification.permission === 'granted') {
+                    new Notification(payload.notification?.title || "Gramzo Alert", {
+                        body: payload.notification?.body || "You have a new update.",
+                        icon: 'https://gramzo.web.app/logo.png' 
+                    });
+                }
+                window.sendAlert(
+                    payload.notification?.title || "Gramzo Alert", 
+                    payload.notification?.body || "You have a new update."
+                );
+                window.speakAlert(payload.notification?.body || "New notification");
             });
         }
-
-        // 2. Trigger your existing UI/Audio
-        window.sendAlert(
-            payload.notification?.title || "Gramzo Alert", 
-            payload.notification?.body || "You have a new update."
-        );
-        window.speakAlert(payload.notification?.body || "New notification");
-    });
-}
 
         // GLOBALS & STATE
         let currentUser = null;
@@ -978,6 +1028,10 @@ try {
         let currentAuthRole = 'User'; 
         window.currentUserMainCategory = 'Food Owner'; // Default to Food
         window.allProducts = []; // For admin promo feature
+        window.availableTrips = []; 
+
+        window.currentCartCoinsUsed = 0;
+        window.currentRideCoinsUsed = 0;
 
         // RATING STATE
         window.currentRatingOrderId = null;
@@ -1095,6 +1149,10 @@ try {
                 document.getElementById('food-grocery-section').classList.add('hidden');
                 document.getElementById('ride-section').classList.remove('hidden');
                 document.getElementById('partner-cta').classList.add('hidden');
+                if (currentUser && currentUser.walletPoints > 0) {
+                    document.getElementById('ride-coins-container').classList.remove('hidden');
+                    document.getElementById('ride-coin-balance').innerText = currentUser.walletPoints;
+                }
             } else {
                 document.getElementById('food-grocery-section').classList.remove('hidden');
                 document.getElementById('ride-section').classList.add('hidden');
@@ -1310,11 +1368,26 @@ try {
             initInput('ride-pickup');
             initInput('ride-drop');
             initInput('partner-ride-location');
+            initInput('trip-from');
+            initInput('trip-to');
         };
 
         if (window.isGoogleMapsLoaded) window.setupMapsFeatures();
 
-        // RIDE FUNCTIONS (UNCHANGED)
+        window.switchRideTab = (tab) => {
+            if (tab === 'Book') {
+                document.getElementById('tab-ride-book').className = "flex-1 bg-white text-gray-900 font-bold py-2 rounded-lg text-xs shadow-sm transition";
+                document.getElementById('tab-ride-trips').className = "flex-1 text-gray-500 font-bold py-2 rounded-lg text-xs hover:text-gray-900 transition";
+                document.getElementById('ride-booking-form').classList.remove('hidden');
+                document.getElementById('available-trips-list').classList.add('hidden');
+            } else {
+                document.getElementById('tab-ride-book').className = "flex-1 text-gray-500 font-bold py-2 rounded-lg text-xs hover:text-gray-900 transition";
+                document.getElementById('tab-ride-trips').className = "flex-1 bg-white text-gray-900 font-bold py-2 rounded-lg text-xs shadow-sm transition";
+                document.getElementById('ride-booking-form').classList.add('hidden');
+                document.getElementById('available-trips-list').classList.remove('hidden');
+            }
+        };
+
         window.handleRideTypeChange = () => {
             const searchType = document.getElementById('ride-search-type').value;
             const roundTripContainer = document.getElementById('round-trip-container');
@@ -1362,7 +1435,6 @@ try {
             document.getElementById('btn-calc-fare').classList.remove('hidden');
             document.getElementById('btn-request-broadcast-ride').classList.add('hidden');
             document.getElementById('ride-distance-display').classList.add('hidden');
-            document.getElementById('ride-results-list').innerHTML = '';
         };
 
         window.calculateRideFares = async () => {
@@ -1448,14 +1520,25 @@ try {
                 fareBreakdownStr = `Base: ₹100 (upto 5km) + ₹10/km`;
             }
 
+            let coinDiscount = 0;
+            const useCoinsToggle = document.getElementById('ride-use-coins-toggle');
+            if (useCoinsToggle && useCoinsToggle.checked && currentUser && currentUser.walletPoints > 0) {
+                coinDiscount = Math.min(currentUser.walletPoints, estFare);
+            }
+            const finalFare = estFare - coinDiscount;
+            window.currentRideCoinDiscount = Math.floor(coinDiscount);
+
+            const discountHtml = coinDiscount > 0 ? `<div class="text-xs text-yellow-600 font-bold bg-yellow-100/50 py-1.5 rounded-lg border border-yellow-200 mt-1"><i class="fa-solid fa-coins"></i> -₹${Math.floor(coinDiscount)} Gramzo Coins applied</div>` : '';
+
             distDisplay.innerHTML = `
                 <div class="flex flex-col gap-2 py-1">
                     <div class="text-[11px] text-blue-700 font-bold bg-blue-100/50 py-1.5 rounded-lg">
                         <i class="fa-solid fa-route mr-1"></i> ${distanceHtml}
                     </div>
                     <div class="text-lg text-gray-900 font-black">
-                        Est. Fare: <span class="text-emerald-600">₹${estFare}</span>
+                        Est. Fare: <span class="text-emerald-600">₹${finalFare}</span> ${coinDiscount > 0 ? `<span class="text-[10px] text-gray-400 line-through ml-1">₹${estFare}</span>` : ''}
                     </div>
+                    ${discountHtml}
                     <div class="text-[10px] text-gray-700 font-bold bg-gray-100/80 border border-gray-200 py-1.5 rounded-lg">
                         <i class="fa-solid fa-calculator text-gray-500 mr-1"></i> Breakdown: ${fareBreakdownStr}
                     </div>
@@ -1464,7 +1547,7 @@ try {
                     </div>
                 </div>`;
             
-            window.currentRideFares = { [searchType]: estFare };
+            window.currentRideFares = { [searchType]: finalFare };
             window.currentSelectedRideType = searchType; 
             window.currentRideWaitTime = waitTime;
             window.currentRideDistStr = distanceStrForDb;
@@ -1480,6 +1563,7 @@ try {
             const pickup = document.getElementById('ride-pickup').value.trim();
             const drop = document.getElementById('ride-drop').value.trim();
             const searchType = window.currentSelectedRideType || document.getElementById('ride-search-type').value;
+            const scheduledTime = document.getElementById('ride-schedule-time').value;
 
             if(!pickup || !drop) return window.showToast("Please calculate fares first.", "error");
 
@@ -1509,11 +1593,23 @@ try {
                     total: fare,
                     waitingTime: window.currentRideWaitTime || 0,
                     distanceStr: window.currentRideDistStr || '',
+                    isScheduled: !!scheduledTime,
+                    scheduledTime: scheduledTime || null,
                     time: serverTimestamp() 
                 }), 15000);
 
+                if (window.currentRideCoinDiscount > 0) {
+                    await window.dbCall(updateDoc(getDocRef('users', currentUser.phone), {
+                        walletPoints: (currentUser.walletPoints || 0) - window.currentRideCoinDiscount
+                    }), 5000);
+                    window.currentRideCoinDiscount = 0;
+                }
+
                 window.showToast("Ride Request Broadcasted to nearby drivers!", "success");
                 window.resetRideCalc();
+                document.getElementById('ride-schedule-time').value = '';
+                const rideCoinToggle = document.getElementById('ride-use-coins-toggle');
+                if(rideCoinToggle) rideCoinToggle.checked = false;
                 window.switchMainView('Orders'); 
             } catch(e) {
                 window.showToast("Failed to request ride.", "error");
@@ -1521,6 +1617,99 @@ try {
                 btn.innerHTML = origTxt; 
                 btn.disabled = false;
             }
+        };
+
+        window.submitCreateTrip = async () => {
+            if(!currentUser) return;
+            const from = document.getElementById('trip-from').value.trim();
+            const to = document.getElementById('trip-to').value.trim();
+            const stops = document.getElementById('trip-stops').value.trim();
+            const timeStr = document.getElementById('trip-time').value;
+            const seats = parseInt(document.getElementById('trip-seats').value);
+            const fare = parseInt(document.getElementById('trip-fare').value);
+
+            if(!from || !to || !timeStr || isNaN(seats) || isNaN(fare)) return window.showToast("All fields are required", "error");
+
+            const btn = document.querySelector('#create-trip-modal button:last-child');
+            const orig = btn.innerText; btn.innerText = "Publishing..."; btn.disabled = true;
+
+            try {
+                await window.dbCall(addDoc(getCol('scheduled_trips'), {
+                    from, to, stops, time: timeStr, seats, fare,
+                    riderId: currentUser.phone, riderName: currentUser.name, vehicle: `${currentUser.carModel} (${currentUser.carNum})`,
+                    created: serverTimestamp()
+                }), 10000);
+                window.showToast("Scheduled trip published successfully!", "success");
+                document.getElementById('create-trip-modal').classList.remove('active');
+                document.getElementById('trip-from').value = ''; document.getElementById('trip-to').value = ''; 
+                document.getElementById('trip-stops').value = ''; document.getElementById('trip-time').value = ''; 
+                document.getElementById('trip-seats').value = ''; document.getElementById('trip-fare').value = '';
+            } catch(e) { window.showToast("Failed to publish trip", "error"); } finally { btn.innerText = orig; btn.disabled = false; }
+        };
+
+        window.renderAvailableTrips = () => {
+            const list = document.getElementById('available-trips-list');
+            if(!list) return;
+            if(!window.availableTrips || window.availableTrips.length === 0) {
+                list.innerHTML = `<p class="text-center py-6 text-sm text-gray-500 bg-white rounded-xl border border-gray-100 shadow-sm">No scheduled trips available right now.</p>`;
+                return;
+            }
+            list.innerHTML = window.availableTrips.map(t => {
+                const dateObj = new Date(t.time);
+                const displayTime = dateObj.toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
+                return `
+                <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <p class="text-[10px] font-black text-blue-600 uppercase tracking-wide bg-blue-50 px-2 py-0.5 rounded inline-block mb-1"><i class="fa-solid fa-van-shuttle mr-1"></i> Scheduled Trip</p>
+                            <h4 class="font-bold text-gray-900 text-sm mt-1">${t.from} <i class="fa-solid fa-arrow-right text-[10px] text-gray-400 mx-1"></i> ${t.to}</h4>
+                        </div>
+                        <span class="text-lg font-black text-emerald-600">₹${t.fare}</span>
+                    </div>
+                    <div class="bg-gray-50 p-2.5 rounded-xl mt-2 mb-3 border border-gray-100">
+                        <p class="text-[10px] font-bold text-gray-700"><i class="fa-regular fa-calendar-check text-blue-400 w-3"></i> Departure: ${displayTime}</p>
+                        ${t.stops ? `<p class="text-[10px] font-bold text-gray-700 mt-1.5 leading-tight"><i class="fa-solid fa-route text-blue-400 w-3"></i> En-route: ${t.stops}</p>` : ''}
+                        <p class="text-[10px] font-bold text-gray-700 mt-1.5"><i class="fa-solid fa-chair text-blue-400 w-3"></i> ${t.seats} Seats Available</p>
+                        <p class="text-[10px] font-bold text-gray-700 mt-1.5"><i class="fa-solid fa-id-card text-blue-400 w-3"></i> Driver: ${t.riderName} <span class="text-gray-400 font-medium">(${t.vehicle})</span></p>
+                    </div>
+                    <button type="button" onclick="window.bookTripSeat('${t.id}', '${t.fare}', '${t.riderId}', '${t.riderName.replace(/'/g, "\\'")}')" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl text-xs font-bold shadow-md transition active:scale-95">Book 1 Seat Now</button>
+                </div>
+                `;
+            }).join('');
+        };
+
+        window.bookTripSeat = async (tripId, fare, riderId, riderName) => {
+            if(!currentUser) { window.openAuthModal('User'); return; }
+            if(currentUser.role !== 'User') return window.showToast("Log in as User to book.", "error");
+
+            const confirmed = await window.customConfirm("Confirm Booking", `Book 1 seat for ₹${fare}?`, "Book Now");
+            if(!confirmed) return;
+
+            try {
+                const snap = await window.dbCall(getDoc(getDocRef('scheduled_trips', tripId)), 5000);
+                if(!snap.exists() || snap.data().seats <= 0) return window.showToast("Sorry, no seats left.", "error");
+
+                const tData = snap.data();
+
+                await window.dbCall(addDoc(getCol('orders'), {
+                    type: 'Ride',
+                    customer: currentUser.name, phone: currentUser.phone,
+                    riderId: riderId, riderName: riderName, riderPhone: riderId,
+                    vehicleType: 'Scheduled Trip',
+                    pickup: tData.from, address: tData.to,
+                    status: 'Confirmed', amount: parseInt(fare), total: parseInt(fare),
+                    time: serverTimestamp(),
+                    isScheduled: true, scheduledTime: tData.time
+                }), 10000);
+
+                await window.dbCall(updateDoc(getDocRef('scheduled_trips', tripId), {
+                    seats: tData.seats - 1
+                }), 5000);
+
+                window.showToast("Seat booked successfully!", "success");
+                window.switchMainView('Orders');
+            } catch(e) { window.showToast("Booking failed.", "error"); }
         };
 
         window.driverAcceptRide = async (orderId) => {
@@ -1556,13 +1745,13 @@ try {
         };
 
         window.adminAddPoints = async (userId, currentPoints) => {
-            const amountStr = await window.customPrompt("Add Points", `Current Points: ${currentPoints}\nEnter amount of points to add:`, "amount", "number");
+            const amountStr = await window.customPrompt("Add Points", `Current Balance: ${currentPoints}\nEnter amount of points/coins to add:`, "amount", "number");
             if(!amountStr) return;
             const pointsToAdd = parseInt(amountStr);
             if(isNaN(pointsToAdd) || pointsToAdd <= 0) return window.showToast("Invalid points amount.", "error");
             try {
                 await window.dbCall(updateDoc(getDocRef('users', userId), { walletPoints: (currentPoints || 0) + pointsToAdd }), 10000);
-                window.showToast("Points added successfully!", "success");
+                window.showToast("Points/Coins added successfully!", "success");
             } catch(e) { window.showToast("Failed to add points.", "error"); }
         };
 
@@ -1903,27 +2092,6 @@ try {
                 }
             }
 
-            if (messaging) {
-    onMessage(messaging, (payload) => {
-        console.log('Foreground Push Notification received: ', payload);
-
-        // 1. Show the NATIVE Browser Notification (this will display your icon)
-        if (Notification.permission === 'granted') {
-            new Notification(payload.notification?.title || "Gramzo Alert", {
-                body: payload.notification?.body || "You have a new update.",
-                icon: 'https://gramzo.web.app/logo.png' // Ensure this matches your logo
-            });
-        }
-
-        // 2. Trigger your existing UI/Audio
-        window.sendAlert(
-            payload.notification?.title || "Gramzo Alert", 
-            payload.notification?.body || "You have a new update."
-        );
-        window.speakAlert(payload.notification?.body || "New notification");
-    });
-}
-
             window.initRoleListeners();
             window.loadMarketplaceData();
 
@@ -1935,24 +2103,24 @@ try {
         };
 
         window.registerDeviceForNotifications = async (phone) => {
-    if ('serviceWorker' in navigator && messaging) {
-        try {
-            const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-            const permission = await Notification.requestPermission();
-            if (permission === 'granted') {
-                const token = await getToken(messaging, { 
-                    vapidKey: 'BM4kAcfdUnR_a3T_4akm1Y-VsebvaZ8kTCShHLFqoCxGjHIOfILQP0QhpYHLtNXXIOXAqF8RiE9iUZ8YuWSU7MU',
-                    serviceWorkerRegistration: registration 
-                });
-                
-                if (token && phone) {
-                    await setDoc(doc(db, 'users', phone), { fcmToken: token }, { merge: true });
-                    console.log("FCM Token synced:", token);
-                }
+            if ('serviceWorker' in navigator && messaging) {
+                try {
+                    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+                    const permission = await Notification.requestPermission();
+                    if (permission === 'granted') {
+                        const token = await getToken(messaging, { 
+                            vapidKey: 'BM4kAcfdUnR_a3T_4akm1Y-VsebvaZ8kTCShHLFqoCxGjHIOfILQP0QhpYHLtNXXIOXAqF8RiE9iUZ8YuWSU7MU',
+                            serviceWorkerRegistration: registration 
+                        });
+                        
+                        if (token && phone) {
+                            await setDoc(doc(db, 'users', phone), { fcmToken: token }, { merge: true });
+                            console.log("FCM Token synced:", token);
+                        }
+                    }
+                } catch (err) { console.error("FCM Registration failed:", err); }
             }
-        } catch (err) { console.error("FCM Registration failed:", err); }
-    }
-};
+        };
 
         const renderProducts = (items) => {
             const listEl = document.getElementById('market-list');
@@ -2005,7 +2173,6 @@ try {
                 return true;
             });
 
-            // Sort: Promos first, then Top Rated/Offered, then generic Favorites
             filtered.sort((a, b) => {
                 const getScore = (item) => {
                     if (window.activePromos && window.activePromos.some(promo => promo.isActive && promo.itemId === item.id)) return 3;
@@ -2193,10 +2360,15 @@ try {
             onSnapshot(getCol('promos'), (snap) => {
                 window.activePromos = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(p => p.isActive);
             });
+            
+            onSnapshot(getCol('scheduled_trips'), (snap) => {
+                window.availableTrips = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(t => t.seats > 0 && new Date(t.time) > new Date());
+                window.renderAvailableTrips();
+            });
 
             onSnapshot(getCol('products'), (snap) => {
                 let items = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
-                window.allProducts = items; // Cache for admin item offers
+                window.allProducts = items; 
                 extractRestaurants(); 
                 renderProducts(items);
             }, (err) => {
@@ -2301,7 +2473,7 @@ try {
                 const snap = await window.dbCall(getDocs(getCol('promos')), 10000);
                 const promos = snap.docs.map(d => d.data());
                 
-                const matchedPromo = promos.find(p => p.code === code && !p.isItemOffer); // Only allow cart promos here
+                const matchedPromo = promos.find(p => p.code === code && !p.isItemOffer); 
                 if(!matchedPromo) {
                     window.showToast("Invalid Promo Code", "error");
                     window.appliedPromo = 0; window.promoCode = '';
@@ -2312,7 +2484,7 @@ try {
                     window.showToast("Promo not valid for this restaurant", "error");
                     window.appliedPromo = 0; window.promoCode = '';
                 } else {
-                    window.appliedPromo = matchedPromo.discount; // Still supports percentages here, we should upgrade to handle 'flat' cart promos too if needed, but currently keeping as percentage for cart promos.
+                    window.appliedPromo = matchedPromo.discount; 
                     window.promoCode = matchedPromo.code;
                     window.showToast(`${window.appliedPromo}% Discount Applied!`, "success");
                 }
@@ -2386,20 +2558,40 @@ try {
             }
 
             const handlingFee = window.cart.length > 0 ? 5 : 0;
-            const discountAmt = (sub * (window.appliedPromo || 0)) / 100;
-            const total = sub - discountAmt + handlingFee + deliveryFee;
+            const promoDiscountAmt = (sub * (window.appliedPromo || 0)) / 100;
+            
+            let coinDiscount = 0;
+            const coinsContainer = document.getElementById('cart-coins-container');
+            const useCoinsToggle = document.getElementById('cart-use-coins-toggle');
+            
+            if (currentUser && currentUser.walletPoints > 0) {
+                if (coinsContainer) coinsContainer.classList.remove('hidden');
+                if (document.getElementById('cart-coin-balance')) document.getElementById('cart-coin-balance').innerText = currentUser.walletPoints;
+                
+                if (useCoinsToggle && useCoinsToggle.checked) {
+                    coinDiscount = Math.min(currentUser.walletPoints, (sub - promoDiscountAmt + handlingFee + deliveryFee));
+                }
+            } else {
+                if (coinsContainer) coinsContainer.classList.add('hidden');
+            }
+
+            const total = (sub - promoDiscountAmt + handlingFee + deliveryFee) - coinDiscount;
+            window.currentCartCoinDiscount = Math.floor(coinDiscount);
 
             if (summaryTotals) {
-                const discountHtml = window.appliedPromo > 0 
-                    ? `<div class="flex justify-between text-[11px] text-emerald-600 font-bold"><span>Promo (${window.appliedPromo}%)</span><span>-₹${discountAmt.toFixed(2)}</span></div>` 
+                const promoHtml = window.appliedPromo > 0 
+                    ? `<div class="flex justify-between text-[11px] text-emerald-600 font-bold"><span>Promo (${window.appliedPromo}%)</span><span>-₹${promoDiscountAmt.toFixed(2)}</span></div>` 
+                    : '';
+                const coinHtml = coinDiscount > 0 
+                    ? `<div class="flex justify-between text-[11px] text-yellow-600 font-bold"><span>Coins Applied</span><span>-₹${Math.floor(coinDiscount)}</span></div>` 
                     : '';
                 
                 summaryTotals.innerHTML = `
                     <div class="flex justify-between text-[11px] text-gray-600 font-medium"><span>Item Total</span><span>₹${sub.toFixed(2)}</span></div>
-                    ${discountHtml}
+                    ${promoHtml}
                     <div class="flex justify-between text-[11px] text-gray-600 font-medium"><span>Delivery Fee</span><span>${selectedVillage === '' ? '-' : (deliveryFee === 0 ? '<span class="text-emerald-500 font-bold">FREE</span>' : '₹' + deliveryFee.toFixed(2))}</span></div>
                     <div class="flex justify-between text-[11px] text-gray-600 font-medium"><span>Platform Fee</span><span>₹${handlingFee.toFixed(2)}</span></div>
-                    
+                    ${coinHtml}
                     <div class="pt-2 mt-2 border-t border-gray-100 flex justify-between items-center">
                         <span class="text-xs font-black text-gray-900">To Pay</span>
                         <span class="text-sm font-black text-gray-900 tracking-tight">₹${total.toFixed(2)}</span>
@@ -2529,8 +2721,9 @@ try {
             else if (village !== '') deliveryFee = sub <= 99 ? 20 : 0;
 
             const handlingFee = window.cart.length > 0 ? 5 : 0;
-            const discountAmt = (sub * (window.appliedPromo || 0)) / 100;
-            const total = sub - discountAmt + handlingFee + deliveryFee;
+            const promoDiscountAmt = (sub * (window.appliedPromo || 0)) / 100;
+            const coinDiscount = window.currentCartCoinDiscount || 0;
+            const total = (sub - promoDiscountAmt + handlingFee + deliveryFee) - coinDiscount;
             
             const restaurantId = window.cart[0].partnerId || null;
             const restaurantName = window.cart[0].shopName || null;
@@ -2543,16 +2736,25 @@ try {
                 await window.dbCall(addDoc(getCol('orders'), { 
                     customer: currentUser.name || 'Unknown', phone: currentUser.phone || '', 
                     items: window.cart.map(item => ({ name: item.name || '', price: item.price || 0, quantity: item.quantity || 1, partnerId: item.partnerId || null, shopName: item.shopName || null })), 
-                    subtotal: sub || 0, discount: discountAmt || 0, promoCode: window.promoCode || null, total: total || 0, address: fullAddress || '', status: 'Placed', 
+                    subtotal: sub || 0, discount: promoDiscountAmt || 0, coinDiscount: coinDiscount, promoCode: window.promoCode || null, total: total || 0, address: fullAddress || '', status: 'Placed', 
                     restaurantId: restaurantId, restaurantName: restaurantName, restaurantAddress: restaurantAddress, paymentMode: paymentMode, paymentScreenshot: paymentScreenshot,
                     time: serverTimestamp() 
                 }), 15000);
+
+                if (coinDiscount > 0) {
+                    await window.dbCall(updateDoc(getDocRef('users', currentUser.phone), {
+                        walletPoints: (currentUser.walletPoints || 0) - coinDiscount
+                    }), 5000);
+                    window.currentCartCoinDiscount = 0;
+                }
                 
                 window.cart = []; window.appliedPromo = 0; window.promoCode = ''; localStorage.removeItem('gramzo_cart');
                 document.getElementById('cart-address').value = ''; document.getElementById('cart-village').value = '';
                 document.getElementById('cart-other-village').value = ''; document.getElementById('cart-other-village').classList.add('hidden');
                 if(document.getElementById('promo-code-input')) document.getElementById('promo-code-input').value = '';
                 if(document.getElementById('payment-screenshot')) document.getElementById('payment-screenshot').value = '';
+                const cartCoinToggle = document.getElementById('cart-use-coins-toggle');
+                if(cartCoinToggle) cartCoinToggle.checked = false;
                 
                 window.renderCartUI(); window.setupBottomNav(currentUser?.role);
                 window.showToast("Order Placed Successfully!", "success");
