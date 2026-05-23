@@ -3220,6 +3220,7 @@
                 window.showToast(`Status marked as ${newStatus}`, "success");
                 if (window.initRoleListeners) window.initRoleListeners();
             } catch(e) { window.showToast("Error updating status", "error");
+
 window.togglePartnerStock = async (productId, currentInStock) => {
     try { await window.dbCall(updateDoc(getDocRef('products', productId), { inStock: !currentInStock }), 10000); window.showToast(currentInStock ? "Marked Out of Stock" : "Marked In Stock", "success"); } 
     catch(e) { window.showToast("Error updating stock", "error"); }
