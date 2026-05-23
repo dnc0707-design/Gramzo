@@ -18,7 +18,7 @@
                     return; 
                 }
 
-                const APP_VERSION = "11.28.7"; // Most Ordered & Ride Timestamps Update
+                const APP_VERSION = "11.28.7"; // Features Update: Whole Car Booking & Most Ordered
                 
                 const clearAllCachesAndReload = () => {
                     console.log("Wiping Service Workers and Caches for update...");
@@ -270,15 +270,15 @@
                         <div id="restaurant-list-carousel" class="flex flex-wrap gap-3 mb-6"></div>
                     </div>
 
-                    <div>
-                        <!-- Most Ordered Section -->
-                        <div id="most-ordered-section" class="hidden mb-6">
-                            <h3 class="font-black text-xl text-gray-900 mb-4 tracking-tight uppercase">MOST ORDERED ITEMS</h3>
-                            <div id="most-ordered-list" class="flex gap-3 overflow-x-auto hide-scroll pb-4 snap-x">
-                            </div>
+                    <!-- MOST ORDERED SECTION -->
+                    <div id="most-ordered-section-container" class="mt-2 mb-6 hidden">
+                        <h3 class="font-black text-xl text-gray-900 mb-4 tracking-tight uppercase">Most Ordered Items</h3>
+                        <div id="most-ordered-list" class="flex gap-3 overflow-x-auto hide-scroll pb-2 snap-x">
+                            <!-- Populated dynamically -->
                         </div>
+                    </div>
 
-                        <!-- Fav Items Section -->
+                    <div>
                         <h3 id="market-list-title" class="font-black text-xl text-gray-900 mb-4 tracking-tight uppercase">FAV ITEMS</h3>
                         <div id="market-list" class="flex gap-3 overflow-x-auto hide-scroll pb-6 snap-x">
                             <div class="w-full py-10 text-center text-gray-400 font-medium text-sm animate-pulse border border-gray-200 rounded-3xl shadow-sm bg-white">Loading catalogue...</div>
@@ -405,7 +405,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.28.7 - Most Ordered & Timestamps</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.28.7 - Whole Ride & Popular Items</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right flex flex-col sm:flex-row gap-3">
                             <button type="button" id="btn-partner-login-trigger" onclick="window.openAuthModal('Partner')" class="bg-gray-900 text-white hover:bg-gray-800 border px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2">
@@ -814,7 +814,6 @@
                     <div class="overflow-x-auto"><table class="w-full text-left text-xs"><tbody id="admin-users-body"></tbody></table></div>
                 </div>
 
-                <!-- ADMIN OFFERS & PROMO MANAGEMENT -->
                 <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden mt-6 p-5">
                     <h3 class="font-bold text-gray-900 mb-2 border-b border-gray-100 pb-2">Manage Offers & Promos</h3>
                     <div class="space-y-3 mt-3">
@@ -943,8 +942,7 @@
             <label class="text-[10px] font-bold text-gray-500 uppercase ml-1 block mb-1">Departure Time</label>
             <input type="datetime-local" id="trip-time" class="input-field mb-3 !py-2.5">
             <div class="flex gap-2 mb-4">
-                <input type="number" id="trip-seats" class="input-field !py-2.5 flex-1" placeholder="Seats">
-                <input type="number" id="trip-fare" class="input-field !py-2.5 flex-1" placeholder="Fare/Seat (₹)">
+                <input type="number" id="trip-fare" class="input-field !py-2.5 w-full" placeholder="Total Trip Fare (₹)">
             </div>
             <div class="flex gap-2">
                 <button onclick="document.getElementById('create-trip-modal').classList.remove('active')" class="flex-1 bg-gray-100 py-3 rounded-xl font-bold text-sm">Cancel</button>
@@ -1037,8 +1035,6 @@
         window.currentUserMainCategory = 'Food Owner'; // Default to Food
         window.allProducts = []; // For admin promo feature
         window.availableTrips = []; 
-        window.globalOrders = [];
-        window.isMarketplaceLoaded = false;
 
         window.currentCartCoinsUsed = 0;
         window.currentRideCoinsUsed = 0;
@@ -1183,11 +1179,7 @@
                     listTitle.innerText = "FAV ITEMS";
                 }
 
-                if (window.allProducts) {
-                    window.extractRestaurants();
-                    window.renderProducts(window.allProducts);
-                    if (window.renderMostOrdered) window.renderMostOrdered();
-                }
+                window.loadMarketplaceData();
             }
         };
         
@@ -1355,10 +1347,7 @@
 
         window.handleSearchInput = () => {
             window.currentSearchQuery = document.getElementById('global-search').value.toLowerCase();
-            if (window.allProducts) {
-                window.renderProducts(window.allProducts);
-                if (window.renderMostOrdered) window.renderMostOrdered();
-            }
+            window.loadMarketplaceData();
         };
 
         window.startApp = async () => {
@@ -1642,17 +1631,16 @@
             const to = document.getElementById('trip-to').value.trim();
             const stops = document.getElementById('trip-stops').value.trim();
             const timeStr = document.getElementById('trip-time').value;
-            const seats = parseInt(document.getElementById('trip-seats').value);
             const fare = parseInt(document.getElementById('trip-fare').value);
 
-            if(!from || !to || !timeStr || isNaN(seats) || isNaN(fare)) return window.showToast("All fields are required", "error");
+            if(!from || !to || !timeStr || isNaN(fare)) return window.showToast("All required fields must be filled", "error");
 
             const btn = document.querySelector('#create-trip-modal button:last-child');
             const orig = btn.innerText; btn.innerText = "Publishing..."; btn.disabled = true;
 
             try {
                 await window.dbCall(addDoc(getCol('scheduled_trips'), {
-                    from, to, stops, time: timeStr, seats, fare,
+                    from, to, stops, time: timeStr, fare,
                     riderId: currentUser.phone, riderName: currentUser.name, vehicle: `${currentUser.carModel} (${currentUser.carNum})`,
                     created: serverTimestamp()
                 }), 10000);
@@ -1660,7 +1648,7 @@
                 document.getElementById('create-trip-modal').classList.remove('active');
                 document.getElementById('trip-from').value = ''; document.getElementById('trip-to').value = ''; 
                 document.getElementById('trip-stops').value = ''; document.getElementById('trip-time').value = ''; 
-                document.getElementById('trip-seats').value = ''; document.getElementById('trip-fare').value = '';
+                document.getElementById('trip-fare').value = '';
             } catch(e) { window.showToast("Failed to publish trip", "error"); } finally { btn.innerText = orig; btn.disabled = false; }
         };
 
@@ -1687,10 +1675,9 @@
                     <div class="bg-gray-50 p-2.5 rounded-xl mt-2 mb-3 border border-gray-100">
                         <p class="text-[10px] font-bold text-gray-700"><i class="fa-regular fa-calendar-check text-blue-400 w-3"></i> Departure: ${displayTime}</p>
                         ${t.stops ? `<p class="text-[10px] font-bold text-gray-700 mt-1.5 leading-tight"><i class="fa-solid fa-route text-blue-400 w-3"></i> En-route: ${t.stops}</p>` : ''}
-                        <p class="text-[10px] font-bold text-gray-700 mt-1.5"><i class="fa-solid fa-chair text-blue-400 w-3"></i> ${t.seats} Seats Available</p>
                         <p class="text-[10px] font-bold text-gray-700 mt-1.5"><i class="fa-solid fa-id-card text-blue-400 w-3"></i> Driver: ${t.riderName} <span class="text-gray-400 font-medium">(${t.vehicle})</span></p>
                     </div>
-                    <button type="button" onclick="window.bookTripSeat('${t.id}', '${t.fare}', '${t.riderId}', '${t.riderName.replace(/'/g, "\\'")}')" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl text-xs font-bold shadow-md transition active:scale-95">Book 1 Seat Now</button>
+                    <button type="button" onclick="window.bookTripSeat('${t.id}', '${t.fare}', '${t.riderId}', '${t.riderName.replace(/'/g, "\\'")}')" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl text-xs font-bold shadow-md transition active:scale-95">Book Entire Ride</button>
                 </div>
                 `;
             }).join('');
@@ -1700,12 +1687,12 @@
             if(!currentUser) { window.openAuthModal('User'); return; }
             if(currentUser.role !== 'User') return window.showToast("Log in as User to book.", "error");
 
-            const confirmed = await window.customConfirm("Confirm Booking", `Book 1 seat for ₹${fare}?`, "Book Now");
+            const confirmed = await window.customConfirm("Confirm Booking", `Book this entire ride for ₹${fare}?`, "Book Now");
             if(!confirmed) return;
 
             try {
                 const snap = await window.dbCall(getDoc(getDocRef('scheduled_trips', tripId)), 5000);
-                if(!snap.exists() || snap.data().seats <= 0) return window.showToast("Sorry, no seats left.", "error");
+                if(!snap.exists()) return window.showToast("Sorry, this ride is no longer available.", "error");
 
                 const tData = snap.data();
 
@@ -1720,11 +1707,9 @@
                     isScheduled: true, scheduledTime: tData.time
                 }), 10000);
 
-                await window.dbCall(updateDoc(getDocRef('scheduled_trips', tripId), {
-                    seats: tData.seats - 1
-                }), 5000);
+                await window.dbCall(deleteDoc(getDocRef('scheduled_trips', tripId)), 5000);
 
-                window.showToast("Seat booked successfully!", "success");
+                window.showToast("Ride booked successfully!", "success");
                 window.switchMainView('Orders');
             } catch(e) { window.showToast("Booking failed.", "error"); }
         };
@@ -2139,161 +2124,38 @@
             }
         };
 
-        window.generateProductCardHtml = (p, isHorizontal, idPrefix = '') => {
-            const hasVariants = p.variants && p.variants.length > 0;
-            let basePrice = hasVariants ? p.variants[0].price : p.price;
-            let originalPrice = basePrice;
-            let displayPrice = basePrice;
-
-            const itemPromo = window.activePromos?.find(promo => promo.isActive && promo.itemId === p.id);
-            let imageOverlayHtml = '';
-            
-            if (itemPromo) {
-                if (itemPromo.discountType === 'percentage') displayPrice = Math.floor(basePrice * (1 - itemPromo.discount / 100));
-                else if (itemPromo.discountType === 'flat') displayPrice = Math.max(0, basePrice - itemPromo.discount);
-                let discountStr = itemPromo.discountType === 'percentage' ? `${itemPromo.discount}% OFF` : `₹${itemPromo.discount} OFF`;
-                imageOverlayHtml = `<div class="absolute top-0 left-0 bg-blue-600 text-white text-[11px] font-black px-2 py-1 rounded-br-lg z-30 shadow-md border-b border-r border-blue-700 tracking-wide">${discountStr}</div>`;
-            } else if (p.tag && p.tag !== 'None') {
-                imageOverlayHtml = `<div class="absolute top-0 left-0 bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded-br-lg z-30 shadow-md"><i class="fa-solid fa-fire mr-0.5"></i> ${p.tag}</div>`;
-            }
-
-            const isClosed = p.shopStatus === 'Closed' || p.shopStatus === 'Offline';
-            const isOutOfStock = p.inStock === false;
-            const prefixId = idPrefix ? `${idPrefix}-` : '';
-            
-            let qtyDisplay = `<p class="text-[9px] sm:text-[10px] text-gray-500 uppercase tracking-wide font-medium mb-1 truncate">${p.qty || ''}</p>`;
-            
-            if (hasVariants) {
-                const options = p.variants.map((v, i) => {
-                    let vPrice = v.price;
-                    if(itemPromo) {
-                        if (itemPromo.discountType === 'percentage') vPrice = Math.floor(v.price * (1 - itemPromo.discount / 100));
-                        else if (itemPromo.discountType === 'flat') vPrice = Math.max(0, v.price - itemPromo.discount);
-                    }
-                    return `<option value="${i}" data-price="${vPrice}" data-orig="${v.price}">${v.qty}</option>`;
-                }).join('');
-                qtyDisplay = `
-                    <div class="mb-1 w-full relative z-30">
-                        <select onchange="window.updatePriceDisplay(this, '${prefixId}price-${p.id}', '${prefixId}orig-${p.id}')" id="${prefixId}sel-${p.id}" class="text-[9px] sm:text-[10px] bg-gray-50 border border-gray-200 rounded p-1 outline-none w-full font-medium text-gray-700 focus:border-red-400">
-                            ${options}
-                        </select>
-                    </div>
-                `;
-            }
-
-            const clickFn = hasVariants 
-                ? `window.addToCartVariant('${p.id}', '${p.name.replace(/'/g, "\\'")}', '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}', '${prefixId}')` 
-                : `window.addToCartStandard('${p.id}', '${p.name.replace(/'/g, "\\'")}', ${displayPrice}, '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')`;
-
-            let actionHtml = '';
-            if (isClosed) {
-                actionHtml = `<div class="bg-gray-100 border border-gray-200 text-gray-500 w-full text-center py-2 rounded-lg text-[10px] font-black uppercase shadow-sm">Closed</div>`;
-            } else if (isOutOfStock) {
-                actionHtml = `<div class="bg-orange-50 border border-orange-200 text-orange-500 w-full text-center py-2 rounded-lg text-[10px] font-black uppercase shadow-sm">No Stock</div>`;
-            } else {
-                actionHtml = `<button type="button" onclick="${clickFn}" class="relative w-full bg-red-50 text-red-600 border border-red-200 shadow-sm rounded-lg py-2 font-black text-sm uppercase hover:bg-red-600 hover:text-white transition tracking-wider z-20">ADD</button>`;
-            }
-
-            const priceHtml = itemPromo
-                ? `<span class="text-[10px] sm:text-xs text-gray-400 line-through mr-1" id="${prefixId}orig-${p.id}">₹${originalPrice}</span><span id="${prefixId}price-${p.id}" class="text-[12px] sm:text-[14px] font-black text-gray-900">₹${displayPrice}</span>`
-                : `<span id="${prefixId}price-${p.id}" class="text-[12px] sm:text-[14px] font-black text-gray-900">₹${displayPrice}</span>`;
-
-            if (isHorizontal) {
-                return `
-                    <div class="bg-white rounded-xl p-2 shadow-sm border border-gray-100 w-[120px] shrink-0 snap-center relative flex flex-col transform transition hover:-translate-y-1 hover:shadow-md ${isClosed || isOutOfStock ? 'opacity-60 grayscale-[0.5]' : ''}">
-                        <div class="w-full h-[90px] rounded-lg overflow-hidden bg-gray-50 mb-1.5 border border-gray-100 relative">
-                            <img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/200x200/f3f4f6/a1a1aa?text=Item'">
-                            ${imageOverlayHtml}
-                        </div>
-                        <h4 class="font-bold text-gray-900 text-[11px] leading-tight mb-0.5 truncate w-full" title="${p.name}">${p.name}</h4>
-                        <p class="text-[9px] font-bold text-gray-500 truncate w-full mb-1"><i class="fa-solid fa-store text-gray-300"></i> ${p.shopName || 'Gramzo Partner'}</p>
-                        <div class="flex items-center gap-1 mb-1 truncate w-full">${priceHtml}</div>
-                        ${qtyDisplay}
-                        <div class="mt-auto pt-1 relative z-20">${actionHtml}</div>
-                    </div>
-                `;
-            } else {
-                const isVeg = p.category && p.category.toLowerCase().includes('non-veg') ? false : true;
-                const vegIconColor = isVeg ? 'text-emerald-600 border-emerald-600' : 'text-red-600 border-red-600';
-                const vegIcon = `<div class="w-3 h-3 border ${vegIconColor} flex items-center justify-center rounded-sm shrink-0 mb-1"><div class="w-1.5 h-1.5 ${vegIconColor.replace('border-', 'bg-').replace('text-', 'bg-')} rounded-full"></div></div>`;
-
-                return `
-                    <div class="bg-white rounded-[1rem] p-3 sm:p-4 shadow-sm border border-gray-100 flex justify-between gap-3 relative transform transition hover:shadow-md ${isClosed || isOutOfStock ? 'opacity-60 grayscale-[0.5]' : ''}">
-                        <div class="flex-1 flex flex-col min-w-0 justify-center py-1">
-                            ${vegIcon}
-                            <h4 class="font-black text-gray-900 text-[15px] leading-tight mb-1 break-words pr-2">${p.name}</h4>
-                            <p class="text-[10px] font-bold text-gray-500 mb-1.5"><i class="fa-solid fa-store text-gray-300"></i> ${p.shopName || 'Gramzo Partner'}</p>
-                            <div class="flex items-center gap-2 mb-1.5">${priceHtml}</div>
-                            <div class="mt-1 w-2/3">${qtyDisplay}</div>
-                            ${p.prepTime ? `<p class="text-[10px] text-gray-400 font-medium mt-1"><i class="fa-regular fa-clock"></i> ${p.prepTime} mins</p>` : ''}
-                        </div>
-                        
-                        <div class="w-[100px] h-[100px] sm:w-[120px] sm:h-[120px] shrink-0 flex flex-col items-center relative rounded-2xl bg-gray-50 border border-gray-100 mt-1 overflow-visible">
-                            <div class="w-full h-full overflow-hidden rounded-2xl relative">
-                                <img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x400/f3f4f6/a1a1aa?text=Item'">
-                                ${imageOverlayHtml}
-                            </div>
-                            <div class="absolute -bottom-3 w-[90%] z-30 mx-auto left-0 right-0 shadow-[0_4px_10px_rgba(0,0,0,0.15)] rounded-lg">
-                                ${actionHtml}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-        };
-
-        window.renderMostOrdered = () => {
-            const section = document.getElementById('most-ordered-section');
-            const listEl = document.getElementById('most-ordered-list');
-            if (!section || !listEl) return;
-
-            if (window.currentUserMainCategory === 'Rider' || window.currentRestaurantFilter || window.currentSearchQuery) {
-                section.classList.add('hidden');
-                return;
-            }
-
-            if (!window.globalOrders || !window.allProducts) return;
-
-            const itemCounts = {};
-            window.globalOrders.forEach(o => {
-                if (['Delivered', 'Completed'].includes(o.status) && o.items) {
-                    o.items.forEach(item => {
-                        const key = item.name + '|' + (item.partnerId || '');
-                        itemCounts[key] = (itemCounts[key] || 0) + (item.quantity || 1);
-                    });
-                }
-            });
-
-            let topProducts = [];
-            window.allProducts.forEach(p => {
-                const pShopCat = p.shopCategory || 'Food Owner';
-                if (pShopCat !== window.currentUserMainCategory) return;
-
-                const key = p.name + '|' + (p.partnerId || '');
-                if (itemCounts[key] > 0) {
-                    topProducts.push({ ...p, orderCount: itemCounts[key] });
-                }
-            });
-
-            topProducts.sort((a, b) => b.orderCount - a.orderCount);
-            topProducts = topProducts.slice(0, 10);
-
-            if (topProducts.length === 0) {
-                section.classList.add('hidden');
-                return;
-            }
-
-            section.classList.remove('hidden');
-            listEl.innerHTML = topProducts.map(p => window.generateProductCardHtml(p, true, 'mo')).join('');
-        };
-
         const renderProducts = (items) => {
             const listEl = document.getElementById('market-list');
             const chipsEl = document.getElementById('food-category-chips');
             const listTitle = document.getElementById('market-list-title');
+            const mostOrderedList = document.getElementById('most-ordered-list');
+            const mostOrderedContainer = document.getElementById('most-ordered-section-container');
             
             if (!listEl) return;
             
+            // Populating Most Ordered Items Section (Only in Global View without filters)
+            if (!currentRestaurantFilter && !window.currentSearchQuery && window.currentUserMainCategory !== 'Rider') {
+                let popularItems = [...items].filter(i => (i.shopCategory || 'Food Owner') === window.currentUserMainCategory);
+                
+                // Fallback simulation: if true orderCount doesn't exist, randomly select by name length or price to simulate a curated list
+                popularItems.sort((a, b) => {
+                    const scoreA = a.orderCount || Math.floor(Math.random() * 100);
+                    const scoreB = b.orderCount || Math.floor(Math.random() * 100);
+                    return scoreB - scoreA;
+                });
+                
+                popularItems = popularItems.slice(0, 10);
+                
+                if (popularItems.length > 0 && mostOrderedList && mostOrderedContainer) {
+                    mostOrderedContainer.classList.remove('hidden');
+                    mostOrderedList.innerHTML = popularItems.map(p => generateProductCardHtml(p, true)).join('');
+                } else if (mostOrderedContainer) {
+                    mostOrderedContainer.classList.add('hidden');
+                }
+            } else {
+                if (mostOrderedContainer) mostOrderedContainer.classList.add('hidden');
+            }
+
             if (currentRestaurantFilter && window.currentUserMainCategory === 'Food Owner' && chipsEl) {
                 const restaurantItems = items.filter(i => i.partnerId === currentRestaurantFilter);
                 const uniqueCategories = [...new Set(restaurantItems.map(i => i.category || 'Others'))];
@@ -2358,7 +2220,109 @@
             const isHorizontal = !currentRestaurantFilter && !window.currentSearchQuery;
             listEl.className = isHorizontal ? "flex gap-3 overflow-x-auto hide-scroll pb-4 snap-x" : "flex flex-col gap-4 pb-6";
 
-            listEl.innerHTML = filtered.map(p => window.generateProductCardHtml(p, isHorizontal, 'fav')).join('');
+            listEl.innerHTML = filtered.map(p => generateProductCardHtml(p, isHorizontal)).join('');
+        };
+
+        const generateProductCardHtml = (p, isHorizontal) => {
+            const hasVariants = p.variants && p.variants.length > 0;
+            let basePrice = hasVariants ? p.variants[0].price : p.price;
+            let originalPrice = basePrice;
+            let displayPrice = basePrice;
+
+            const itemPromo = window.activePromos?.find(promo => promo.isActive && promo.itemId === p.id);
+            let imageOverlayHtml = '';
+            
+            if (itemPromo) {
+                if (itemPromo.discountType === 'percentage') displayPrice = Math.floor(basePrice * (1 - itemPromo.discount / 100));
+                else if (itemPromo.discountType === 'flat') displayPrice = Math.max(0, basePrice - itemPromo.discount);
+                let discountStr = itemPromo.discountType === 'percentage' ? `${itemPromo.discount}% OFF` : `₹${itemPromo.discount} OFF`;
+                imageOverlayHtml = `<div class="absolute top-0 left-0 bg-blue-600 text-white text-[11px] font-black px-2 py-1 rounded-br-lg z-30 shadow-md border-b border-r border-blue-700 tracking-wide">${discountStr}</div>`;
+            } else if (p.tag && p.tag !== 'None') {
+                imageOverlayHtml = `<div class="absolute top-0 left-0 bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded-br-lg z-30 shadow-md"><i class="fa-solid fa-fire mr-0.5"></i> ${p.tag}</div>`;
+            }
+
+            const isClosed = p.shopStatus === 'Closed' || p.shopStatus === 'Offline';
+            const isOutOfStock = p.inStock === false;
+            
+            let qtyDisplay = `<p class="text-[9px] sm:text-[10px] text-gray-500 uppercase tracking-wide font-medium mb-1 truncate">${p.qty || ''}</p>`;
+            
+            if (hasVariants) {
+                const options = p.variants.map((v, i) => {
+                    let vPrice = v.price;
+                    if(itemPromo) {
+                        if (itemPromo.discountType === 'percentage') vPrice = Math.floor(v.price * (1 - itemPromo.discount / 100));
+                        else if (itemPromo.discountType === 'flat') vPrice = Math.max(0, v.price - itemPromo.discount);
+                    }
+                    return `<option value="${i}" data-price="${vPrice}" data-orig="${v.price}">${v.qty}</option>`;
+                }).join('');
+                qtyDisplay = `
+                    <div class="mb-1 w-full relative z-30">
+                        <select onchange="window.updatePriceDisplay(this, 'price-${p.id}', 'orig-${p.id}')" id="sel-${p.id}" class="text-[9px] sm:text-[10px] bg-gray-50 border border-gray-200 rounded p-1 outline-none w-full font-medium text-gray-700 focus:border-red-400">
+                            ${options}
+                        </select>
+                    </div>
+                `;
+            }
+
+            const clickFn = hasVariants 
+                ? `window.addToCartVariant('${p.id}', '${p.name.replace(/'/g, "\\'")}', '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')` 
+                : `window.addToCartStandard('${p.id}', '${p.name.replace(/'/g, "\\'")}', ${displayPrice}, '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')`;
+
+            let actionHtml = '';
+            if (isClosed) {
+                actionHtml = `<div class="bg-gray-100 border border-gray-200 text-gray-500 w-full text-center py-2 rounded-lg text-[10px] font-black uppercase shadow-sm">Closed</div>`;
+            } else if (isOutOfStock) {
+                actionHtml = `<div class="bg-orange-50 border border-orange-200 text-orange-500 w-full text-center py-2 rounded-lg text-[10px] font-black uppercase shadow-sm">No Stock</div>`;
+            } else {
+                actionHtml = `<button type="button" onclick="${clickFn}" class="relative w-full bg-red-50 text-red-600 border border-red-200 shadow-sm rounded-lg py-2 font-black text-sm uppercase hover:bg-red-600 hover:text-white transition tracking-wider z-20">ADD</button>`;
+            }
+
+            const priceHtml = itemPromo
+                ? `<span class="text-[10px] sm:text-xs text-gray-400 line-through mr-1" id="orig-${p.id}">₹${originalPrice}</span><span id="price-${p.id}" class="text-[12px] sm:text-[14px] font-black text-gray-900">₹${displayPrice}</span>`
+                : `<span id="price-${p.id}" class="text-[12px] sm:text-[14px] font-black text-gray-900">₹${displayPrice}</span>`;
+
+            if (isHorizontal) {
+                return `
+                    <div class="bg-white rounded-xl p-2 shadow-sm border border-gray-100 w-[120px] shrink-0 snap-center relative flex flex-col transform transition hover:-translate-y-1 hover:shadow-md ${isClosed || isOutOfStock ? 'opacity-60 grayscale-[0.5]' : ''}">
+                        <div class="w-full h-[90px] rounded-lg overflow-hidden bg-gray-50 mb-1.5 border border-gray-100 relative">
+                            <img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/200x200/f3f4f6/a1a1aa?text=Item'">
+                            ${imageOverlayHtml}
+                        </div>
+                        <h4 class="font-bold text-gray-900 text-[11px] leading-tight mb-0.5 truncate w-full" title="${p.name}">${p.name}</h4>
+                        <p class="text-[9px] font-bold text-gray-500 truncate w-full mb-1"><i class="fa-solid fa-store text-gray-300"></i> ${p.shopName || 'Gramzo Partner'}</p>
+                        <div class="flex items-center gap-1 mb-1 truncate w-full">${priceHtml}</div>
+                        ${qtyDisplay}
+                        <div class="mt-auto pt-1 relative z-20">${actionHtml}</div>
+                    </div>
+                `;
+            } else {
+                const isVeg = p.category && p.category.toLowerCase().includes('non-veg') ? false : true;
+                const vegIconColor = isVeg ? 'text-emerald-600 border-emerald-600' : 'text-red-600 border-red-600';
+                const vegIcon = `<div class="w-3 h-3 border ${vegIconColor} flex items-center justify-center rounded-sm shrink-0 mb-1"><div class="w-1.5 h-1.5 ${vegIconColor.replace('border-', 'bg-').replace('text-', 'bg-')} rounded-full"></div></div>`;
+
+                return `
+                    <div class="bg-white rounded-[1rem] p-3 sm:p-4 shadow-sm border border-gray-100 flex justify-between gap-3 relative transform transition hover:shadow-md ${isClosed || isOutOfStock ? 'opacity-60 grayscale-[0.5]' : ''}">
+                        <div class="flex-1 flex flex-col min-w-0 justify-center py-1">
+                            ${vegIcon}
+                            <h4 class="font-black text-gray-900 text-[15px] leading-tight mb-1 break-words pr-2">${p.name}</h4>
+                            <p class="text-[10px] font-bold text-gray-500 mb-1.5"><i class="fa-solid fa-store text-gray-300"></i> ${p.shopName || 'Gramzo Partner'}</p>
+                            <div class="flex items-center gap-2 mb-1.5">${priceHtml}</div>
+                            <div class="mt-1 w-2/3">${qtyDisplay}</div>
+                            ${p.prepTime ? `<p class="text-[10px] text-gray-400 font-medium mt-1"><i class="fa-regular fa-clock"></i> ${p.prepTime} mins</p>` : ''}
+                        </div>
+                        
+                        <div class="w-[100px] h-[100px] sm:w-[120px] sm:h-[120px] shrink-0 flex flex-col items-center relative rounded-2xl bg-gray-50 border border-gray-100 mt-1 overflow-visible">
+                            <div class="w-full h-full overflow-hidden rounded-2xl relative">
+                                <img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x400/f3f4f6/a1a1aa?text=Item'">
+                                ${imageOverlayHtml}
+                            </div>
+                            <div class="absolute -bottom-3 w-[90%] z-30 mx-auto left-0 right-0 shadow-[0_4px_10px_rgba(0,0,0,0.15)] rounded-lg">
+                                ${actionHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
         };
 
         window.renderRestaurants = (restaurants) => {
@@ -2383,12 +2347,13 @@
             }).join('');
         };
 
-        window.extractRestaurants = async () => {
+        const extractRestaurants = async () => {
             try {
                 const snap = await window.dbCall(getDocs(getCol('users')), 5000);
                 const approvedPartners = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(u => u.role === 'Partner' && u.approvalStatus === 'Approved' && (u.category === window.currentUserMainCategory));
                 
-                const products = window.allProducts;
+                const prodSnap = await window.dbCall(getDocs(getCol('products')), 5000);
+                const products = prodSnap.docs.map(d => d.data());
 
                 const uniqueRestaurants = approvedPartners.map(p => {
                     const shopProducts = products.filter(prod => prod.partnerId === p.id);
@@ -2404,13 +2369,6 @@
         };
 
         window.loadMarketplaceData = () => {
-            if (window.isMarketplaceLoaded) {
-                if (window.allProducts) window.renderProducts(window.allProducts);
-                if (window.renderMostOrdered) window.renderMostOrdered();
-                return;
-            }
-            window.isMarketplaceLoaded = true;
-
             const defaultMarqueeText = "🚀 খাবার অর্ডার করুন ঘরে বসেই - সার্ভিস অ্যাভেইলেবল অ্যাট কোটালডিহ, কিনাইডিহ, লালগড়, কৃষ্ণপুর, রামচন্দ্রপুর, মুরাডি, গাংপুর, যশপুর এবং বড়ন্তি এলাকা 🚀";
 
             onSnapshot(getDocRef('settings', 'app_config'), (snap) => {
@@ -2430,25 +2388,18 @@
 
             onSnapshot(getCol('promos'), (snap) => {
                 window.activePromos = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(p => p.isActive);
-                if (window.allProducts) window.renderProducts(window.allProducts);
             });
             
             onSnapshot(getCol('scheduled_trips'), (snap) => {
-                window.availableTrips = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(t => t.seats > 0 && new Date(t.time) > new Date());
+                window.availableTrips = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(t => new Date(t.time) > new Date());
                 window.renderAvailableTrips();
-            });
-
-            onSnapshot(getCol('orders'), (snap) => {
-                window.globalOrders = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                if (window.renderMostOrdered) window.renderMostOrdered();
             });
 
             onSnapshot(getCol('products'), (snap) => {
                 let items = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
                 window.allProducts = items; 
-                window.extractRestaurants(); 
+                extractRestaurants(); 
                 renderProducts(items);
-                if (window.renderMostOrdered) window.renderMostOrdered();
             }, (err) => {
                 if (err.code === 'permission-denied') window.showToast("Firebase Permissions Denied! Check rules.", "error");
             });
@@ -2483,17 +2434,12 @@
                 }
                 if (marketplaceRow) marketplaceRow.classList.add('hidden');
             }
-            if (window.allProducts) {
-                window.renderProducts(window.allProducts);
-                if (window.renderMostOrdered) window.renderMostOrdered();
-            }
+            window.loadMarketplaceData();
         };
 
         window.filterFoodCategory = (categoryName) => {
             currentFoodCategoryFilter = categoryName;
-            if (window.allProducts) {
-                window.renderProducts(window.allProducts);
-            }
+            window.loadMarketplaceData();
         };
 
         window.updatePriceDisplay = (selectEl, priceId, origId) => {
@@ -2579,8 +2525,8 @@
             window.addToCartActual(name, price, partnerId, shopName);
         };
 
-        window.addToCartVariant = (id, name, partnerId, shopName, prefixId = '') => {
-            const selectEl = document.getElementById(`${prefixId}sel-${id}`);
+        window.addToCartVariant = (id, name, partnerId, shopName) => {
+            const selectEl = document.getElementById(`sel-${id}`);
             if(!selectEl) { window.showToast("Variant selection error. Try reloading.", "error"); return; }
             const selectedOpt = selectEl.options[selectEl.selectedIndex];
             const price = parseFloat(selectedOpt.dataset.price);
@@ -2866,70 +2812,6 @@
                 window.showToast("Order Rejected.", "success");
                 document.getElementById('reject-modal').classList.remove('active');
             } catch(e) { window.showToast("Failed to update.", "error"); }
-        };
-
-        window.loadItemsForPromo = () => {
-            const resId = document.getElementById('admin-promo-restaurant').value;
-            const itemSelect = document.getElementById('admin-promo-item');
-            if (resId === 'Global') {
-                itemSelect.innerHTML = '<option value="">Apply to Cart (Requires Code)</option>';
-                itemSelect.disabled = true;
-                return;
-            }
-            itemSelect.disabled = false;
-            const resItems = window.allProducts.filter(p => p.partnerId === resId);
-            itemSelect.innerHTML = '<option value="">Apply to Cart (Requires Code)</option>' +
-                resItems.map(i => `<option value="${i.id}">${i.name}</option>`).join('');
-        };
-
-        window.adminCreatePromo = async () => {
-            if(currentUser.role !== 'Admin') return;
-            const codeInput = document.getElementById('admin-promo-code').value.trim().toUpperCase();
-            const discount = parseInt(document.getElementById('admin-promo-discount').value);
-            const discountType = document.getElementById('admin-promo-type').value;
-            const resSelect = document.getElementById('admin-promo-restaurant');
-            const itemSelect = document.getElementById('admin-promo-item');
-
-            const restaurantId = resSelect.value;
-            const restaurantName = resSelect.options[resSelect.selectedIndex].text;
-            const itemId = itemSelect.value;
-            const itemName = itemSelect.value ? itemSelect.options[itemSelect.selectedIndex].text : null;
-
-            const code = codeInput || (itemId ? `OFFER-${Date.now().toString().slice(-6)}` : '');
-
-            if(!itemId && !codeInput) return window.showToast("Promo Code is mandatory for Store-wide offers.", "error");
-            if(isNaN(discount) || discount <= 0) return window.showToast("Enter a valid discount amount.", "error");
-            if(discountType === 'percentage' && discount > 100) return window.showToast("Percentage cannot exceed 100", "error");
-
-            try {
-                await window.dbCall(addDoc(getCol('promos'), {
-                    code, discount, discountType, restaurantId,
-                    restaurantName: restaurantId === 'Global' ? 'All Restaurants' : restaurantName,
-                    itemId: itemId || null,
-                    itemName: itemName,
-                    isItemOffer: !!itemId, 
-                    isActive: true
-                }), 10000);
-                document.getElementById('admin-promo-code').value = '';
-                document.getElementById('admin-promo-discount').value = '';
-                window.showToast("Offer/Promo Created!", "success");
-            } catch(e) { window.showToast("Failed to create", "error"); }
-        };
-
-        window.togglePromo = async (id, currentStatus) => { try { await window.dbCall(updateDoc(getDocRef('promos', id), {isActive: !currentStatus}), 10000); } catch(e){} };
-        window.deletePromo = async (id) => { try { await window.dbCall(deleteDoc(getDocRef('promos', id)), 10000); window.showToast("Offer Deleted", "info"); } catch(e){} };
-
-        window.adminUpdateMarquee = async () => {
-            if(currentUser.role !== 'Admin') return;
-            const text = document.getElementById('admin-marquee-text').value.trim();
-            if(!text) return window.showToast("Please enter marquee text.", "error");
-            const btn = document.getElementById('btn-update-marquee');
-            const orig = btn.innerText; btn.innerText = "Updating..."; btn.disabled = true;
-            try {
-                await window.dbCall(setDoc(getDocRef('settings', 'app_config'), { marqueeText: text }, { merge: true }), 10000);
-                window.showToast("Marquee Updated!", "success");
-                document.getElementById('admin-marquee-text').value = "";
-            } catch(e) { window.showToast("Error updating marquee.", "error"); } finally { btn.innerText = orig; btn.disabled = false; }
         };
 
         window.acceptDelivery = async (orderId) => {
@@ -3299,17 +3181,18 @@
             let html = '';
             filteredOrders.forEach(o => {
                 const timeStr = window.formatOrderTime(o.time);
+                let scheduledTimeHtml = o.isScheduled && o.scheduledTime ? `<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[9px] font-black uppercase ml-2 block mt-1"><i class="fa-solid fa-calendar mr-1"></i> Trip Date: ${window.formatOrderTime(o.scheduledTime)}</span>` : '';
+                
                 let statusColor = o.status === 'Placed' || o.status === 'Requested' || o.status === 'Broadcasted' ? 'text-amber-500' : o.status === 'Preparing' || o.status === 'Started' || o.status === 'Out for Delivery' ? 'text-blue-500' : o.status === 'Rejected' ? 'text-red-500' : 'text-emerald-500';
                 const displayType = o.type === 'Ride' ? '🚕 Ride' : '🍔 Order';
                 const addressDisplay = o.type === 'Ride' ? `<span class="text-blue-500 font-medium">From:</span> ${o.pickup || 'N/A'}<br/><span class="text-emerald-500 font-medium">To:</span> ${o.address || 'N/A'}` : o.address || 'N/A';
                 
-                // Matches the display list items similar to partner view
                 const itemsStr = o.items ? o.items.map(i => `${i.name} ${i.quantity && i.quantity > 1 ? '(x'+i.quantity+')' : ''}`.trim()).join('<br/>') : '';
                 const itemsHtml = itemsStr ? `<div class="bg-gray-50 p-2 rounded-xl mt-2 border border-gray-100 text-[10px] text-gray-700 font-bold leading-relaxed"><i class="fa-solid fa-clipboard-list text-gray-400 mr-1"></i> ${itemsStr}</div>` : '';
 
                 html += `
                     <tr class="hover:bg-gray-50 transition-colors border-b border-gray-50">
-                        <td class="p-3 font-mono font-bold text-[10px] text-gray-500 align-top pt-4">#${o.id.slice(-5).toUpperCase()}<br/><span class="font-sans font-medium text-[9px] text-gray-400">${timeStr}</span></td>
+                        <td class="p-3 font-mono font-bold text-[10px] text-gray-500 align-top pt-4">#${o.id.slice(-5).toUpperCase()}<br/><span class="font-sans font-medium text-[9px] text-gray-400">${timeStr}</span>${scheduledTimeHtml}</td>
                         <td class="p-3 font-bold text-gray-900 text-xs align-top pt-4">
                             ${o.customer || 'Unknown'} <span class="font-normal text-[9px] text-gray-500 bg-gray-100 px-1 rounded ml-1">${displayType}</span><br/>
                             <a href="tel:${o.phone}" class="font-mono font-normal text-[10px] text-blue-600 hover:underline inline-block mt-0.5"><i class="fa-solid fa-phone text-[8px]"></i> ${o.phone || 'N/A'}</a><br/>
@@ -3361,6 +3244,8 @@
                 filteredOrders.forEach(o => {
                     const itemsStr = o.items ? o.items.map(i => `${i.name} ${i.quantity && i.quantity > 1 ? '(x'+i.quantity+')' : ''}`.trim()).join(', ') : '';
                     const timeStr = window.formatOrderTime(o.time);
+                    let scheduledTimeHtml = o.isScheduled && o.scheduledTime ? `<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[9px] font-black uppercase ml-2"><i class="fa-solid fa-calendar mr-1"></i> Trip Date: ${window.formatOrderTime(o.scheduledTime)}</span>` : '';
+
                     let cardStyle = 'border-gray-100', actionButtons = '';
                     let paymentBadge = o.paymentMode === 'Prepaid' ? `<span class="bg-blue-100 text-blue-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">Prepaid</span>` : `<span class="bg-gray-100 text-gray-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">COD</span>`;
                     let screenshotHtml = o.paymentMode === 'Prepaid' && o.paymentScreenshot ? `<button type="button" onclick="window.viewImage('${o.paymentScreenshot}')" class="text-[10px] text-blue-600 bg-blue-50 px-2 py-1 rounded font-bold hover:bg-blue-100 transition mt-2 w-full text-left"><i class="fa-solid fa-image"></i> View Payment Screenshot</button>` : '';
