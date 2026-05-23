@@ -18,7 +18,7 @@
                     return; 
                 }
 
-                const APP_VERSION = "11.28.6"; // Features Update
+                const APP_VERSION = "11.28.7"; // Most Ordered & Ride Timestamps Update
                 
                 const clearAllCachesAndReload = () => {
                     console.log("Wiping Service Workers and Caches for update...");
@@ -271,6 +271,14 @@
                     </div>
 
                     <div>
+                        <!-- Most Ordered Section -->
+                        <div id="most-ordered-section" class="hidden mb-6">
+                            <h3 class="font-black text-xl text-gray-900 mb-4 tracking-tight uppercase">MOST ORDERED ITEMS</h3>
+                            <div id="most-ordered-list" class="flex gap-3 overflow-x-auto hide-scroll pb-4 snap-x">
+                            </div>
+                        </div>
+
+                        <!-- Fav Items Section -->
                         <h3 id="market-list-title" class="font-black text-xl text-gray-900 mb-4 tracking-tight uppercase">FAV ITEMS</h3>
                         <div id="market-list" class="flex gap-3 overflow-x-auto hide-scroll pb-6 snap-x">
                             <div class="w-full py-10 text-center text-gray-400 font-medium text-sm animate-pulse border border-gray-200 rounded-3xl shadow-sm bg-white">Loading catalogue...</div>
@@ -397,7 +405,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.28.6 - Coins & Schedule Engine</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.28.7 - Most Ordered & Timestamps</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right flex flex-col sm:flex-row gap-3">
                             <button type="button" id="btn-partner-login-trigger" onclick="window.openAuthModal('Partner')" class="bg-gray-900 text-white hover:bg-gray-800 border px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2">
@@ -1029,6 +1037,8 @@
         window.currentUserMainCategory = 'Food Owner'; // Default to Food
         window.allProducts = []; // For admin promo feature
         window.availableTrips = []; 
+        window.globalOrders = [];
+        window.isMarketplaceLoaded = false;
 
         window.currentCartCoinsUsed = 0;
         window.currentRideCoinsUsed = 0;
@@ -1173,7 +1183,11 @@
                     listTitle.innerText = "FAV ITEMS";
                 }
 
-                window.loadMarketplaceData();
+                if (window.allProducts) {
+                    window.extractRestaurants();
+                    window.renderProducts(window.allProducts);
+                    if (window.renderMostOrdered) window.renderMostOrdered();
+                }
             }
         };
         
@@ -1341,7 +1355,10 @@
 
         window.handleSearchInput = () => {
             window.currentSearchQuery = document.getElementById('global-search').value.toLowerCase();
-            window.loadMarketplaceData();
+            if (window.allProducts) {
+                window.renderProducts(window.allProducts);
+                if (window.renderMostOrdered) window.renderMostOrdered();
+            }
         };
 
         window.startApp = async () => {
@@ -2122,6 +2139,154 @@
             }
         };
 
+        window.generateProductCardHtml = (p, isHorizontal, idPrefix = '') => {
+            const hasVariants = p.variants && p.variants.length > 0;
+            let basePrice = hasVariants ? p.variants[0].price : p.price;
+            let originalPrice = basePrice;
+            let displayPrice = basePrice;
+
+            const itemPromo = window.activePromos?.find(promo => promo.isActive && promo.itemId === p.id);
+            let imageOverlayHtml = '';
+            
+            if (itemPromo) {
+                if (itemPromo.discountType === 'percentage') displayPrice = Math.floor(basePrice * (1 - itemPromo.discount / 100));
+                else if (itemPromo.discountType === 'flat') displayPrice = Math.max(0, basePrice - itemPromo.discount);
+                let discountStr = itemPromo.discountType === 'percentage' ? `${itemPromo.discount}% OFF` : `₹${itemPromo.discount} OFF`;
+                imageOverlayHtml = `<div class="absolute top-0 left-0 bg-blue-600 text-white text-[11px] font-black px-2 py-1 rounded-br-lg z-30 shadow-md border-b border-r border-blue-700 tracking-wide">${discountStr}</div>`;
+            } else if (p.tag && p.tag !== 'None') {
+                imageOverlayHtml = `<div class="absolute top-0 left-0 bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded-br-lg z-30 shadow-md"><i class="fa-solid fa-fire mr-0.5"></i> ${p.tag}</div>`;
+            }
+
+            const isClosed = p.shopStatus === 'Closed' || p.shopStatus === 'Offline';
+            const isOutOfStock = p.inStock === false;
+            const prefixId = idPrefix ? `${idPrefix}-` : '';
+            
+            let qtyDisplay = `<p class="text-[9px] sm:text-[10px] text-gray-500 uppercase tracking-wide font-medium mb-1 truncate">${p.qty || ''}</p>`;
+            
+            if (hasVariants) {
+                const options = p.variants.map((v, i) => {
+                    let vPrice = v.price;
+                    if(itemPromo) {
+                        if (itemPromo.discountType === 'percentage') vPrice = Math.floor(v.price * (1 - itemPromo.discount / 100));
+                        else if (itemPromo.discountType === 'flat') vPrice = Math.max(0, v.price - itemPromo.discount);
+                    }
+                    return `<option value="${i}" data-price="${vPrice}" data-orig="${v.price}">${v.qty}</option>`;
+                }).join('');
+                qtyDisplay = `
+                    <div class="mb-1 w-full relative z-30">
+                        <select onchange="window.updatePriceDisplay(this, '${prefixId}price-${p.id}', '${prefixId}orig-${p.id}')" id="${prefixId}sel-${p.id}" class="text-[9px] sm:text-[10px] bg-gray-50 border border-gray-200 rounded p-1 outline-none w-full font-medium text-gray-700 focus:border-red-400">
+                            ${options}
+                        </select>
+                    </div>
+                `;
+            }
+
+            const clickFn = hasVariants 
+                ? `window.addToCartVariant('${p.id}', '${p.name.replace(/'/g, "\\'")}', '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}', '${prefixId}')` 
+                : `window.addToCartStandard('${p.id}', '${p.name.replace(/'/g, "\\'")}', ${displayPrice}, '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')`;
+
+            let actionHtml = '';
+            if (isClosed) {
+                actionHtml = `<div class="bg-gray-100 border border-gray-200 text-gray-500 w-full text-center py-2 rounded-lg text-[10px] font-black uppercase shadow-sm">Closed</div>`;
+            } else if (isOutOfStock) {
+                actionHtml = `<div class="bg-orange-50 border border-orange-200 text-orange-500 w-full text-center py-2 rounded-lg text-[10px] font-black uppercase shadow-sm">No Stock</div>`;
+            } else {
+                actionHtml = `<button type="button" onclick="${clickFn}" class="relative w-full bg-red-50 text-red-600 border border-red-200 shadow-sm rounded-lg py-2 font-black text-sm uppercase hover:bg-red-600 hover:text-white transition tracking-wider z-20">ADD</button>`;
+            }
+
+            const priceHtml = itemPromo
+                ? `<span class="text-[10px] sm:text-xs text-gray-400 line-through mr-1" id="${prefixId}orig-${p.id}">₹${originalPrice}</span><span id="${prefixId}price-${p.id}" class="text-[12px] sm:text-[14px] font-black text-gray-900">₹${displayPrice}</span>`
+                : `<span id="${prefixId}price-${p.id}" class="text-[12px] sm:text-[14px] font-black text-gray-900">₹${displayPrice}</span>`;
+
+            if (isHorizontal) {
+                return `
+                    <div class="bg-white rounded-xl p-2 shadow-sm border border-gray-100 w-[120px] shrink-0 snap-center relative flex flex-col transform transition hover:-translate-y-1 hover:shadow-md ${isClosed || isOutOfStock ? 'opacity-60 grayscale-[0.5]' : ''}">
+                        <div class="w-full h-[90px] rounded-lg overflow-hidden bg-gray-50 mb-1.5 border border-gray-100 relative">
+                            <img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/200x200/f3f4f6/a1a1aa?text=Item'">
+                            ${imageOverlayHtml}
+                        </div>
+                        <h4 class="font-bold text-gray-900 text-[11px] leading-tight mb-0.5 truncate w-full" title="${p.name}">${p.name}</h4>
+                        <p class="text-[9px] font-bold text-gray-500 truncate w-full mb-1"><i class="fa-solid fa-store text-gray-300"></i> ${p.shopName || 'Gramzo Partner'}</p>
+                        <div class="flex items-center gap-1 mb-1 truncate w-full">${priceHtml}</div>
+                        ${qtyDisplay}
+                        <div class="mt-auto pt-1 relative z-20">${actionHtml}</div>
+                    </div>
+                `;
+            } else {
+                const isVeg = p.category && p.category.toLowerCase().includes('non-veg') ? false : true;
+                const vegIconColor = isVeg ? 'text-emerald-600 border-emerald-600' : 'text-red-600 border-red-600';
+                const vegIcon = `<div class="w-3 h-3 border ${vegIconColor} flex items-center justify-center rounded-sm shrink-0 mb-1"><div class="w-1.5 h-1.5 ${vegIconColor.replace('border-', 'bg-').replace('text-', 'bg-')} rounded-full"></div></div>`;
+
+                return `
+                    <div class="bg-white rounded-[1rem] p-3 sm:p-4 shadow-sm border border-gray-100 flex justify-between gap-3 relative transform transition hover:shadow-md ${isClosed || isOutOfStock ? 'opacity-60 grayscale-[0.5]' : ''}">
+                        <div class="flex-1 flex flex-col min-w-0 justify-center py-1">
+                            ${vegIcon}
+                            <h4 class="font-black text-gray-900 text-[15px] leading-tight mb-1 break-words pr-2">${p.name}</h4>
+                            <p class="text-[10px] font-bold text-gray-500 mb-1.5"><i class="fa-solid fa-store text-gray-300"></i> ${p.shopName || 'Gramzo Partner'}</p>
+                            <div class="flex items-center gap-2 mb-1.5">${priceHtml}</div>
+                            <div class="mt-1 w-2/3">${qtyDisplay}</div>
+                            ${p.prepTime ? `<p class="text-[10px] text-gray-400 font-medium mt-1"><i class="fa-regular fa-clock"></i> ${p.prepTime} mins</p>` : ''}
+                        </div>
+                        
+                        <div class="w-[100px] h-[100px] sm:w-[120px] sm:h-[120px] shrink-0 flex flex-col items-center relative rounded-2xl bg-gray-50 border border-gray-100 mt-1 overflow-visible">
+                            <div class="w-full h-full overflow-hidden rounded-2xl relative">
+                                <img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x400/f3f4f6/a1a1aa?text=Item'">
+                                ${imageOverlayHtml}
+                            </div>
+                            <div class="absolute -bottom-3 w-[90%] z-30 mx-auto left-0 right-0 shadow-[0_4px_10px_rgba(0,0,0,0.15)] rounded-lg">
+                                ${actionHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        };
+
+        window.renderMostOrdered = () => {
+            const section = document.getElementById('most-ordered-section');
+            const listEl = document.getElementById('most-ordered-list');
+            if (!section || !listEl) return;
+
+            if (window.currentUserMainCategory === 'Rider' || window.currentRestaurantFilter || window.currentSearchQuery) {
+                section.classList.add('hidden');
+                return;
+            }
+
+            if (!window.globalOrders || !window.allProducts) return;
+
+            const itemCounts = {};
+            window.globalOrders.forEach(o => {
+                if (['Delivered', 'Completed'].includes(o.status) && o.items) {
+                    o.items.forEach(item => {
+                        const key = item.name + '|' + (item.partnerId || '');
+                        itemCounts[key] = (itemCounts[key] || 0) + (item.quantity || 1);
+                    });
+                }
+            });
+
+            let topProducts = [];
+            window.allProducts.forEach(p => {
+                const pShopCat = p.shopCategory || 'Food Owner';
+                if (pShopCat !== window.currentUserMainCategory) return;
+
+                const key = p.name + '|' + (p.partnerId || '');
+                if (itemCounts[key] > 0) {
+                    topProducts.push({ ...p, orderCount: itemCounts[key] });
+                }
+            });
+
+            topProducts.sort((a, b) => b.orderCount - a.orderCount);
+            topProducts = topProducts.slice(0, 10);
+
+            if (topProducts.length === 0) {
+                section.classList.add('hidden');
+                return;
+            }
+
+            section.classList.remove('hidden');
+            listEl.innerHTML = topProducts.map(p => window.generateProductCardHtml(p, true, 'mo')).join('');
+        };
+
         const renderProducts = (items) => {
             const listEl = document.getElementById('market-list');
             const chipsEl = document.getElementById('food-category-chips');
@@ -2193,107 +2358,7 @@
             const isHorizontal = !currentRestaurantFilter && !window.currentSearchQuery;
             listEl.className = isHorizontal ? "flex gap-3 overflow-x-auto hide-scroll pb-4 snap-x" : "flex flex-col gap-4 pb-6";
 
-            listEl.innerHTML = filtered.map(p => {
-                const hasVariants = p.variants && p.variants.length > 0;
-                let basePrice = hasVariants ? p.variants[0].price : p.price;
-                let originalPrice = basePrice;
-                let displayPrice = basePrice;
-
-                const itemPromo = window.activePromos?.find(promo => promo.isActive && promo.itemId === p.id);
-                let imageOverlayHtml = '';
-                
-                if (itemPromo) {
-                    if (itemPromo.discountType === 'percentage') displayPrice = Math.floor(basePrice * (1 - itemPromo.discount / 100));
-                    else if (itemPromo.discountType === 'flat') displayPrice = Math.max(0, basePrice - itemPromo.discount);
-                    let discountStr = itemPromo.discountType === 'percentage' ? `${itemPromo.discount}% OFF` : `₹${itemPromo.discount} OFF`;
-                    imageOverlayHtml = `<div class="absolute top-0 left-0 bg-blue-600 text-white text-[11px] font-black px-2 py-1 rounded-br-lg z-30 shadow-md border-b border-r border-blue-700 tracking-wide">${discountStr}</div>`;
-                } else if (p.tag && p.tag !== 'None') {
-                    imageOverlayHtml = `<div class="absolute top-0 left-0 bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded-br-lg z-30 shadow-md"><i class="fa-solid fa-fire mr-0.5"></i> ${p.tag}</div>`;
-                }
-
-                const isClosed = p.shopStatus === 'Closed' || p.shopStatus === 'Offline';
-                const isOutOfStock = p.inStock === false;
-                
-                let qtyDisplay = `<p class="text-[9px] sm:text-[10px] text-gray-500 uppercase tracking-wide font-medium mb-1 truncate">${p.qty || ''}</p>`;
-                
-                if (hasVariants) {
-                    const options = p.variants.map((v, i) => {
-                        let vPrice = v.price;
-                        if(itemPromo) {
-                            if (itemPromo.discountType === 'percentage') vPrice = Math.floor(v.price * (1 - itemPromo.discount / 100));
-                            else if (itemPromo.discountType === 'flat') vPrice = Math.max(0, v.price - itemPromo.discount);
-                        }
-                        return `<option value="${i}" data-price="${vPrice}" data-orig="${v.price}">${v.qty}</option>`;
-                    }).join('');
-                    qtyDisplay = `
-                        <div class="mb-1 w-full relative z-30">
-                            <select onchange="window.updatePriceDisplay(this, 'price-${p.id}', 'orig-${p.id}')" id="sel-${p.id}" class="text-[9px] sm:text-[10px] bg-gray-50 border border-gray-200 rounded p-1 outline-none w-full font-medium text-gray-700 focus:border-red-400">
-                                ${options}
-                            </select>
-                        </div>
-                    `;
-                }
-
-                const clickFn = hasVariants 
-                    ? `window.addToCartVariant('${p.id}', '${p.name.replace(/'/g, "\\'")}', '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')` 
-                    : `window.addToCartStandard('${p.id}', '${p.name.replace(/'/g, "\\'")}', ${displayPrice}, '${p.partnerId || ''}', '${(p.shopName || 'Gramzo').replace(/'/g, "\\'")}')`;
-
-                let actionHtml = '';
-                if (isClosed) {
-                    actionHtml = `<div class="bg-gray-100 border border-gray-200 text-gray-500 w-full text-center py-2 rounded-lg text-[10px] font-black uppercase shadow-sm">Closed</div>`;
-                } else if (isOutOfStock) {
-                    actionHtml = `<div class="bg-orange-50 border border-orange-200 text-orange-500 w-full text-center py-2 rounded-lg text-[10px] font-black uppercase shadow-sm">No Stock</div>`;
-                } else {
-                    actionHtml = `<button type="button" onclick="${clickFn}" class="relative w-full bg-red-50 text-red-600 border border-red-200 shadow-sm rounded-lg py-2 font-black text-sm uppercase hover:bg-red-600 hover:text-white transition tracking-wider z-20">ADD</button>`;
-                }
-
-                const priceHtml = itemPromo
-                    ? `<span class="text-[10px] sm:text-xs text-gray-400 line-through mr-1" id="orig-${p.id}">₹${originalPrice}</span><span id="price-${p.id}" class="text-[12px] sm:text-[14px] font-black text-gray-900">₹${displayPrice}</span>`
-                    : `<span id="price-${p.id}" class="text-[12px] sm:text-[14px] font-black text-gray-900">₹${displayPrice}</span>`;
-
-                if (isHorizontal) {
-                    return `
-                        <div class="bg-white rounded-xl p-2 shadow-sm border border-gray-100 w-[120px] shrink-0 snap-center relative flex flex-col transform transition hover:-translate-y-1 hover:shadow-md ${isClosed || isOutOfStock ? 'opacity-60 grayscale-[0.5]' : ''}">
-                            <div class="w-full h-[90px] rounded-lg overflow-hidden bg-gray-50 mb-1.5 border border-gray-100 relative">
-                                <img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/200x200/f3f4f6/a1a1aa?text=Item'">
-                                ${imageOverlayHtml}
-                            </div>
-                            <h4 class="font-bold text-gray-900 text-[11px] leading-tight mb-0.5 truncate w-full" title="${p.name}">${p.name}</h4>
-                            <p class="text-[9px] font-bold text-gray-500 truncate w-full mb-1"><i class="fa-solid fa-store text-gray-300"></i> ${p.shopName || 'Gramzo Partner'}</p>
-                            <div class="flex items-center gap-1 mb-1 truncate w-full">${priceHtml}</div>
-                            ${qtyDisplay}
-                            <div class="mt-auto pt-1 relative z-20">${actionHtml}</div>
-                        </div>
-                    `;
-                } else {
-                    const isVeg = p.category && p.category.toLowerCase().includes('non-veg') ? false : true;
-                    const vegIconColor = isVeg ? 'text-emerald-600 border-emerald-600' : 'text-red-600 border-red-600';
-                    const vegIcon = `<div class="w-3 h-3 border ${vegIconColor} flex items-center justify-center rounded-sm shrink-0 mb-1"><div class="w-1.5 h-1.5 ${vegIconColor.replace('border-', 'bg-').replace('text-', 'bg-')} rounded-full"></div></div>`;
-
-                    return `
-                        <div class="bg-white rounded-[1rem] p-3 sm:p-4 shadow-sm border border-gray-100 flex justify-between gap-3 relative transform transition hover:shadow-md ${isClosed || isOutOfStock ? 'opacity-60 grayscale-[0.5]' : ''}">
-                            <div class="flex-1 flex flex-col min-w-0 justify-center py-1">
-                                ${vegIcon}
-                                <h4 class="font-black text-gray-900 text-[15px] leading-tight mb-1 break-words pr-2">${p.name}</h4>
-                                <p class="text-[10px] font-bold text-gray-500 mb-1.5"><i class="fa-solid fa-store text-gray-300"></i> ${p.shopName || 'Gramzo Partner'}</p>
-                                <div class="flex items-center gap-2 mb-1.5">${priceHtml}</div>
-                                <div class="mt-1 w-2/3">${qtyDisplay}</div>
-                                ${p.prepTime ? `<p class="text-[10px] text-gray-400 font-medium mt-1"><i class="fa-regular fa-clock"></i> ${p.prepTime} mins</p>` : ''}
-                            </div>
-                            
-                            <div class="w-[100px] h-[100px] sm:w-[120px] sm:h-[120px] shrink-0 flex flex-col items-center relative rounded-2xl bg-gray-50 border border-gray-100 mt-1 overflow-visible">
-                                <div class="w-full h-full overflow-hidden rounded-2xl relative">
-                                    <img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x400/f3f4f6/a1a1aa?text=Item'">
-                                    ${imageOverlayHtml}
-                                </div>
-                                <div class="absolute -bottom-3 w-[90%] z-30 mx-auto left-0 right-0 shadow-[0_4px_10px_rgba(0,0,0,0.15)] rounded-lg">
-                                    ${actionHtml}
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }
-            }).join('');
+            listEl.innerHTML = filtered.map(p => window.generateProductCardHtml(p, isHorizontal, 'fav')).join('');
         };
 
         window.renderRestaurants = (restaurants) => {
@@ -2318,13 +2383,12 @@
             }).join('');
         };
 
-        const extractRestaurants = async () => {
+        window.extractRestaurants = async () => {
             try {
                 const snap = await window.dbCall(getDocs(getCol('users')), 5000);
                 const approvedPartners = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(u => u.role === 'Partner' && u.approvalStatus === 'Approved' && (u.category === window.currentUserMainCategory));
                 
-                const prodSnap = await window.dbCall(getDocs(getCol('products')), 5000);
-                const products = prodSnap.docs.map(d => d.data());
+                const products = window.allProducts;
 
                 const uniqueRestaurants = approvedPartners.map(p => {
                     const shopProducts = products.filter(prod => prod.partnerId === p.id);
@@ -2340,6 +2404,13 @@
         };
 
         window.loadMarketplaceData = () => {
+            if (window.isMarketplaceLoaded) {
+                if (window.allProducts) window.renderProducts(window.allProducts);
+                if (window.renderMostOrdered) window.renderMostOrdered();
+                return;
+            }
+            window.isMarketplaceLoaded = true;
+
             const defaultMarqueeText = "🚀 খাবার অর্ডার করুন ঘরে বসেই - সার্ভিস অ্যাভেইলেবল অ্যাট কোটালডিহ, কিনাইডিহ, লালগড়, কৃষ্ণপুর, রামচন্দ্রপুর, মুরাডি, গাংপুর, যশপুর এবং বড়ন্তি এলাকা 🚀";
 
             onSnapshot(getDocRef('settings', 'app_config'), (snap) => {
@@ -2359,6 +2430,7 @@
 
             onSnapshot(getCol('promos'), (snap) => {
                 window.activePromos = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(p => p.isActive);
+                if (window.allProducts) window.renderProducts(window.allProducts);
             });
             
             onSnapshot(getCol('scheduled_trips'), (snap) => {
@@ -2366,11 +2438,17 @@
                 window.renderAvailableTrips();
             });
 
+            onSnapshot(getCol('orders'), (snap) => {
+                window.globalOrders = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                if (window.renderMostOrdered) window.renderMostOrdered();
+            });
+
             onSnapshot(getCol('products'), (snap) => {
                 let items = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
                 window.allProducts = items; 
-                extractRestaurants(); 
+                window.extractRestaurants(); 
                 renderProducts(items);
+                if (window.renderMostOrdered) window.renderMostOrdered();
             }, (err) => {
                 if (err.code === 'permission-denied') window.showToast("Firebase Permissions Denied! Check rules.", "error");
             });
@@ -2405,12 +2483,17 @@
                 }
                 if (marketplaceRow) marketplaceRow.classList.add('hidden');
             }
-            window.loadMarketplaceData();
+            if (window.allProducts) {
+                window.renderProducts(window.allProducts);
+                if (window.renderMostOrdered) window.renderMostOrdered();
+            }
         };
 
         window.filterFoodCategory = (categoryName) => {
             currentFoodCategoryFilter = categoryName;
-            window.loadMarketplaceData();
+            if (window.allProducts) {
+                window.renderProducts(window.allProducts);
+            }
         };
 
         window.updatePriceDisplay = (selectEl, priceId, origId) => {
@@ -2496,8 +2579,8 @@
             window.addToCartActual(name, price, partnerId, shopName);
         };
 
-        window.addToCartVariant = (id, name, partnerId, shopName) => {
-            const selectEl = document.getElementById(`sel-${id}`);
+        window.addToCartVariant = (id, name, partnerId, shopName, prefixId = '') => {
+            const selectEl = document.getElementById(`${prefixId}sel-${id}`);
             if(!selectEl) { window.showToast("Variant selection error. Try reloading.", "error"); return; }
             const selectedOpt = selectEl.options[selectEl.selectedIndex];
             const price = parseFloat(selectedOpt.dataset.price);
