@@ -18,7 +18,7 @@
                     return; 
                 }
 
-                const APP_VERSION = "11.28.6"; // Features Update
+                const APP_VERSION = "11.28.7"; // Features Update: Profiles, Trending & Ride Schedules
                 
                 const clearAllCachesAndReload = () => {
                     console.log("Wiping Service Workers and Caches for update...");
@@ -270,8 +270,14 @@
                         <div id="restaurant-list-carousel" class="flex flex-wrap gap-3 mb-6"></div>
                     </div>
 
+                    <!-- TRENDING SECTION -->
+                    <div id="trending-section" class="hidden mb-6">
+                        <h3 class="font-black text-xl text-gray-900 mb-4 tracking-tight uppercase">🔥 Trending Now</h3>
+                        <div id="trending-list" class="flex gap-3 overflow-x-auto hide-scroll pb-4 snap-x"></div>
+                    </div>
+
                     <div>
-                        <h3 id="market-list-title" class="font-black text-xl text-gray-900 mb-4 tracking-tight uppercase">FAV ITEMS</h3>
+                        <h3 id="market-list-title" class="font-black text-xl text-gray-900 mb-4 tracking-tight uppercase mt-2">FAV ITEMS</h3>
                         <div id="market-list" class="flex gap-3 overflow-x-auto hide-scroll pb-6 snap-x">
                             <div class="w-full py-10 text-center text-gray-400 font-medium text-sm animate-pulse border border-gray-200 rounded-3xl shadow-sm bg-white">Loading catalogue...</div>
                         </div>
@@ -397,7 +403,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.28.6 - Coins & Schedule Engine</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.28.7 - User Profiles & Trending Data</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right flex flex-col sm:flex-row gap-3">
                             <button type="button" id="btn-partner-login-trigger" onclick="window.openAuthModal('Partner')" class="bg-gray-900 text-white hover:bg-gray-800 border px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2">
@@ -516,6 +522,42 @@
             <div id="view-Orders" class="view-section space-y-6">
                 <h2 class="text-2xl font-black text-gray-900">My Orders & Rides</h2>
                 <div id="user-orders-list" class="space-y-4"></div>
+            </div>
+
+            <div id="view-User-Profile" class="view-section space-y-6">
+                <h2 class="text-2xl font-black text-gray-900">My Profile</h2>
+                
+                <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex items-center gap-4">
+                    <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-3xl font-black">
+                        <span id="profile-page-initial">U</span>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-black text-gray-900" id="profile-page-name">User Name</h3>
+                        <p class="text-sm font-bold text-gray-500 mt-1" id="profile-page-phone">+91 0000000000</p>
+                        <span class="text-[10px] font-black uppercase bg-gray-100 text-gray-600 px-2 py-1 rounded mt-2 inline-block">Registered User</span>
+                    </div>
+                </div>
+
+                <div class="bg-yellow-50 rounded-3xl p-6 shadow-sm border border-yellow-200 flex justify-between items-center">
+                    <div>
+                        <p class="text-[10px] font-black uppercase tracking-widest text-yellow-600 mb-1">Gramzo Coins</p>
+                        <p class="text-3xl font-black text-yellow-500" id="profile-page-coins">0</p>
+                    </div>
+                    <i class="fa-solid fa-coins text-5xl text-yellow-200 opacity-60"></i>
+                </div>
+
+                <div class="space-y-3">
+                    <button onclick="window.registerDeviceForNotifications(currentUser?.phone)" class="w-full bg-white border border-gray-200 p-4 rounded-2xl flex items-center gap-4 shadow-sm active:scale-95 transition">
+                        <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center shrink-0"><i class="fa-solid fa-bell"></i></div>
+                        <div class="text-left flex-1"><p class="font-bold text-gray-900 text-sm">Enable Notifications</p><p class="text-[10px] text-gray-500">Get order updates instantly</p></div>
+                        <i class="fa-solid fa-chevron-right text-gray-300"></i>
+                    </button>
+                    <button onclick="window.logout()" class="w-full bg-white border border-gray-200 p-4 rounded-2xl flex items-center gap-4 shadow-sm active:scale-95 transition">
+                        <div class="w-10 h-10 bg-red-50 text-red-600 rounded-full flex items-center justify-center shrink-0"><i class="fa-solid fa-power-off"></i></div>
+                        <div class="text-left flex-1"><p class="font-bold text-gray-900 text-sm">Sign Out</p><p class="text-[10px] text-gray-500">Logout from this device</p></div>
+                        <i class="fa-solid fa-chevron-right text-gray-300"></i>
+                    </button>
+                </div>
             </div>
 
             <div id="view-Partner" class="view-section space-y-6">
@@ -1993,6 +2035,13 @@
             document.getElementById('menu-name').innerText = currentUser.name;
             document.getElementById('menu-phone').innerText = currentUser.phone;
 
+            if(document.getElementById('profile-page-initial')) {
+                document.getElementById('profile-page-initial').innerText = currentUser.name.charAt(0).toUpperCase();
+                document.getElementById('profile-page-name').innerText = currentUser.name;
+                document.getElementById('profile-page-phone').innerText = currentUser.phone;
+                document.getElementById('profile-page-coins').innerText = currentUser.walletPoints || 0;
+            }
+
             window.setupBottomNav(currentUser.role);
             window.switchMainView(currentUser.role === 'Admin' ? 'Admin' : currentUser.role === 'Partner' ? 'Partner' : 'User');
 
@@ -2119,6 +2168,79 @@
                         }
                     }
                 } catch (err) { console.error("FCM Registration failed:", err); }
+            }
+        };
+
+        window.renderTrendingProducts = async (items) => {
+            const trendingSection = document.getElementById('trending-section');
+            const trendingList = document.getElementById('trending-list');
+            if (!trendingSection || !trendingList) return;
+
+            if (window.currentSearchQuery || currentRestaurantFilter) {
+                trendingSection.classList.add('hidden');
+                return;
+            }
+
+            try {
+                const snap = await window.dbCall(getDocs(collection(db, 'orders')), 5000);
+                const itemCounts = {};
+                
+                snap.docs.forEach(doc => {
+                    const data = doc.data();
+                    if (data.items && data.status !== 'Rejected') {
+                        data.items.forEach(i => {
+                            itemCounts[i.name] = (itemCounts[i.name] || 0) + (i.quantity || 1);
+                        });
+                    }
+                });
+
+                let trendingItems = items.map(item => ({
+                    ...item,
+                    orderCount: itemCounts[item.name] || 0
+                })).filter(i => i.orderCount > 0 && (i.shopCategory || 'Food Owner') === window.currentUserMainCategory);
+
+                trendingItems.sort((a, b) => b.orderCount - a.orderCount);
+                trendingItems = trendingItems.slice(0, 8); 
+
+                if (trendingItems.length > 0) {
+                    trendingSection.classList.remove('hidden');
+                    trendingList.innerHTML = trendingItems.map(p => {
+                        const hasVariants = p.variants && p.variants.length > 0;
+                        let basePrice = hasVariants ? p.variants[0].price : p.price;
+                        const isClosed = p.shopStatus === 'Closed' || p.shopStatus === 'Offline';
+                        const isOutOfStock = p.inStock === false;
+                        
+                        let qtyDisplay = `<p class="text-[9px] text-gray-500 uppercase tracking-wide font-medium mb-1 truncate">${p.qty || ''}</p>`;
+                        if (hasVariants) {
+                            qtyDisplay = `<div class="mb-1 w-full relative z-30"><select onchange="window.updatePriceDisplay(this, 't-price-${p.id}')" id="t-sel-${p.id}" class="text-[9px] bg-gray-50 border border-gray-200 rounded p-1 outline-none w-full">${p.variants.map((v, i) => `<option value="${i}" data-price="${v.price}">${v.qty}</option>`).join('')}</select></div>`;
+                        }
+
+                        const clickFn = hasVariants 
+                            ? `window.addToCartVariant('${p.id}', '${p.name.replace(/'/g, "\\'")}', '${p.partnerId || ''}', '${(p.shopName || '').replace(/'/g, "\\'")}')` 
+                            : `window.addToCartStandard('${p.id}', '${p.name.replace(/'/g, "\\'")}', ${basePrice}, '${p.partnerId || ''}', '${(p.shopName || '').replace(/'/g, "\\'")}')`;
+
+                        let actionHtml = isClosed ? `<div class="bg-gray-100 text-gray-500 w-full text-center py-2 rounded-lg text-[10px] font-black uppercase shadow-sm">Closed</div>` 
+                            : isOutOfStock ? `<div class="bg-orange-50 text-orange-500 w-full text-center py-2 rounded-lg text-[10px] font-black uppercase shadow-sm">No Stock</div>`
+                            : `<button type="button" onclick="${clickFn}" class="w-full bg-red-50 text-red-600 border border-red-200 shadow-sm rounded-lg py-2 font-black text-sm uppercase hover:bg-red-600 hover:text-white transition z-20 relative">ADD</button>`;
+
+                        return `
+                            <div class="bg-white rounded-xl p-2 shadow-sm border border-gray-100 w-[120px] shrink-0 snap-center relative flex flex-col ${isClosed || isOutOfStock ? 'opacity-60 grayscale-[0.5]' : ''}">
+                                <div class="w-full h-[90px] rounded-lg overflow-hidden bg-gray-50 mb-1.5 relative">
+                                    <img src="${p.image}" class="w-full h-full object-cover">
+                                    <div class="absolute top-0 left-0 bg-yellow-400 text-gray-900 text-[9px] font-black px-1.5 py-0.5 rounded-br-lg shadow-md"><i class="fa-solid fa-arrow-trend-up"></i> Trending</div>
+                                </div>
+                                <h4 class="font-bold text-gray-900 text-[11px] leading-tight mb-0.5 truncate w-full" title="${p.name}">${p.name}</h4>
+                                <p class="text-[9px] font-bold text-gray-500 truncate w-full mb-1"><i class="fa-solid fa-store text-gray-300"></i> ${p.shopName || 'Partner'}</p>
+                                <div class="flex items-center gap-1 mb-1 truncate w-full"><span id="t-price-${p.id}" class="text-[12px] font-black text-gray-900">₹${basePrice}</span></div>
+                                ${qtyDisplay}
+                                <div class="mt-auto pt-1 relative z-20">${actionHtml}</div>
+                            </div>`;
+                    }).join('');
+                } else {
+                    trendingSection.classList.add('hidden');
+                }
+            } catch(e) {
+                console.warn("Failed to calculate trends", e);
             }
         };
 
@@ -2371,6 +2493,7 @@
                 window.allProducts = items; 
                 extractRestaurants(); 
                 renderProducts(items);
+                if (window.renderTrendingProducts) window.renderTrendingProducts(items);
             }, (err) => {
                 if (err.code === 'permission-denied') window.showToast("Firebase Permissions Denied! Check rules.", "error");
             });
@@ -2443,6 +2566,7 @@
                 container.innerHTML += createNavItem('User', 'fa-solid fa-house', 'Home', 'User');
                 container.innerHTML += createNavItem('Cart', 'fa-solid fa-basket-shopping', 'Cart', 'Cart');
                 container.innerHTML += createNavItem('Orders', 'fa-solid fa-receipt', 'History', 'Orders'); 
+                container.innerHTML += createNavItem('User-Profile', 'fa-solid fa-user', 'Profile', 'User-Profile');
             } else if (role === 'Partner') {
                 container.innerHTML += createNavItem('Partner', 'fa-solid fa-utensils', 'Tasks', 'Partner');
                 container.innerHTML += createNavItem('Partner-Profile', 'fa-solid fa-store', 'Settings', 'Partner-Profile');
@@ -3220,7 +3344,6 @@
                 const displayType = o.type === 'Ride' ? '🚕 Ride' : '🍔 Order';
                 const addressDisplay = o.type === 'Ride' ? `<span class="text-blue-500 font-medium">From:</span> ${o.pickup || 'N/A'}<br/><span class="text-emerald-500 font-medium">To:</span> ${o.address || 'N/A'}` : o.address || 'N/A';
                 
-                // Matches the display list items similar to partner view
                 const itemsStr = o.items ? o.items.map(i => `${i.name} ${i.quantity && i.quantity > 1 ? '(x'+i.quantity+')' : ''}`.trim()).join('<br/>') : '';
                 const itemsHtml = itemsStr ? `<div class="bg-gray-50 p-2 rounded-xl mt-2 border border-gray-100 text-[10px] text-gray-700 font-bold leading-relaxed"><i class="fa-solid fa-clipboard-list text-gray-400 mr-1"></i> ${itemsStr}</div>` : '';
 
