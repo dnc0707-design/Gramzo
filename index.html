@@ -933,7 +933,7 @@
     </div>
 
     <!-- Modals -->
-    <div id="create-trip-modal" class="modal-overlay z-[200]">
+     <div id="create-trip-modal" class="modal-overlay z-[200]">
         <div class="modal-content !max-w-sm">
             <h3 class="font-black text-xl text-gray-900 mb-4">Create Scheduled Trip</h3>
             <input type="text" id="trip-from" class="input-field mb-3 !py-2.5" placeholder="From Location (e.g. Purulia)">
@@ -952,7 +952,7 @@
     </div>
 
     <div id="admin-edit-user-modal" class="modal-overlay z-[200]"><div class="modal-content !max-w-xs"><h3 class="font-black text-xl text-gray-900 mb-4 border-b pb-2">Edit Profile</h3><input type="hidden" id="edit-u-phone"><label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Name</label><input id="edit-u-name" type="text" class="input-field mb-3 !py-2.5" placeholder="User Name"><label class="text-[10px] font-bold text-gray-500 uppercase ml-1">Shop / Vehicle Name</label><input id="edit-u-shop" type="text" class="input-field mb-4 !py-2.5" placeholder="Shop Name (If Partner)"><div class="flex gap-2"><button onclick="document.getElementById('admin-edit-user-modal').classList.remove('active')" class="flex-1 bg-gray-100 text-gray-600 py-3 rounded-xl font-bold text-sm hover:bg-gray-200">Cancel</button><button onclick="window.submitAdminUserEdit()" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-blue-700">Save</button></div></div></div>
-    <div id="custom-prompt-modal" class="modal-overlay z-[600]"><div class="modal-content !max-w-xs"><h3 class="font-black text-xl text-gray-900 mb-2" id="prompt-title">Prompt</h3><p class="text-xs text-gray-500 mb-4" id="prompt-desc">Enter value:</p><input type="text" id="prompt-input" class="input-field mb-4" placeholder="..."><div class="flex gap-2"><button onclick="window.cancelCustomPrompt()" class="flex-1 bg-gray-100 text-gray-600 py-3 rounded-xl font-bold text-sm hover:bg-gray-200">Cancel</button><button onclick="window.submitCustomPrompt()" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-blue-700">Submit</button></div></div></div>
+ <div id="custom-prompt-modal" class="modal-overlay z-[600]"><div class="modal-content !max-w-xs"><h3 class="font-black text-xl text-gray-900 mb-2" id="prompt-title">Prompt</h3><p class="text-xs text-gray-500 mb-4" id="prompt-desc">Enter value:</p><input type="text" id="prompt-input" class="input-field mb-4" placeholder="..."><div class="flex gap-2"><button onclick="window.cancelCustomPrompt()" class="flex-1 bg-gray-100 text-gray-600 py-3 rounded-xl font-bold text-sm hover:bg-gray-200">Cancel</button><button onclick="window.submitCustomPrompt()" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-blue-700">Submit</button></div></div></div>
     <div id="custom-confirm-modal" class="modal-overlay z-[600]"><div class="modal-content !max-w-xs"><div class="w-12 h-12 bg-yellow-50 rounded-full flex items-center justify-center mb-3"><i class="fa-solid fa-triangle-exclamation text-xl text-yellow-500"></i></div><h3 class="font-black text-xl text-gray-900 mb-2" id="confirm-title">Confirm Action</h3><p class="text-sm text-gray-600 mb-6 font-medium" id="confirm-desc">Are you sure you want to do this?</p><div class="flex gap-2"><button onclick="window.cancelCustomConfirm()" class="flex-1 bg-gray-100 text-gray-600 py-3 rounded-xl font-bold text-sm hover:bg-gray-200">Cancel</button><button id="btn-confirm-yes" onclick="window.submitCustomConfirm()" class="flex-[1.5] bg-red-600 text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-red-700">Yes</button></div></div></div>
     <div id="status-popup-modal" class="modal-overlay z-[500]"><div class="modal-content !max-w-xs text-center border-t-8 border-red-500"><div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce"><i class="fa-solid fa-bell text-3xl text-red-500"></i></div><h3 id="status-popup-title" class="font-black text-2xl text-gray-900 mb-2">Update</h3><p id="status-popup-desc" class="text-sm text-gray-600 mb-6 font-medium">Details</p><button onclick="document.getElementById('status-popup-modal').classList.remove('active'); window.stopAlertSound && window.stopAlertSound();" class="w-full bg-gray-900 text-white py-3.5 rounded-xl font-bold shadow-md hover:bg-gray-800 transition active:scale-95 text-sm uppercase tracking-widest">Acknowledge</button></div></div>
     <div id="admin-auth-overlay" class="modal-overlay z-[150]"><div class="modal-content !bg-gray-900 border border-gray-800"><div class="flex justify-between items-center mb-4"><h3 class="font-black text-2xl text-white"><i class="fa-solid fa-shield-halved text-emerald-400"></i> Portal</h3><button type="button" onclick="window.closeAdminModal()" class="w-8 h-8 bg-gray-800 text-white rounded-full"><i class="fa-solid fa-xmark"></i></button></div><div class="space-y-4"><input id="admin-id-input" type="text" class="input-field !bg-gray-800 !text-white" placeholder="Admin ID"><input id="admin-pass-input" type="password" class="input-field !bg-gray-800 !text-white" placeholder="Admin Password"><button type="button" onclick="window.handleAdminLogin()" class="w-full bg-emerald-500 text-white p-4 rounded-2xl font-bold">Access Database</button></div></div></div>
@@ -1628,30 +1628,117 @@
         window.submitCreateTrip = async () => {
             if(!currentUser) return;
             const from = document.getElementById('trip-from').value.trim();
-            const to = document.getElementById('trip-to').value.trim();
-            const stops = document.getElementById('trip-stops').value.trim();
-            const timeStr = document.getElementById('trip-time').value;
-            const fare = parseInt(document.getElementById('trip-fare').value);
+    <main id="main-content" class="px-4 pb-24 max-w-md mx-auto sm:max-w-4xl sm:px-6 pt-6">
+        
+        <div id="view-User" class="view-section active space-y-6">
+            
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-location-dot text-red-500 text-xl mt-1"></i>
+                <div class="flex-1 border-b border-gray-200 pb-1 relative pr-6">
+                    <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-0.5">Delivering To</p>
+                    <input type="text" id="user-location-input" class="w-full text-sm font-black text-gray-900 bg-transparent outline-none truncate p-0 border-none focus:ring-0 placeholder-gray-300" placeholder="Type your delivery location...">
+                    <button type="button" onclick="document.getElementById('user-location-input').value=''; document.getElementById('user-location-input').focus();" class="absolute right-0 bottom-1 text-gray-400 hover:text-red-600" title="Edit/Clear Location">
+                        <i class="fa-solid fa-pen text-[10px]"></i>
+                    </button>
+                </div>
+                <button type="button" onclick="window.getCurrentLocation('user-location-input')" class="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-100 transition shrink-0 border border-red-100 shadow-sm">
+                    <i class="fa-solid fa-location-crosshairs"></i>
+                </button>
+            </div>
 
-            if(!from || !to || !timeStr || isNaN(fare)) return window.showToast("All required fields must be filled", "error");
+            <div class="flex gap-2 bg-gray-100 p-1.5 rounded-xl w-full mt-4 border border-gray-200 shadow-inner">
+                <button type="button" id="tab-cat-Food" onclick="window.switchMainCategory('Food Owner')" class="flex-1 bg-red-600 text-white font-black py-2.5 rounded-lg text-sm shadow-md transition-all">
+                    🍔 Food
+                </button>
+                <button type="button" id="tab-cat-Grocery" onclick="window.switchMainCategory('Grocery Shop')" class="flex-1 text-gray-500 font-bold py-2.5 rounded-lg text-sm hover:text-gray-900 transition-all">
+                    🛒 Grocery & more
+                </button>
+                <button type="button" id="tab-cat-Ride" onclick="window.switchMainCategory('Rider')" class="flex-1 text-gray-500 font-bold py-2.5 rounded-lg text-sm hover:text-gray-900 transition-all">
+                    🚕 Ride
+                </button>
+            </div>
 
-            const btn = document.querySelector('#create-trip-modal button:last-child');
-            const orig = btn.innerText; btn.innerText = "Publishing..."; btn.disabled = true;
+            <div id="food-grocery-section">
+                <div id="most-ordered-container">
+                    <h3 class="font-black text-lg text-gray-900 mb-3 tracking-tight uppercase mt-6">Most Ordered Items</h3>
+                    <div id="most-ordered-list" class="flex gap-3 overflow-x-auto hide-scroll pb-4 snap-x">
+                        <div class="text-center py-4 text-sm text-gray-400">Loading popular items...</div>
+                    </div>
+                </div>
 
-            try {
-                await window.dbCall(addDoc(getCol('scheduled_trips'), {
-                    from, to, stops, time: timeStr, fare,
-                    riderId: currentUser.phone, riderName: currentUser.name, vehicle: `${currentUser.carModel} (${currentUser.carNum})`,
-                    created: serverTimestamp()
-                }), 10000);
-                window.showToast("Scheduled trip published successfully!", "success");
-                document.getElementById('create-trip-modal').classList.remove('active');
-                document.getElementById('trip-from').value = ''; document.getElementById('trip-to').value = ''; 
-                document.getElementById('trip-stops').value = ''; document.getElementById('trip-time').value = ''; 
-                document.getElementById('trip-fare').value = '';
-            } catch(e) { window.showToast("Failed to publish trip", "error"); } finally { btn.innerText = orig; btn.disabled = false; }
+                <div class="relative w-full search-shadow rounded-2xl bg-white border border-gray-100 flex items-center px-4 py-3.5 focus-within:ring-2 focus-within:ring-red-500/20 transition-all mt-4">
+                    <i class="fa-solid fa-magnifying-glass text-red-500 text-lg"></i>
+                    <div class="w-px h-5 bg-gray-200 mx-3"></div>
+                    <input type="text" id="global-search" onkeyup="window.handleSearchInput()" placeholder="Search items or shops..." class="w-full bg-transparent outline-none text-sm font-medium text-gray-800 placeholder-gray-400">
+                </div>
+        window.loadMarketplaceData = () => {
+            const defaultMarqueeText = "🚀 খাবার অর্ডার করুন ঘরে বসেই - সার্ভিস অ্যাভেইলেবল অ্যাট কোটালডিহ, কিনাইডিহ, লালগড়, কৃষ্ণপুর, রামচন্দ্রপুর, মুরাডি, গাংপুর, যশপুর এবং বড়ন্তি এলাকা 🚀";
+
+            onSnapshot(getDocRef('settings', 'app_config'), (snap) => {
+                const marqueeContainer = document.getElementById('marquee-container');
+                const marqueeEl = document.getElementById('dynamic-marquee');
+                if (snap.exists()) {
+                    const data = snap.data();
+                    if (data.marqueeText && data.marqueeText.trim() !== '') {
+                        if(marqueeContainer) marqueeContainer.classList.remove('hidden');
+                        if(marqueeEl) marqueeEl.innerHTML = `${data.marqueeText} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${data.marqueeText}`;
+                    } else {
+                        if(marqueeContainer) marqueeContainer.classList.remove('hidden');
+                        if(marqueeEl) marqueeEl.innerHTML = `${defaultMarqueeText} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${defaultMarqueeText}`;
+                    }
+                }
+            }, (err) => console.error(err));
+
+            onSnapshot(getCol('promos'), (snap) => {
+                window.activePromos = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(p => p.isActive);
+            });
+            
+            onSnapshot(getCol('scheduled_trips'), (snap) => {
+                window.availableTrips = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(t => new Date(t.time) > new Date());
+                window.renderAvailableTrips();
+            });
+
+            onSnapshot(getCol('orders'), (snap) => {
+                let items = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
+                
+                // Track Most Ordered
+                const successfulOrders = items.filter(o => ['Delivered', 'Completed'].includes(o.status));
+                const counts = {};
+                successfulOrders.forEach(o => {
+                    o.items?.forEach(i => {
+                        counts[i.name] = (counts[i.name] || 0) + 1;
+                    });
+                });
+                const sorted = Object.entries(counts).sort((a,b) => b[1] - a[1]).slice(0, 10);
+                const mostOrderedList = document.getElementById('most-ordered-list');
+                if(mostOrderedList) {
+                    if(sorted.length === 0) mostOrderedList.innerHTML = `<p class="text-xs text-gray-400">Not enough orders yet.</p>`;
+                    else {
+                        mostOrderedList.innerHTML = sorted.map(([name, count]) => {
+                            const p = window.allProducts.find(x => x.name === name);
+                            return `
+                                <div class="bg-white rounded-xl p-2 shadow-sm border border-gray-100 w-[100px] shrink-0 text-center">
+                                    <div class="w-16 h-16 mx-auto rounded-full overflow-hidden bg-gray-50 border mb-1">
+                                        <img src="${p?.image || 'https://placehold.co/100x100'}" class="w-full h-full object-cover">
+                                    </div>
+                                    <p class="text-[10px] font-black text-gray-800 truncate">${name}</p>
+                                    <p class="text-[9px] text-gray-400 font-bold">${count} Orders</p>
+                                </div>
+                            `;
+                        }).join('');
+                    }
+                }
+            });
+
+            onSnapshot(getCol('products'), (snap) => {
+                let items = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
+                window.allProducts = items; 
+                extractRestaurants(); 
+                renderProducts(items);
+            }, (err) => {
+                if (err.code === 'permission-denied') window.showToast("Firebase Permissions Denied! Check rules.", "error");
+            });
         };
-
         window.renderAvailableTrips = () => {
             const list = document.getElementById('available-trips-list');
             if(!list) return;
@@ -1667,7 +1754,7 @@
                     <div class="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
                     <div class="flex justify-between items-start mb-2">
                         <div>
-                            <p class="text-[10px] font-black text-blue-600 uppercase tracking-wide bg-blue-50 px-2 py-0.5 rounded inline-block mb-1"><i class="fa-solid fa-van-shuttle mr-1"></i> Scheduled Trip</p>
+                            <p class="text-[10px] font-black text-blue-600 uppercase tracking-wide bg-blue-50 px-2 py-0.5 rounded inline-block mb-1"><i class="fa-solid fa-car mr-1"></i> Available Ride (Whole Car)</p>
                             <h4 class="font-bold text-gray-900 text-sm mt-1">${t.from} <i class="fa-solid fa-arrow-right text-[10px] text-gray-400 mx-1"></i> ${t.to}</h4>
                         </div>
                         <span class="text-lg font-black text-emerald-600">₹${t.fare}</span>
@@ -1677,7 +1764,7 @@
                         ${t.stops ? `<p class="text-[10px] font-bold text-gray-700 mt-1.5 leading-tight"><i class="fa-solid fa-route text-blue-400 w-3"></i> En-route: ${t.stops}</p>` : ''}
                         <p class="text-[10px] font-bold text-gray-700 mt-1.5"><i class="fa-solid fa-id-card text-blue-400 w-3"></i> Driver: ${t.riderName} <span class="text-gray-400 font-medium">(${t.vehicle})</span></p>
                     </div>
-                    <button type="button" onclick="window.bookTripSeat('${t.id}', '${t.fare}', '${t.riderId}', '${t.riderName.replace(/'/g, "\\'")}')" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl text-xs font-bold shadow-md transition active:scale-95">Book Entire Ride</button>
+                    <button type="button" onclick="window.bookTripSeat('${t.id}', '${t.fare}', '${t.riderId}', '${t.riderName.replace(/'/g, "\\'")}')" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl text-xs font-bold shadow-md transition active:scale-95">Book Full Car</button>
                 </div>
                 `;
             }).join('');
@@ -3530,7 +3617,8 @@
                         const itemsList = o.items ? o.items.map(i => `${i.name} ${i.quantity && i.quantity > 1 ? '(x'+i.quantity+')' : ''}`.trim()).join(', ') : '';
                         const paymentBadge = o.paymentMode === 'Prepaid' ? `<span class="bg-blue-100 text-blue-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">Prepaid</span>` : `<span class="bg-gray-100 text-gray-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">COD</span>`;
 
-                        let trackingHtml = '';
+                        let scheduledTimeHtml = o.isScheduled && o.scheduledTime ? `<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[9px] font-black uppercase ml-2"><i class="fa-solid fa-calendar mr-1"></i> Trip Date: ${window.formatOrderTime(o.scheduledTime)}</span>` : '';
+
                         if (o.type === 'Ride') {
                             if (o.status === 'Requested') statusText = "Searching for Cab...";
                             if (o.status === 'Rider Accepted') statusText = "Driver Responded!";
