@@ -18,7 +18,7 @@
                     return; 
                 }
 
-                const APP_VERSION = "12.0.1"; // Update: Ride Bidding System Introduced
+                const APP_VERSION = "11.28.7"; // Features Update: Whole Car Booking & Most Ordered
                 
                 const clearAllCachesAndReload = () => {
                     console.log("Wiping Service Workers and Caches for update...");
@@ -45,8 +45,25 @@
                     clearAllCachesAndReload();
                     return; 
                 }
+
+                setTimeout(() => {
+                    fetch(window.location.href.split('?')[0] + '?nocache=' + new Date().getTime(), { 
+                        cache: "reload",
+                        headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+                    })
+                    .then(res => res.text())
+                    .then(html => {
+                        const match = html.match(/const APP_VERSION = ["']([^"']+)["']/);
+                        if (match && match[1] && match[1] !== APP_VERSION) {
+                            console.log("Update found on server: " + match[1] + ". Force updating...");
+                            localStorage.removeItem("gramzo_app_version"); 
+                            clearAllCachesAndReload();
+                        }
+                    }).catch(e => console.log("Offline mode active."));
+                }, 3000);
+
             } catch (error) {
-                console.warn("Storage restricted.", error);
+                console.warn("Storage or Network restricted by App Wrapper. Proceeding normally.", error);
             }
         })();
     </script>
@@ -57,7 +74,6 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
@@ -83,6 +99,7 @@
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .glass-nav { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(16px); border-bottom: 1px solid #f0f0f0; }
         
         .view-section { display: none; animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         .view-section.active { display: block; }
@@ -118,6 +135,9 @@
         .modal-overlay.active .modal-content { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 
         .search-shadow { box-shadow: 0 4px 12px rgba(226, 55, 68, 0.08); }
+        .pac-container { border-radius: 1.5rem; border: 1px solid #e5e7eb; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); font-family: 'Outfit', sans-serif; z-index: 9999; padding: 0.5rem; }
+        .pac-item { padding: 12px; font-size: 14px; font-weight: 500; color: #374151; border-bottom: 1px solid #f3f4f6; cursor: pointer; }
+        .pac-item:hover { background-color: #f0fdf4; color: #E23744; }
         select { -webkit-appearance: none; -moz-appearance: none; appearance: none; }
         
         .hide-scroll::-webkit-scrollbar { display: none; }
@@ -173,7 +193,7 @@
 
         <div id="marquee-container" class="w-full bg-gray-900 border-b border-gray-800 z-30 overflow-hidden h-10 flex items-center shadow-lg relative">
             <div id="dynamic-marquee" class="animate-marquee inline-block whitespace-nowrap text-sm sm:text-base font-black font-bengali text-yellow-300 tracking-wide drop-shadow-md">
-                🚀 খাবার অর্ডার করুন ঘরে বসেই 🚀
+                🚀 খাবার অর্ডার করুন ঘরে বসেই - সার্ভিস অ্যাভেইলেবল অ্যাট কোটালডিহ, কিনাইডিহ, লালগড়, কৃষ্ণপুর, রামচন্দ্রপুর, মুরাডি, গাংপুর, যশপুর এবং বড়ন্তি এলাকা 🚀
             </div>
         </div>
 
@@ -200,7 +220,7 @@
                         🍔 Food
                     </button>
                     <button type="button" id="tab-cat-Grocery" onclick="window.switchMainCategory('Grocery Shop')" class="flex-1 text-gray-500 font-bold py-2.5 rounded-lg text-sm hover:text-gray-900 transition-all">
-                        🛒 Grocery
+                        🛒 Grocery & more
                     </button>
                     <button type="button" id="tab-cat-Ride" onclick="window.switchMainCategory('Rider')" class="flex-1 text-gray-500 font-bold py-2.5 rounded-lg text-sm hover:text-gray-900 transition-all">
                         🚕 Ride
@@ -222,12 +242,13 @@
                             <div>
                                 <h3 id="banner-restaurant-name" class="font-black text-lg text-gray-900 leading-tight mb-1">Restaurant Name</h3>
                                 <p id="banner-restaurant-address" class="text-[10px] text-gray-500 font-medium mb-1"><i class="fa-solid fa-location-dot mr-1"></i> Address goes here</p>
+                                <p class="text-[9px] text-emerald-600 font-bold uppercase tracking-widest"><i class="fa-solid fa-circle-check mr-1"></i> Currently Open</p>
                             </div>
                             <div class="flex flex-col items-end gap-2 shrink-0">
                                 <a id="banner-call-btn" href="#" class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 py-1.5 rounded-lg text-[10px] font-black flex items-center gap-1.5 transition-colors border border-gray-200">
                                     <i class="fa-solid fa-phone text-blue-600"></i> Call Store
                                 </a>
-                                <button type="button" onclick="window.filterRestaurant(null, '')" class="text-[10px] font-bold text-red-500 hover:underline">View All</button>
+                                <button type="button" onclick="window.filterRestaurant(null, '')" class="text-[10px] font-bold text-red-500 hover:underline">View All Stores</button>
                             </div>
                         </div>
 
@@ -238,9 +259,12 @@
                         <div id="restaurant-list-carousel" class="flex flex-wrap gap-3 mb-6"></div>
                     </div>
 
+                    <!-- MOST ORDERED SECTION -->
                     <div id="most-ordered-section-container" class="mt-2 mb-6 hidden">
                         <h3 class="font-black text-xl text-gray-900 mb-4 tracking-tight uppercase">Most Ordered Items</h3>
-                        <div id="most-ordered-list" class="flex gap-3 overflow-x-auto hide-scroll pb-2 snap-x"></div>
+                        <div id="most-ordered-list" class="flex gap-3 overflow-x-auto hide-scroll pb-2 snap-x">
+                            <!-- Populated dynamically -->
+                        </div>
                     </div>
 
                     <div>
@@ -274,7 +298,7 @@
                         
                         <div class="flex gap-2 mt-3">
                             <div class="flex-[2]">
-                                <select id="ride-search-type" class="w-full bg-gray-50 border border-gray-100 rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-red-400 font-bold text-gray-700">
+                                <select id="ride-search-type" class="w-full bg-gray-50 border border-gray-100 rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-red-400 font-bold text-gray-700" onchange="window.handleRideTypeChange();">
                                     <option value="Car_Mini" selected>🚕 Mini/Sedan (4-6 Seater)</option>
                                     <option value="Car_SUV">🚙 SUV (7-13 Seater)</option>
                                     <option value="Bike">🏍️ Bike (Max 1 Person)</option>
@@ -287,29 +311,27 @@
                             </div>
                         </div>
 
-                        <div class="mt-3">
-                            <label class="block text-[10px] font-bold text-gray-500 uppercase ml-1 mb-1">Schedule Journey (Date & Time)</label>
+                        <div class="mt-3 bg-blue-50 p-3 rounded-xl border border-blue-100">
+                            <label class="block text-[10px] font-black text-blue-800 uppercase mb-2"><i class="fa-regular fa-clock mr-1"></i> Journey Date & Time</label>
                             <div class="flex gap-2">
-                                <input type="datetime-local" id="ride-schedule-time" class="w-full bg-gray-50 border border-gray-100 rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-red-400 font-bold text-gray-700">
-                                <button type="button" onclick="document.getElementById('ride-schedule-time').value = ''" class="shrink-0 bg-red-50 text-red-600 font-black rounded-xl px-4 text-xs border border-red-100 hover:bg-red-100 transition shadow-sm">NOW</button>
+                                <button type="button" id="btn-ride-now" onclick="document.getElementById('ride-schedule-time').value=''; this.classList.add('ring-2', 'ring-blue-600', 'bg-blue-600', 'text-white'); this.classList.remove('bg-white', 'text-gray-700'); document.getElementById('ride-schedule-time').classList.remove('ring-2', 'ring-blue-600');" class="bg-blue-600 text-white font-black px-4 py-2.5 rounded-lg text-xs shadow-sm ring-2 ring-blue-600 transition-all">NOW</button>
+                                <input type="datetime-local" id="ride-schedule-time" onchange="document.getElementById('btn-ride-now').classList.remove('ring-2', 'ring-blue-600', 'bg-blue-600', 'text-white'); document.getElementById('btn-ride-now').classList.add('bg-white', 'text-gray-700'); this.classList.add('ring-2', 'ring-blue-600');" class="w-full bg-white border border-gray-200 rounded-lg py-2.5 px-3 text-sm outline-none font-bold text-gray-700 transition-all">
                             </div>
                         </div>
 
-                        <!-- Round Trip Checkbox -->
-                        <label class="flex items-center gap-2 text-xs font-bold text-gray-700 mt-4 cursor-pointer" id="round-trip-container">
-                            <input type="checkbox" id="ride-round-trip" class="w-4 h-4 text-red-600 focus:ring-red-500 rounded border-gray-300 shadow-sm">
-                            <span id="round-trip-label-text">Return Trip Included (Round Trip)</span>
+                        <!-- Round Trip -->
+                        <label class="flex items-center gap-2 text-xs font-bold text-gray-700 mt-3" id="round-trip-container" style="display: flex;">
+                            <input type="checkbox" id="ride-round-trip" class="w-4 h-4 text-red-600 focus:ring-red-500 rounded border-gray-300 disabled:opacity-50" checked disabled>
+                            <span id="round-trip-label-text" class="text-red-600">Round Trip (Mandatory for Car)</span>
                         </label>
 
                         <!-- T&C Checkbox -->
                         <label class="flex items-start gap-2 text-[9px] text-gray-500 mt-4 leading-tight bg-gray-50 p-2.5 rounded-lg border border-gray-200">
                             <input type="checkbox" id="ride-tnc" class="mt-0.5 shrink-0 w-3 h-3 text-red-600 focus:ring-red-500 rounded border-gray-300">
-                            <span><b>Terms & Conditions:</b> Gramzo operates strictly as a technology aggregator. You will receive fare bids directly from drivers. Once you accept a bid, the fare is final.</span>
+                            <span><b>Terms & Conditions:</b> Gramzo operates strictly as a technology aggregator. Any liability regarding driving, licensing, accidents, or service quality rests entirely with the service provider and the user. Gramzo assumes no corporate or legal liability.</span>
                         </label>
 
-                        <button type="button" id="btn-request-broadcast-ride" onclick="window.requestBroadcastRide()" class="w-full bg-gray-900 text-white font-bold py-3.5 rounded-xl mt-4 text-sm hover:bg-gray-800 transition active:scale-95 shadow-md flex justify-center items-center gap-2">
-                            <i class="fa-solid fa-radar"></i> Find Riders
-                        </button>
+                        <button type="button" id="btn-request-broadcast-ride" onclick="window.requestBroadcastRide()" class="w-full bg-yellow-400 text-gray-900 font-bold py-3.5 rounded-xl mt-4 text-sm hover:bg-yellow-500 transition active:scale-95 shadow-md border border-yellow-500"><i class="fa-solid fa-paper-plane mr-1"></i> Send Request to Riders</button>
                     </div>
 
                     <div id="available-trips-list" class="hidden space-y-3 pt-2"></div>
@@ -318,7 +340,7 @@
                 <div id="partner-cta" class="mt-8 bg-gray-900 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden flex items-center justify-between">
                     <div class="relative z-10">
                         <h3 class="text-xl font-black mb-1">Partner with us</h3>
-                        <p class="text-gray-300 text-xs mb-3 font-medium">List your business or drive with us.</p>
+                        <p class="text-gray-300 text-xs mb-3 font-medium">List your restaurant, grocery shop, or ride with us.</p>
                         <button type="button" onclick="window.openAuthModal('Partner')" class="bg-red-600 text-white px-5 py-2.5 rounded-xl text-xs font-black shadow-sm active:scale-95 uppercase tracking-widest hover:bg-red-500">
                             Register Partner
                         </button>
@@ -360,7 +382,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v12.0.1 - Open Fare Bidding</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v11.28.7 - Whole Ride & Popular Items</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right flex flex-col sm:flex-row gap-3">
                             <button type="button" id="btn-partner-login-trigger" onclick="window.openAuthModal('Partner')" class="bg-gray-900 text-white hover:bg-gray-800 border px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2">
@@ -437,6 +459,27 @@
                         <div class="relative">
                             <textarea id="cart-address" rows="2" class="w-full bg-gray-50 border border-gray-100 rounded-xl px-3 py-3 text-xs font-medium outline-none pr-16 resize-none focus:ring-1 focus:ring-red-400" placeholder="Detailed Address (House No, Landmark...)"></textarea>
                             <button type="button" onclick="window.getCurrentLocation('cart-address')" class="absolute right-2 top-2 text-red-500 text-[10px] font-bold bg-red-50 px-2 py-1.5 rounded-lg border border-red-100 hover:bg-red-100"><i class="fa-solid fa-location-crosshairs"></i> GPS</button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-4">
+                        <div class="flex items-center gap-2 mb-3 pb-2 border-b border-gray-50">
+                            <i class="fa-regular fa-clock text-gray-400 text-sm"></i>
+                            <h3 class="text-xs font-black text-gray-700 uppercase tracking-widest">Delivery Time</h3>
+                        </div>
+                        <div class="flex gap-2">
+                            <label class="flex-1 flex items-center gap-2 p-2 border border-gray-200 rounded-xl cursor-pointer hover:bg-red-50 transition bg-gray-50">
+                                <input type="radio" name="delivery_timing" value="Now" checked onchange="document.getElementById('cart-schedule-container').classList.add('hidden')" class="w-4 h-4 text-red-600 focus:ring-red-500 border-gray-300">
+                                <span class="text-xs font-bold text-gray-800">Standard (Now)</span>
+                            </label>
+                            <label class="flex-1 flex items-center gap-2 p-2 border border-gray-200 rounded-xl cursor-pointer hover:bg-red-50 transition">
+                                <input type="radio" name="delivery_timing" value="Advance" onchange="document.getElementById('cart-schedule-container').classList.remove('hidden')" class="w-4 h-4 text-red-600 focus:ring-red-500 border-gray-300">
+                                <span class="text-xs font-bold text-gray-800">Advance Order</span>
+                            </label>
+                        </div>
+                        <div id="cart-schedule-container" class="hidden mt-3 pt-3 border-t border-gray-50 border-dashed">
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1 ml-1">Select Delivery Date & Time</label>
+                            <input type="datetime-local" id="cart-schedule-time" class="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-red-400 font-bold text-gray-700">
                         </div>
                     </div>
 
@@ -887,7 +930,7 @@
         </div>
     </div>
 
-    <!-- Additional Modals -->
+    <!-- Modals -->
     <div id="create-trip-modal" class="modal-overlay z-[200]">
         <div class="modal-content !max-w-sm">
             <h3 class="font-black text-xl text-gray-900 mb-4">Create Scheduled Trip</h3>
@@ -969,7 +1012,6 @@
             });
         }
 
-        // GLOBALS & STATE
         let currentUser = null;
         let currentRestaurantFilter = null;
         let currentFoodCategoryFilter = null;
@@ -988,16 +1030,17 @@
         let unsubscribeListeners = []; 
         let currentAuthRole = 'User'; 
         window.currentUserMainCategory = 'Food Owner'; // Default to Food
-        window.allProducts = []; 
+        window.allProducts = []; // For admin promo feature
         window.availableTrips = []; 
 
         window.currentCartCoinsUsed = 0;
+        window.currentRideCoinsUsed = 0;
 
         // RATING STATE
         window.currentRatingOrderId = null;
         window.currentRatingPartnerId = null;
         window.selectedRating = 0;
-        window.editingProductId = null;
+        window.editingProductId = null; // Added to track edit mode
         window.activePromos = [];
 
         // ADMIN TABS STATE
@@ -1010,6 +1053,10 @@
         // PARTNER TABS STATE
         window.partnerCurrentOrderTab = 'Live';
         window.partnerOrdersData = [];
+
+        // RIDE BOOKING STATE
+        window.currentSelectedRideType = null;
+        window.currentRideFares = { Bike: 0, Toto: 0, Car_Mini: 0, Car_SUV: 0 };
 
         window.wakeLockRef = null;
         window.requestWakeLock = async () => {
@@ -1140,7 +1187,13 @@
 
         window.formatOrderTime = (timestamp) => {
             if (!timestamp) return 'Just now';
-            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+            let date;
+            if (typeof timestamp === 'string') {
+                date = new Date(timestamp);
+            } else {
+                date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+            }
+            if (isNaN(date.getTime())) return 'Invalid Date';
             return date.toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
         };
 
@@ -1327,57 +1380,16 @@
                 roundTripContainer.style.display = 'flex';
                 roundTripCheckbox.checked = true;
                 roundTripCheckbox.disabled = true; 
-                roundTripLabelText.innerText = "Return Trip Included (Mandatory for Car)";
+                roundTripLabelText.innerText = "Round Trip (Mandatory for Car)";
                 roundTripLabelText.classList.add('text-red-600');
-            } else {
+            } else if (searchType === 'Toto') {
                 roundTripContainer.style.display = 'flex';
                 roundTripCheckbox.disabled = false; 
-                roundTripLabelText.innerText = "Return Trip Included (Optional)";
+                roundTripLabelText.innerText = "Round Trip (Optional)";
                 roundTripLabelText.classList.remove('text-red-600');
-            }
-        };
-
-        // Free Geocoding with OSM Nominatim
-        window.getCurrentLocation = (inputId) => {
-            const inputEl = document.getElementById(inputId);
-            let locationFound = false;
-            inputEl.value = "Fetching your location...";
-            const fallbackTimer = setTimeout(() => {
-                if (locationFound) return;
-                inputEl.value = "";
-                window.showToast("Could not access Location API. Please type your address.", "error");
-            }, 6000);
-            
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(async (pos) => {
-                    locationFound = true;
-                    clearTimeout(fallbackTimer);
-                    try {
-                        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`);
-                        const data = await res.json();
-                        if (data && data.display_name) {
-                            inputEl.value = data.display_name;
-                            window.showToast("Location detected successfully!", "success");
-                        } else {
-                            inputEl.value = "";
-                            window.showToast("Location text unreadable. Please type it.", "error");
-                        }
-                    } catch(e) { 
-                        inputEl.value = ""; 
-                        window.showToast("Map API failed to load. Please type address.", "error");
-                    }
-                }, (error) => {
-                    locationFound = true;
-                    clearTimeout(fallbackTimer);
-                    inputEl.value = "";
-                    let msg = "Failed to get location.";
-                    if (error.code == error.PERMISSION_DENIED) msg = "Location permission denied by user.";
-                    window.showToast(msg, "error");
-                }, { timeout: 10000, enableHighAccuracy: true });
             } else {
-                clearTimeout(fallbackTimer);
-                inputEl.value = "";
-                window.showToast("Geolocation not supported by browser.", "error");
+                roundTripContainer.style.display = 'none';
+                roundTripCheckbox.checked = false;
             }
         };
 
@@ -1396,7 +1408,8 @@
             if(!pickup || !drop) return window.showToast("Please enter Pickup and Drop locations.", "error");
             if(!tncChecked) return window.showToast("Please accept the Terms & Conditions.", "error");
 
-            const confirmed = await window.customConfirm("Request Ride", `Broadcast this ride request to nearby drivers?`, "Request");
+            const timeStrDisplay = scheduledTime ? window.formatOrderTime(scheduledTime) : 'NOW';
+            const confirmed = await window.customConfirm("Confirm Ride Request", `Broadcast request for ${timeStrDisplay}? Riders will send you their fare offers.`, "Broadcast Request");
             if (!confirmed) return;
 
             const btn = document.getElementById('btn-request-broadcast-ride');
@@ -1420,15 +1433,13 @@
                     total: 0,
                     waitingTime: waitTime,
                     isRoundTrip: isRoundTrip,
-                    bids: [], // Array to hold incoming bids
                     isScheduled: !!scheduledTime,
                     scheduledTime: scheduledTime || null,
+                    bids: [],
                     time: serverTimestamp() 
                 }), 15000);
 
-                window.showToast("Ride Request Sent! Waiting for driver bids...", "success");
-                
-                // Reset form
+                window.showToast("Ride Request Broadcasted! Waiting for rider offers...", "success");
                 document.getElementById('ride-pickup').value = '';
                 document.getElementById('ride-drop').value = '';
                 document.getElementById('ride-schedule-time').value = '';
@@ -1441,47 +1452,6 @@
                 btn.innerHTML = origTxt; 
                 btn.disabled = false;
             }
-        };
-
-        window.sendRideBid = async (orderId, inputId) => {
-            const amt = parseInt(document.getElementById(inputId).value);
-            if (isNaN(amt) || amt <= 0) return window.showToast("Enter a valid fare.", "error");
-            try {
-                const orderRef = getDocRef('orders', orderId);
-                const snap = await window.dbCall(getDoc(orderRef), 5000);
-                if(snap.exists()) {
-                    let bids = snap.data().bids || [];
-                    bids = bids.filter(b => b.riderId !== currentUser.phone);
-                    bids.push({
-                        riderId: currentUser.phone,
-                        riderName: currentUser.name,
-                        riderPhone: currentUser.phone,
-                        vehicle: `${currentUser.carModel} (${currentUser.carNum})`,
-                        amount: amt,
-                        time: new Date().toISOString()
-                    });
-                    await window.dbCall(updateDoc(orderRef, { bids }), 10000);
-                    window.showToast("Offer sent to customer!", "success");
-                }
-            } catch(e) { window.showToast("Failed to send offer.", "error"); }
-        };
-
-        window.acceptRideBid = async (orderId, riderId, riderName, amount, vehicle, riderPhone) => {
-            const confirmed = await window.customConfirm("Confirm Ride", `Accept ${riderName}'s offer of ₹${amount}?`, "Confirm");
-            if(!confirmed) return;
-            try {
-                await window.dbCall(updateDoc(getDocRef('orders', orderId), {
-                    status: 'Confirmed',
-                    riderId: riderId,
-                    riderName: riderName,
-                    riderPhone: riderPhone,
-                    amount: amount,
-                    total: amount,
-                    carModel: vehicle.split('(')[0].trim(),
-                    carNum: vehicle.split('(')[1] ? vehicle.split('(')[1].replace(')','') : ''
-                }), 10000);
-                window.showToast("Ride Confirmed!", "success");
-            } catch(e) { window.showToast("Error confirming ride.", "error"); }
         };
 
         window.submitCreateTrip = async () => {
@@ -1573,6 +1543,96 @@
             } catch(e) { window.showToast("Booking failed.", "error"); }
         };
 
+        window.sendRideBid = async (orderId, inputId) => {
+            if (!currentUser) return;
+            const amountStr = document.getElementById(inputId).value;
+            const amount = parseInt(amountStr);
+            if (isNaN(amount) || amount <= 0) return window.showToast("Please enter a valid fare offer.", "error");
+
+            try {
+                const orderRef = getDocRef('orders', orderId);
+                const snap = await window.dbCall(getDoc(orderRef), 5000);
+                if (!snap.exists()) return window.showToast("Order not found.", "error");
+                
+                let orderData = snap.data();
+                if (orderData.status !== 'Broadcasted' && orderData.status !== 'Requested') {
+                    return window.showToast("Ride is no longer available for bidding.", "error");
+                }
+
+                let bids = orderData.bids || [];
+                const existingBidIndex = bids.findIndex(b => b.riderId === currentUser.phone);
+                
+                const newBid = {
+                    riderId: currentUser.phone,
+                    riderName: currentUser.name,
+                    riderPhone: currentUser.phone,
+                    vehicle: `${currentUser.carModel} (${currentUser.carNum})`,
+                    amount: amount,
+                    timestamp: new Date().toISOString()
+                };
+
+                if (existingBidIndex > -1) {
+                    bids[existingBidIndex] = newBid;
+                } else {
+                    bids.push(newBid);
+                }
+
+                await window.dbCall(updateDoc(orderRef, { bids: bids }), 10000);
+                window.showToast("Offer sent successfully!", "success");
+            } catch (e) {
+                window.showToast("Failed to send offer.", "error");
+            }
+        };
+
+        window.userAcceptRideFare = async (orderId, riderId, riderName, amount, vehicle, riderPhone) => {
+            const confirmed = await window.customConfirm("Accept Offer", `Accept ${riderName}'s offer of ₹${amount}?`, "Accept");
+            if (!confirmed) return;
+
+            try {
+                await window.dbCall(updateDoc(getDocRef('orders', orderId), { 
+                    status: 'Confirmed', 
+                    riderId: riderId, 
+                    riderName: riderName, 
+                    riderPhone: riderPhone, 
+                    carModel: vehicle.split('(')[0].trim(), 
+                    carNum: vehicle.split('(')[1] ? vehicle.split('(')[1].replace(')', '') : '',
+                    amount: amount,
+                    total: amount
+                }), 10000);
+                window.showToast("Ride Confirmed!", "success");
+            } catch(e) { 
+                window.showToast("Failed to accept ride.", "error"); 
+            }
+        };
+        
+        window.userRejectRideFare = async (orderId, inputId) => {
+            const input = document.getElementById(inputId);
+            const reason = input ? input.value.trim() : 'Price too high';
+            const confirmed = await window.customConfirm("Reject Offers", `Reject current offers? (Reason: ${reason || 'Not provided'})`, "Reject");
+            if(!confirmed) return;
+            try {
+                await window.dbCall(updateDoc(getDocRef('orders', orderId), { 
+                    status: 'Rejected', 
+                    rejectReason: reason || 'User rejected bids' 
+                }), 10000);
+                window.showToast("Ride Offers Rejected.", "success");
+            } catch(e) {
+                window.showToast("Failed to reject.", "error");
+            }
+        };
+
+        window.driverAcceptRide = async (orderId) => {
+            if (!auth.currentUser) return;
+            const confirmed = await window.customConfirm("Accept Ride", "Are you sure you want to accept this ride?", "Accept Ride");
+            if(!confirmed) return;
+            try {
+                await window.dbCall(updateDoc(getDocRef('orders', orderId), { 
+                    status: 'Confirmed', riderId: currentUser.phone, riderName: currentUser.name, riderPhone: currentUser.phone, carModel: currentUser.carModel || '', carNum: currentUser.carNum || ''
+                }), 10000);
+                window.showToast("Ride Accepted! Assigned to you.", "success");
+            } catch(e) { window.showToast("Failed to accept ride.", "error"); }
+        };
+
         window.markRideStarted = async (orderId) => {
             try { await window.dbCall(updateDoc(getDocRef('orders', orderId), { status: 'Started' }), 10000); window.showToast("Ride Started!", "success"); } catch(e) { window.showToast("Failed to start ride.", "error"); }
         };
@@ -1602,6 +1662,49 @@
                 await window.dbCall(updateDoc(getDocRef('users', userId), { walletPoints: (currentPoints || 0) + pointsToAdd }), 10000);
                 window.showToast("Points/Coins added successfully!", "success");
             } catch(e) { window.showToast("Failed to add points.", "error"); }
+        };
+
+        window.getCurrentLocation = (inputId) => {
+            const inputEl = document.getElementById(inputId);
+            let locationFound = false;
+            inputEl.value = "Fetching your location...";
+            const fallbackTimer = setTimeout(() => {
+                if (locationFound) return;
+                inputEl.value = "";
+                window.showToast("Could not access Location API. Please type your address.", "error");
+            }, 6000);
+            
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(async (pos) => {
+                    locationFound = true;
+                    clearTimeout(fallbackTimer);
+                    try {
+                        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`);
+                        const data = await res.json();
+                        if (data && data.display_name) {
+                            inputEl.value = data.display_name;
+                            window.showToast("Location detected successfully!", "success");
+                        } else {
+                            inputEl.value = "";
+                            window.showToast("Location text unreadable. Please type it.", "error");
+                        }
+                    } catch(e) { 
+                        inputEl.value = ""; 
+                        window.showToast("Map API failed to load. Please type address.", "error");
+                    }
+                }, (error) => {
+                    locationFound = true;
+                    clearTimeout(fallbackTimer);
+                    inputEl.value = "";
+                    let msg = "Failed to get location.";
+                    if (error.code == error.PERMISSION_DENIED) msg = "Location permission denied by user.";
+                    window.showToast(msg, "error");
+                }, { timeout: 10000, enableHighAccuracy: true });
+            } else {
+                clearTimeout(fallbackTimer);
+                inputEl.value = "";
+                window.showToast("Geolocation not supported by browser.", "error");
+            }
         };
 
         window.openAuthModal = (role = 'User') => {
@@ -2169,7 +2272,7 @@
         };
 
         window.loadMarketplaceData = () => {
-            const defaultMarqueeText = "🚀 খাবার অর্ডার করুন ঘরে বসেই 🚀";
+            const defaultMarqueeText = "🚀 খাবার অর্ডার করুন ঘরে বসেই - সার্ভিস অ্যাভেইলেবল অ্যাট কোটালডিহ, কিনাইডিহ, লালগড়, কৃষ্ণপুর, রামচন্দ্রপুর, মুরাডি, গাংপুর, যশপুর এবং বড়ন্তি এলাকা 🚀";
 
             onSnapshot(getDocRef('settings', 'app_config'), (snap) => {
                 const marqueeContainer = document.getElementById('marquee-container');
@@ -2531,6 +2634,13 @@
             const addrDetails = document.getElementById('cart-address').value.trim();
             if(!addrDetails) return window.showToast("Please provide detailed delivery address.", "error");
 
+            const deliveryTiming = document.querySelector('input[name="delivery_timing"]:checked')?.value || 'Now';
+            let scheduledDeliveryTime = null;
+            if (deliveryTiming === 'Advance') {
+                scheduledDeliveryTime = document.getElementById('cart-schedule-time').value;
+                if (!scheduledDeliveryTime) return window.showToast("Please select a date and time for Advance Order.", "error");
+            }
+
             const fullAddress = `${addrDetails}, ${finalVillage}`;
             const paymentRadio = document.querySelector('input[name="payment_mode"]:checked');
             if(!paymentRadio && window.currentCartPartner) return window.showToast("Please select a payment method.", "error");
@@ -2567,6 +2677,7 @@
                     items: window.cart.map(item => ({ name: item.name || '', price: item.price || 0, quantity: item.quantity || 1, partnerId: item.partnerId || null, shopName: item.shopName || null })), 
                     subtotal: sub || 0, discount: promoDiscountAmt || 0, coinDiscount: coinDiscount, promoCode: window.promoCode || null, total: total || 0, address: fullAddress || '', status: 'Placed', 
                     restaurantId: restaurantId, restaurantName: restaurantName, restaurantAddress: restaurantAddress, paymentMode: paymentMode, paymentScreenshot: paymentScreenshot,
+                    isScheduled: deliveryTiming === 'Advance', scheduledTime: scheduledDeliveryTime || null,
                     time: serverTimestamp() 
                 }), 15000);
 
@@ -2983,7 +3094,7 @@
                 const timeStr = window.formatOrderTime(o.time);
                 let scheduledTimeHtml = o.isScheduled && o.scheduledTime ? `<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[9px] font-black uppercase ml-2 block mt-1"><i class="fa-solid fa-calendar mr-1"></i> Trip Date: ${window.formatOrderTime(o.scheduledTime)}</span>` : '';
                 
-                let statusColor = o.status === 'Placed' || o.status === 'Requested' || o.status === 'Broadcasted' ? 'text-amber-500' : o.status === 'Preparing' || o.status === 'Started' || o.status === 'Out for Delivery' || o.status === 'Confirmed' ? 'text-blue-500' : o.status === 'Rejected' ? 'text-red-500' : 'text-emerald-500';
+                let statusColor = o.status === 'Placed' || o.status === 'Requested' || o.status === 'Broadcasted' ? 'text-amber-500' : o.status === 'Preparing' || o.status === 'Started' || o.status === 'Out for Delivery' ? 'text-blue-500' : o.status === 'Rejected' ? 'text-red-500' : 'text-emerald-500';
                 const displayType = o.type === 'Ride' ? '🚕 Ride' : '🍔 Order';
                 const addressDisplay = o.type === 'Ride' ? `<span class="text-blue-500 font-medium">From:</span> ${o.pickup || 'N/A'}<br/><span class="text-emerald-500 font-medium">To:</span> ${o.address || 'N/A'}` : o.address || 'N/A';
                 
@@ -3063,490 +3174,578 @@
                     let phoneLink = showPhone ? `tel:${o.phone}` : 'javascript:void(0)';
                     let phoneClass = showPhone ? 'text-blue-600' : 'text-gray-400 cursor-not-allowed';
 
+                    let bigJourneyTimeHtml = '';
+                    if (o.isScheduled && o.scheduledTime) {
+                        const timeFormatted = window.formatOrderTime(o.scheduledTime);
+                        bigJourneyTimeHtml = `
+                            <div class="mt-3 mb-2 bg-blue-50 border border-blue-200 p-3 rounded-xl text-center">
+                                <p class="text-[10px] font-black uppercase text-blue-600 tracking-widest mb-1">${o.type === 'Ride' ? 'JOURNEY DATE & TIME' : 'DELIVERY DATE & TIME'}</p>
+                                <p class="text-lg font-black text-blue-900 drop-shadow-sm">${timeFormatted}</p>
+                            </div>
+                        `;
+                    } else if (o.type === 'Ride') {
+                        bigJourneyTimeHtml = `
+                            <div class="mt-3 mb-2 bg-emerald-50 border border-emerald-200 p-3 rounded-xl text-center">
+                                <p class="text-[10px] font-black uppercase text-emerald-600 tracking-widest mb-1">JOURNEY TIME</p>
+                                <p class="text-lg font-black text-emerald-900 drop-shadow-sm">IMMEDIATE (NOW)</p>
+                            </div>
+                        `;
+                    }
+
                     let customerInfo = `<div class="mb-3 bg-gray-50 p-2 rounded-xl border border-gray-100">
                         <p class="text-xs font-black text-gray-800"><i class="fa-solid fa-user text-gray-400 mr-1"></i> ${o.customer}</p>
                         <p class="text-xs font-bold ${phoneClass} mt-1"><a href="${phoneLink}"><i class="fa-solid fa-phone mr-1"></i> ${displayPhone}</a></p>
                     </div>`;
 
                     if (['Rider', 'Ride Partner'].includes(currentUser.category)) {
-                                        if (o.type === 'Ride') {
-                                            if (o.status === 'Broadcasted' || o.status === 'Requested') {
-                                                let hasBid = o.bids && o.bids.find(b => b.riderId === currentUser.phone);
-                                                if (hasBid) {
-                                                    actionButtons = `<div class="w-full bg-yellow-50 text-yellow-700 py-3 rounded-xl font-bold text-sm text-center border border-yellow-200"><i class="fa-solid fa-clock mr-1"></i> Offer sent: ₹${hasBid.amount}. Waiting...</div>`;
-                                                } else {
-                                                    actionButtons = `
-                                                        <div class="flex gap-2">
-                                                            <input type="number" id="bid-amt-${o.id}" class="flex-[2] border border-gray-200 rounded-xl px-3 text-sm outline-none focus:border-blue-400 bg-white" placeholder="Your Offer (₹)">
-                                                            <button type="button" onclick="window.sendRideBid('${o.id}', 'bid-amt-${o.id}')" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-paper-plane mr-1"></i> Send Bid</button>
-                                                        </div>
-                                                    `;
-                                                }
-                                            } else if (o.status === 'Confirmed') {
-                                                actionButtons = `<button type="button" onclick="window.markRideStarted('${o.id}')" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-play mr-1"></i> Start Ride</button>`;
-                                            } else if (o.status === 'Started') {
-                                                const deduction = ['Car', 'Car_Mini', 'Car_SUV'].includes(currentUser.vehicleType) ? 50 : 5;
-                                                actionButtons = `<button type="button" onclick="window.completeRide('${o.id}')" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-check-double mr-1"></i> End Ride & Collect ₹${o.amount} (-${deduction} Pts)</button>`;
-                                            } else if (o.status === 'Completed') {
-                                                actionButtons = `<div class="w-full bg-gray-100 text-gray-500 py-3 rounded-xl font-bold text-sm text-center border border-gray-200"><i class="fa-solid fa-check mr-1"></i> Completed (₹${o.amount})</div>`;
-                                            }
-                                        } else {
-                                            if (o.status === 'Ready' && !o.riderId) {
-                                                actionButtons = `<button type="button" onclick="window.acceptDelivery('${o.id}')" class="w-full bg-gray-900 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-motorcycle mr-1"></i> Accept Delivery</button>`;
-                                            } else if (o.status === 'Out for Delivery' && o.riderId === currentUser.phone) {
-                                                actionButtons = `<div class="flex gap-2"><a href="tel:${o.phone}" class="flex-1 bg-white border border-gray-200 text-gray-700 py-3 rounded-xl font-bold text-sm text-center flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone mr-1"></i> Customer</a><button type="button" onclick="window.markDelivered('${o.id}')" class="flex-1 bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md"><i class="fa-solid fa-check-double mr-1"></i> Done</button></div>`;
-                                            }
-                                        }
-                                    } else {
-                                        if (o.status === 'Placed') actionButtons = `<div class="flex gap-2"><button type="button" onclick="window.acceptFoodOrder('${o.id}')" class="flex-1 bg-black text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-gray-800 transition-colors active:scale-95"><i class="fa-solid fa-check"></i> Accept</button><button type="button" onclick="window.openRejectModal('${o.id}')" class="flex-1 bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm hover:bg-red-100 transition-colors active:scale-95"><i class="fa-solid fa-xmark"></i> Reject</button></div>`;
-                                        else if (o.status === 'Accepted') { cardStyle = 'border-blue-200 bg-blue-50/30'; actionButtons = `<button type="button" onclick="window.markPreparing('${o.id}')" class="w-full bg-blue-600 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-blue-700 active:scale-95">Start Preparing</button>`; }
-                                        else if (o.status === 'Preparing') { cardStyle = 'border-orange-200 bg-orange-50/30'; actionButtons = `<button type="button" onclick="window.markReady('${o.id}')" class="w-full bg-orange-500 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-orange-600 active:scale-95">Mark Ready for Rider</button>`; }
-                                        else if (o.status === 'Ready') { cardStyle = 'border-yellow-200 bg-yellow-50/30'; actionButtons = `<p class="text-xs font-bold text-orange-600 text-center py-2 bg-orange-50 rounded-xl">Waiting for Delivery Partner...</p><button type="button" onclick="window.markOutForDelivery('${o.id}')" class="w-full mt-2 bg-yellow-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95 border border-yellow-600">Self Deliver (Skip Rider)</button>`; }
-                                        else if (o.status === 'Out for Delivery') {
-                                            if (!o.riderId) { 
-                                                actionButtons = `<button type="button" onclick="window.markDelivered('${o.id}')" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-check-double mr-1"></i> Mark as Delivered</button>`;
-                                            } else {
-                                                actionButtons = `
-                                                <div class="flex gap-2 w-full mt-1">
-                                                    <div class="flex-1 bg-yellow-50 border border-yellow-200 text-yellow-700 py-2 rounded-xl flex flex-col items-center justify-center">
-                                                        <span class="text-[9px] font-black uppercase">Out for Delivery</span>
-                                                        <span class="text-xs font-bold">${o.riderName || 'Rider'}</span>
-                                                    </div>
-                                                    <a href="tel:${o.riderPhone || o.riderId}" class="flex-[0.3] bg-blue-600 text-white rounded-xl flex items-center justify-center text-lg shadow-md active:scale-95"><i class="fa-solid fa-phone"></i></a>
-                                                </div>
-                                                `;
-                                            }
-                                        }
-                                        else if (o.status === 'Delivered') actionButtons = `<div class="w-full bg-emerald-50 text-emerald-600 py-3 rounded-xl font-bold text-sm text-center border border-emerald-100"><i class="fa-solid fa-circle-check mr-1"></i> Order Completed</div>`;
-                                        else if (o.status === 'Rejected') actionButtons = `<div class="w-full bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm text-center border border-red-100"><i class="fa-solid fa-circle-xmark mr-1"></i> Order Rejected</div>`;
-                                    }
-
-                                    let ratingHtml = o.rating ? `<div class="mt-2 text-center text-xs font-bold text-yellow-600 bg-yellow-50 rounded-lg py-1 border border-yellow-100"><i class="fa-solid fa-star"></i> Customer Rated: ${o.rating} Star</div>` : '';
-
-                                    if (o.type === 'Ride') {
-                                        html += `
-                                            <div class="bg-white rounded-3xl p-5 shadow-sm border border-blue-100 relative overflow-hidden">
-                                                <div class="flex justify-between items-start mb-3">
-                                                    <div>
-                                                        <div class="flex items-center gap-2 mb-1">
-                                                            <span class="text-[10px] font-black text-blue-500 uppercase tracking-widest bg-blue-50 px-2 py-0.5 rounded"><i class="fa-solid fa-taxi"></i> RIDE</span>
-                                                            <span class="text-[9px] font-medium text-gray-400"><i class="fa-regular fa-clock"></i> ${timeStr}</span>
-                                                        </div>
-                                                        <h4 class="font-bold text-gray-900 text-sm mt-2"><i class="fa-solid fa-user text-gray-400 mr-1"></i> ${o.customer}</h4>
-                                                        <a href="${phoneLink}" class="text-xs font-bold ${phoneClass} block mt-0.5"><i class="fa-solid fa-phone mr-1"></i> ${displayPhone}</a>
-                                                    </div>
-                                                    <span class="text-xl font-black text-emerald-600">${o.amount ? '₹'+o.amount : '...'}</span>
-                                                </div>
-                                                <div class="relative bg-gray-50 p-3 rounded-xl mb-4 border border-gray-100 mt-2">
-                                                    <div class="absolute top-4 left-3.5 w-2 h-2 rounded-full bg-emerald-500 z-10"></div>
-                                                    <div class="absolute top-7 left-4 w-0.5 h-6 bg-gray-300 z-10"></div>
-                                                    <div class="absolute top-14 left-3.5 w-2 h-2 rounded-full bg-red-500 z-10"></div>
-                                                    
-                                                    <p class="text-xs font-medium text-gray-700 pl-6 mb-3">From: <b>${o.pickup}</b></p>
-                                                    <p class="text-xs font-medium text-gray-700 pl-6">To: <b>${o.address}</b></p>
-                                                </div>
-                                                ${o.isRoundTrip ? '<p class="text-[10px] bg-purple-50 text-purple-700 font-bold px-2 py-1 rounded mb-3 border border-purple-100 text-center"><i class="fa-solid fa-rotate w-3"></i> Round Trip Requested</p>' : ''}
-                                                ${actionButtons}
-                                            </div>
-                                        `;
-                                    } else {
-                                        html += `<div class="bg-white rounded-3xl p-5 shadow-sm border ${cardStyle}">
-                                                <div class="flex justify-between items-start mb-3"><div><div class="flex items-center gap-2 mb-1"><span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Order #${o.id.slice(-4).toUpperCase()}</span><span class="text-[9px] font-medium text-gray-400"><i class="fa-regular fa-clock"></i> ${timeStr}</span>${paymentBadge}</div><h4 class="font-bold text-gray-900 text-sm"><i class="fa-solid fa-map-pin text-red-500 mr-1"></i> ${o.address}</h4></div><span class="text-xl font-black text-emerald-600">₹${o.total.toFixed(2)}</span></div>
-                                                ${customerInfo}
-                                                <div class="bg-gray-50 p-3 rounded-xl mb-4 border border-gray-100"><p class="text-xs text-gray-700 font-bold mb-1"><i class="fa-solid fa-clipboard-list text-gray-400 mr-1"></i> Items:</p><p class="text-sm text-gray-600 font-medium">${itemsStr}</p>${screenshotHtml}</div>
-                                                ${actionButtons}
-                                                ${ratingHtml}
-                                                </div>`;
-                                    }
-                                });
-                                listEl.innerHTML = html;
-                };
-
-                // Completely redefining the listener logic to ensure User Bid UI displays correctly
-                window.initRoleListeners = () => {
-                    if (!auth.currentUser || !currentUser) return;
-
-                    unsubscribeListeners.forEach(u => u());
-                    unsubscribeListeners = [];
-
-                    if (currentUser.role === 'Admin') {
-                        const unsubOrders = onSnapshot(getCol('orders'), (snap) => {
-                            let revFood = 0, revGrocery = 0, revRide = 0, count = 0;
-                            const orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                            orders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0));
-
-                            let newOrderIds = {};
-                            let firstLoad = Object.keys(window.lastKnownOrders || {}).length === 0;
-
-                            orders.forEach(o => {
-                                if (o.status !== 'Rejected') {
-                                    if (o.type === 'Ride') revRide += (o.total || o.amount || 0);
-                                    else if (o.restaurantName && o.restaurantName.toLowerCase().includes('grocery')) revGrocery += (o.total || 0); 
-                                    else revFood += (o.total || 0);
-                                    count++;
-                                }
-                                newOrderIds[o.id] = o.status;
-                                if (!firstLoad && !window.lastKnownOrders[o.id]) {
-                                    window.speakAlert("New order received");
-                                    window.showStatusPopup("New Order Alert", `Order #${o.id.slice(-5).toUpperCase()} placed for ₹${o.total || o.amount}`);
-                                }
-                            });
-                            
-                            window.lastKnownOrders = newOrderIds;
-                            
-                            const elRev = document.getElementById('stat-rev');
-                            if(elRev) elRev.innerText = `₹${(revFood + revGrocery + revRide).toFixed(2)}`;
-                            const elFood = document.getElementById('stat-rev-food');
-                            if(elFood) elFood.innerText = `₹${revFood.toFixed(0)}`;
-                            const elGroc = document.getElementById('stat-rev-grocery');
-                            if(elGroc) elGroc.innerText = `₹${revGrocery.toFixed(0)}`;
-                            const elRide = document.getElementById('stat-rev-ride');
-                            if(elRide) elRide.innerText = `₹${revRide.toFixed(0)}`;
-                            const elOrd = document.getElementById('stat-ord');
-                            if(elOrd) elOrd.innerText = count;
-
-                            window.adminOrdersData = orders;
-                            if(window.renderAdminOrders) window.renderAdminOrders();
-                        });
-                        unsubscribeListeners.push(unsubOrders);
-
-                        const unsubUsers = onSnapshot(getCol('users'), (snap) => {
-                            const allUsers = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                            const elUsers = document.getElementById('stat-users');
-                            if(elUsers) elUsers.innerText = allUsers.length;
-                            
-                            const partners = allUsers.filter(u => u.role === 'Partner' && u.approvalStatus === 'Approved');
-                            const promoSelect = document.getElementById('admin-promo-restaurant');
-                            if(promoSelect) {
-                                promoSelect.innerHTML = '<option value="Global">All Restaurants (Global)</option>' + partners.map(p => `<option value="${p.id}">${p.shopName || p.name}</option>`).join('');
-                            }
-
-                            window.adminUsersData = allUsers;
-                            if(window.renderAdminUsers) window.renderAdminUsers();
-                        });
-                        unsubscribeListeners.push(unsubUsers);
-
-                        const unsubPromos = onSnapshot(getCol('promos'), (snap) => {
-                            const promoList = document.getElementById('admin-promo-list');
-                            if(!promoList) return;
-                            const promos = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                            if(promos.length === 0) {
-                                promoList.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-400">No offers active.</td></tr>';
-                                return;
-                            }
-                            promoList.innerHTML = promos.map(p => `
-                                <tr class="border-b border-gray-50">
-                                    <td class="p-2 font-bold text-gray-900 uppercase">
-                                        ${p.isItemOffer ? '<i class="fa-solid fa-cube text-blue-500 mr-1"></i> Item Offer' : `<i class="fa-solid fa-ticket text-emerald-500 mr-1"></i> ${p.code}`}
-                                    </td>
-                                    <td class="p-2 font-black text-red-600">${p.discountType === 'flat' ? '₹' : ''}${p.discount}${p.discountType === 'percentage' ? '%' : ''} OFF</td>
-                                    <td class="p-2 text-gray-500 text-[10px] truncate max-w-[100px]">${p.itemName || p.restaurantName || 'All Restaurants'}</td>
-                                    <td class="p-2 text-right">
-                                        <button onclick="window.togglePromo('${p.id}', ${p.isActive})" class="px-2 py-1 rounded text-[10px] font-bold ${p.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'}">${p.isActive ? 'Active' : 'Disabled'}</button>
-                                        <button onclick="window.deletePromo('${p.id}')" class="px-2 py-1 rounded text-[10px] font-bold bg-red-100 text-red-700 ml-1"><i class="fa-solid fa-trash"></i></button>
-                                    </td>
-                                </tr>
-                            `).join('');
-                        });
-                        unsubscribeListeners.push(unsubPromos);
-                    } 
-                    else if (currentUser.role === 'User') {
-                        const unsubUserOrders = onSnapshot(getCol('orders'), (snap) => {
-                            const listEl = document.getElementById('user-orders-list');
-                            if(!listEl) return;
-                            const myOrders = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(o => o.phone === currentUser.phone);
-                            myOrders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0));
-                            window.userOrderHistory = myOrders;
-
-                            if(myOrders.length === 0) {
-                                listEl.innerHTML = '<div class="text-center py-10 bg-white rounded-3xl border border-gray-100"><img src="https://cdn-icons-png.flaticon.com/512/1008/1008000.png" class="w-16 h-16 mx-auto mb-4 opacity-20"><p class="text-gray-400 font-medium text-sm">No orders yet. Discover great food around you!</p></div>';
-                                return;
-                            }
-
-                            let newOrderIds = {};
-                            let firstLoad = Object.keys(window.lastKnownOrders || {}).length === 0;
-
-                            listEl.innerHTML = myOrders.map(o => {
-                                newOrderIds[o.id] = o.status;
-                                
-                                if (!firstLoad && window.lastKnownOrders[o.id] && window.lastKnownOrders[o.id] !== o.status) {
-                                    window.showStatusPopup("Order Update", `Your order #${o.id.slice(-5).toUpperCase()} is now ${o.status}`);
-                                }
-
-                                const timeStr = window.formatOrderTime(o.time);
-                                let statusColor = 'text-orange-500', progressWidth = '15%', statusText = 'Pending Approval';
-                                if(o.status === 'Accepted') { statusColor = 'text-blue-500'; progressWidth = '30%'; statusText = 'Order Confirmed'; }
-                                if(o.status === 'Preparing') { statusColor = 'text-blue-500'; progressWidth = '50%'; statusText = 'Food is Preparing'; }
-                                if(o.status === 'Ready') { statusColor = 'text-yellow-500'; progressWidth = '65%'; statusText = 'Waiting for Delivery'; }
-                                if(o.status === 'Out for Delivery') { statusColor = 'text-yellow-500'; progressWidth = '85%'; statusText = 'OUT FOR DELIVERY.. Reaching soon'; }
-                                if(o.status === 'Delivered') { statusColor = 'text-emerald-500'; progressWidth = '100%'; statusText = 'Delivered Successfully'; }
-                                if(o.status === 'Rejected') { statusColor = 'text-red-500'; progressWidth = '100%'; statusText = 'Order Rejected'; }
-
-                                const itemsList = o.items ? o.items.map(i => `${i.name} ${i.quantity && i.quantity > 1 ? '(x'+i.quantity+')' : ''}`.trim()).join(', ') : '';
-                                const paymentBadge = o.paymentMode === 'Prepaid' ? `<span class="bg-blue-100 text-blue-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">Prepaid</span>` : `<span class="bg-gray-100 text-gray-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">COD</span>`;
-
-                                let trackingHtml = '';
-                                if (o.type === 'Ride') {
-                                    if (o.status === 'Broadcasted' || o.status === 'Requested') statusText = "Searching for Cab...";
-                                    if (o.status === 'Confirmed') { statusColor = 'text-blue-500'; progressWidth = '50%'; statusText = "Driver is arriving..."; }
-                                    if (o.status === 'Started') { statusColor = 'text-blue-500'; progressWidth = '75%'; statusText = "Ride in Progress"; }
-                                    if (o.status === 'Completed') { statusColor = 'text-emerald-500'; progressWidth = '100%'; statusText = "Ride Completed"; }
-
-                                    let fareActionHtml = '';
-                                    if (o.status === 'Broadcasted' || o.status === 'Requested') {
-                                        if (o.bids && o.bids.length > 0) {
-                                            fareActionHtml = `
-                                                <div class="mt-3 space-y-2 border-t border-blue-100 pt-3">
-                                                    <p class="text-[10px] font-black uppercase text-blue-600 mb-1">Incoming Driver Offers</p>
-                                                    ${o.bids.map(b => `
-                                                        <div class="bg-blue-50 border border-blue-200 p-2.5 rounded-xl flex justify-between items-center shadow-sm">
-                                                            <div>
-                                                                <p class="text-xs font-bold text-gray-900">${b.riderName}</p>
-                                                                <p class="text-[9px] text-gray-500 font-medium">${b.vehicle}</p>
-                                                            </div>
-                                                            <div class="flex items-center gap-3">
-                                                                <span class="text-lg font-black text-emerald-600">₹${b.amount}</span>
-                                                                <button onclick="window.acceptRideBid('${o.id}', '${b.riderId}', '${b.riderName.replace(/'/g,"\\'")}', ${b.amount}, '${b.vehicle}', '${b.riderPhone}')" class="bg-emerald-500 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-sm active:scale-95">Accept</button>
-                                                            </div>
-                                                        </div>
-                                                    `).join('')}
-                                                </div>
-                                            `;
-                                        } else {
-                                            fareActionHtml = `<div class="mt-3 text-center text-xs text-gray-500 bg-gray-50 p-3 rounded-xl border border-gray-100"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Waiting for drivers to send offers...</div>`;
-                                        }
-                                    }
-
-                                    trackingHtml = `
-                                    <div class="mt-4 bg-blue-50 border border-blue-100 rounded-xl p-3">
-                                        <p class="text-[10px] font-black uppercase text-blue-600 mb-1">Ride Details</p>
-                                        ${o.riderId ? `
-                                        <div class="flex items-center gap-2 mb-2 pb-2 border-b border-blue-200">
-                                            <div class="w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center text-blue-700"><i class="fa-solid fa-taxi"></i></div>
-                                            <div class="flex-1">
-                                                <p class="text-xs font-bold text-gray-900">${o.riderName || 'Waiting...'}</p>
-                                                <p class="text-[10px] text-gray-500 font-medium">${o.carModel || ''} (${o.carNum || ''})</p>
-                                            </div>
-                                            <a href="tel:${o.riderPhone || o.riderId}" class="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone text-xs"></i></a>
-                                        </div>` : ''}
-                                        <div class="relative bg-white p-2 rounded-xl border border-blue-100 mt-2 shadow-sm">
-                                            <div class="absolute top-3 left-2.5 w-1.5 h-1.5 rounded-full bg-emerald-500 z-10"></div>
-                                            <div class="absolute top-5 left-3 w-0.5 h-4 bg-gray-300 z-10"></div>
-                                            <div class="absolute top-9 left-2.5 w-1.5 h-1.5 rounded-full bg-red-500 z-10"></div>
-                                            <p class="text-[10px] font-medium text-gray-700 pl-5 mb-1.5">From: <b>${o.pickup}</b></p>
-                                            <p class="text-[10px] font-medium text-gray-700 pl-5">To: <b>${o.address}</b></p>
-                                        </div>
-                                        ${o.isRoundTrip ? '<p class="text-[10px] bg-purple-100 text-purple-700 font-bold px-2 py-1 rounded mt-2 border border-purple-200 text-center"><i class="fa-solid fa-rotate w-3"></i> Round Trip Requested</p>' : ''}
-                                        ${fareActionHtml}
-                                    </div>`;
-                                } else if (o.status === 'Out for Delivery') {
-                                    const displayRiderName = o.riderName || 'Restaurant (Self Delivery)';
-                                    const displayRiderPhone = o.riderPhone || '';
-                                    trackingHtml = `
-                                    <div class="mt-4 bg-blue-50 border border-blue-100 rounded-xl p-3">
-                                        <p class="text-[10px] font-black uppercase text-blue-600 mb-1">Delivery Partner Allocated</p>
-                                        <div class="flex items-center gap-2">
-                                            <div class="w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center text-blue-700"><i class="fa-solid fa-motorcycle"></i></div>
-                                            <div class="flex-1">
-                                                <p class="text-xs font-bold text-gray-900">${displayRiderName}</p>
-                                                <p class="text-[10px] text-gray-500">${displayRiderPhone}</p>
-                                            </div>
-                                            ${displayRiderPhone ? `<a href="tel:${displayRiderPhone}" class="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone text-xs"></i></a>` : ''}
-                                        </div>
-                                        <div class="w-full h-32 mt-3 rounded-lg flex items-center justify-center border border-blue-200 bg-blue-50 relative overflow-hidden">
-                                            <div class="absolute w-20 h-20 border-4 border-blue-200 rounded-full animate-ping"></div>
-                                            <div class="absolute w-10 h-10 border-4 border-blue-400 rounded-full animate-ping" style="animation-delay: 0.5s"></div>
-                                            <i class="fa-solid fa-motorcycle text-3xl text-blue-600 z-10 relative"></i>
-                                            <div class="absolute bottom-2 left-0 right-0 text-center">
-                                                <span class="bg-white/90 backdrop-blur px-2 py-1 rounded text-[9px] font-black text-blue-600 shadow-sm">
-                                                    <i class="fa-solid fa-satellite-dish mr-1 animate-pulse"></i> Live Tracking - Reaching soon
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>`;
-                                } else if (o.status === 'Rejected' && o.rejectReason) {
-                                    trackingHtml = `<p class="text-xs font-bold text-red-500 mt-3 bg-red-50 p-2 rounded-lg border border-red-100"><i class="fa-solid fa-circle-info mr-1"></i> Reason: ${o.rejectReason}</p>`;
-                                }
-                                
-                                let ratingHtml = '';
-                                if (o.status === 'Delivered' || o.status === 'Completed') {
-                                    if (o.rating) {
-                                        ratingHtml = `
-                                            <div class="mt-3 bg-yellow-50 p-3 rounded-xl border border-yellow-100">
-                                                <div class="flex items-center justify-between">
-                                                    <span class="text-[10px] font-bold text-yellow-700">Your Rating</span>
-                                                    <span class="text-sm font-black text-yellow-500">${o.rating} <i class="fa-solid fa-star"></i></span>
-                                                </div>
-                                                ${o.review ? `<p class="text-xs text-gray-600 mt-1 italic">"${o.review}"</p>` : ''}
-                                            </div>
-                                        `;
-                                    } else {
-                                        ratingHtml = `<button onclick="window.openRatingModal('${o.id}', '${o.restaurantId || o.riderId}')" class="w-full mt-3 bg-yellow-400 text-gray-900 py-3 rounded-xl font-bold text-xs shadow-sm hover:bg-yellow-500 transition-colors"><i class="fa-solid fa-star mr-1"></i> Rate Your Experience</button>`;
-                                    }
-                                }
-
-                                let resAddressHtml = o.restaurantAddress && o.type !== 'Ride' ? `<p class="text-[9px] text-gray-500 font-medium mb-1"><i class="fa-solid fa-location-dot"></i> ${o.restaurantAddress}</p>` : '';
-
-                                return `
-                                    <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 relative overflow-hidden transition-all hover:shadow-md">
-                                        <div class="flex justify-between items-start mb-2">
-                                            <div>
-                                                <div class="flex items-center gap-2 mb-1"><span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">${o.type === 'Ride' ? '🚕 RIDE' : 'Order'} #${o.id.slice(-5).toUpperCase()}</span><span class="text-[9px] font-medium text-gray-400"><i class="fa-regular fa-clock"></i> ${timeStr}</span>${o.type !== 'Ride' ? paymentBadge : ''}</div>
-                                                <h4 class="font-black text-gray-900 text-base leading-none">${o.type === 'Ride' ? 'Ride Service' : (o.restaurantName || 'Gramzo Partner')}</h4>
-                                            </div>
-                                            <span class="text-xl font-black text-gray-900">₹${o.total ? o.total.toFixed(2) : (o.amount || 0)}</span>
-                                        </div>
-                                        ${resAddressHtml}
-                                        ${o.type !== 'Ride' ? `<p class="text-xs text-gray-500 mb-5 font-medium line-clamp-2 mt-2">${itemsList}</p>` : ''}
-                                        <div class="mb-2 mt-4 bg-gray-50 p-3 rounded-xl border border-gray-100">
-                                            <div class="flex justify-between text-[10px] font-black uppercase tracking-wider mb-2 ${statusColor}"><span>${statusText}</span></div>
-                                            <div class="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden"><div class="bg-current h-1.5 rounded-full transition-all duration-1000 ${statusColor.replace('text-', 'bg-')}" style="width: ${progressWidth}"></div></div>
-                                        </div>
-                                        ${trackingHtml}
-                                        ${ratingHtml}
-                                    </div>`;
-                            }).join('');
-                            
-                            window.lastKnownOrders = newOrderIds;
-                        });
-                        unsubscribeListeners.push(unsubUserOrders);
-                    }
-                    else if (currentUser.role === 'Partner') {
-                        const userUnsub = onSnapshot(getDocRef('users', currentUser.phone), (docSnap) => {
-                            if (docSnap.exists()) {
-                                const data = docSnap.data();
-                                currentUser.shopStatus = data.shopStatus || 'Offline';
-                                const isCurrentlyOpen = ['Open', 'Online'].includes(currentUser.shopStatus);
-                                
-                                const statusToggleShop = document.getElementById('partner-status-toggle');
-                                const statusToggleRider = document.getElementById('rider-status-toggle');
-                                
-                                if (statusToggleShop) statusToggleShop.checked = isCurrentlyOpen;
-                                if (statusToggleRider) statusToggleRider.checked = isCurrentlyOpen;
-                                
-                                const shopStatusTxt = document.getElementById('shop-status-text');
-                                if(shopStatusTxt) shopStatusTxt.innerText = `Currently ${isCurrentlyOpen ? 'Open' : 'Closed'}`;
-                                
-                                const riderStatusTxt = document.getElementById('rider-status-text');
-                                if(riderStatusTxt) riderStatusTxt.innerText = isCurrentlyOpen ? 'You are ONLINE' : 'You are OFFLINE';
-                            }
-                        });
-                        unsubscribeListeners.push(userUnsub);
-
-                        const orderUnsub = onSnapshot(getCol('orders'), (snap) => {
-                            const orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                            
-                            let relevantOrders = [];
-                            if (['Food Owner', 'Grocery Shop'].includes(currentUser.category)) {
-                                relevantOrders = orders.filter(o => o.restaurantId === currentUser.phone && o.type !== 'Ride');
-                            } else if (['Rider', 'Ride Partner'].includes(currentUser.category)) {
-                                let myType = currentUser.vehicleType || 'Bike'; 
-                                let mySeater = parseInt(currentUser.seater) || 4; 
-                                
-                                let isCar = myType === 'Car' || myType.startsWith('Car');
-                                let myCarCat = mySeater <= 6 ? 'Car_Mini' : 'Car_SUV';
-                                let isOnline = currentUser.shopStatus === 'Online' || currentUser.shopStatus === 'Open';
-
-                                relevantOrders = orders.filter(o => {
-                                    let orderVeh = o.vehicleType || 'Bike';
-                                    let isIncomingRide = (o.status === 'Broadcasted' || o.status === 'Requested') && o.type === 'Ride';
-                                    
-                                    let vehicleMatch = false;
-                                    if (isCar) {
-                                        vehicleMatch = (orderVeh === myCarCat || orderVeh === 'Car' || orderVeh.startsWith('Car'));
-                                    } else {
-                                        vehicleMatch = (orderVeh === myType);
-                                    }
-
-                                    return (
-                                        (o.status === 'Ready' && !o.riderId && o.type !== 'Ride' && myType === 'Bike') || 
-                                        (o.status === 'Placed' && !o.restaurantId && o.type !== 'Ride' && myType === 'Bike') || 
-                                        (o.riderId === currentUser.phone && ['Out for Delivery'].includes(o.status) && o.type !== 'Ride') ||
-                                        (o.riderId === currentUser.phone && o.type === 'Ride') ||
-                                        (isIncomingRide && vehicleMatch && isOnline)
-                                    );
-                                });
-                            }
-                            
-                            relevantOrders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0));
-
-                            let newOrderIds = {};
-                            let firstLoad = Object.keys(window.lastKnownOrders || {}).length === 0;
-
-                            relevantOrders.forEach(o => {
-                                newOrderIds[o.id] = o.status;
-                                if (!firstLoad && !window.lastKnownOrders[o.id]) {
-                                    window.showStatusPopup("New Task Received!", `Order #${o.id.slice(-5).toUpperCase()} needs attention.`);
-                                }
-                            });
-                            
-                            window.lastKnownOrders = newOrderIds;
-                            window.partnerOrdersData = relevantOrders;
-                            if (window.renderPartnerOrders) window.renderPartnerOrders();
-                        });
-                        unsubscribeListeners.push(orderUnsub);
-
-                        if (['Food Owner', 'Grocery Shop'].includes(currentUser.category)) {
-                            const catalogUnsub = onSnapshot(getCol('products'), (snap) => {
-                                const list = document.getElementById('partner-catalog-list');
-                                if (!list) return;
-                                const items = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(p => p.partnerId === currentUser.phone); 
-                                if (items.length === 0) { list.innerHTML = '<p class="text-sm text-gray-400 text-center py-4 bg-white rounded-2xl border border-gray-100">No items added to catalogue yet.</p>'; return; }
-                                list.innerHTML = items.map(p => {
-                                    const variantsDisplay = p.variants ? p.variants.map(v => `${v.qty}: ₹${v.price}`).join(', ') : `${p.qty || ''}: ₹${p.price}`;
-                                    const stockColor = p.inStock !== false ? 'text-emerald-600 border-emerald-200 bg-emerald-50' : 'text-red-500 border-red-200 bg-red-50';
-                                    const stockText = p.inStock !== false ? 'In Stock' : 'Out of Stock';
-                                    return `<div class="flex justify-between items-center bg-white border border-gray-100 p-4 rounded-2xl shadow-sm"><div class="flex-1 mr-4"><p class="font-black text-sm text-gray-900">${p.name}</p><p class="text-[10px] text-gray-500">${p.shopCategory || p.category}</p><p class="text-xs text-gray-700 font-bold mt-1">${variantsDisplay}</p></div><div class="flex items-center gap-2 shrink-0"><button type="button" onclick="window.editPartnerProduct('${p.id}')" class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-colors shrink-0" title="Edit Item"><i class="fa-solid fa-pen text-xs"></i></button><button type="button" onclick="window.togglePartnerStock('${p.id}', ${p.inStock !== false})" class="text-[10px] font-black uppercase tracking-wider ${stockColor} border px-2 py-1 rounded transition whitespace-nowrap">${stockText}</button><button type="button" onclick="window.deletePartnerProduct('${p.id}')" class="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors shrink-0"><i class="fa-solid fa-trash text-xs"></i></button></div></div>`;
-                                }).join('');
-                            });
-                            unsubscribeListeners.push(catalogUnsub);
-                        }
-                    }
-                };
-
-                onAuthStateChanged(auth, async (user) => {
-                    if (user) {
-                        if (!currentUser) {
-                            let sessionPhone = null;
-                            try {
-                                const sessionSnap = await window.dbCall(getDoc(getDocRef('sessions', user.uid)), 5000);
-                                if (sessionSnap && sessionSnap.exists()) {
-                                    sessionPhone = sessionSnap.data().phone;
-                                }
-                            } catch(e) { console.warn("Session fetch delayed."); }
-
-                            if (!sessionPhone) {
-                                try {
-                                    const usersSnap = await window.dbCall(getDocs(getCol('users')), 5000);
-                                    const matchedUser = usersSnap.docs.find(d => d.data().uid === user.uid);
-                                    if (matchedUser) {
-                                        sessionPhone = matchedUser.id;
-                                        setDoc(getDocRef('sessions', user.uid), { phone: sessionPhone }, { merge: true }).catch(()=>{});
-                                    }
-                                } catch(e) { console.warn("Fallback fetch failed."); }
-                            }
-
-                            if (sessionPhone) {
-                                if (sessionPhone === 'admin_session' || sessionPhone === 'Gramzo_admin') {
-                                    currentUser = { name: 'Super Admin', role: 'Admin', phone: 'Admin', docId: 'admin_session', uid: user.uid };
-                                    window.finalizeLoginSequence(true);
+                        if (o.type === 'Ride') {
+                            if (o.status === 'Broadcasted' || o.status === 'Requested') {
+                                let hasBid = o.bids && o.bids.find(b => b.riderId === currentUser.phone);
+                                if (hasBid) {
+                                    actionButtons = `<div class="w-full bg-yellow-50 text-yellow-700 py-3 rounded-xl font-bold text-sm text-center border border-yellow-200"><i class="fa-solid fa-clock mr-1"></i> Offer sent: ₹${hasBid.amount}. Waiting...</div>`;
                                 } else {
-                                    try {
-                                        const userSnap = await window.dbCall(getDoc(getDocRef('users', sessionPhone)), 5000);
-                                        if (userSnap && userSnap.exists()) {
-                                            currentUser = { ...userSnap.data(), docId: sessionPhone };
-                                            window.finalizeLoginSequence(true); 
-                                        }
-                                    } catch(e) { console.warn("Profile fetch failed."); }
+                                    actionButtons = `
+                                        <div class="flex gap-2">
+                                            <input type="number" id="bid-amt-${o.id}" class="flex-[2] border border-gray-200 rounded-xl px-3 text-sm outline-none focus:border-blue-400 bg-white" placeholder="Your Offer (₹)">
+                                            <button type="button" onclick="window.sendRideBid('${o.id}', 'bid-amt-${o.id}')" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-paper-plane mr-1"></i> Send Bid</button>
+                                        </div>
+                                    `;
                                 }
+                            } else if (o.status === 'Confirmed') {
+                                actionButtons = `<button type="button" onclick="window.markRideStarted('${o.id}')" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-play mr-1"></i> Start Ride</button>`;
+                            } else if (o.status === 'Started') {
+                                const deduction = ['Car', 'Car_Mini', 'Car_SUV'].includes(currentUser.vehicleType) ? 50 : 5;
+                                actionButtons = `<button type="button" onclick="window.completeRide('${o.id}')" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-check-double mr-1"></i> End Ride & Collect ₹${o.amount} (-${deduction} Pts)</button>`;
+                            } else if (o.status === 'Completed') {
+                                actionButtons = `<div class="w-full bg-gray-100 text-gray-500 py-3 rounded-xl font-bold text-sm text-center border border-gray-200"><i class="fa-solid fa-check mr-1"></i> Completed (₹${o.amount})</div>`;
                             }
-                            window.loadMarketplaceData();
+                        } else {
+                            if (o.status === 'Ready' && !o.riderId) {
+                                actionButtons = `<button type="button" onclick="window.acceptDelivery('${o.id}')" class="w-full bg-gray-900 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-motorcycle mr-1"></i> Accept Delivery</button>`;
+                            } else if (o.status === 'Out for Delivery' && o.riderId === currentUser.phone) {
+                                actionButtons = `<div class="flex gap-2"><a href="tel:${o.phone}" class="flex-1 bg-white border border-gray-200 text-gray-700 py-3 rounded-xl font-bold text-sm text-center flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone mr-1"></i> Customer</a><button type="button" onclick="window.markDelivered('${o.id}')" class="flex-1 bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md"><i class="fa-solid fa-check-double mr-1"></i> Done</button></div>`;
+                            }
                         }
                     } else {
-                        if(window.startApp) window.startApp(); 
+                        if (o.status === 'Placed') actionButtons = `<div class="flex gap-2"><button type="button" onclick="window.acceptFoodOrder('${o.id}')" class="flex-1 bg-black text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-gray-800 transition-colors active:scale-95"><i class="fa-solid fa-check"></i> Accept</button><button type="button" onclick="window.openRejectModal('${o.id}')" class="flex-1 bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm hover:bg-red-100 transition-colors active:scale-95"><i class="fa-solid fa-xmark"></i> Reject</button></div>`;
+                        else if (o.status === 'Accepted') { cardStyle = 'border-blue-200 bg-blue-50/30'; actionButtons = `<button type="button" onclick="window.markPreparing('${o.id}')" class="w-full bg-blue-600 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-blue-700 active:scale-95">Start Preparing</button>`; }
+                        else if (o.status === 'Preparing') { cardStyle = 'border-orange-200 bg-orange-50/30'; actionButtons = `<button type="button" onclick="window.markReady('${o.id}')" class="w-full bg-orange-500 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-orange-600 active:scale-95">Mark Ready for Rider</button>`; }
+                        else if (o.status === 'Ready') { cardStyle = 'border-yellow-200 bg-yellow-50/30'; actionButtons = `<p class="text-xs font-bold text-orange-600 text-center py-2 bg-orange-50 rounded-xl">Waiting for Delivery Partner...</p><button type="button" onclick="window.markOutForDelivery('${o.id}')" class="w-full mt-2 bg-yellow-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95 border border-yellow-600">Self Deliver (Skip Rider)</button>`; }
+                        else if (o.status === 'Out for Delivery') {
+                            if (!o.riderId) { 
+                                actionButtons = `<button type="button" onclick="window.markDelivered('${o.id}')" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-check-double mr-1"></i> Mark as Delivered</button>`;
+                            } else {
+                                actionButtons = `
+                                <div class="flex gap-2 w-full mt-1">
+                                    <div class="flex-1 bg-yellow-50 border border-yellow-200 text-yellow-700 py-2 rounded-xl flex flex-col items-center justify-center">
+                                        <span class="text-[9px] font-black uppercase">Out for Delivery</span>
+                                        <span class="text-xs font-bold">${o.riderName || 'Rider'}</span>
+                                    </div>
+                                    <a href="tel:${o.riderPhone || o.riderId}" class="flex-[0.3] bg-blue-600 text-white rounded-xl flex items-center justify-center text-lg shadow-md active:scale-95"><i class="fa-solid fa-phone"></i></a>
+                                </div>
+                                `;
+                            }
+                        }
+                        else if (o.status === 'Delivered') actionButtons = `<div class="w-full bg-emerald-50 text-emerald-600 py-3 rounded-xl font-bold text-sm text-center border border-emerald-100"><i class="fa-solid fa-circle-check mr-1"></i> Order Completed</div>`;
+                        else if (o.status === 'Rejected') actionButtons = `<div class="w-full bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm text-center border border-red-100"><i class="fa-solid fa-circle-xmark mr-1"></i> Order Rejected</div>`;
+                    }
+
+                    let ratingHtml = o.rating ? `<div class="mt-2 text-center text-xs font-bold text-yellow-600 bg-yellow-50 rounded-lg py-1 border border-yellow-100"><i class="fa-solid fa-star"></i> Customer Rated: ${o.rating} Star</div>` : '';
+
+                    if (o.type === 'Ride') {
+                        html += `
+                            <div class="bg-white rounded-3xl p-5 shadow-sm border border-blue-100 relative overflow-hidden">
+                                <div class="flex justify-between items-start mb-3">
+                                    <div>
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="text-[10px] font-black text-blue-500 uppercase tracking-widest bg-blue-50 px-2 py-0.5 rounded"><i class="fa-solid fa-taxi"></i> RIDE</span>
+                                            <span class="text-[9px] font-medium text-gray-400"><i class="fa-regular fa-clock"></i> ${timeStr}</span>
+                                        </div>
+                                        <h4 class="font-bold text-gray-900 text-sm mt-2"><i class="fa-solid fa-user text-gray-400 mr-1"></i> ${o.customer}</h4>
+                                        <a href="${phoneLink}" class="text-xs font-bold ${phoneClass} block mt-0.5"><i class="fa-solid fa-phone mr-1"></i> ${displayPhone}</a>
+                                    </div>
+                                    <span class="text-xl font-black text-emerald-600">${o.amount ? '₹'+o.amount : '...'}</span>
+                                </div>
+                                ${bigJourneyTimeHtml}
+                                <div class="relative bg-gray-50 p-3 rounded-xl mb-4 border border-gray-100 mt-2">
+                                    <div class="absolute top-4 left-3.5 w-2 h-2 rounded-full bg-emerald-500 z-10"></div>
+                                    <div class="absolute top-7 left-4 w-0.5 h-6 bg-gray-300 z-10"></div>
+                                    <div class="absolute top-14 left-3.5 w-2 h-2 rounded-full bg-red-500 z-10"></div>
+                                    
+                                    <p class="text-xs font-medium text-gray-700 pl-6 mb-3">From: <b>${o.pickup}</b></p>
+                                    <p class="text-xs font-medium text-gray-700 pl-6">To: <b>${o.address}</b></p>
+                                </div>
+                                ${o.isRoundTrip ? '<p class="text-[10px] bg-purple-50 text-purple-700 font-bold px-2 py-1 rounded mb-3 border border-purple-100 text-center"><i class="fa-solid fa-rotate w-3"></i> Round Trip Requested</p>' : ''}
+                                ${actionButtons}
+                            </div>
+                        `;
+                    } else {
+                        html += `<div class="bg-white rounded-3xl p-5 shadow-sm border ${cardStyle}">
+                                <div class="flex justify-between items-start mb-3"><div><div class="flex items-center gap-2 mb-1"><span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Order #${o.id.slice(-4).toUpperCase()}</span><span class="text-[9px] font-medium text-gray-400"><i class="fa-regular fa-clock"></i> ${timeStr}</span>${paymentBadge}</div><h4 class="font-bold text-gray-900 text-sm"><i class="fa-solid fa-map-pin text-red-500 mr-1"></i> ${o.address}</h4></div><span class="text-xl font-black text-emerald-600">₹${o.total.toFixed(2)}</span></div>
+                                ${bigJourneyTimeHtml}
+                                ${customerInfo}
+                                <div class="bg-gray-50 p-3 rounded-xl mb-4 border border-gray-100"><p class="text-xs text-gray-700 font-bold mb-1"><i class="fa-solid fa-clipboard-list text-gray-400 mr-1"></i> Items:</p><p class="text-sm text-gray-600 font-medium">${itemsStr}</p>${screenshotHtml}</div>
+                                ${actionButtons}
+                                ${ratingHtml}
+                                </div>`;
                     }
                 });
+                listEl.innerHTML = html;
+        };
 
-            </script>
-        </body>
-    </html>
+        window.adminCreatePromo = async () => {
+            if(currentUser.role !== 'Admin') return;
+            const code = document.getElementById('admin-promo-code').value.trim().toUpperCase();
+            const discount = parseInt(document.getElementById('admin-promo-discount').value);
+            const selectEl = document.getElementById('admin-promo-restaurant');
+            const restaurantId = selectEl.value;
+            const restaurantName = selectEl.options[selectEl.selectedIndex].text;
+
+            if(!code || isNaN(discount) || discount <= 0 || discount > 100) return window.showToast("Enter valid code and discount %", "error");
+
+            try {
+                await window.dbCall(addDoc(getCol('promos'), {
+                    code, discount, restaurantId, restaurantName: restaurantId === 'Global' ? 'All Restaurants' : restaurantName, isActive: true
+                }), 10000);
+                document.getElementById('admin-promo-code').value = '';
+                document.getElementById('admin-promo-discount').value = '';
+                window.showToast("Promo Created!", "success");
+            } catch(e) { window.showToast("Failed to create", "error"); }
+        };
+
+        window.togglePromo = async (id, currentStatus) => {
+            try { await window.dbCall(updateDoc(getDocRef('promos', id), {isActive: !currentStatus}), 10000); } catch(e){}
+        };
+
+        window.deletePromo = async (id) => {
+            try { await window.dbCall(deleteDoc(getDocRef('promos', id)), 10000); window.showToast("Promo Deleted", "info"); } catch(e){}
+        };
+
+        window.adminUpdateMarquee = async () => {
+            if(currentUser.role !== 'Admin') return;
+            const text = document.getElementById('admin-marquee-text').value.trim();
+            if(!text) return window.showToast("Please enter marquee text.", "error");
+
+            const btn = document.getElementById('btn-update-marquee');
+            const orig = btn.innerText;
+            btn.innerText = "Updating...";
+            btn.disabled = true;
+
+            try {
+                await window.dbCall(setDoc(getDocRef('settings', 'app_config'), { marqueeText: text }, { merge: true }), 10000);
+                window.showToast("Marquee Updated!", "success");
+                document.getElementById('admin-marquee-text').value = "";
+            } catch(e) {
+                window.showToast("Error updating marquee.", "error");
+            } finally {
+                btn.innerText = orig;
+                btn.disabled = false;
+            }
+        };
+
+        window.initRoleListeners = () => {
+            if (!auth.currentUser || !currentUser) return;
+
+            unsubscribeListeners.forEach(u => u());
+            unsubscribeListeners = [];
+
+            if (currentUser.role === 'Admin') {
+                const unsubOrders = onSnapshot(getCol('orders'), (snap) => {
+                    let revFood = 0, revGrocery = 0, revRide = 0, count = 0;
+                    const orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                    orders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0));
+
+                    let newOrderIds = {};
+                    let firstLoad = Object.keys(window.lastKnownOrders || {}).length === 0;
+
+                    orders.forEach(o => {
+                        if (o.status !== 'Rejected') {
+                            if (o.type === 'Ride') revRide += (o.total || o.amount || 0);
+                            else if (o.restaurantName && o.restaurantName.toLowerCase().includes('grocery')) revGrocery += (o.total || 0); 
+                            else revFood += (o.total || 0);
+                            count++;
+                        }
+                        newOrderIds[o.id] = o.status;
+                        if (!firstLoad && !window.lastKnownOrders[o.id]) {
+                            window.speakAlert("New order received");
+                            window.showStatusPopup("New Order Alert", `Order #${o.id.slice(-5).toUpperCase()} placed for ₹${o.total || o.amount}`);
+                        }
+                    });
+                    
+                    window.lastKnownOrders = newOrderIds;
+                    
+                    const elRev = document.getElementById('stat-rev');
+                    if(elRev) elRev.innerText = `₹${(revFood + revGrocery + revRide).toFixed(2)}`;
+                    const elFood = document.getElementById('stat-rev-food');
+                    if(elFood) elFood.innerText = `₹${revFood.toFixed(0)}`;
+                    const elGroc = document.getElementById('stat-rev-grocery');
+                    if(elGroc) elGroc.innerText = `₹${revGrocery.toFixed(0)}`;
+                    const elRide = document.getElementById('stat-rev-ride');
+                    if(elRide) elRide.innerText = `₹${revRide.toFixed(0)}`;
+                    const elOrd = document.getElementById('stat-ord');
+                    if(elOrd) elOrd.innerText = count;
+
+                    window.adminOrdersData = orders;
+                    if(window.renderAdminOrders) window.renderAdminOrders();
+                });
+                unsubscribeListeners.push(unsubOrders);
+
+                const unsubUsers = onSnapshot(getCol('users'), (snap) => {
+                    const allUsers = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                    const elUsers = document.getElementById('stat-users');
+                    if(elUsers) elUsers.innerText = allUsers.length;
+                    
+                    const partners = allUsers.filter(u => u.role === 'Partner' && u.approvalStatus === 'Approved');
+                    const promoSelect = document.getElementById('admin-promo-restaurant');
+                    if(promoSelect) {
+                        promoSelect.innerHTML = '<option value="Global">All Restaurants (Global)</option>' + partners.map(p => `<option value="${p.id}">${p.shopName || p.name}</option>`).join('');
+                    }
+
+                    window.adminUsersData = allUsers;
+                    if(window.renderAdminUsers) window.renderAdminUsers();
+                });
+                unsubscribeListeners.push(unsubUsers);
+
+                const unsubPromos = onSnapshot(getCol('promos'), (snap) => {
+                    const promoList = document.getElementById('admin-promo-list');
+                    if(!promoList) return;
+                    const promos = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                    if(promos.length === 0) {
+                        promoList.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-400">No offers active.</td></tr>';
+                        return;
+                    }
+                    promoList.innerHTML = promos.map(p => `
+                        <tr class="border-b border-gray-50">
+                            <td class="p-2 font-bold text-gray-900 uppercase">
+                                ${p.isItemOffer ? '<i class="fa-solid fa-cube text-blue-500 mr-1"></i> Item Offer' : `<i class="fa-solid fa-ticket text-emerald-500 mr-1"></i> ${p.code}`}
+                            </td>
+                            <td class="p-2 font-black text-red-600">${p.discountType === 'flat' ? '₹' : ''}${p.discount}${p.discountType === 'percentage' ? '%' : ''} OFF</td>
+                            <td class="p-2 text-gray-500 text-[10px] truncate max-w-[100px]">${p.itemName || p.restaurantName || 'All Restaurants'}</td>
+                            <td class="p-2 text-right">
+                                <button onclick="window.togglePromo('${p.id}', ${p.isActive})" class="px-2 py-1 rounded text-[10px] font-bold ${p.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'}">${p.isActive ? 'Active' : 'Disabled'}</button>
+                                <button onclick="window.deletePromo('${p.id}')" class="px-2 py-1 rounded text-[10px] font-bold bg-red-100 text-red-700 ml-1"><i class="fa-solid fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    `).join('');
+                });
+                unsubscribeListeners.push(unsubPromos);
+            } 
+            else if (currentUser.role === 'User') {
+                const unsubUserOrders = onSnapshot(getCol('orders'), (snap) => {
+                    const listEl = document.getElementById('user-orders-list');
+                    if(!listEl) return;
+                    const myOrders = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(o => o.phone === currentUser.phone);
+                    myOrders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0));
+                    window.userOrderHistory = myOrders;
+
+                    if(myOrders.length === 0) {
+                        listEl.innerHTML = '<div class="text-center py-10 bg-white rounded-3xl border border-gray-100"><img src="https://cdn-icons-png.flaticon.com/512/1008/1008000.png" class="w-16 h-16 mx-auto mb-4 opacity-20"><p class="text-gray-400 font-medium text-sm">No orders yet. Discover great services around you!</p></div>';
+                        return;
+                    }
+
+                    let newOrderIds = {};
+                    let firstLoad = Object.keys(window.lastKnownOrders || {}).length === 0;
+
+                    listEl.innerHTML = myOrders.map(o => {
+                        newOrderIds[o.id] = o.status;
+                        
+                        if (!firstLoad && window.lastKnownOrders[o.id] && window.lastKnownOrders[o.id] !== o.status) {
+                            window.showStatusPopup("Order Update", `Your order #${o.id.slice(-5).toUpperCase()} is now ${o.status}`);
+                        }
+
+                        const timeStr = window.formatOrderTime(o.time);
+                        let statusColor = 'text-orange-500', progressWidth = '15%', statusText = 'Pending Approval';
+                        if(o.status === 'Accepted') { statusColor = 'text-blue-500'; progressWidth = '30%'; statusText = 'Order Confirmed'; }
+                        if(o.status === 'Preparing') { statusColor = 'text-blue-500'; progressWidth = '50%'; statusText = 'Food is Preparing'; }
+                        if(o.status === 'Ready') { statusColor = 'text-yellow-500'; progressWidth = '65%'; statusText = 'Waiting for Delivery'; }
+                        if(o.status === 'Out for Delivery') { statusColor = 'text-yellow-500'; progressWidth = '85%'; statusText = 'OUT FOR DELIVERY.. Reaching soon'; }
+                        if(o.status === 'Delivered') { statusColor = 'text-emerald-500'; progressWidth = '100%'; statusText = 'Delivered Successfully'; }
+                        if(o.status === 'Rejected') { statusColor = 'text-red-500'; progressWidth = '100%'; statusText = 'Order Rejected'; }
+
+                        const itemsList = o.items ? o.items.map(i => `${i.name} ${i.quantity && i.quantity > 1 ? '(x'+i.quantity+')' : ''}`.trim()).join(', ') : '';
+                        const paymentBadge = o.paymentMode === 'Prepaid' ? `<span class="bg-blue-100 text-blue-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">Prepaid</span>` : `<span class="bg-gray-100 text-gray-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">COD</span>`;
+
+                        let bigJourneyTimeHtml = '';
+                        if (o.isScheduled && o.scheduledTime) {
+                            const timeFormatted = window.formatOrderTime(o.scheduledTime);
+                            bigJourneyTimeHtml = `
+                                <div class="mt-3 mb-2 bg-blue-50 border border-blue-200 p-3 rounded-xl text-center">
+                                    <p class="text-[10px] font-black uppercase text-blue-600 tracking-widest mb-1">${o.type === 'Ride' ? 'JOURNEY DATE & TIME' : 'DELIVERY DATE & TIME'}</p>
+                                    <p class="text-lg font-black text-blue-900 drop-shadow-sm">${timeFormatted}</p>
+                                </div>
+                            `;
+                        } else if (o.type === 'Ride') {
+                            bigJourneyTimeHtml = `
+                                <div class="mt-3 mb-2 bg-emerald-50 border border-emerald-200 p-3 rounded-xl text-center">
+                                    <p class="text-[10px] font-black uppercase text-emerald-600 tracking-widest mb-1">JOURNEY TIME</p>
+                                    <p class="text-lg font-black text-emerald-900 drop-shadow-sm">IMMEDIATE (NOW)</p>
+                                </div>
+                            `;
+                        }
+
+                        let trackingHtml = '';
+                        if (o.type === 'Ride') {
+                            if (o.status === 'Broadcasted' || o.status === 'Requested') statusText = "Searching for Cab...";
+                            if (o.status === 'Confirmed') { statusColor = 'text-blue-500'; progressWidth = '50%'; statusText = "Driver is arriving..."; }
+                            if (o.status === 'Started') { statusColor = 'text-blue-500'; progressWidth = '75%'; statusText = "Ride in Progress"; }
+                            if (o.status === 'Completed') { statusColor = 'text-emerald-500'; progressWidth = '100%'; statusText = "Ride Completed"; }
+
+                            let fareActionHtml = '';
+                            if (o.status === 'Broadcasted' || o.status === 'Requested') {
+                                if (o.bids && o.bids.length > 0) {
+                                    fareActionHtml = `
+                                        <div class="mt-3 space-y-2 border-t border-blue-100 pt-3">
+                                            <p class="text-[10px] font-black uppercase text-blue-600 mb-1">Incoming Driver Offers</p>
+                                            ${o.bids.map(b => `
+                                                <div class="bg-blue-50 border border-blue-200 p-2.5 rounded-xl flex justify-between items-center shadow-sm">
+                                                    <div>
+                                                        <p class="text-xs font-bold text-gray-900">${b.riderName}</p>
+                                                        <p class="text-[9px] text-gray-500 font-medium">${b.vehicle}</p>
+                                                    </div>
+                                                    <div class="flex items-center gap-3">
+                                                        <span class="text-lg font-black text-emerald-600">₹${b.amount}</span>
+                                                        <button onclick="window.acceptRideBid('${o.id}', '${b.riderId}', '${b.riderName.replace(/'/g,"\\'")}', ${b.amount}, '${b.vehicle}', '${b.riderPhone}')" class="bg-emerald-500 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-sm active:scale-95">Accept</button>
+                                                    </div>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                    `;
+                                } else {
+                                    fareActionHtml = `<div class="mt-3 text-center text-xs text-gray-500 bg-gray-50 p-3 rounded-xl border border-gray-100"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Waiting for drivers to send offers...</div>`;
+                                }
+                            }
+
+                            trackingHtml = `
+                            <div class="mt-4 bg-blue-50 border border-blue-100 rounded-xl p-3">
+                                <p class="text-[10px] font-black uppercase text-blue-600 mb-1">Ride Details</p>
+                                ${o.riderId ? `
+                                <div class="flex items-center gap-2 mb-2 pb-2 border-b border-blue-200">
+                                    <div class="w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center text-blue-700"><i class="fa-solid fa-taxi"></i></div>
+                                    <div class="flex-1">
+                                        <p class="text-xs font-bold text-gray-900">${o.riderName || 'Waiting...'}</p>
+                                        <p class="text-[10px] text-gray-500 font-medium">${o.carModel || ''} (${o.carNum || ''})</p>
+                                    </div>
+                                    <a href="tel:${o.riderPhone || o.riderId}" class="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone text-xs"></i></a>
+                                </div>` : ''}
+                                <div class="relative bg-white p-2 rounded-xl border border-blue-100 mt-2 shadow-sm">
+                                    <div class="absolute top-3 left-2.5 w-1.5 h-1.5 rounded-full bg-emerald-500 z-10"></div>
+                                    <div class="absolute top-5 left-3 w-0.5 h-4 bg-gray-300 z-10"></div>
+                                    <div class="absolute top-9 left-2.5 w-1.5 h-1.5 rounded-full bg-red-500 z-10"></div>
+                                    <p class="text-[10px] font-medium text-gray-700 pl-5 mb-1.5">From: <b>${o.pickup}</b></p>
+                                    <p class="text-[10px] font-medium text-gray-700 pl-5">To: <b>${o.address}</b></p>
+                                </div>
+                                ${o.isRoundTrip ? '<p class="text-[10px] bg-purple-100 text-purple-700 font-bold px-2 py-1 rounded mt-2 border border-purple-200 text-center"><i class="fa-solid fa-rotate w-3"></i> Round Trip Requested</p>' : ''}
+                                ${fareActionHtml}
+                            </div>`;
+                        } else if (o.status === 'Out for Delivery') {
+                            const displayRiderName = o.riderName || 'Restaurant (Self Delivery)';
+                            const displayRiderPhone = o.riderPhone || '';
+                            trackingHtml = `
+                            <div class="mt-4 bg-blue-50 border border-blue-100 rounded-xl p-3">
+                                <p class="text-[10px] font-black uppercase text-blue-600 mb-1">Delivery Partner Allocated</p>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center text-blue-700"><i class="fa-solid fa-motorcycle"></i></div>
+                                    <div class="flex-1">
+                                        <p class="text-xs font-bold text-gray-900">${displayRiderName}</p>
+                                        <p class="text-[10px] text-gray-500">${displayRiderPhone}</p>
+                                    </div>
+                                    ${displayRiderPhone ? `<a href="tel:${displayRiderPhone}" class="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone text-xs"></i></a>` : ''}
+                                </div>
+                                <div class="w-full h-32 mt-3 rounded-lg flex items-center justify-center border border-blue-200 bg-blue-50 relative overflow-hidden">
+                                    <div class="absolute w-20 h-20 border-4 border-blue-200 rounded-full animate-ping"></div>
+                                    <div class="absolute w-10 h-10 border-4 border-blue-400 rounded-full animate-ping" style="animation-delay: 0.5s"></div>
+                                    <i class="fa-solid fa-motorcycle text-3xl text-blue-600 z-10 relative"></i>
+                                    <div class="absolute bottom-2 left-0 right-0 text-center">
+                                        <span class="bg-white/90 backdrop-blur px-2 py-1 rounded text-[9px] font-black text-blue-600 shadow-sm">
+                                            <i class="fa-solid fa-satellite-dish mr-1 animate-pulse"></i> Live Tracking - Reaching soon
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>`;
+                        } else if (o.status === 'Rejected' && o.rejectReason) {
+                            trackingHtml = `<p class="text-xs font-bold text-red-500 mt-3 bg-red-50 p-2 rounded-lg border border-red-100"><i class="fa-solid fa-circle-info mr-1"></i> Reason: ${o.rejectReason}</p>`;
+                        }
+                        
+                        let ratingHtml = '';
+                        if (o.status === 'Delivered' || o.status === 'Completed') {
+                            if (o.rating) {
+                                ratingHtml = `
+                                    <div class="mt-3 bg-yellow-50 p-3 rounded-xl border border-yellow-100">
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-[10px] font-bold text-yellow-700">Your Rating</span>
+                                            <span class="text-sm font-black text-yellow-500">${o.rating} <i class="fa-solid fa-star"></i></span>
+                                        </div>
+                                        ${o.review ? `<p class="text-xs text-gray-600 mt-1 italic">"${o.review}"</p>` : ''}
+                                    </div>
+                                `;
+                            } else {
+                                ratingHtml = `<button onclick="window.openRatingModal('${o.id}', '${o.restaurantId || o.riderId}')" class="w-full mt-3 bg-yellow-400 text-gray-900 py-3 rounded-xl font-bold text-xs shadow-sm hover:bg-yellow-500 transition-colors"><i class="fa-solid fa-star mr-1"></i> Rate Your Experience</button>`;
+                            }
+                        }
+
+                        let resAddressHtml = o.restaurantAddress && o.type !== 'Ride' ? `<p class="text-[9px] text-gray-500 font-medium mb-1"><i class="fa-solid fa-location-dot"></i> ${o.restaurantAddress}</p>` : '';
+
+                        return `
+                            <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 relative overflow-hidden transition-all hover:shadow-md">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div>
+                                        <div class="flex items-center gap-2 mb-1"><span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">${o.type === 'Ride' ? '🚕 RIDE' : 'Order'} #${o.id.slice(-5).toUpperCase()}</span><span class="text-[9px] font-medium text-gray-400"><i class="fa-regular fa-clock"></i> ${timeStr}</span>${o.type !== 'Ride' ? paymentBadge : ''}</div>
+                                        <h4 class="font-black text-gray-900 text-base leading-none">${o.type === 'Ride' ? 'Ride Service' : (o.restaurantName || 'Gramzo Partner')}</h4>
+                                    </div>
+                                    <span class="text-xl font-black text-gray-900">₹${o.total ? o.total.toFixed(2) : (o.amount || 0)}</span>
+                                </div>
+                                ${bigJourneyTimeHtml}
+                                ${resAddressHtml}
+                                ${o.type !== 'Ride' ? `<p class="text-xs text-gray-500 mb-5 font-medium line-clamp-2 mt-2">${itemsList}</p>` : ''}
+                                <div class="mb-2 mt-4 bg-gray-50 p-3 rounded-xl border border-gray-100">
+                                    <div class="flex justify-between text-[10px] font-black uppercase tracking-wider mb-2 ${statusColor}"><span>${statusText}</span></div>
+                                    <div class="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden"><div class="bg-current h-1.5 rounded-full transition-all duration-1000 ${statusColor.replace('text-', 'bg-')}" style="width: ${progressWidth}"></div></div>
+                                </div>
+                                ${trackingHtml}
+                                ${ratingHtml}
+                            </div>`;
+                    }).join('');
+                    
+                    window.lastKnownOrders = newOrderIds;
+                });
+                unsubscribeListeners.push(unsubUserOrders);
+            }
+            else if (currentUser.role === 'Partner') {
+                const userUnsub = onSnapshot(getDocRef('users', currentUser.phone), (docSnap) => {
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        currentUser.shopStatus = data.shopStatus || 'Offline';
+                        const isCurrentlyOpen = ['Open', 'Online'].includes(currentUser.shopStatus);
+                        
+                        const statusToggleShop = document.getElementById('partner-status-toggle');
+                        const statusToggleRider = document.getElementById('rider-status-toggle');
+                        
+                        if (statusToggleShop) statusToggleShop.checked = isCurrentlyOpen;
+                        if (statusToggleRider) statusToggleRider.checked = isCurrentlyOpen;
+                        
+                        const shopStatusTxt = document.getElementById('shop-status-text');
+                        if(shopStatusTxt) shopStatusTxt.innerText = `Currently ${isCurrentlyOpen ? 'Open' : 'Closed'}`;
+                        
+                        const riderStatusTxt = document.getElementById('rider-status-text');
+                        if(riderStatusTxt) riderStatusTxt.innerText = isCurrentlyOpen ? 'You are ONLINE' : 'You are OFFLINE';
+                    }
+                });
+                unsubscribeListeners.push(userUnsub);
+
+                const orderUnsub = onSnapshot(getCol('orders'), (snap) => {
+                    const orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                    
+                    let relevantOrders = [];
+                    if (['Food Owner', 'Grocery Shop'].includes(currentUser.category)) {
+                        relevantOrders = orders.filter(o => o.restaurantId === currentUser.phone && o.type !== 'Ride');
+                    } else if (['Rider', 'Ride Partner'].includes(currentUser.category)) {
+                        let myType = currentUser.vehicleType || 'Bike'; 
+                        let mySeater = parseInt(currentUser.seater) || 4; 
+                        
+                        let isCar = myType === 'Car' || myType.startsWith('Car');
+                        let myCarCat = mySeater <= 6 ? 'Car_Mini' : 'Car_SUV';
+                        let isOnline = currentUser.shopStatus === 'Online' || currentUser.shopStatus === 'Open';
+
+                        relevantOrders = orders.filter(o => {
+                            let orderVeh = o.vehicleType || 'Bike';
+                            let isIncomingRide = (o.status === 'Broadcasted' || o.status === 'Requested') && o.type === 'Ride';
+                            
+                            let vehicleMatch = false;
+                            if (isCar) {
+                                vehicleMatch = (orderVeh === myCarCat || orderVeh === 'Car' || orderVeh.startsWith('Car'));
+                            } else {
+                                vehicleMatch = (orderVeh === myType);
+                            }
+
+                            return (
+                                (o.status === 'Ready' && !o.riderId && o.type !== 'Ride' && myType === 'Bike') || 
+                                (o.status === 'Placed' && !o.restaurantId && o.type !== 'Ride' && myType === 'Bike') || 
+                                (o.riderId === currentUser.phone && ['Out for Delivery'].includes(o.status) && o.type !== 'Ride') ||
+                                (o.riderId === currentUser.phone && o.type === 'Ride') ||
+                                (isIncomingRide && vehicleMatch && isOnline)
+                            );
+                        });
+                    }
+                    
+                    relevantOrders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0));
+
+                    let newOrderIds = {};
+                    let firstLoad = Object.keys(window.lastKnownOrders || {}).length === 0;
+
+                    relevantOrders.forEach(o => {
+                        newOrderIds[o.id] = o.status;
+                        if (!firstLoad && !window.lastKnownOrders[o.id]) {
+                            window.showStatusPopup("New Task Received!", `Order #${o.id.slice(-5).toUpperCase()} needs attention.`);
+                        }
+                    });
+                    
+                    window.lastKnownOrders = newOrderIds;
+                    window.partnerOrdersData = relevantOrders;
+                    if (window.renderPartnerOrders) window.renderPartnerOrders();
+                });
+                unsubscribeListeners.push(orderUnsub);
+
+                if (['Food Owner', 'Grocery Shop'].includes(currentUser.category)) {
+                    const catalogUnsub = onSnapshot(getCol('products'), (snap) => {
+                        const list = document.getElementById('partner-catalog-list');
+                        if (!list) return;
+                        const items = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(p => p.partnerId === currentUser.phone); 
+                        if (items.length === 0) { list.innerHTML = '<p class="text-sm text-gray-400 text-center py-4 bg-white rounded-2xl border border-gray-100">No items added to catalogue yet.</p>'; return; }
+                        list.innerHTML = items.map(p => {
+                            const variantsDisplay = p.variants ? p.variants.map(v => `${v.qty}: ₹${v.price}`).join(', ') : `${p.qty || ''}: ₹${p.price}`;
+                            const stockColor = p.inStock !== false ? 'text-emerald-600 border-emerald-200 bg-emerald-50' : 'text-red-500 border-red-200 bg-red-50';
+                            const stockText = p.inStock !== false ? 'In Stock' : 'Out of Stock';
+                            return `<div class="flex justify-between items-center bg-white border border-gray-100 p-4 rounded-2xl shadow-sm"><div class="flex-1 mr-4"><p class="font-black text-sm text-gray-900">${p.name}</p><p class="text-[10px] text-gray-500">${p.shopCategory || p.category}</p><p class="text-xs text-gray-700 font-bold mt-1">${variantsDisplay}</p></div><div class="flex items-center gap-2 shrink-0"><button type="button" onclick="window.editPartnerProduct('${p.id}')" class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-colors shrink-0" title="Edit Item"><i class="fa-solid fa-pen text-xs"></i></button><button type="button" onclick="window.togglePartnerStock('${p.id}', ${p.inStock !== false})" class="text-[10px] font-black uppercase tracking-wider ${stockColor} border px-2 py-1 rounded transition whitespace-nowrap">${stockText}</button><button type="button" onclick="window.deletePartnerProduct('${p.id}')" class="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors shrink-0"><i class="fa-solid fa-trash text-xs"></i></button></div></div>`;
+                        }).join('');
+                    });
+                    unsubscribeListeners.push(catalogUnsub);
+                }
+            }
+        };
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                if (!currentUser) {
+                    let sessionPhone = null;
+                    try {
+                        const sessionSnap = await window.dbCall(getDoc(getDocRef('sessions', user.uid)), 5000);
+                        if (sessionSnap && sessionSnap.exists()) {
+                            sessionPhone = sessionSnap.data().phone;
+                        }
+                    } catch(e) { console.warn("Session fetch delayed."); }
+
+                    if (!sessionPhone) {
+                        try {
+                            const usersSnap = await window.dbCall(getDocs(getCol('users')), 5000);
+                            const matchedUser = usersSnap.docs.find(d => d.data().uid === user.uid);
+                            if (matchedUser) {
+                                sessionPhone = matchedUser.id;
+                                setDoc(getDocRef('sessions', user.uid), { phone: sessionPhone }, { merge: true }).catch(()=>{});
+                            }
+                        } catch(e) { console.warn("Fallback fetch failed."); }
+                    }
+
+                    if (sessionPhone) {
+                        if (sessionPhone === 'admin_session' || sessionPhone === 'Gramzo_admin') {
+                            currentUser = { name: 'Super Admin', role: 'Admin', phone: 'Admin', docId: 'admin_session', uid: user.uid };
+                            window.finalizeLoginSequence(true);
+                        } else {
+                            try {
+                                const userSnap = await window.dbCall(getDoc(getDocRef('users', sessionPhone)), 5000);
+                                if (userSnap && userSnap.exists()) {
+                                    currentUser = { ...userSnap.data(), docId: sessionPhone };
+                                    window.finalizeLoginSequence(true); 
+                                }
+                            } catch(e) { console.warn("Profile fetch failed."); }
+                        }
+                    }
+                    window.loadMarketplaceData();
+}
+                } else {
+                    if(window.startApp) window.startApp(); 
+                }
+            });
+
+        </script>
+    </body>
+</html>
