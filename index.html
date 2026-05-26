@@ -18,36 +18,27 @@
                     return; 
                 }
 
-                const APP_VERSION = "13.0.1"; // Update: Fix Authentication & Init Loop
+                const APP_VERSION = "12.0.1"; // Update: Ride Bidding System Introduced
                 
                 const clearAllCachesAndReload = () => {
                     console.log("Wiping Service Workers and Caches for update...");
-                    try {
-                        if ('serviceWorker' in navigator) {
-                            navigator.serviceWorker.getRegistrations().then(regs => {
-                                for(let reg of regs) reg.unregister();
-                            }).catch(e => console.warn("SW error", e));
-                        }
-                    } catch(e) { console.warn("SW sync error", e); }
-                    
-                    try {
-                        if ('caches' in window) {
-                            caches.keys().then(names => { names.forEach(name => caches.delete(name)) }).catch(e => {});
-                        }
-                    } catch(e) {}
-                    
-                    try { localStorage.setItem("gramzo_app_version", APP_VERSION); } catch(e) {}
-                    
+                    if ('serviceWorker' in navigator) {
+                        navigator.serviceWorker.getRegistrations().then(regs => {
+                            for(let reg of regs) reg.unregister();
+                        });
+                    }
+                    if ('caches' in window) {
+                        caches.keys().then(names => { names.forEach(name => caches.delete(name)) });
+                    }
+                    localStorage.setItem("gramzo_app_version", APP_VERSION);
                     setTimeout(() => {
                         window.location.href = window.location.href.split('?')[0] + '?v=' + new Date().getTime();
                     }, 800);
                 };
 
-                try {
-                    if ('serviceWorker' in navigator) {
-                        navigator.serviceWorker.register('/firebase-messaging-sw.js').then(reg => reg.update()).catch(e => {});
-                    }
-                } catch(e) { console.warn("SW sync error", e); }
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.register('/firebase-messaging-sw.js').then(reg => reg.update()).catch(e => {});
+                }
 
                 const storedVersion = localStorage.getItem("gramzo_app_version");
                 if (storedVersion !== APP_VERSION) {
@@ -66,6 +57,7 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
@@ -282,7 +274,7 @@
                         
                         <div class="flex gap-2 mt-3">
                             <div class="flex-[2]">
-                                <select id="ride-search-type" onchange="window.handleRideTypeChange()" class="w-full bg-gray-50 border border-gray-100 rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-red-400 font-bold text-gray-700">
+                                <select id="ride-search-type" class="w-full bg-gray-50 border border-gray-100 rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-red-400 font-bold text-gray-700">
                                     <option value="Car_Mini" selected>🚕 Mini/Sedan (4-6 Seater)</option>
                                     <option value="Car_SUV">🚙 SUV (7-13 Seater)</option>
                                     <option value="Bike">🏍️ Bike (Max 1 Person)</option>
@@ -305,8 +297,8 @@
 
                         <!-- Round Trip Checkbox -->
                         <label class="flex items-center gap-2 text-xs font-bold text-gray-700 mt-4 cursor-pointer" id="round-trip-container">
-                            <input type="checkbox" id="ride-round-trip" class="w-4 h-4 text-red-600 focus:ring-red-500 rounded border-gray-300 shadow-sm" checked disabled>
-                            <span id="round-trip-label-text" class="text-red-600">Return Trip Included (Mandatory for Car)</span>
+                            <input type="checkbox" id="ride-round-trip" class="w-4 h-4 text-red-600 focus:ring-red-500 rounded border-gray-300 shadow-sm">
+                            <span id="round-trip-label-text">Return Trip Included (Round Trip)</span>
                         </label>
 
                         <!-- T&C Checkbox -->
@@ -368,7 +360,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v13.0.1 - Fix Auth Loop</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v12.0.1 - Open Fare Bidding</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right flex flex-col sm:flex-row gap-3">
                             <button type="button" id="btn-partner-login-trigger" onclick="window.openAuthModal('Partner')" class="bg-gray-900 text-white hover:bg-gray-800 border px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2">
@@ -404,7 +396,7 @@
                         <div id="cart-items-list" class="space-y-1"></div>
                         
                         <div class="mt-3 pt-3 border-t border-gray-50 border-dashed flex gap-2">
-                            <input type="text" id="promo-code-input" class="w-full bg-gray-50 border border-gray-100 rounded-xl px-3 py-2 text-xs font-bold uppercase outline-none focus:ring-1 focus:ring-red-400 placeholder-gray-400" placeholder="Promo Code (Optional)">
+                            <input type="text" id="promo-code-input" class="w-full bg-gray-50 border border-gray-100 rounded-xl px-3 py-2 text-xs font-bold uppercase outline-none focus:ring-1 focus:ring-red-400 placeholder-gray-400" placeholder="Promo Code (e.g. SAVE50)">
                             <button type="button" onclick="window.applyPromo()" class="bg-gray-900 text-white px-4 py-2 rounded-xl text-xs font-bold active:scale-95 transition">Apply</button>
                         </div>
                         
@@ -446,15 +438,6 @@
                             <textarea id="cart-address" rows="2" class="w-full bg-gray-50 border border-gray-100 rounded-xl px-3 py-3 text-xs font-medium outline-none pr-16 resize-none focus:ring-1 focus:ring-red-400" placeholder="Detailed Address (House No, Landmark...)"></textarea>
                             <button type="button" onclick="window.getCurrentLocation('cart-address')" class="absolute right-2 top-2 text-red-500 text-[10px] font-bold bg-red-50 px-2 py-1.5 rounded-lg border border-red-100 hover:bg-red-100"><i class="fa-solid fa-location-crosshairs"></i> GPS</button>
                         </div>
-                    </div>
-
-                    <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-2" id="cart-schedule-section">
-                        <div class="flex items-center gap-2 mb-3 pb-2 border-b border-gray-50">
-                            <i class="fa-regular fa-calendar-check text-gray-400 text-sm"></i>
-                            <h3 class="text-xs font-black text-gray-700 uppercase tracking-widest">Schedule Delivery (Optional)</h3>
-                        </div>
-                        <p class="text-[10px] text-gray-500 mb-2 font-medium">Select a future date & time for delivery. Leave blank for instant delivery.</p>
-                        <input type="datetime-local" id="cart-schedule-time" class="w-full bg-gray-50 border border-gray-100 rounded-xl px-3 py-3 text-xs font-bold text-gray-700 outline-none focus:ring-1 focus:ring-red-400">
                     </div>
 
                     <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100" id="payment-section">
@@ -795,18 +778,15 @@
                                 <option value="percentage">Percentage (%)</option>
                                 <option value="flat">Flat Amount (₹)</option>
                             </select>
-                            <input type="text" id="admin-promo-code" class="input-field !py-2 uppercase sm:w-1/3" placeholder="Promo Code (Optional)">
+                            <input type="text" id="admin-promo-code" class="input-field !py-2 uppercase sm:w-1/3" placeholder="Promo Code (Optional for Items)">
                         </div>
                         <div class="flex flex-col sm:flex-row gap-2">
                             <select id="admin-promo-restaurant" onchange="window.loadItemsForPromo()" class="input-field !py-2 sm:w-1/2 bg-white">
                                 <option value="Global">All Restaurants</option>
                             </select>
                             <select id="admin-promo-item" class="input-field !py-2 sm:w-1/2 bg-white" disabled>
-                                <option value="">Apply to Cart</option>
+                                <option value="">Apply to Cart (Requires Code)</option>
                             </select>
-                        </div>
-                        <div class="flex flex-col sm:flex-row gap-2 mt-2">
-                            <input type="number" id="admin-promo-min-cart" class="input-field !py-2 w-full" placeholder="Min Cart Value to Apply (Optional, ₹)">
                         </div>
                         <button type="button" onclick="window.adminCreatePromo()" class="w-full bg-red-600 text-white py-3 rounded-xl font-bold shadow-md hover:bg-red-700 active:scale-95 transition text-sm">Create Offer / Promo</button>
                     </div>
@@ -932,34 +912,23 @@
     <div id="status-popup-modal" class="modal-overlay z-[500]"><div class="modal-content !max-w-xs text-center border-t-8 border-red-500"><div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce"><i class="fa-solid fa-bell text-3xl text-red-500"></i></div><h3 id="status-popup-title" class="font-black text-2xl text-gray-900 mb-2">Update</h3><p id="status-popup-desc" class="text-sm text-gray-600 mb-6 font-medium">Details</p><button onclick="document.getElementById('status-popup-modal').classList.remove('active'); window.stopAlertSound && window.stopAlertSound();" class="w-full bg-gray-900 text-white py-3.5 rounded-xl font-bold shadow-md hover:bg-gray-800 transition active:scale-95 text-sm uppercase tracking-widest">Acknowledge</button></div></div>
     <div id="admin-auth-overlay" class="modal-overlay z-[150]"><div class="modal-content !bg-gray-900 border border-gray-800"><div class="flex justify-between items-center mb-4"><h3 class="font-black text-2xl text-white"><i class="fa-solid fa-shield-halved text-emerald-400"></i> Portal</h3><button type="button" onclick="window.closeAdminModal()" class="w-8 h-8 bg-gray-800 text-white rounded-full"><i class="fa-solid fa-xmark"></i></button></div><div class="space-y-4"><input id="admin-id-input" type="text" class="input-field !bg-gray-800 !text-white" placeholder="Admin ID"><input id="admin-pass-input" type="password" class="input-field !bg-gray-800 !text-white" placeholder="Admin Password"><button type="button" onclick="window.handleAdminLogin()" class="w-full bg-emerald-500 text-white p-4 rounded-2xl font-bold">Access Database</button></div></div></div>
     <div id="image-view-modal" class="modal-overlay z-[200]"><div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-md bg-white p-2 rounded-2xl shadow-2xl"><div class="flex justify-between items-center px-2 py-1 mb-2 border-b"><h3 class="font-bold text-sm">Payment Screenshot</h3><button type="button" onclick="document.getElementById('image-view-modal').classList.remove('active')" class="w-8 h-8 bg-gray-100 rounded-full"><i class="fa-solid fa-xmark"></i></button></div><img id="modal-full-img" src="" class="w-full h-auto rounded-xl max-h-[70vh] object-contain"></div></div>
-    
-    <div id="reject-modal" class="modal-overlay z-[200]">
-        <div class="modal-content !max-w-xs">
-            <h3 id="reject-modal-title" class="font-black text-xl text-gray-900 mb-2">Reject Order</h3>
-            <p class="text-xs text-gray-500 mb-4">Please provide a reason for rejecting.</p>
-            <select id="reject-reason" class="input-field mb-4 bg-white" onchange="document.getElementById('reject-reason-custom').classList.toggle('hidden', this.value === 'Other' || this.value === '')">
-                <option value="">Select a reason</option>
-            </select>
-            <textarea id="reject-reason-custom" class="input-field mb-4 hidden !py-2 resize-none text-xs" rows="2" placeholder="Type the exact reason..."></textarea>
-            <div class="flex gap-2">
-                <button onclick="document.getElementById('reject-modal').classList.remove('active')" class="flex-1 bg-gray-100 text-gray-600 py-3 rounded-xl font-bold text-sm hover:bg-gray-200">Cancel</button>
-                <button onclick="window.confirmRejectOrder()" class="flex-1 bg-red-600 text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-red-700">Confirm Reject</button>
-            </div>
-        </div>
-    </div>
-
+    <div id="reject-modal" class="modal-overlay z-[200]"><div class="modal-content !max-w-xs"><h3 class="font-black text-xl text-gray-900 mb-2">Reject Order</h3><p class="text-xs text-gray-500 mb-4">Please provide a reason for rejecting.</p><select id="reject-reason" class="input-field mb-4 bg-white" onchange="document.getElementById('reject-reason-custom').classList.toggle('hidden', this.value !== 'Other')"><option value="">Select a reason</option><option value="Items out of stock">Items out of stock</option><option value="Store is closing">Store is closing</option><option value="Too busy/High volume">Too busy/High volume</option><option value="Delivery unavailable">Delivery unavailable</option><option value="Other">Other (Type below)</option></select><textarea id="reject-reason-custom" class="input-field mb-4 hidden !py-2 resize-none text-xs" rows="2" placeholder="Type the exact reason..."></textarea><div class="flex gap-2"><button onclick="document.getElementById('reject-modal').classList.remove('active')" class="flex-1 bg-gray-100 text-gray-600 py-3 rounded-xl font-bold text-sm hover:bg-gray-200">Cancel</button><button onclick="window.confirmRejectOrder()" class="flex-1 bg-red-600 text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-red-700">Reject</button></div></div></div>
     <div id="rating-modal" class="modal-overlay z-[200]"><div class="modal-content !max-w-xs text-center"><h3 class="font-black text-xl text-gray-900 mb-2">Rate Your Experience</h3><p class="text-xs text-gray-500 mb-4">How was your service?</p><div class="flex justify-center gap-2 mb-4" id="star-container"><i class="fa-solid fa-star text-3xl text-gray-300 cursor-pointer" onclick="window.setRating(1)"></i><i class="fa-solid fa-star text-3xl text-gray-300 cursor-pointer" onclick="window.setRating(2)"></i><i class="fa-solid fa-star text-3xl text-gray-300 cursor-pointer" onclick="window.setRating(3)"></i><i class="fa-solid fa-star text-3xl text-gray-300 cursor-pointer" onclick="window.setRating(4)"></i><i class="fa-solid fa-star text-3xl text-gray-300 cursor-pointer" onclick="window.setRating(5)"></i></div><textarea id="rating-review-text" class="input-field mb-4 !py-2 resize-none text-xs" rows="2" placeholder="Write a review (optional)..."></textarea><div class="flex gap-2"><button onclick="document.getElementById('rating-modal').classList.remove('active')" class="flex-1 bg-gray-100 text-gray-600 py-3 rounded-xl font-bold text-sm hover:bg-gray-200">Cancel</button><button onclick="window.submitRating()" class="flex-1 bg-yellow-400 text-gray-900 py-3 rounded-xl font-bold text-sm shadow-md hover:bg-yellow-500">Submit</button></div></div></div>
     
-    <div id="toast-msg" class="fixed top-24 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full text-sm font-bold z-[300] shadow-2xl transition-all duration-300 transform -translate-y-10 opacity-0 pointer-events-none flex items-center gap-2 w-max max-w-[90vw]">
+    <div id="toast-msg" class="fixed top-24 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full text-sm font-bold z-[300] shadow-2xl transition-all duration-300 transform -translate-y-10 opacity-0 pointer-events-none flex items-center gap-2">
         <i class="fa-solid fa-circle-info text-emerald-400"></i>
-        <span id="toast-text" class="truncate">Message</span>
+        <span id="toast-text">Message</span>
     </div>
+
+   
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, getDoc, getDocs, setDoc, onSnapshot, addDoc, updateDoc, deleteDoc, serverTimestamp, initializeFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-messaging.js";
+
+        const IS_LIVE_WEBSITE = true;
 
         const liveFirebaseConfig = {
             apiKey: "AIzaSyCA4U4jva7HHeMP-yk1VJy3l_BBct3Gohg",
@@ -1008,12 +977,10 @@
             if(savedCart) window.cart = JSON.parse(savedCart); 
         } catch(e){}
 
-        window.appliedPromoData = null; // Object { discount, type, code, minCartValue }
+        window.appliedPromo = 0;
         window.promoCode = '';
         window.currentSearchQuery = '';
         window.currentRejectOrderId = null;
-        window.rejectContext = 'Partner'; // 'Partner', 'UserRide', 'Admin'
-        
         window.lastKnownOrders = {}; 
         let unsubscribeListeners = []; 
         let currentAuthRole = 'User'; 
@@ -1170,23 +1137,9 @@
 
         window.formatOrderTime = (timestamp) => {
             if (!timestamp) return 'Just now';
-            let date = timestamp;
-            if (typeof timestamp === 'string') date = new Date(timestamp);
-            else if (timestamp.toDate) date = timestamp.toDate();
-            
+            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
             return date.toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
         };
-
-        window.getScheduleHighlightHtml = (isScheduled, scheduledTime, isRide = false) => {
-            if (!isScheduled || !scheduledTime) return '';
-            const typeStr = isRide ? 'RIDE JOURNEY' : 'SCHEDULED ORDER';
-            return `
-                <div class="bg-purple-100 border-2 border-purple-400 text-purple-900 px-3 py-2 rounded-xl text-sm font-black text-center mt-2 mb-3 shadow-md animate-pulse uppercase tracking-wider">
-                    <i class="fa-solid fa-calendar-check mr-1 text-lg align-middle"></i> ${typeStr}: <br/>
-                    <span class="text-lg">${window.formatOrderTime(scheduledTime)}</span>
-                </div>
-            `;
-        }
 
         const getCol = (name) => collection(db, name);
         const getDocRef = (colName, docId) => doc(db, colName, String(docId));
@@ -1711,7 +1664,7 @@
                 try { await signOut(auth); } catch(e) {}
             }
             currentUser = null; window.cart = []; localStorage.removeItem('gramzo_cart');
-            window.appliedPromoData = null; window.promoCode = ''; window.lastKnownOrders = {};
+            window.appliedPromo = 0; window.promoCode = ''; window.lastKnownOrders = {};
             window.showToast("Signing out...", "info");
             setTimeout(() => window.location.reload(), 800);
         };
@@ -2080,7 +2033,7 @@
                 if (itemPromo.discountType === 'percentage') displayPrice = Math.floor(basePrice * (1 - itemPromo.discount / 100));
                 else if (itemPromo.discountType === 'flat') displayPrice = Math.max(0, basePrice - itemPromo.discount);
                 let discountStr = itemPromo.discountType === 'percentage' ? `${itemPromo.discount}% OFF` : `₹${itemPromo.discount} OFF`;
-                imageOverlayHtml = `<div class="absolute top-0 left-0 bg-blue-600 text-white text-[11px] font-black px-2 py-1 rounded-br-lg z-30 shadow-md border-b border-r border-blue-700 tracking-wide"><i class="fa-solid fa-tags mr-0.5"></i> ${discountStr}</div>`;
+                imageOverlayHtml = `<div class="absolute top-0 left-0 bg-blue-600 text-white text-[11px] font-black px-2 py-1 rounded-br-lg z-30 shadow-md border-b border-r border-blue-700 tracking-wide">${discountStr}</div>`;
             } else if (p.tag && p.tag !== 'None') {
                 imageOverlayHtml = `<div class="absolute top-0 left-0 bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded-br-lg z-30 shadow-md"><i class="fa-solid fa-fire mr-0.5"></i> ${p.tag}</div>`;
             }
@@ -2232,7 +2185,6 @@
 
             onSnapshot(getCol('promos'), (snap) => {
                 window.activePromos = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(p => p.isActive);
-                window.renderCartUI(); // Re-eval best auto promos
             });
             
             onSnapshot(getCol('scheduled_trips'), (snap) => {
@@ -2344,31 +2296,26 @@
             btn.innerText = '...'; btn.disabled = true;
 
             try {
-                const promos = window.activePromos || [];
+                const snap = await window.dbCall(getDocs(getCol('promos')), 10000);
+                const promos = snap.docs.map(d => d.data());
                 
                 const matchedPromo = promos.find(p => p.code === code && !p.isItemOffer); 
                 if(!matchedPromo) {
                     window.showToast("Invalid Promo Code", "error");
-                    window.appliedPromoData = null;
+                    window.appliedPromo = 0; window.promoCode = '';
                 } else if (!matchedPromo.isActive) {
                     window.showToast("Promo code is disabled", "error");
-                    window.appliedPromoData = null;
+                    window.appliedPromo = 0; window.promoCode = '';
                 } else if (matchedPromo.restaurantId !== 'Global' && window.cart.length > 0 && window.cart[0].partnerId !== matchedPromo.restaurantId) {
                     window.showToast("Promo not valid for this restaurant", "error");
-                    window.appliedPromoData = null;
+                    window.appliedPromo = 0; window.promoCode = '';
                 } else {
-                    const sub = window.cart.reduce((s, i) => s + (i.price * (i.quantity || 1)), 0);
-                    if (matchedPromo.minCartValue && sub < matchedPromo.minCartValue) {
-                        window.showToast(`Cart value must be at least ₹${matchedPromo.minCartValue}`, "error");
-                        window.appliedPromoData = null;
-                    } else {
-                        window.appliedPromoData = matchedPromo;
-                        window.promoCode = matchedPromo.code;
-                        window.showToast(`Offer Applied: ${matchedPromo.discount}${matchedPromo.discountType==='percentage'?'%':'₹'} OFF!`, "success");
-                    }
+                    window.appliedPromo = matchedPromo.discount; 
+                    window.promoCode = matchedPromo.code;
+                    window.showToast(`${window.appliedPromo}% Discount Applied!`, "success");
                 }
                 window.renderCartUI();
-            } catch(e) { window.showToast("Error verifying promo", "error"); } finally { btn.innerText = origText; btn.disabled = false; }
+            } catch(e) { window.showToast("Network Error verifying promo", "error"); } finally { btn.innerText = origText; btn.disabled = false; }
         };
 
         window.addToCartStandard = (id, name, price, partnerId, shopName) => {
@@ -2437,39 +2384,7 @@
             }
 
             const handlingFee = window.cart.length > 0 ? 5 : 0;
-
-            // Handle Promos automatically if manual code not applied
-            let bestAutoPromo = null;
-            let bestAutoDiscount = 0;
-            const resId = window.cart[0]?.partnerId;
-            const activeCartPromos = (window.activePromos || []).filter(p => !p.isItemOffer && (p.restaurantId === 'Global' || p.restaurantId === resId));
-
-            activeCartPromos.forEach(p => {
-                if (!p.code && p.minCartValue && sub >= p.minCartValue) {
-                    let dAmt = p.discountType === 'percentage' ? (sub * p.discount / 100) : p.discount;
-                    if (dAmt > bestAutoDiscount) {
-                        bestAutoDiscount = dAmt;
-                        bestAutoPromo = p;
-                    }
-                }
-            });
-
-            if (!window.appliedPromoData && bestAutoPromo) {
-                window.appliedPromoData = bestAutoPromo;
-                window.promoCode = '';
-            } else if (window.appliedPromoData && window.appliedPromoData.minCartValue && sub < window.appliedPromoData.minCartValue) {
-                window.appliedPromoData = null; // Eligibility lost
-                window.promoCode = '';
-            }
-
-            let promoDiscountAmt = 0;
-            let promoText = '';
-            if (window.appliedPromoData) {
-                let pd = window.appliedPromoData;
-                promoDiscountAmt = pd.discountType === 'percentage' ? (sub * pd.discount / 100) : pd.discount;
-                if (promoDiscountAmt > sub) promoDiscountAmt = sub;
-                promoText = pd.code ? `Code: ${pd.code}` : `Auto Applied Offer`;
-            }
+            const promoDiscountAmt = (sub * (window.appliedPromo || 0)) / 100;
             
             let coinDiscount = 0;
             const coinsContainer = document.getElementById('cart-coins-container');
@@ -2490,8 +2405,8 @@
             window.currentCartCoinDiscount = Math.floor(coinDiscount);
 
             if (summaryTotals) {
-                const promoHtml = promoDiscountAmt > 0 
-                    ? `<div class="flex justify-between text-[11px] text-emerald-600 font-bold"><span>${promoText}</span><span>-₹${promoDiscountAmt.toFixed(2)}</span></div>` 
+                const promoHtml = window.appliedPromo > 0 
+                    ? `<div class="flex justify-between text-[11px] text-emerald-600 font-bold"><span>Promo (${window.appliedPromo}%)</span><span>-₹${promoDiscountAmt.toFixed(2)}</span></div>` 
                     : '';
                 const coinHtml = coinDiscount > 0 
                     ? `<div class="flex justify-between text-[11px] text-yellow-600 font-bold"><span>Coins Applied</span><span>-₹${Math.floor(coinDiscount)}</span></div>` 
@@ -2586,7 +2501,7 @@
             else window.cart.splice(idx, 1);
 
             if(window.cart.length === 0) {
-                window.appliedPromoData = null; window.promoCode = '';
+                window.appliedPromo = 0; window.promoCode = '';
                 const promoInput = document.getElementById('promo-code-input');
                 if(promoInput) promoInput.value = '';
                 const villageSelect = document.getElementById('cart-village');
@@ -2632,23 +2547,13 @@
             else if (village !== '') deliveryFee = sub <= 99 ? 20 : 0;
 
             const handlingFee = window.cart.length > 0 ? 5 : 0;
-            
-            let promoDiscountAmt = 0;
-            if (window.appliedPromoData) {
-                let pd = window.appliedPromoData;
-                promoDiscountAmt = pd.discountType === 'percentage' ? (sub * pd.discount / 100) : pd.discount;
-                if (promoDiscountAmt > sub) promoDiscountAmt = sub;
-            }
-
+            const promoDiscountAmt = (sub * (window.appliedPromo || 0)) / 100;
             const coinDiscount = window.currentCartCoinDiscount || 0;
             const total = (sub - promoDiscountAmt + handlingFee + deliveryFee) - coinDiscount;
             
             const restaurantId = window.cart[0].partnerId || null;
             const restaurantName = window.cart[0].shopName || null;
             const restaurantAddress = (window.currentCartPartner && window.currentCartPartner.shopAddress) ? window.currentCartPartner.shopAddress : null;
-
-            const scheduleInput = document.getElementById('cart-schedule-time');
-            const scheduledTime = scheduleInput && scheduleInput.value ? scheduleInput.value : null;
 
             const btn = document.getElementById('btn-place-order');
             const originalText = btn.innerText; btn.innerText = "PLACING ORDER..."; btn.disabled = true;
@@ -2659,7 +2564,6 @@
                     items: window.cart.map(item => ({ name: item.name || '', price: item.price || 0, quantity: item.quantity || 1, partnerId: item.partnerId || null, shopName: item.shopName || null })), 
                     subtotal: sub || 0, discount: promoDiscountAmt || 0, coinDiscount: coinDiscount, promoCode: window.promoCode || null, total: total || 0, address: fullAddress || '', status: 'Placed', 
                     restaurantId: restaurantId, restaurantName: restaurantName, restaurantAddress: restaurantAddress, paymentMode: paymentMode, paymentScreenshot: paymentScreenshot,
-                    isScheduled: !!scheduledTime, scheduledTime: scheduledTime,
                     time: serverTimestamp() 
                 }), 15000);
 
@@ -2670,12 +2574,11 @@
                     window.currentCartCoinDiscount = 0;
                 }
                 
-                window.cart = []; window.appliedPromoData = null; window.promoCode = ''; localStorage.removeItem('gramzo_cart');
+                window.cart = []; window.appliedPromo = 0; window.promoCode = ''; localStorage.removeItem('gramzo_cart');
                 document.getElementById('cart-address').value = ''; document.getElementById('cart-village').value = '';
                 document.getElementById('cart-other-village').value = ''; document.getElementById('cart-other-village').classList.add('hidden');
                 if(document.getElementById('promo-code-input')) document.getElementById('promo-code-input').value = '';
                 if(document.getElementById('payment-screenshot')) document.getElementById('payment-screenshot').value = '';
-                if(document.getElementById('cart-schedule-time')) document.getElementById('cart-schedule-time').value = '';
                 const cartCoinToggle = document.getElementById('cart-use-coins-toggle');
                 if(cartCoinToggle) cartCoinToggle.checked = false;
                 
@@ -2685,24 +2588,8 @@
             } catch(e) { window.showToast(e.message || "Network Error. Try Again.", "error"); } finally { btn.innerText = originalText; btn.disabled = false; }
         };
 
-        window.openRejectModal = (id, context = 'Partner') => {
+        window.openRejectModal = (id) => {
             window.currentRejectOrderId = id;
-            window.rejectContext = context; // 'Partner', 'UserRide', 'Admin'
-            
-            const select = document.getElementById('reject-reason');
-            const title = document.getElementById('reject-modal-title');
-            
-            if (context === 'UserRide') {
-                title.innerText = "Cancel Ride Request";
-                select.innerHTML = '<option value="">Select a reason</option><option value="Fare too high">Fare too high</option><option value="Driver taking too long">Driver taking too long</option><option value="Changed my mind">Changed my mind</option><option value="Other">Other</option>';
-            } else if (context === 'Admin') {
-                title.innerText = "Reject Order (Admin)";
-                select.innerHTML = '<option value="">Select a reason</option><option value="Suspected Fraud">Suspected Fraud</option><option value="Restaurant Unresponsive">Restaurant Unresponsive</option><option value="No Riders Available">No Riders Available</option><option value="Customer Requested Cancellation">Customer Requested Cancellation</option><option value="Other">Other</option>';
-            } else {
-                title.innerText = "Reject Order";
-                select.innerHTML = '<option value="">Select a reason</option><option value="Items out of stock">Items out of stock</option><option value="Store is closing">Store is closing</option><option value="Too busy/High volume">Too busy/High volume</option><option value="Delivery unavailable">Delivery unavailable</option><option value="Other">Other (Type below)</option>';
-            }
-            
             document.getElementById('reject-reason').value = '';
             document.getElementById('reject-reason-custom').value = '';
             document.getElementById('reject-reason-custom').classList.add('hidden');
@@ -2715,15 +2602,11 @@
                 reason = document.getElementById('reject-reason-custom').value.trim();
                 if (!reason) return window.showToast("Please type the exact reason.", "error");
             } else if (!reason) { return window.showToast("Please select a reason.", "error"); }
-            
             if (!window.currentRejectOrderId) return;
 
             try {
-                await window.dbCall(updateDoc(getDocRef('orders', window.currentRejectOrderId), { status: 'Rejected', rejectReason: reason, rejectedBy: window.rejectContext }), 10000);
-                
-                if (window.rejectContext === 'UserRide') window.showToast("Ride Request Cancelled.", "success");
-                else window.showToast("Order Rejected successfully.", "success");
-                
+                await window.dbCall(updateDoc(getDocRef('orders', window.currentRejectOrderId), { status: 'Rejected', rejectReason: reason }), 10000);
+                window.showToast("Order Rejected.", "success");
                 document.getElementById('reject-modal').classList.remove('active');
             } catch(e) { window.showToast("Failed to update.", "error"); }
         };
@@ -2995,8 +2878,7 @@
             const confirmed = await window.customConfirm(`${actionVerb} Partner`, `Are you sure you want to ${actionVerb.toLowerCase()} this partner's registration?`, `Yes, ${actionVerb}`);
             if(!confirmed) return;
             try { await window.dbCall(setDoc(getDocRef('users', partnerPhone), { approvalStatus: status }, { merge: true }), 10000); window.showToast(`Partner status changed to ${status}!`, "success"); } 
-            catch(e) { window.showToast("Error updating status.", "error");
-}
+            catch(e) { window.showToast("Error updating status.", "error"); }
         };
 
         window.adminToggleUserVisibility = async (partnerPhone, currentStatus) => {
@@ -3105,11 +2987,6 @@
                 const itemsStr = o.items ? o.items.map(i => `${i.name} ${i.quantity && i.quantity > 1 ? '(x'+i.quantity+')' : ''}`.trim()).join('<br/>') : '';
                 const itemsHtml = itemsStr ? `<div class="bg-gray-50 p-2 rounded-xl mt-2 border border-gray-100 text-[10px] text-gray-700 font-bold leading-relaxed"><i class="fa-solid fa-clipboard-list text-gray-400 mr-1"></i> ${itemsStr}</div>` : '';
 
-                let rejectBtnHtml = '';
-                if (window.adminCurrentOrderTab === 'Live') {
-                    rejectBtnHtml = `<button onclick="window.openRejectModal('${o.id}', 'Admin')" class="mt-2 text-[9px] font-bold bg-red-50 text-red-600 px-2 py-1.5 rounded border border-red-100 hover:bg-red-100 w-full shadow-sm"><i class="fa-solid fa-xmark mr-1"></i>Reject</button>`;
-                }
-
                 html += `
                     <tr class="hover:bg-gray-50 transition-colors border-b border-gray-50">
                         <td class="p-3 font-mono font-bold text-[10px] text-gray-500 align-top pt-4">#${o.id.slice(-5).toUpperCase()}<br/><span class="font-sans font-medium text-[9px] text-gray-400">${timeStr}</span>${scheduledTimeHtml}</td>
@@ -3121,10 +2998,7 @@
                         </td>
                         <td class="p-3 font-medium text-gray-600 text-xs align-top pt-4">${o.type === 'Ride' ? (o.riderName || 'Pending') : (o.restaurantName || '-')}</td>
                         <td class="p-3 font-black text-gray-900 text-xs align-top pt-4">₹${o.total ? o.total.toFixed(2) : (o.amount || 0)}</td>
-                        <td class="p-3 text-right uppercase text-[9px] font-black tracking-wider align-top pt-4">
-                            <span class="${statusColor}">${o.status}</span>
-                            ${rejectBtnHtml}
-                        </td>
+                        <td class="p-3 text-right uppercase text-[9px] font-black ${statusColor} tracking-wider align-top pt-4">${o.status}</td>
                     </tr>`;
             });
             adminLog.innerHTML = html;
@@ -3167,7 +3041,7 @@
                 filteredOrders.forEach(o => {
                     const itemsStr = o.items ? o.items.map(i => `${i.name} ${i.quantity && i.quantity > 1 ? '(x'+i.quantity+')' : ''}`.trim()).join(', ') : '';
                     const timeStr = window.formatOrderTime(o.time);
-                    let scheduledTimeHtml = window.getScheduleHighlightHtml(o.isScheduled, o.scheduledTime, o.type === 'Ride');
+                    let scheduledTimeHtml = o.isScheduled && o.scheduledTime ? `<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[9px] font-black uppercase ml-2"><i class="fa-solid fa-calendar mr-1"></i> Trip Date: ${window.formatOrderTime(o.scheduledTime)}</span>` : '';
 
                     let cardStyle = 'border-gray-100', actionButtons = '';
                     let paymentBadge = o.paymentMode === 'Prepaid' ? `<span class="bg-blue-100 text-blue-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">Prepaid</span>` : `<span class="bg-gray-100 text-gray-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">COD</span>`;
@@ -3192,191 +3066,484 @@
                     </div>`;
 
                     if (['Rider', 'Ride Partner'].includes(currentUser.category)) {
-                        if (o.type === 'Ride') {
-                            if (o.status === 'Broadcasted' || o.status === 'Requested') {
-                                let hasBid = o.bids && o.bids.find(b => b.riderId === currentUser.phone);
-                                if (hasBid) {
-                                    actionButtons = `<div class="w-full bg-yellow-50 text-yellow-700 py-3 rounded-xl font-bold text-sm text-center border border-yellow-200"><i class="fa-solid fa-clock mr-1"></i> Offer sent: ₹${hasBid.amount}. Waiting...</div>`;
-                                } else {
-                                    actionButtons = `
-                                        <div class="flex gap-2">
-                                            <input type="number" id="bid-amt-${o.id}" class="flex-[2] border border-gray-200 rounded-xl px-3 text-sm outline-none focus:border-blue-400 bg-white" placeholder="Your Offer (₹)">
-                                            <button type="button" onclick="window.sendRideBid('${o.id}', 'bid-amt-${o.id}')" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-paper-plane mr-1"></i> Send Bid</button>
-                                        </div>
-                                    `;
-                                }
-                            } else if (o.status === 'Confirmed') {
-                                actionButtons = `<button type="button" onclick="window.markRideStarted('${o.id}')" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-play mr-1"></i> Start Ride</button>`;
-                            } else if (o.status === 'Started') {
-                                const deduction = ['Car', 'Car_Mini', 'Car_SUV'].includes(currentUser.vehicleType) ? 50 : 5;
-                                actionButtons = `<button type="button" onclick="window.completeRide('${o.id}')" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-check-double mr-1"></i> End Ride & Collect ₹${o.amount} (-${deduction} Pts)</button>`;
-                            } else if (o.status === 'Completed') {
-                                actionButtons = `<div class="w-full bg-gray-100 text-gray-500 py-3 rounded-xl font-bold text-sm text-center border border-gray-200"><i class="fa-solid fa-check mr-1"></i> Completed (₹${o.amount})</div>`;
-                            }
-                        } else {
-                            if (o.status === 'Ready' && !o.riderId) {
-                                actionButtons = `<button type="button" onclick="window.acceptDelivery('${o.id}')" class="w-full bg-gray-900 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-motorcycle mr-1"></i> Accept Delivery</button>`;
-                            } else if (o.status === 'Out for Delivery' && o.riderId === currentUser.phone) {
-                                actionButtons = `<div class="flex gap-2"><a href="tel:${o.phone}" class="flex-1 bg-white border border-gray-200 text-gray-700 py-3 rounded-xl font-bold text-sm text-center flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone mr-1"></i> Customer</a><button type="button" onclick="window.markDelivered('${o.id}')" class="flex-1 bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md"><i class="fa-solid fa-check-double mr-1"></i> Done</button></div>`;
-                            }
-                        }
-                    } else {
-                        if (o.status === 'Placed') actionButtons = `<div class="flex gap-2"><button type="button" onclick="window.acceptFoodOrder('${o.id}')" class="flex-1 bg-black text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-gray-800 transition-colors active:scale-95"><i class="fa-solid fa-check"></i> Accept</button><button type="button" onclick="window.openRejectModal('${o.id}', 'Partner')" class="flex-1 bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm hover:bg-red-100 transition-colors active:scale-95"><i class="fa-solid fa-xmark"></i> Reject</button></div>`;
-                        else if (o.status === 'Accepted') { cardStyle = 'border-blue-200 bg-blue-50/30'; actionButtons = `<button type="button" onclick="window.markPreparing('${o.id}')" class="w-full bg-blue-600 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-blue-700 active:scale-95">Start Preparing</button>`; }
-                        else if (o.status === 'Preparing') { cardStyle = 'border-orange-200 bg-orange-50/30'; actionButtons = `<button type="button" onclick="window.markReady('${o.id}')" class="w-full bg-orange-500 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-orange-600 active:scale-95">Mark Ready for Rider</button>`; }
-                        else if (o.status === 'Ready') { cardStyle = 'border-yellow-200 bg-yellow-50/30'; actionButtons = `<p class="text-xs font-bold text-orange-600 text-center py-2 bg-orange-50 rounded-xl">Waiting for Delivery Partner...</p><button type="button" onclick="window.markOutForDelivery('${o.id}')" class="w-full mt-2 bg-yellow-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95 border border-yellow-600">Self Deliver (Skip Rider)</button>`; }
-                        else if (o.status === 'Out for Delivery') {
-                            if (!o.riderId) { 
-                                actionButtons = `<button type="button" onclick="window.markDelivered('${o.id}')" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-check-double mr-1"></i> Mark as Delivered</button>`;
-                            } else {
-                                actionButtons = `
-                                <div class="flex gap-2 w-full mt-1">
-                                    <div class="flex-1 bg-yellow-50 border border-yellow-200 text-yellow-700 py-2 rounded-xl flex flex-col items-center justify-center">
-                                        <span class="text-[9px] font-black uppercase">Out for Delivery</span>
-                                        <span class="text-xs font-bold">${o.riderName || 'Rider'}</span>
-                                    </div>
-                                    <a href="tel:${o.riderPhone || o.riderId}" class="flex-[0.3] bg-blue-600 text-white rounded-xl flex items-center justify-center text-lg shadow-md active:scale-95"><i class="fa-solid fa-phone"></i></a>
-                                </div>
-                                `;
-                            }
-                        }
-                        else if (o.status === 'Delivered') actionButtons = `<div class="w-full bg-emerald-50 text-emerald-600 py-3 rounded-xl font-bold text-sm text-center border border-emerald-100"><i class="fa-solid fa-circle-check mr-1"></i> Order Completed</div>`;
-                        else if (o.status === 'Rejected') actionButtons = `<div class="w-full bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm text-center border border-red-100"><i class="fa-solid fa-circle-xmark mr-1"></i> Order Rejected</div>`;
-                    }
+                                        if (o.type === 'Ride') {
+                                            if (o.status === 'Broadcasted' || o.status === 'Requested') {
+                                                let hasBid = o.bids && o.bids.find(b => b.riderId === currentUser.phone);
+                                                if (hasBid) {
+                                                    actionButtons = `<div class="w-full bg-yellow-50 text-yellow-700 py-3 rounded-xl font-bold text-sm text-center border border-yellow-200"><i class="fa-solid fa-clock mr-1"></i> Offer sent: ₹${hasBid.amount}. Waiting...</div>`;
+                                                } else {
+                                                    actionButtons = `
+                                                        <div class="flex gap-2">
+                                                            <input type="number" id="bid-amt-${o.id}" class="flex-[2] border border-gray-200 rounded-xl px-3 text-sm outline-none focus:border-blue-400 bg-white" placeholder="Your Offer (₹)">
+                                                            <button type="button" onclick="window.sendRideBid('${o.id}', 'bid-amt-${o.id}')" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-paper-plane mr-1"></i> Send Bid</button>
+                                                        </div>
+                                                    `;
+                                                }
+                                            } else if (o.status === 'Confirmed') {
+                                                actionButtons = `<button type="button" onclick="window.markRideStarted('${o.id}')" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-play mr-1"></i> Start Ride</button>`;
+                                            } else if (o.status === 'Started') {
+                                                const deduction = ['Car', 'Car_Mini', 'Car_SUV'].includes(currentUser.vehicleType) ? 50 : 5;
+                                                actionButtons = `<button type="button" onclick="window.completeRide('${o.id}')" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-check-double mr-1"></i> End Ride & Collect ₹${o.amount} (-${deduction} Pts)</button>`;
+                                            } else if (o.status === 'Completed') {
+                                                actionButtons = `<div class="w-full bg-gray-100 text-gray-500 py-3 rounded-xl font-bold text-sm text-center border border-gray-200"><i class="fa-solid fa-check mr-1"></i> Completed (₹${o.amount})</div>`;
+                                            }
+                                        } else {
+                                            if (o.status === 'Ready' && !o.riderId) {
+                                                actionButtons = `<button type="button" onclick="window.acceptDelivery('${o.id}')" class="w-full bg-gray-900 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-motorcycle mr-1"></i> Accept Delivery</button>`;
+                                            } else if (o.status === 'Out for Delivery' && o.riderId === currentUser.phone) {
+                                                actionButtons = `<div class="flex gap-2"><a href="tel:${o.phone}" class="flex-1 bg-white border border-gray-200 text-gray-700 py-3 rounded-xl font-bold text-sm text-center flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone mr-1"></i> Customer</a><button type="button" onclick="window.markDelivered('${o.id}')" class="flex-1 bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md"><i class="fa-solid fa-check-double mr-1"></i> Done</button></div>`;
+                                            }
+                                        }
+                                    } else {
+                                        if (o.status === 'Placed') actionButtons = `<div class="flex gap-2"><button type="button" onclick="window.acceptFoodOrder('${o.id}')" class="flex-1 bg-black text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-gray-800 transition-colors active:scale-95"><i class="fa-solid fa-check"></i> Accept</button><button type="button" onclick="window.openRejectModal('${o.id}')" class="flex-1 bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm hover:bg-red-100 transition-colors active:scale-95"><i class="fa-solid fa-xmark"></i> Reject</button></div>`;
+                                        else if (o.status === 'Accepted') { cardStyle = 'border-blue-200 bg-blue-50/30'; actionButtons = `<button type="button" onclick="window.markPreparing('${o.id}')" class="w-full bg-blue-600 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-blue-700 active:scale-95">Start Preparing</button>`; }
+                                        else if (o.status === 'Preparing') { cardStyle = 'border-orange-200 bg-orange-50/30'; actionButtons = `<button type="button" onclick="window.markReady('${o.id}')" class="w-full bg-orange-500 text-white py-3.5 rounded-xl font-bold text-sm shadow-md hover:bg-orange-600 active:scale-95">Mark Ready for Rider</button>`; }
+                                        else if (o.status === 'Ready') { cardStyle = 'border-yellow-200 bg-yellow-50/30'; actionButtons = `<p class="text-xs font-bold text-orange-600 text-center py-2 bg-orange-50 rounded-xl">Waiting for Delivery Partner...</p><button type="button" onclick="window.markOutForDelivery('${o.id}')" class="w-full mt-2 bg-yellow-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95 border border-yellow-600">Self Deliver (Skip Rider)</button>`; }
+                                        else if (o.status === 'Out for Delivery') {
+                                            if (!o.riderId) { 
+                                                actionButtons = `<button type="button" onclick="window.markDelivered('${o.id}')" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95"><i class="fa-solid fa-check-double mr-1"></i> Mark as Delivered</button>`;
+                                            } else {
+                                                actionButtons = `
+                                                <div class="flex gap-2 w-full mt-1">
+                                                    <div class="flex-1 bg-yellow-50 border border-yellow-200 text-yellow-700 py-2 rounded-xl flex flex-col items-center justify-center">
+                                                        <span class="text-[9px] font-black uppercase">Out for Delivery</span>
+                                                        <span class="text-xs font-bold">${o.riderName || 'Rider'}</span>
+                                                    </div>
+                                                    <a href="tel:${o.riderPhone || o.riderId}" class="flex-[0.3] bg-blue-600 text-white rounded-xl flex items-center justify-center text-lg shadow-md active:scale-95"><i class="fa-solid fa-phone"></i></a>
+                                                </div>
+                                                `;
+                                            }
+                                        }
+                                        else if (o.status === 'Delivered') actionButtons = `<div class="w-full bg-emerald-50 text-emerald-600 py-3 rounded-xl font-bold text-sm text-center border border-emerald-100"><i class="fa-solid fa-circle-check mr-1"></i> Order Completed</div>`;
+                                        else if (o.status === 'Rejected') actionButtons = `<div class="w-full bg-red-50 text-red-600 py-3 rounded-xl font-bold text-sm text-center border border-red-100"><i class="fa-solid fa-circle-xmark mr-1"></i> Order Rejected</div>`;
+                                    }
 
-                    let ratingHtml = o.rating ? `<div class="mt-2 text-center text-xs font-bold text-yellow-600 bg-yellow-50 rounded-lg py-1 border border-yellow-100"><i class="fa-solid fa-star"></i> Customer Rated: ${o.rating} Star</div>` : '';
+                                    let ratingHtml = o.rating ? `<div class="mt-2 text-center text-xs font-bold text-yellow-600 bg-yellow-50 rounded-lg py-1 border border-yellow-100"><i class="fa-solid fa-star"></i> Customer Rated: ${o.rating} Star</div>` : '';
 
-                    if (o.type === 'Ride') {
-                        html += `
-                            <div class="bg-white rounded-3xl p-5 shadow-sm border border-blue-100 relative overflow-hidden">
-                                <div class="flex justify-between items-start mb-3">
-                                    <div>
-                                        <div class="flex items-center gap-2 mb-1">
-                                            <span class="text-[10px] font-black text-blue-500 uppercase tracking-widest bg-blue-50 px-2 py-0.5 rounded"><i class="fa-solid fa-taxi"></i> RIDE</span>
-                                            <span class="text-[9px] font-medium text-gray-400"><i class="fa-regular fa-clock"></i> ${timeStr}</span>
-                                        </div>
-                                        <h4 class="font-bold text-gray-900 text-sm mt-2"><i class="fa-solid fa-user text-gray-400 mr-1"></i> ${o.customer}</h4>
-                                        <a href="${phoneLink}" class="text-xs font-bold ${phoneClass} block mt-0.5"><i class="fa-solid fa-phone mr-1"></i> ${displayPhone}</a>
-                                    </div>
-                                    <span class="text-xl font-black text-emerald-600">${o.amount ? '₹'+o.amount : '...'}</span>
-                                </div>
-                                <div class="relative bg-gray-50 p-3 rounded-xl mb-4 border border-gray-100 mt-2">
-                                    <div class="absolute top-4 left-3.5 w-2 h-2 rounded-full bg-emerald-500 z-10"></div>
-                                    <div class="absolute top-7 left-4 w-0.5 h-6 bg-gray-300 z-10"></div>
-                                    <div class="absolute top-14 left-3.5 w-2 h-2 rounded-full bg-red-500 z-10"></div>
-                                    
-                                    <p class="text-xs font-medium text-gray-700 pl-6 mb-3">From: <b>${o.pickup}</b></p>
-                                    <p class="text-xs font-medium text-gray-700 pl-6">To: <b>${o.address}</b></p>
-                                </div>
-                                ${o.isRoundTrip ? '<p class="text-[10px] bg-purple-50 text-purple-700 font-bold px-2 py-1 rounded mb-3 border border-purple-100 text-center"><i class="fa-solid fa-rotate w-3"></i> Round Trip Requested</p>' : ''}
-                                ${actionButtons}
-                            </div>
-                        `;
-                    } else {
-                        html += `<div class="bg-white rounded-3xl p-5 shadow-sm border ${cardStyle}">
-                                <div class="flex justify-between items-start mb-3"><div><div class="flex items-center gap-2 mb-1"><span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Order #${o.id.slice(-4).toUpperCase()}</span><span class="text-[9px] font-medium text-gray-400"><i class="fa-regular fa-clock"></i> ${timeStr}</span>${paymentBadge}</div><h4 class="font-bold text-gray-900 text-sm"><i class="fa-solid fa-map-pin text-red-500 mr-1"></i> ${o.address}</h4></div><span class="text-xl font-black text-emerald-600">₹${o.total.toFixed(2)}</span></div>
-                                ${customerInfo}
-                                <div class="bg-gray-50 p-3 rounded-xl mb-4 border border-gray-100"><p class="text-xs text-gray-700 font-bold mb-1"><i class="fa-solid fa-clipboard-list text-gray-400 mr-1"></i> Items:</p><p class="text-sm text-gray-600 font-medium">${itemsStr}</p>${screenshotHtml}</div>
-                                ${actionButtons}
-                                ${ratingHtml}
-                                </div>`;
-                    }
-                });
-                listEl.innerHTML = html;
-        };
-
-        window.adminCreatePromo = async () => {
-            const discountAmt = parseInt(document.getElementById('admin-promo-discount').value);
-            const discountType = document.getElementById('admin-promo-type').value;
-            const code = document.getElementById('admin-promo-code').value.trim().toUpperCase();
-            const restId = document.getElementById('admin-promo-restaurant').value;
-            const itemId = document.getElementById('admin-promo-item').value;
-            const minCart = parseInt(document.getElementById('admin-promo-min-cart').value) || 0;
-
-            if (isNaN(discountAmt) || discountAmt <= 0) return window.showToast("Enter a valid discount.", "error");
-            
-            const isItemOffer = !!itemId;
-            if (isItemOffer && code) return window.showToast("Item offers do not use Promo Codes.", "error");
-            if (!isItemOffer && !code && minCart === 0) return window.showToast("Cart offers must have either a Promo Code or a Min Cart Value.", "error");
-
-            const btn = document.querySelector('button[onclick="window.adminCreatePromo()"]');
-            const orig = btn.innerText; btn.innerText = "Saving..."; btn.disabled = true;
-
-            try {
-                const promoData = {
-                    discount: discountAmt,
-                    discountType: discountType,
-                    code: code || null,
-                    restaurantId: restId,
-                    itemId: itemId || null,
-                    isItemOffer: isItemOffer,
-                    minCartValue: minCart,
-                    isActive: true,
-                    created: serverTimestamp()
+                                    if (o.type === 'Ride') {
+                                        html += `
+                                            <div class="bg-white rounded-3xl p-5 shadow-sm border border-blue-100 relative overflow-hidden">
+                                                <div class="flex justify-between items-start mb-3">
+                                                    <div>
+                                                        <div class="flex items-center gap-2 mb-1">
+                                                            <span class="text-[10px] font-black text-blue-500 uppercase tracking-widest bg-blue-50 px-2 py-0.5 rounded"><i class="fa-solid fa-taxi"></i> RIDE</span>
+                                                            <span class="text-[9px] font-medium text-gray-400"><i class="fa-regular fa-clock"></i> ${timeStr}</span>
+                                                        </div>
+                                                        <h4 class="font-bold text-gray-900 text-sm mt-2"><i class="fa-solid fa-user text-gray-400 mr-1"></i> ${o.customer}</h4>
+                                                        <a href="${phoneLink}" class="text-xs font-bold ${phoneClass} block mt-0.5"><i class="fa-solid fa-phone mr-1"></i> ${displayPhone}</a>
+                                                    </div>
+                                                    <span class="text-xl font-black text-emerald-600">${o.amount ? '₹'+o.amount : '...'}</span>
+                                                </div>
+                                                <div class="relative bg-gray-50 p-3 rounded-xl mb-4 border border-gray-100 mt-2">
+                                                    <div class="absolute top-4 left-3.5 w-2 h-2 rounded-full bg-emerald-500 z-10"></div>
+                                                    <div class="absolute top-7 left-4 w-0.5 h-6 bg-gray-300 z-10"></div>
+                                                    <div class="absolute top-14 left-3.5 w-2 h-2 rounded-full bg-red-500 z-10"></div>
+                                                    
+                                                    <p class="text-xs font-medium text-gray-700 pl-6 mb-3">From: <b>${o.pickup}</b></p>
+                                                    <p class="text-xs font-medium text-gray-700 pl-6">To: <b>${o.address}</b></p>
+                                                </div>
+                                                ${o.isRoundTrip ? '<p class="text-[10px] bg-purple-50 text-purple-700 font-bold px-2 py-1 rounded mb-3 border border-purple-100 text-center"><i class="fa-solid fa-rotate w-3"></i> Round Trip Requested</p>' : ''}
+                                                ${actionButtons}
+                                            </div>
+                                        `;
+                                    } else {
+                                        html += `<div class="bg-white rounded-3xl p-5 shadow-sm border ${cardStyle}">
+                                                <div class="flex justify-between items-start mb-3"><div><div class="flex items-center gap-2 mb-1"><span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Order #${o.id.slice(-4).toUpperCase()}</span><span class="text-[9px] font-medium text-gray-400"><i class="fa-regular fa-clock"></i> ${timeStr}</span>${paymentBadge}</div><h4 class="font-bold text-gray-900 text-sm"><i class="fa-solid fa-map-pin text-red-500 mr-1"></i> ${o.address}</h4></div><span class="text-xl font-black text-emerald-600">₹${o.total.toFixed(2)}</span></div>
+                                                ${customerInfo}
+                                                <div class="bg-gray-50 p-3 rounded-xl mb-4 border border-gray-100"><p class="text-xs text-gray-700 font-bold mb-1"><i class="fa-solid fa-clipboard-list text-gray-400 mr-1"></i> Items:</p><p class="text-sm text-gray-600 font-medium">${itemsStr}</p>${screenshotHtml}</div>
+                                                ${actionButtons}
+                                                ${ratingHtml}
+                                                </div>`;
+                                    }
+                                });
+                                listEl.innerHTML = html;
                 };
 
-                await window.dbCall(addDoc(getCol('promos'), promoData), 10000);
-                window.showToast("Promo/Offer created successfully!", "success");
-                
-                document.getElementById('admin-promo-discount').value = '';
-                document.getElementById('admin-promo-code').value = '';
-                document.getElementById('admin-promo-min-cart').value = '';
-                document.getElementById('admin-promo-item').value = '';
-            } catch(e) { window.showToast("Failed to create offer.", "error"); } finally { btn.innerText = orig; btn.disabled = false; }
-        };
+                // Completely redefining the listener logic to ensure User Bid UI displays correctly
+                window.initRoleListeners = () => {
+                    if (!auth.currentUser || !currentUser) return;
 
-        window.loadItemsForPromo = async () => {
-            const restId = document.getElementById('admin-promo-restaurant').value;
-            const itemSelect = document.getElementById('admin-promo-item');
-            
-            if (restId === 'Global') {
-                itemSelect.innerHTML = '<option value="">Apply to Cart</option>';
-                itemSelect.disabled = true;
-                return;
-            }
+                    unsubscribeListeners.forEach(u => u());
+                    unsubscribeListeners = [];
 
-            itemSelect.disabled = true;
-            itemSelect.innerHTML = '<option value="">Loading...</option>';
+                    if (currentUser.role === 'Admin') {
+                        const unsubOrders = onSnapshot(getCol('orders'), (snap) => {
+                            let revFood = 0, revGrocery = 0, revRide = 0, count = 0;
+                            const orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                            orders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0));
 
-            try {
-                const snap = await window.dbCall(getDocs(getCol('products')), 5000);
-                const items = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(p => p.partnerId === restId);
-                
-                let html = '<option value="">Apply to Cart</option>';
-                items.forEach(i => { html += `<option value="${i.id}">${i.name}</option>`; });
-                itemSelect.innerHTML = html;
-                itemSelect.disabled = false;
-            } catch(e) {
-                itemSelect.innerHTML = '<option value="">Error loading items</option>';
-            }
-        };
+                            let newOrderIds = {};
+                            let firstLoad = Object.keys(window.lastKnownOrders || {}).length === 0;
 
-        window.togglePromo = async (id, currentStatus) => {
-            try { await window.dbCall(updateDoc(getDocRef('promos', id), { isActive: !currentStatus }), 10000); window.showToast("Offer status updated.", "success"); } 
-            catch(e) { window.showToast("Failed to update.", "error"); }
-        };
+                            orders.forEach(o => {
+                                if (o.status !== 'Rejected') {
+                                    if (o.type === 'Ride') revRide += (o.total || o.amount || 0);
+                                    else if (o.restaurantName && o.restaurantName.toLowerCase().includes('grocery')) revGrocery += (o.total || 0); 
+                                    else revFood += (o.total || 0);
+                                    count++;
+                                }
+                                newOrderIds[o.id] = o.status;
+                                if (!firstLoad && !window.lastKnownOrders[o.id]) {
+                                    window.speakAlert("New order received");
+                                    window.showStatusPopup("New Order Alert", `Order #${o.id.slice(-5).toUpperCase()} placed for ₹${o.total || o.amount}`);
+                                }
+                            });
+                            
+                            window.lastKnownOrders = newOrderIds;
+                            
+                            const elRev = document.getElementById('stat-rev');
+                            if(elRev) elRev.innerText = `₹${(revFood + revGrocery + revRide).toFixed(2)}`;
+                            const elFood = document.getElementById('stat-rev-food');
+                            if(elFood) elFood.innerText = `₹${revFood.toFixed(0)}`;
+                            const elGroc = document.getElementById('stat-rev-grocery');
+                            if(elGroc) elGroc.innerText = `₹${revGrocery.toFixed(0)}`;
+                            const elRide = document.getElementById('stat-rev-ride');
+                            if(elRide) elRide.innerText = `₹${revRide.toFixed(0)}`;
+                            const elOrd = document.getElementById('stat-ord');
+                            if(elOrd) elOrd.innerText = count;
 
-        window.deletePromo = async (id) => {
-            const confirmed = await window.customConfirm("Delete Offer", "Are you sure you want to permanently delete this offer?", "Delete");
-            if(!confirmed) return;
-            try { await window.dbCall(deleteDoc(getDocRef('promos', id)), 10000); window.showToast("Offer deleted.", "success"); } 
-            catch(e) { window.showToast("Failed to delete.", "error"); }
-        };
+                            window.adminOrdersData = orders;
+                            if(window.renderAdminOrders) window.renderAdminOrders();
+                        });
+                        unsubscribeListeners.push(unsubOrders);
 
-        window.adminUpdateMarquee = async () => {
-            const text = document.getElementById('admin-marquee-text').value.trim();
-            if(!text) return window.showToast("Please enter text.", "error");
-            const btn = document.getElementById('btn-update-marquee');
-            const orig = btn.innerText; btn.innerText = "Updating..."; btn.disabled = true;
-            try {
-                await window.dbCall(setDoc(getDocRef('settings', 'app_config'), { marqueeText: text }, { merge: true }), 10000);
-                window.showToast("Marquee updated successfully!", "success");
-                document.getElementById('admin-marquee-text').value = '';
-            } catch(e) { window.showToast("Failed to update marquee.", "error"); } finally { btn.innerText = orig; btn.disabled = false; }
-        };
+                        const unsubUsers = onSnapshot(getCol('users'), (snap) => {
+                            const allUsers = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                            const elUsers = document.getElementById('stat-users');
+                            if(elUsers) elUsers.innerText = allUsers.length;
+                            
+                            const partners = allUsers.filter(u => u.role === 'Partner' && u.approvalStatus === 'Approved');
+                            const promoSelect = document.getElementById('admin-promo-restaurant');
+                            if(promoSelect) {
+                                promoSelect.innerHTML = '<option value="Global">All Restaurants (Global)</option>' + partners.map(p => `<option value="${p.id}">${p.shopName || p.name}</option>`).join('');
+                            }
 
-        window.startApp();
-    })();
-    </script>
-</body>
-</html>
+                            window.adminUsersData = allUsers;
+                            if(window.renderAdminUsers) window.renderAdminUsers();
+                        });
+                        unsubscribeListeners.push(unsubUsers);
+
+                        const unsubPromos = onSnapshot(getCol('promos'), (snap) => {
+                            const promoList = document.getElementById('admin-promo-list');
+                            if(!promoList) return;
+                            const promos = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                            if(promos.length === 0) {
+                                promoList.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-400">No offers active.</td></tr>';
+                                return;
+                            }
+                            promoList.innerHTML = promos.map(p => `
+                                <tr class="border-b border-gray-50">
+                                    <td class="p-2 font-bold text-gray-900 uppercase">
+                                        ${p.isItemOffer ? '<i class="fa-solid fa-cube text-blue-500 mr-1"></i> Item Offer' : `<i class="fa-solid fa-ticket text-emerald-500 mr-1"></i> ${p.code}`}
+                                    </td>
+                                    <td class="p-2 font-black text-red-600">${p.discountType === 'flat' ? '₹' : ''}${p.discount}${p.discountType === 'percentage' ? '%' : ''} OFF</td>
+                                    <td class="p-2 text-gray-500 text-[10px] truncate max-w-[100px]">${p.itemName || p.restaurantName || 'All Restaurants'}</td>
+                                    <td class="p-2 text-right">
+                                        <button onclick="window.togglePromo('${p.id}', ${p.isActive})" class="px-2 py-1 rounded text-[10px] font-bold ${p.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'}">${p.isActive ? 'Active' : 'Disabled'}</button>
+                                        <button onclick="window.deletePromo('${p.id}')" class="px-2 py-1 rounded text-[10px] font-bold bg-red-100 text-red-700 ml-1"><i class="fa-solid fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                            `).join('');
+                        });
+                        unsubscribeListeners.push(unsubPromos);
+                    } 
+                    else if (currentUser.role === 'User') {
+                        const unsubUserOrders = onSnapshot(getCol('orders'), (snap) => {
+                            const listEl = document.getElementById('user-orders-list');
+                            if(!listEl) return;
+                            const myOrders = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(o => o.phone === currentUser.phone);
+                            myOrders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0));
+                            window.userOrderHistory = myOrders;
+
+                            if(myOrders.length === 0) {
+                                listEl.innerHTML = '<div class="text-center py-10 bg-white rounded-3xl border border-gray-100"><img src="https://cdn-icons-png.flaticon.com/512/1008/1008000.png" class="w-16 h-16 mx-auto mb-4 opacity-20"><p class="text-gray-400 font-medium text-sm">No orders yet. Discover great food around you!</p></div>';
+                                return;
+                            }
+
+                            let newOrderIds = {};
+                            let firstLoad = Object.keys(window.lastKnownOrders || {}).length === 0;
+
+                            listEl.innerHTML = myOrders.map(o => {
+                                newOrderIds[o.id] = o.status;
+                                
+                                if (!firstLoad && window.lastKnownOrders[o.id] && window.lastKnownOrders[o.id] !== o.status) {
+                                    window.showStatusPopup("Order Update", `Your order #${o.id.slice(-5).toUpperCase()} is now ${o.status}`);
+                                }
+
+                                const timeStr = window.formatOrderTime(o.time);
+                                let statusColor = 'text-orange-500', progressWidth = '15%', statusText = 'Pending Approval';
+                                if(o.status === 'Accepted') { statusColor = 'text-blue-500'; progressWidth = '30%'; statusText = 'Order Confirmed'; }
+                                if(o.status === 'Preparing') { statusColor = 'text-blue-500'; progressWidth = '50%'; statusText = 'Food is Preparing'; }
+                                if(o.status === 'Ready') { statusColor = 'text-yellow-500'; progressWidth = '65%'; statusText = 'Waiting for Delivery'; }
+                                if(o.status === 'Out for Delivery') { statusColor = 'text-yellow-500'; progressWidth = '85%'; statusText = 'OUT FOR DELIVERY.. Reaching soon'; }
+                                if(o.status === 'Delivered') { statusColor = 'text-emerald-500'; progressWidth = '100%'; statusText = 'Delivered Successfully'; }
+                                if(o.status === 'Rejected') { statusColor = 'text-red-500'; progressWidth = '100%'; statusText = 'Order Rejected'; }
+
+                                const itemsList = o.items ? o.items.map(i => `${i.name} ${i.quantity && i.quantity > 1 ? '(x'+i.quantity+')' : ''}`.trim()).join(', ') : '';
+                                const paymentBadge = o.paymentMode === 'Prepaid' ? `<span class="bg-blue-100 text-blue-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">Prepaid</span>` : `<span class="bg-gray-100 text-gray-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">COD</span>`;
+
+                                let trackingHtml = '';
+                                if (o.type === 'Ride') {
+                                    if (o.status === 'Broadcasted' || o.status === 'Requested') statusText = "Searching for Cab...";
+                                    if (o.status === 'Confirmed') { statusColor = 'text-blue-500'; progressWidth = '50%'; statusText = "Driver is arriving..."; }
+                                    if (o.status === 'Started') { statusColor = 'text-blue-500'; progressWidth = '75%'; statusText = "Ride in Progress"; }
+                                    if (o.status === 'Completed') { statusColor = 'text-emerald-500'; progressWidth = '100%'; statusText = "Ride Completed"; }
+
+                                    let fareActionHtml = '';
+                                    if (o.status === 'Broadcasted' || o.status === 'Requested') {
+                                        if (o.bids && o.bids.length > 0) {
+                                            fareActionHtml = `
+                                                <div class="mt-3 space-y-2 border-t border-blue-100 pt-3">
+                                                    <p class="text-[10px] font-black uppercase text-blue-600 mb-1">Incoming Driver Offers</p>
+                                                    ${o.bids.map(b => `
+                                                        <div class="bg-blue-50 border border-blue-200 p-2.5 rounded-xl flex justify-between items-center shadow-sm">
+                                                            <div>
+                                                                <p class="text-xs font-bold text-gray-900">${b.riderName}</p>
+                                                                <p class="text-[9px] text-gray-500 font-medium">${b.vehicle}</p>
+                                                            </div>
+                                                            <div class="flex items-center gap-3">
+                                                                <span class="text-lg font-black text-emerald-600">₹${b.amount}</span>
+                                                                <button onclick="window.acceptRideBid('${o.id}', '${b.riderId}', '${b.riderName.replace(/'/g,"\\'")}', ${b.amount}, '${b.vehicle}', '${b.riderPhone}')" class="bg-emerald-500 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-sm active:scale-95">Accept</button>
+                                                            </div>
+                                                        </div>
+                                                    `).join('')}
+                                                </div>
+                                            `;
+                                        } else {
+                                            fareActionHtml = `<div class="mt-3 text-center text-xs text-gray-500 bg-gray-50 p-3 rounded-xl border border-gray-100"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Waiting for drivers to send offers...</div>`;
+                                        }
+                                    }
+
+                                    trackingHtml = `
+                                    <div class="mt-4 bg-blue-50 border border-blue-100 rounded-xl p-3">
+                                        <p class="text-[10px] font-black uppercase text-blue-600 mb-1">Ride Details</p>
+                                        ${o.riderId ? `
+                                        <div class="flex items-center gap-2 mb-2 pb-2 border-b border-blue-200">
+                                            <div class="w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center text-blue-700"><i class="fa-solid fa-taxi"></i></div>
+                                            <div class="flex-1">
+                                                <p class="text-xs font-bold text-gray-900">${o.riderName || 'Waiting...'}</p>
+                                                <p class="text-[10px] text-gray-500 font-medium">${o.carModel || ''} (${o.carNum || ''})</p>
+                                            </div>
+                                            <a href="tel:${o.riderPhone || o.riderId}" class="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone text-xs"></i></a>
+                                        </div>` : ''}
+                                        <div class="relative bg-white p-2 rounded-xl border border-blue-100 mt-2 shadow-sm">
+                                            <div class="absolute top-3 left-2.5 w-1.5 h-1.5 rounded-full bg-emerald-500 z-10"></div>
+                                            <div class="absolute top-5 left-3 w-0.5 h-4 bg-gray-300 z-10"></div>
+                                            <div class="absolute top-9 left-2.5 w-1.5 h-1.5 rounded-full bg-red-500 z-10"></div>
+                                            <p class="text-[10px] font-medium text-gray-700 pl-5 mb-1.5">From: <b>${o.pickup}</b></p>
+                                            <p class="text-[10px] font-medium text-gray-700 pl-5">To: <b>${o.address}</b></p>
+                                        </div>
+                                        ${o.isRoundTrip ? '<p class="text-[10px] bg-purple-100 text-purple-700 font-bold px-2 py-1 rounded mt-2 border border-purple-200 text-center"><i class="fa-solid fa-rotate w-3"></i> Round Trip Requested</p>' : ''}
+                                        ${fareActionHtml}
+                                    </div>`;
+                                } else if (o.status === 'Out for Delivery') {
+                                    const displayRiderName = o.riderName || 'Restaurant (Self Delivery)';
+                                    const displayRiderPhone = o.riderPhone || '';
+                                    trackingHtml = `
+                                    <div class="mt-4 bg-blue-50 border border-blue-100 rounded-xl p-3">
+                                        <p class="text-[10px] font-black uppercase text-blue-600 mb-1">Delivery Partner Allocated</p>
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center text-blue-700"><i class="fa-solid fa-motorcycle"></i></div>
+                                            <div class="flex-1">
+                                                <p class="text-xs font-bold text-gray-900">${displayRiderName}</p>
+                                                <p class="text-[10px] text-gray-500">${displayRiderPhone}</p>
+                                            </div>
+                                            ${displayRiderPhone ? `<a href="tel:${displayRiderPhone}" class="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone text-xs"></i></a>` : ''}
+                                        </div>
+                                        <div class="w-full h-32 mt-3 rounded-lg flex items-center justify-center border border-blue-200 bg-blue-50 relative overflow-hidden">
+                                            <div class="absolute w-20 h-20 border-4 border-blue-200 rounded-full animate-ping"></div>
+                                            <div class="absolute w-10 h-10 border-4 border-blue-400 rounded-full animate-ping" style="animation-delay: 0.5s"></div>
+                                            <i class="fa-solid fa-motorcycle text-3xl text-blue-600 z-10 relative"></i>
+                                            <div class="absolute bottom-2 left-0 right-0 text-center">
+                                                <span class="bg-white/90 backdrop-blur px-2 py-1 rounded text-[9px] font-black text-blue-600 shadow-sm">
+                                                    <i class="fa-solid fa-satellite-dish mr-1 animate-pulse"></i> Live Tracking - Reaching soon
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>`;
+                                } else if (o.status === 'Rejected' && o.rejectReason) {
+                                    trackingHtml = `<p class="text-xs font-bold text-red-500 mt-3 bg-red-50 p-2 rounded-lg border border-red-100"><i class="fa-solid fa-circle-info mr-1"></i> Reason: ${o.rejectReason}</p>`;
+                                }
+                                
+                                let ratingHtml = '';
+                                if (o.status === 'Delivered' || o.status === 'Completed') {
+                                    if (o.rating) {
+                                        ratingHtml = `
+                                            <div class="mt-3 bg-yellow-50 p-3 rounded-xl border border-yellow-100">
+                                                <div class="flex items-center justify-between">
+                                                    <span class="text-[10px] font-bold text-yellow-700">Your Rating</span>
+                                                    <span class="text-sm font-black text-yellow-500">${o.rating} <i class="fa-solid fa-star"></i></span>
+                                                </div>
+                                                ${o.review ? `<p class="text-xs text-gray-600 mt-1 italic">"${o.review}"</p>` : ''}
+                                            </div>
+                                        `;
+                                    } else {
+                                        ratingHtml = `<button onclick="window.openRatingModal('${o.id}', '${o.restaurantId || o.riderId}')" class="w-full mt-3 bg-yellow-400 text-gray-900 py-3 rounded-xl font-bold text-xs shadow-sm hover:bg-yellow-500 transition-colors"><i class="fa-solid fa-star mr-1"></i> Rate Your Experience</button>`;
+                                    }
+                                }
+
+                                let resAddressHtml = o.restaurantAddress && o.type !== 'Ride' ? `<p class="text-[9px] text-gray-500 font-medium mb-1"><i class="fa-solid fa-location-dot"></i> ${o.restaurantAddress}</p>` : '';
+
+                                return `
+                                    <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 relative overflow-hidden transition-all hover:shadow-md">
+                                        <div class="flex justify-between items-start mb-2">
+                                            <div>
+                                                <div class="flex items-center gap-2 mb-1"><span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">${o.type === 'Ride' ? '🚕 RIDE' : 'Order'} #${o.id.slice(-5).toUpperCase()}</span><span class="text-[9px] font-medium text-gray-400"><i class="fa-regular fa-clock"></i> ${timeStr}</span>${o.type !== 'Ride' ? paymentBadge : ''}</div>
+                                                <h4 class="font-black text-gray-900 text-base leading-none">${o.type === 'Ride' ? 'Ride Service' : (o.restaurantName || 'Gramzo Partner')}</h4>
+                                            </div>
+                                            <span class="text-xl font-black text-gray-900">₹${o.total ? o.total.toFixed(2) : (o.amount || 0)}</span>
+                                        </div>
+                                        ${resAddressHtml}
+                                        ${o.type !== 'Ride' ? `<p class="text-xs text-gray-500 mb-5 font-medium line-clamp-2 mt-2">${itemsList}</p>` : ''}
+                                        <div class="mb-2 mt-4 bg-gray-50 p-3 rounded-xl border border-gray-100">
+                                            <div class="flex justify-between text-[10px] font-black uppercase tracking-wider mb-2 ${statusColor}"><span>${statusText}</span></div>
+                                            <div class="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden"><div class="bg-current h-1.5 rounded-full transition-all duration-1000 ${statusColor.replace('text-', 'bg-')}" style="width: ${progressWidth}"></div></div>
+                                        </div>
+                                        ${trackingHtml}
+                                        ${ratingHtml}
+                                    </div>`;
+                            }).join('');
+                            
+                            window.lastKnownOrders = newOrderIds;
+                        });
+                        unsubscribeListeners.push(unsubUserOrders);
+                    }
+                    else if (currentUser.role === 'Partner') {
+                        const userUnsub = onSnapshot(getDocRef('users', currentUser.phone), (docSnap) => {
+                            if (docSnap.exists()) {
+                                const data = docSnap.data();
+                                currentUser.shopStatus = data.shopStatus || 'Offline';
+                                const isCurrentlyOpen = ['Open', 'Online'].includes(currentUser.shopStatus);
+                                
+                                const statusToggleShop = document.getElementById('partner-status-toggle');
+                                const statusToggleRider = document.getElementById('rider-status-toggle');
+                                
+                                if (statusToggleShop) statusToggleShop.checked = isCurrentlyOpen;
+                                if (statusToggleRider) statusToggleRider.checked = isCurrentlyOpen;
+                                
+                                const shopStatusTxt = document.getElementById('shop-status-text');
+                                if(shopStatusTxt) shopStatusTxt.innerText = `Currently ${isCurrentlyOpen ? 'Open' : 'Closed'}`;
+                                
+                                const riderStatusTxt = document.getElementById('rider-status-text');
+                                if(riderStatusTxt) riderStatusTxt.innerText = isCurrentlyOpen ? 'You are ONLINE' : 'You are OFFLINE';
+                            }
+                        });
+                        unsubscribeListeners.push(userUnsub);
+
+                        const orderUnsub = onSnapshot(getCol('orders'), (snap) => {
+                            const orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                            
+                            let relevantOrders = [];
+                            if (['Food Owner', 'Grocery Shop'].includes(currentUser.category)) {
+                                relevantOrders = orders.filter(o => o.restaurantId === currentUser.phone && o.type !== 'Ride');
+                            } else if (['Rider', 'Ride Partner'].includes(currentUser.category)) {
+                                let myType = currentUser.vehicleType || 'Bike'; 
+                                let mySeater = parseInt(currentUser.seater) || 4; 
+                                
+                                let isCar = myType === 'Car' || myType.startsWith('Car');
+                                let myCarCat = mySeater <= 6 ? 'Car_Mini' : 'Car_SUV';
+                                let isOnline = currentUser.shopStatus === 'Online' || currentUser.shopStatus === 'Open';
+
+                                relevantOrders = orders.filter(o => {
+                                    let orderVeh = o.vehicleType || 'Bike';
+                                    let isIncomingRide = (o.status === 'Broadcasted' || o.status === 'Requested') && o.type === 'Ride';
+                                    
+                                    let vehicleMatch = false;
+                                    if (isCar) {
+                                        vehicleMatch = (orderVeh === myCarCat || orderVeh === 'Car' || orderVeh.startsWith('Car'));
+                                    } else {
+                                        vehicleMatch = (orderVeh === myType);
+                                    }
+
+                                    return (
+                                        (o.status === 'Ready' && !o.riderId && o.type !== 'Ride' && myType === 'Bike') || 
+                                        (o.status === 'Placed' && !o.restaurantId && o.type !== 'Ride' && myType === 'Bike') || 
+                                        (o.riderId === currentUser.phone && ['Out for Delivery'].includes(o.status) && o.type !== 'Ride') ||
+                                        (o.riderId === currentUser.phone && o.type === 'Ride') ||
+                                        (isIncomingRide && vehicleMatch && isOnline)
+                                    );
+                                });
+                            }
+                            
+                            relevantOrders.sort((a,b) => (b.time?.toMillis() || 0) - (a.time?.toMillis() || 0));
+
+                            let newOrderIds = {};
+                            let firstLoad = Object.keys(window.lastKnownOrders || {}).length === 0;
+
+                            relevantOrders.forEach(o => {
+                                newOrderIds[o.id] = o.status;
+                                if (!firstLoad && !window.lastKnownOrders[o.id]) {
+                                    window.showStatusPopup("New Task Received!", `Order #${o.id.slice(-5).toUpperCase()} needs attention.`);
+                                }
+                            });
+                            
+                            window.lastKnownOrders = newOrderIds;
+                            window.partnerOrdersData = relevantOrders;
+                            if (window.renderPartnerOrders) window.renderPartnerOrders();
+                        });
+                        unsubscribeListeners.push(orderUnsub);
+
+                        if (['Food Owner', 'Grocery Shop'].includes(currentUser.category)) {
+                            const catalogUnsub = onSnapshot(getCol('products'), (snap) => {
+                                const list = document.getElementById('partner-catalog-list');
+                                if (!list) return;
+                                const items = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(p => p.partnerId === currentUser.phone); 
+                                if (items.length === 0) { list.innerHTML = '<p class="text-sm text-gray-400 text-center py-4 bg-white rounded-2xl border border-gray-100">No items added to catalogue yet.</p>'; return; }
+                                list.innerHTML = items.map(p => {
+                                    const variantsDisplay = p.variants ? p.variants.map(v => `${v.qty}: ₹${v.price}`).join(', ') : `${p.qty || ''}: ₹${p.price}`;
+                                    const stockColor = p.inStock !== false ? 'text-emerald-600 border-emerald-200 bg-emerald-50' : 'text-red-500 border-red-200 bg-red-50';
+                                    const stockText = p.inStock !== false ? 'In Stock' : 'Out of Stock';
+                                    return `<div class="flex justify-between items-center bg-white border border-gray-100 p-4 rounded-2xl shadow-sm"><div class="flex-1 mr-4"><p class="font-black text-sm text-gray-900">${p.name}</p><p class="text-[10px] text-gray-500">${p.shopCategory || p.category}</p><p class="text-xs text-gray-700 font-bold mt-1">${variantsDisplay}</p></div><div class="flex items-center gap-2 shrink-0"><button type="button" onclick="window.editPartnerProduct('${p.id}')" class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-colors shrink-0" title="Edit Item"><i class="fa-solid fa-pen text-xs"></i></button><button type="button" onclick="window.togglePartnerStock('${p.id}', ${p.inStock !== false})" class="text-[10px] font-black uppercase tracking-wider ${stockColor} border px-2 py-1 rounded transition whitespace-nowrap">${stockText}</button><button type="button" onclick="window.deletePartnerProduct('${p.id}')" class="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors shrink-0"><i class="fa-solid fa-trash text-xs"></i></button></div></div>`;
+                                }).join('');
+                            });
+                            unsubscribeListeners.push(catalogUnsub);
+                        }
+                    }
+                };
+
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        if (!currentUser) {
+                            let sessionPhone = null;
+                            try {
+                                const sessionSnap = await window.dbCall(getDoc(getDocRef('sessions', user.uid)), 5000);
+                                if (sessionSnap && sessionSnap.exists()) {
+                                    sessionPhone = sessionSnap.data().phone;
+                                }
+                            } catch(e) { console.warn("Session fetch delayed."); }
+
+                            if (!sessionPhone) {
+                                try {
+                                    const usersSnap = await window.dbCall(getDocs(getCol('users')), 5000);
+                                    const matchedUser = usersSnap.docs.find(d => d.data().uid === user.uid);
+                                    if (matchedUser) {
+                                        sessionPhone = matchedUser.id;
+                                        setDoc(getDocRef('sessions', user.uid), { phone: sessionPhone }, { merge: true }).catch(()=>{});
+                                    }
+                                } catch(e) { console.warn("Fallback fetch failed."); }
+                            }
+
+                            if (sessionPhone) {
+                                if (sessionPhone === 'admin_session' || sessionPhone === 'Gramzo_admin') {
+                                    currentUser = { name: 'Super Admin', role: 'Admin', phone: 'Admin', docId: 'admin_session', uid: user.uid };
+                                    window.finalizeLoginSequence(true);
+                                } else {
+                                    try {
+                                        const userSnap = await window.dbCall(getDoc(getDocRef('users', sessionPhone)), 5000);
+                                        if (userSnap && userSnap.exists()) {
+                                            currentUser = { ...userSnap.data(), docId: sessionPhone };
+                                            window.finalizeLoginSequence(true); 
+                                        }
+                                    } catch(e) { console.warn("Profile fetch failed."); }
+                                }
+                            }
+                            window.loadMarketplaceData();
+                        }
+                    } else {
+                        if(window.startApp) window.startApp(); 
+                    }
+                });
+
+            </script>
+        </body>
+    </html>
