@@ -1,4 +1,3 @@
-/ Firebase Messaging Service Worker
 importScripts('https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/11.6.1/firebase-messaging-compat.js');
 
@@ -13,18 +12,19 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// Handle background messages
+// --- 1. BACKGROUND PUSH NOTIFICATIONS ---
 messaging.onBackgroundMessage((payload) => {
-    console.log('[firebase-messaging-sw.js] Received background message ', payload);
-    const notificationTitle = payload.notification?.title || "Gramzo Alert";
+    console.log('[SW] Background message received ', payload);
+    const notificationTitle = payload.notification?.title || "Gramzo Update";
     const notificationOptions = {
         body: payload.notification?.body || "You have a new update.",
-        icon: 'https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/New%20logo%20-Gramzo%20-%206%20may.png'
+        icon: 'https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/New%20logo%20-Gramzo%20-%206%20may.png',
+        badge: 'https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/New%20logo%20-Gramzo%20-%206%20may.png',
+        vibrate: [200, 100, 200]
     };
-    self.registration.showNotification(notificationTitle, notificationOptions);
+    return self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-// Handle clicking the notification to focus the app
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
     event.waitUntil(
@@ -34,6 +34,28 @@ self.addEventListener('notificationclick', (event) => {
                 if (client.url.indexOf('/') !== -1 && 'focus' in client) return client.focus();
             }
             if (clients.openWindow) return clients.openWindow('/');
+        })
+    );
+});
+
+// --- 2. CACHING LOGIC ---
+const CACHE_NAME = 'gramzo-cache-v2';
+const urlsToCache = ['/', '/index.html', '/manifest.json'];
+
+self.addEventListener('install', event => {
+    event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache)));
+});
+
+self.addEventListener('fetch', event => {
+    event.respondWith(caches.match(event.request).then(response => response || fetch(event.request)));
+});
+
+self.addEventListener('activate', event => {
+    event.waitUntil(
+        caches.keys().then(cacheNames => {
+            return Promise.all(
+                cacheNames.filter(name => name !== CACHE_NAME).map(name => caches.delete(name))
+            );
         })
     );
 });
