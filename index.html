@@ -152,7 +152,7 @@
                     <p id="menu-name" class="font-bold text-sm text-gray-900">Name</p>
                     <p id="menu-phone" class="text-xs text-gray-500 font-medium">Phone</p>
                 </div>
-               <div class="p-2 border-b border-gray-50" id="push-prompt-container">
+              <div class="p-2 border-b border-gray-50" id="push-prompt-container">
                     <button type="button" onclick="window.registerDeviceForNotifications(currentUser?.phone, currentUser?.role)" class="w-full text-left px-4 py-2.5 text-sm font-bold text-blue-600 hover:bg-blue-50 rounded-xl transition-colors flex items-center gap-2">
                         <i class="fa-solid fa-bell"></i> Enable Notifications
                     </button>
@@ -1904,29 +1904,43 @@
         };
 
         window.registerDeviceForNotifications = async (phone, role = 'User') => {
-            if ('serviceWorker' in navigator && messaging) {
-                try {
-                    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-                    const permission = await Notification.requestPermission();
-                    if (permission === 'granted') {
-                        const token = await getToken(messaging, { 
-                            vapidKey: 'BM4kAcfdUnR_a3T_4akm1Y-VsebvaZ8kTCShHLFqoCxGjHIOfILQP0QhpYHLtNXXIOXAqF8RiE9iUZ8YuWSU7MU',
-                            serviceWorkerRegistration: registration 
-                        });
+            if (!('serviceWorker' in navigator)) {
+                return window.showToast("Browser does not support background syncing.", "error");
+            }
+            if (!messaging) {
+                return window.showToast("Push notifications not supported on this device/browser.", "error");
+            }
+
+            try {
+                window.showToast("Requesting notification permission...", "info");
+                const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+                const permission = await Notification.requestPermission();
+                
+                if (permission === 'granted') {
+                    window.showToast("Fetching secure token...", "info");
+                    const token = await getToken(messaging, { 
+                        vapidKey: 'BM4kAcfdUnR_a3T_4akm1Y-VsebvaZ8kTCShHLFqoCxGjHIOfILQP0QhpYHLtNXXIOXAqF8RiE9iUZ8YuWSU7MU',
+                        serviceWorkerRegistration: registration 
+                    });
+                    
+                    if (token && phone) {
+                        const updateData = { fcmToken: token };
+                        // If this is the Admin, ensure the role is saved so the Cloud Function can find it
+                        if (phone === 'Admin' || role === 'Admin') updateData.role = 'Admin';
                         
-                        if (token && phone) {
-                            const updateData = { fcmToken: token };
-                            // If this is the Admin, ensure the role is saved so the Cloud Function can find it
-                            if (phone === 'Admin' || role === 'Admin') updateData.role = 'Admin';
-                            
-                            await setDoc(doc(db, 'users', phone), updateData, { merge: true });
-                            console.log("FCM Token synced:", token);
-                            window.showToast("Push Notifications Enabled!", "success");
-                        }
+                        await setDoc(doc(db, 'users', phone), updateData, { merge: true });
+                        console.log("FCM Token synced:", token);
+                        window.showToast("Push Notifications Enabled!", "success");
                     } else {
-                        console.warn("Notification permission denied by user.");
+                        window.showToast("Failed to generate device token.", "error");
                     }
-                } catch (err) { console.error("FCM Registration failed:", err); }
+                } else {
+                    console.warn("Notification permission denied by user.");
+                    window.showToast("Notification permission blocked. Please allow in browser settings.", "error");
+                }
+            } catch (err) { 
+                console.error("FCM Registration failed:", err); 
+                window.showToast("FCM Error: " + (err.message || "Unknown error"), "error");
             }
         };
 
