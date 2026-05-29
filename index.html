@@ -3499,7 +3499,7 @@
                             relevantOrders.forEach(o => {
                                 newOrderIds[o.id] = o.status;
                                 if (!firstLoad && !window.lastKnownOrders[o.id]) {
-                                    window.showStatusPopup("New Task Received!", `Order #${o.id.slice(-5).toUpperCase()} needs attention.`);
+                                    window.showStatusPopup("New Order Received!", `Order #${o.id.slice(-5).toUpperCase()} needs attention.`);
                                 }
                             });
                             
