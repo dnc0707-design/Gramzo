@@ -38,12 +38,25 @@ self.addEventListener('notificationclick', (event) => {
     );
 });
 
-// --- 2. CACHING LOGIC ---
-const CACHE_NAME = 'gramzo-cache-v2';
-const urlsToCache = ['/', '/index.html', '/manifest.json'];
+// --- 2. CRASH-PROOF CACHING LOGIC ---
+const CACHE_NAME = 'gramzo-cache-v3';
+const urlsToCache = ['/', '/index.html'];
 
 self.addEventListener('install', event => {
-    event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache)));
+    // skipWaiting forces the service worker to activate immediately 
+    self.skipWaiting(); 
+    
+    event.waitUntil(
+        caches.open(CACHE_NAME).then(async (cache) => {
+            try {
+                // Try to cache, but don't crash if a file is missing
+                await cache.addAll(urlsToCache);
+                console.log('[SW] Caching successful');
+            } catch (err) {
+                console.warn('[SW] Caching partially failed, but SW will continue running.', err);
+            }
+        })
+    );
 });
 
 self.addEventListener('fetch', event => {
@@ -51,6 +64,9 @@ self.addEventListener('fetch', event => {
 });
 
 self.addEventListener('activate', event => {
+    // Take control of all pages immediately
+    event.waitUntil(self.clients.claim());
+    
     event.waitUntil(
         caches.keys().then(cacheNames => {
             return Promise.all(
