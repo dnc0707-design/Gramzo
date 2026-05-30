@@ -18,7 +18,7 @@
                     return; 
                 }
 
-                const APP_VERSION = "12.0.2"; // Update: Ride Notifications & Auto Reject added
+                const APP_VERSION = "12.0.1"; // Update: Ride Bidding System Introduced
                 
                 const clearAllCachesAndReload = () => {
                     console.log("Wiping Service Workers and Caches for update...");
@@ -360,7 +360,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
                         <div class="text-center sm:text-left">
                             <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v12.0.2 - Smart Notifications</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v12.0.1 - Open Fare Bidding</p>
                         </div>
                         <div class="mt-4 sm:mt-0 text-center sm:text-right flex flex-col sm:flex-row gap-3">
                             <button type="button" id="btn-partner-login-trigger" onclick="window.openAuthModal('Partner')" class="bg-gray-900 text-white hover:bg-gray-800 border px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2">
@@ -1159,7 +1159,7 @@
                 if ('speechSynthesis' in window) {
                     window.speechSynthesis.cancel();
                     const msg = new SpeechSynthesisUtterance(text);
-                    msg.lang = 'en-IN'; 
+                    msg.lang = 'bn-IN'; 
                     msg.rate = 0.9;
                     window.speechSynthesis.speak(msg);
                 }
@@ -2521,6 +2521,7 @@
                 }
             }
         };
+
         window.removeFromCart = (idx) => { 
             if (window.cart[idx].quantity > 1) window.cart[idx].quantity -= 1;
             else window.cart.splice(idx, 1);
