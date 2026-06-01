@@ -152,7 +152,7 @@
                     <p id="menu-name" class="font-bold text-sm text-gray-900">Name</p>
                     <p id="menu-phone" class="text-xs text-gray-500 font-medium">Phone</p>
                 </div>
-              <div class="p-2 border-b border-gray-50" id="push-prompt-container">
+             <div class="p-2 border-b border-gray-50" id="push-prompt-container">
                     <button type="button" onclick="window.registerDeviceForNotifications(currentUser?.phone, currentUser?.role)" class="w-full text-left px-4 py-2.5 text-sm font-bold text-blue-600 hover:bg-blue-50 rounded-xl transition-colors flex items-center gap-2">
                         <i class="fa-solid fa-bell"></i> Enable Notifications
                     </button>
@@ -1897,17 +1897,20 @@
             window.loadMarketplaceData();
 
             setTimeout(() => {
-                if (currentUser && currentUser.phone) {
-                    window.registerDeviceForNotifications(currentUser.phone, currentUser.role);
+                if (currentUser && (currentUser.phone || currentUser.docId)) {
+                    const identifier = currentUser.phone || currentUser.docId;
+                    window.registerDeviceForNotifications(identifier, currentUser.role);
                 }
             }, 3000);
         };
 
         window.registerDeviceForNotifications = async (phone, role = 'User') => {
             if (!('serviceWorker' in navigator)) {
+                console.error("Browser does not support background syncing.");
                 return window.showToast("Browser does not support background syncing.", "error");
             }
             if (!messaging) {
+                console.error("Push notifications not supported on this device/browser.");
                 return window.showToast("Push notifications not supported on this device/browser.", "error");
             }
 
@@ -1926,10 +1929,12 @@
                     if (token && phone) {
                         const updateData = { fcmToken: token };
                         // If this is the Admin, ensure the role is saved so the Cloud Function can find it
-                        if (phone === 'Admin' || role === 'Admin') updateData.role = 'Admin';
+                        if (String(phone) === 'Admin' || role === 'Admin') updateData.role = 'Admin';
                         
-                        await setDoc(doc(db, 'users', phone), updateData, { merge: true });
-                        console.log("FCM Token synced:", token);
+                        // Use window.dbCall to catch any silent Firebase permission/network failures
+                        await window.dbCall(setDoc(doc(db, 'users', String(phone)), updateData, { merge: true }), 8000);
+                        
+                        console.log("FCM Token successfully synced to DB:", token);
                         window.showToast("Push Notifications Enabled!", "success");
                     } else {
                         window.showToast("Failed to generate device token.", "error");
@@ -3494,7 +3499,7 @@
                             relevantOrders.forEach(o => {
                                 newOrderIds[o.id] = o.status;
                                 if (!firstLoad && !window.lastKnownOrders[o.id]) {
-                                    window.showStatusPopup("New Task Received!", `Order #${o.id.slice(-5).toUpperCase()} needs attention.`);
+                                    window.showStatusPopup("New Order Received!", `Order #${o.id.slice(-5).toUpperCase()} needs attention.`);
                                 }
                             });
                             
