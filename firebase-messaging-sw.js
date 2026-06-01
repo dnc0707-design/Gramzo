@@ -13,43 +13,55 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 // --- 1. BACKGROUND PUSH NOTIFICATIONS ---
+// If the backend sends a "notification" object, the browser handles it automatically.
+// We only call showNotification manually if ONLY a "data" object was received.
 messaging.onBackgroundMessage((payload) => {
     console.log('[SW] Background message received ', payload);
-    const notificationTitle = payload.notification?.title || "Gramzo Update";
-    const notificationOptions = {
-        body: payload.notification?.body || "You have a new update.",
-        icon: 'https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/New%20logo%20-Gramzo%20-%206%20may.png',
-        badge: 'https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/New%20logo%20-Gramzo%20-%206%20may.png',
-        vibrate: [200, 100, 200]
-    };
-    return self.registration.showNotification(notificationTitle, notificationOptions);
+    
+    if (!payload.notification && payload.data) {
+        const notificationTitle = payload.data.title || "Gramzo Update";
+        const notificationOptions = {
+            body: payload.data.body || "You have a new update.",
+            icon: 'https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/New%20logo%20-Gramzo%20-%206%20may.png',
+            badge: 'https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/New%20logo%20-Gramzo%20-%206%20may.png',
+            vibrate: [300, 100, 300, 100, 300], // Swiggy style aggressive vibration
+            requireInteraction: true, // Keeps it on screen
+            data: {
+                click_action: payload.data.click_action || '/'
+            }
+        };
+        return self.registration.showNotification(notificationTitle, notificationOptions);
+    }
 });
 
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
+    const targetUrl = event.notification.data?.click_action || '/';
+
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
             for (let i = 0; i < windowClients.length; i++) {
                 const client = windowClients[i];
-                if (client.url.indexOf('/') !== -1 && 'focus' in client) return client.focus();
+                if (client.url.includes(self.location.origin) && 'focus' in client) {
+                    return client.focus();
+                }
             }
-            if (clients.openWindow) return clients.openWindow('/');
+            if (clients.openWindow) {
+                return clients.openWindow(targetUrl);
+            }
         })
     );
 });
 
 // --- 2. CRASH-PROOF CACHING LOGIC ---
-const CACHE_NAME = 'gramzo-cache-v3';
+const CACHE_NAME = 'gramzo-cache-v4'; // Bumped cache version
 const urlsToCache = ['/', '/index.html'];
 
 self.addEventListener('install', event => {
-    // skipWaiting forces the service worker to activate immediately 
     self.skipWaiting(); 
-    
     event.waitUntil(
         caches.open(CACHE_NAME).then(async (cache) => {
             try {
-                // Try to cache, but don't crash if a file is missing
                 await cache.addAll(urlsToCache);
                 console.log('[SW] Caching successful');
             } catch (err) {
@@ -64,9 +76,7 @@ self.addEventListener('fetch', event => {
 });
 
 self.addEventListener('activate', event => {
-    // Take control of all pages immediately
     event.waitUntil(self.clients.claim());
-    
     event.waitUntil(
         caches.keys().then(cacheNames => {
             return Promise.all(
