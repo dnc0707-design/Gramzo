@@ -1145,6 +1145,66 @@
             return date.toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
         };
 
+        window.maskCustomerName = (name) => {
+            if (!name) return 'Customer';
+            const parts = name.trim().split(/\s+/);
+            if (parts.length === 0) return 'Customer';
+            
+            // Mask the first name: e.g. "Sourav Ganguly" becomes "S***** Ganguly"
+            const firstName = parts[0];
+            const maskedFirst = firstName.charAt(0) + '*'.repeat(Math.max(2, firstName.length - 1));
+            
+            if (parts.length > 1) {
+                return maskedFirst + ' ' + parts.slice(1).join(' ');
+            }
+            return maskedFirst;
+        };
+
+        window.renderPublicReviews = (orders) => {
+            const section = document.getElementById('customer-reviews-section');
+            const list = document.getElementById('public-reviews-list');
+            if (!list || !section) return;
+
+            // Extract orders that are complete and have written reviews
+            const reviewedOrders = orders.filter(o => 
+                (o.status === 'Completed' || o.status === 'Delivered') && 
+                o.rating && o.review && o.review.trim() !== ''
+            );
+
+            if (reviewedOrders.length === 0) {
+                section.classList.add('hidden');
+                return;
+            }
+
+            section.classList.remove('hidden');
+            list.innerHTML = reviewedOrders.map(o => {
+                const maskedName = window.maskCustomerName(o.customer);
+                const starsHtml = '<i class="fa-solid fa-star text-yellow-400 text-xs"></i>'.repeat(o.rating) + 
+                                  '<i class="fa-regular fa-star text-gray-200 text-xs"></i>'.repeat(5 - o.rating);
+                
+                const orderTypeTag = o.type === 'Ride' 
+                    ? `<span class="bg-blue-50 text-blue-600 text-[9px] font-black px-2 py-0.5 rounded-full"><i class="fa-solid fa-taxi mr-0.5"></i> RIDE</span>`
+                    : `<span class="bg-red-50 text-red-600 text-[9px] font-black px-2 py-0.5 rounded-full"><i class="fa-solid fa-utensils mr-0.5"></i> FOOD</span>`;
+
+                return `
+                    <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 w-64 shrink-0 snap-center flex flex-col justify-between transform transition-all hover:shadow-md">
+                        <div>
+                            <div class="flex justify-between items-center mb-1.5">
+                                <span class="font-black text-xs text-gray-800 truncate max-w-[140px]">${maskedName}</span>
+                                ${orderTypeTag}
+                            </div>
+                            <div class="flex gap-0.5 mb-2">${starsHtml}</div>
+                            <p class="text-xs text-gray-600 italic font-medium leading-relaxed line-clamp-3">"${o.review}"</p>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-gray-100 flex justify-between items-center text-[9px] text-gray-400 font-bold">
+                            <span><i class="fa-solid fa-circle-check text-emerald-500 mr-0.5"></i> Verified User</span>
+                            <span>${o.time ? window.formatOrderTime(o.time).split(',')[0] : 'Recent'}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        };
+
         const getCol = (name) => collection(db, name);
         const getDocRef = (colName, docId) => doc(db, colName, String(docId));
 
@@ -2217,9 +2277,14 @@
                 window.activePromos = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(p => p.isActive);
             });
             
-            onSnapshot(getCol('scheduled_trips'), (snap) => {
+           onSnapshot(getCol('scheduled_trips'), (snap) => {
                 window.availableTrips = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(t => new Date(t.time) > new Date());
                 window.renderAvailableTrips();
+            });
+
+            onSnapshot(getCol('orders'), (snap) => {
+                const orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                window.renderPublicReviews(orders);
             });
 
             onSnapshot(getCol('products'), (snap) => {
