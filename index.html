@@ -152,8 +152,8 @@
                     <p id="menu-name" class="font-bold text-sm text-gray-900">Name</p>
                     <p id="menu-phone" class="text-xs text-gray-500 font-medium">Phone</p>
                 </div>
-                <div class="p-2 border-b border-gray-50" id="push-prompt-container">
-                    <button type="button" onclick="window.registerDeviceForNotifications(currentUser?.phone)" class="w-full text-left px-4 py-2.5 text-sm font-bold text-blue-600 hover:bg-blue-50 rounded-xl transition-colors flex items-center gap-2">
+              <div class="p-2 border-b border-gray-50" id="push-prompt-container">
+                    <button type="button" onclick="window.registerDeviceForNotifications(currentUser?.phone, currentUser?.role)" class="w-full text-left px-4 py-2.5 text-sm font-bold text-blue-600 hover:bg-blue-50 rounded-xl transition-colors flex items-center gap-2">
                         <i class="fa-solid fa-bell"></i> Enable Notifications
                     </button>
                 </div>
@@ -327,7 +327,21 @@
                 </div>
                 
                 <footer class="mt-8 pt-8 border-t border-gray-200/60 pb-4">
-                   
+                    <div class="w-full mb-8 flex justify-center sm:justify-start">
+                        <img src="https://raw.githubusercontent.com/dnc0707-design/Gramzo/main/ChatGPT%20Image%20May%202%2C%202026%2C%2001_16_21%20PM.png" alt="Gramzo" class="h-16 object-contain opacity-50 drop-shadow-sm rounded-xl">
+                    </div>
+                    
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-8 mb-8 mt-6">
+                        <div class="col-span-2 sm:col-span-2">
+                            <p class="text-xs text-gray-500 font-medium leading-relaxed max-w-xs mb-4">
+                                Bringing convenience to every village. Connect directly with your favorite local businesses.
+                            </p>
+                            <div class="text-xs text-gray-600 font-bold space-y-2">
+                                <p><i class="fa-solid fa-location-dot w-4 text-center text-red-500"></i> Kotaldi, Near Oriya baba Ashram, Pin: 723156, Purulia</p>
+                                <p><i class="fa-solid fa-phone w-4 text-center text-red-500"></i> +91 7980230656</p>
+                            </div>
+                        </div>
+                        <div>
                             <h4 class="font-bold text-gray-900 mb-4 tracking-tight">Company</h4>
                             <ul class="space-y-3 text-xs text-gray-500 font-medium">
                                 <li><a href="#" onclick="window.openStaticPage('about'); return false;" class="hover:text-red-600 transition">About Us</a></li>
@@ -953,7 +967,7 @@
         }
 
         // GLOBALS & STATE
-        let currentUser = null;
+        let currentUser = null;    
         let currentRestaurantFilter = null;
         let currentFoodCategoryFilter = null;
         
@@ -1879,33 +1893,54 @@
                 }
             }
 
-            window.initRoleListeners();
+           window.initRoleListeners();
             window.loadMarketplaceData();
 
             setTimeout(() => {
-                if (currentUser && currentUser.phone && currentUser.phone !== 'Admin') {
-                    window.registerDeviceForNotifications(currentUser.phone);
+                if (currentUser && currentUser.phone) {
+                    window.registerDeviceForNotifications(currentUser.phone, currentUser.role);
                 }
             }, 3000);
         };
 
-        window.registerDeviceForNotifications = async (phone) => {
-            if ('serviceWorker' in navigator && messaging) {
-                try {
-                    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-                    const permission = await Notification.requestPermission();
-                    if (permission === 'granted') {
-                        const token = await getToken(messaging, { 
-                            vapidKey: 'BM4kAcfdUnR_a3T_4akm1Y-VsebvaZ8kTCShHLFqoCxGjHIOfILQP0QhpYHLtNXXIOXAqF8RiE9iUZ8YuWSU7MU',
-                            serviceWorkerRegistration: registration 
-                        });
+        window.registerDeviceForNotifications = async (phone, role = 'User') => {
+            if (!('serviceWorker' in navigator)) {
+                return window.showToast("Browser does not support background syncing.", "error");
+            }
+            if (!messaging) {
+                return window.showToast("Push notifications not supported on this device/browser.", "error");
+            }
+
+            try {
+                window.showToast("Requesting notification permission...", "info");
+                const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+                const permission = await Notification.requestPermission();
+                
+                if (permission === 'granted') {
+                    window.showToast("Fetching secure token...", "info");
+                    const token = await getToken(messaging, { 
+                        vapidKey: 'BM4kAcfdUnR_a3T_4akm1Y-VsebvaZ8kTCShHLFqoCxGjHIOfILQP0QhpYHLtNXXIOXAqF8RiE9iUZ8YuWSU7MU',
+                        serviceWorkerRegistration: registration 
+                    });
+                    
+                    if (token && phone) {
+                        const updateData = { fcmToken: token };
+                        // If this is the Admin, ensure the role is saved so the Cloud Function can find it
+                        if (phone === 'Admin' || role === 'Admin') updateData.role = 'Admin';
                         
-                        if (token && phone) {
-                            await setDoc(doc(db, 'users', phone), { fcmToken: token }, { merge: true });
-                            console.log("FCM Token synced:", token);
-                        }
+                        await setDoc(doc(db, 'users', phone), updateData, { merge: true });
+                        console.log("FCM Token synced:", token);
+                        window.showToast("Push Notifications Enabled!", "success");
+                    } else {
+                        window.showToast("Failed to generate device token.", "error");
                     }
-                } catch (err) { console.error("FCM Registration failed:", err); }
+                } else {
+                    console.warn("Notification permission denied by user.");
+                    window.showToast("Notification permission blocked. Please allow in browser settings.", "error");
+                }
+            } catch (err) { 
+                console.error("FCM Registration failed:", err); 
+                window.showToast("FCM Error: " + (err.message || "Unknown error"), "error");
             }
         };
 
