@@ -2428,7 +2428,113 @@
                 window.renderCartUI();
             } catch(e) { window.showToast("Network Error verifying promo", "error"); } finally { btn.innerText = origText; btn.disabled = false; }
         };
+// ==========================================
+        // ADMIN PROMO & OFFERS MANAGEMENT FUNCTIONS
+        // ==========================================
 
+        window.loadItemsForPromo = () => {
+            const restId = document.getElementById('admin-promo-restaurant').value;
+            const itemSelect = document.getElementById('admin-promo-item');
+            
+            if (restId === 'Global') {
+                itemSelect.innerHTML = '<option value="">Apply to Cart (Requires Code)</option>';
+                itemSelect.disabled = true;
+            } else {
+                itemSelect.disabled = false;
+                let options = '<option value="">Apply to Entire Cart (Requires Code)</option>';
+                // Filter all products to only show items belonging to the selected restaurant
+                const restItems = window.allProducts.filter(p => p.partnerId === restId);
+                restItems.forEach(item => {
+                    options += `<option value="${item.id}">${item.name}</option>`;
+                });
+                itemSelect.innerHTML = options;
+            }
+        };
+
+        window.adminCreatePromo = async () => {
+            const discountStr = document.getElementById('admin-promo-discount').value;
+            const type = document.getElementById('admin-promo-type').value;
+            let code = document.getElementById('admin-promo-code').value.trim().toUpperCase();
+            const restaurantId = document.getElementById('admin-promo-restaurant').value;
+            const itemId = document.getElementById('admin-promo-item').value;
+
+            const discount = parseFloat(discountStr);
+            if (isNaN(discount) || discount <= 0) return window.showToast("Enter a valid discount amount.", "error");
+
+            const isItemOffer = !!itemId;
+            
+            // Cart offers MUST have a promo code. Item offers don't need a code (auto-applied).
+            if (!isItemOffer && !code) {
+                return window.showToast("Cart offers require a Promo Code.", "error");
+            }
+
+            let restaurantName = 'Global';
+            if (restaurantId !== 'Global') {
+                const partner = window.adminUsersData.find(u => u.id === restaurantId);
+                if (partner) restaurantName = partner.shopName || partner.name;
+            }
+
+            let itemName = null;
+            if (isItemOffer) {
+                const item = window.allProducts.find(p => p.id === itemId);
+                if (item) itemName = item.name;
+                code = ''; // Ignore code for individual item offers
+            }
+
+            const btn = document.querySelector('button[onclick="window.adminCreatePromo()"]');
+            const origText = btn.innerText;
+            btn.innerText = "Creating..."; btn.disabled = true;
+
+            try {
+                await window.dbCall(addDoc(getCol('promos'), {
+                    discount: discount,
+                    discountType: type,
+                    code: code,
+                    restaurantId: restaurantId,
+                    restaurantName: restaurantName,
+                    isItemOffer: isItemOffer,
+                    itemId: itemId || null,
+                    itemName: itemName,
+                    isActive: true,
+                    created: serverTimestamp()
+                }), 10000);
+                
+                window.showToast("Promo created successfully!", "success");
+                
+                // Reset form
+                document.getElementById('admin-promo-discount').value = '';
+                document.getElementById('admin-promo-code').value = '';
+                document.getElementById('admin-promo-restaurant').value = 'Global';
+                window.loadItemsForPromo();
+                
+            } catch(e) {
+                window.showToast("Failed to create promo.", "error");
+            } finally {
+                btn.innerText = origText; btn.disabled = false;
+            }
+        };
+
+        window.togglePromo = async (id, currentStatus) => {
+            try {
+                await window.dbCall(updateDoc(getDocRef('promos', id), { isActive: !currentStatus }), 10000);
+                window.showToast(currentStatus ? "Promo Disabled" : "Promo Activated", "success");
+            } catch (e) {
+                window.showToast("Error updating promo.", "error");
+            }
+        };
+
+        window.deletePromo = async (id) => {
+            const confirmed = await window.customConfirm("Delete Promo", "Are you sure you want to delete this offer?", "Delete");
+            if (!confirmed) return;
+            
+            try {
+                await window.dbCall(deleteDoc(getDocRef('promos', id)), 10000);
+                window.showToast("Promo deleted.", "success");
+            } catch (e) {
+                window.showToast("Failed to delete promo.", "error");
+            }
+        };
+        // ==========================================
         window.addToCartStandard = (id, name, price, partnerId, shopName) => {
             window.addToCartActual(name, price, partnerId, shopName);
         };
