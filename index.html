@@ -1639,24 +1639,36 @@
         };
 
         window.markRideStarted = async (orderId) => {
-            try { await window.dbCall(updateDoc(getDocRef('orders', orderId), { status: 'Started' }), 10000); window.showToast("Ride Started!", "success"); } catch(e) { window.showToast("Failed to start ride.", "error"); }
-        };
+                 try { await window.dbCall(updateDoc(getDocRef('orders', orderId), { status: 'Started' }), 10000); window.showToast("Ride Started!", "success"); } catch(e) { window.showToast("Failed to start ride.", "error"); }
+        };
 
-        window.completeRide = async (orderId) => {
-            const deductPoints = ['Car', 'Car_Mini', 'Car_SUV'].includes(currentUser.vehicleType) ? 50 : 5;
-            const confirmed = await window.customConfirm("Complete Ride", `Are you sure you have completed the ride and collected payment? ${deductPoints} Gramzo Points will be deducted.`, "Complete Ride");
-            if (!confirmed) return;
-            if((currentUser.walletPoints || 0) < deductPoints) { return window.showToast(`Insufficient Gramzo Points (${deductPoints} needed) to complete this ride. Contact Admin.`, "error"); }
-            try {
-                const newPoints = (currentUser.walletPoints || 0) - deductPoints;
-                await window.dbCall(updateDoc(getDocRef('orders', orderId), { status: 'Completed' }), 10000);
-                await window.dbCall(updateDoc(getDocRef('users', currentUser.phone), { walletPoints: newPoints }), 10000);
-                currentUser.walletPoints = newPoints;
-                const pointDisplay = document.getElementById('wallet-points-display');
-                if(pointDisplay) pointDisplay.innerText = newPoints;
-                window.showToast("Ride Completed successfully!", "success");
-            } catch(e) { window.showToast("Failed to end ride.", "error"); }
-        };
+        window.completeRide = async (orderId) => {
+            // Admin Override Logic
+            if (currentUser && currentUser.role === 'Admin') {
+                const confirmed = await window.customConfirm("Admin Override", "Force complete this ride? Points will NOT be deducted from the rider automatically here.", "Complete Ride");
+                if (!confirmed) return;
+                try {
+                    await window.dbCall(updateDoc(getDocRef('orders', orderId), { status: 'Completed' }), 10000);
+                    window.showToast("Ride forcefully completed by Admin!", "success");
+                } catch(e) { window.showToast("Failed to end ride.", "error"); }
+                return;
+            }
+
+            // Normal Rider Logic
+            const deductPoints = ['Car', 'Car_Mini', 'Car_SUV'].includes(currentUser.vehicleType) ? 50 : 5;
+            const confirmed = await window.customConfirm("Complete Ride", `Are you sure you have completed the ride and collected payment? ${deductPoints} Gramzo Points will be deducted.`, "Complete Ride");
+            if (!confirmed) return;
+            if((currentUser.walletPoints || 0) < deductPoints) { return window.showToast(`Insufficient Gramzo Points (${deductPoints} needed) to complete this ride. Contact Admin.`, "error"); }
+            try {
+                const newPoints = (currentUser.walletPoints || 0) - deductPoints;
+                await window.dbCall(updateDoc(getDocRef('orders', orderId), { status: 'Completed' }), 10000);
+                await window.dbCall(updateDoc(getDocRef('users', currentUser.phone), { walletPoints: newPoints }), 10000);
+                currentUser.walletPoints = newPoints;
+                const pointDisplay = document.getElementById('wallet-points-display');
+                if(pointDisplay) pointDisplay.innerText = newPoints;
+                window.showToast("Ride Completed successfully!", "success");
+            } catch(e) { window.showToast("Failed to end ride.", "error"); }
+        };
 
         window.adminAddPoints = async (userId, currentPoints) => {
             const amountStr = await window.customPrompt("Add Points", `Current Balance: ${currentPoints}\nEnter amount of points/coins to add:`, "amount", "number");
@@ -3056,53 +3068,74 @@
 
         window.switchOrderTab = (tab) => {
             window.adminCurrentOrderTab = tab;
-            document.querySelectorAll('.admin-order-tab').forEach(el => { el.classList.remove('bg-white', 'text-gray-900', 'shadow-sm'); el.classList.add('text-gray-500'); });
-            const activeEl = document.getElementById(`tab-order-${tab}`);
-            if(activeEl) { activeEl.classList.add('bg-white', 'text-gray-900', 'shadow-sm'); activeEl.classList.remove('text-gray-500'); }
-            window.renderAdminOrders();
-        };
+            document.querySelectorAll('.admin-order-tab').forEach(el => { el.classList.remove('bg-white', 'text-gray-900', 'shadow-sm'); el.classList.add('text-gray-500'); });
+            const activeEl = document.getElementById(`tab-order-${tab}`);
+            if(activeEl) { activeEl.classList.add('bg-white', 'text-gray-900', 'shadow-sm'); activeEl.classList.remove('text-gray-500'); }
+            window.renderAdminOrders();
+        };
 
-        window.renderAdminOrders = () => {
-            const adminLog = document.getElementById('admin-log-body');
-            if(!adminLog) return;
-            
-            let filteredOrders = window.adminOrdersData.filter(o => {
-                if (window.adminCurrentOrderTab === 'Live') return !['Delivered', 'Completed', 'Rejected'].includes(o.status);
-                else if (window.adminCurrentOrderTab === 'Rejected') return o.status === 'Rejected';
-                else return ['Delivered', 'Completed'].includes(o.status);
-            });
+        window.renderAdminOrders = () => {
+            const adminLog = document.getElementById('admin-log-body');
+            if(!adminLog) return;
+            
+            let filteredOrders = window.adminOrdersData.filter(o => {
+                if (window.adminCurrentOrderTab === 'Live') return !['Delivered', 'Completed', 'Rejected'].includes(o.status);
+                else if (window.adminCurrentOrderTab === 'Rejected') return o.status === 'Rejected';
+                else return ['Delivered', 'Completed'].includes(o.status);
+            });
 
-            if(filteredOrders.length === 0) { adminLog.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-gray-400 text-xs italic">No ${window.adminCurrentOrderTab.toLowerCase()} orders</td></tr>`; return; }
+            if(filteredOrders.length === 0) { adminLog.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-gray-400 text-xs italic">No ${window.adminCurrentOrderTab.toLowerCase()} orders</td></tr>`; return; }
 
-            let html = '';
-            filteredOrders.forEach(o => {
-                const timeStr = window.formatOrderTime(o.time);
-                let scheduledTimeHtml = o.isScheduled && o.scheduledTime ? `<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[9px] font-black uppercase ml-2 block mt-1"><i class="fa-solid fa-calendar mr-1"></i> Trip Date: ${window.formatOrderTime(o.scheduledTime)}</span>` : '';
-                
-                let statusColor = o.status === 'Placed' || o.status === 'Requested' || o.status === 'Broadcasted' ? 'text-amber-500' : o.status === 'Preparing' || o.status === 'Started' || o.status === 'Out for Delivery' || o.status === 'Confirmed' ? 'text-blue-500' : o.status === 'Rejected' ? 'text-red-500' : 'text-emerald-500';
-                const displayType = o.type === 'Ride' ? '🚕 Ride' : '🍔 Order';
-                const addressDisplay = o.type === 'Ride' ? `<span class="text-blue-500 font-medium">From:</span> ${o.pickup || 'N/A'}<br/><span class="text-emerald-500 font-medium">To:</span> ${o.address || 'N/A'}` : o.address || 'N/A';
-                
-                const itemsStr = o.items ? o.items.map(i => `${i.name} ${i.quantity && i.quantity > 1 ? '(x'+i.quantity+')' : ''}`.trim()).join('<br/>') : '';
-                const itemsHtml = itemsStr ? `<div class="bg-gray-50 p-2 rounded-xl mt-2 border border-gray-100 text-[10px] text-gray-700 font-bold leading-relaxed"><i class="fa-solid fa-clipboard-list text-gray-400 mr-1"></i> ${itemsStr}</div>` : '';
+            let html = '';
+            filteredOrders.forEach(o => {
+                const timeStr = window.formatOrderTime(o.time);
+                let scheduledTimeHtml = o.isScheduled && o.scheduledTime ? `<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[9px] font-black uppercase ml-2 block mt-1"><i class="fa-solid fa-calendar mr-1"></i> Trip Date: ${window.formatOrderTime(o.scheduledTime)}</span>` : '';
+                
+                let statusColor = o.status === 'Placed' || o.status === 'Requested' || o.status === 'Broadcasted' ? 'text-amber-500' : o.status === 'Preparing' || o.status === 'Started' || o.status === 'Out for Delivery' || o.status === 'Confirmed' ? 'text-blue-500' : o.status === 'Rejected' ? 'text-red-500' : 'text-emerald-500';
+                const displayType = o.type === 'Ride' ? '🚕 Ride' : '🍔 Order';
+                const addressDisplay = o.type === 'Ride' ? `<span class="text-blue-500 font-medium">From:</span> ${o.pickup || 'N/A'}<br/><span class="text-emerald-500 font-medium">To:</span> ${o.address || 'N/A'}` : o.address || 'N/A';
+                
+                const itemsStr = o.items ? o.items.map(i => `${i.name} ${i.quantity && i.quantity > 1 ? '(x'+i.quantity+')' : ''}`.trim()).join('<br/>') : '';
+                const itemsHtml = itemsStr ? `<div class="bg-gray-50 p-2 rounded-xl mt-2 border border-gray-100 text-[10px] text-gray-700 font-bold leading-relaxed"><i class="fa-solid fa-clipboard-list text-gray-400 mr-1"></i> ${itemsStr}</div>` : '';
 
-                html += `
-                    <tr class="hover:bg-gray-50 transition-colors border-b border-gray-50">
-                        <td class="p-3 font-mono font-bold text-[10px] text-gray-500 align-top pt-4">#${o.id.slice(-5).toUpperCase()}<br/><span class="font-sans font-medium text-[9px] text-gray-400">${timeStr}</span>${scheduledTimeHtml}</td>
-                        <td class="p-3 font-bold text-gray-900 text-xs align-top pt-4">
-                            ${o.customer || 'Unknown'} <span class="font-normal text-[9px] text-gray-500 bg-gray-100 px-1 rounded ml-1">${displayType}</span><br/>
-                            <a href="tel:${o.phone}" class="font-mono font-normal text-[10px] text-blue-600 hover:underline inline-block mt-0.5"><i class="fa-solid fa-phone text-[8px]"></i> ${o.phone || 'N/A'}</a><br/>
-                            <span class="font-normal text-[10px] text-gray-500 leading-snug mt-1 inline-block"><i class="fa-solid fa-location-dot text-[8px] text-red-400"></i> ${addressDisplay}</span>
-                            ${itemsHtml}
-                        </td>
-                        <td class="p-3 font-medium text-gray-600 text-xs align-top pt-4">${o.type === 'Ride' ? (o.riderName || 'Pending') : (o.restaurantName || '-')}</td>
-                        <td class="p-3 font-black text-gray-900 text-xs align-top pt-4">₹${o.total ? o.total.toFixed(2) : (o.amount || 0)}</td>
-                        <td class="p-3 text-right uppercase text-[9px] font-black ${statusColor} tracking-wider align-top pt-4">${o.status}</td>
-                    </tr>`;
-            });
-            adminLog.innerHTML = html;
-        };
+                // ---------- ADMIN ACTIONS INJECTED HERE ----------
+                let adminActions = '';
+                const isLive = !['Delivered', 'Completed', 'Rejected'].includes(o.status);
+                
+                if (isLive) {
+                    // Reject Button is available for ALL active Food/Ride Orders
+                    adminActions += `<button type="button" onclick="window.openRejectModal('${o.id}')" class="bg-red-50 text-red-600 px-2 py-1.5 rounded-lg border border-red-200 w-full text-[9px] font-black mb-1 hover:bg-red-100 transition active:scale-95"><i class="fa-solid fa-xmark"></i> REJECT</button>`;
+                    
+                    // Complete Ride / Mark Delivered Action 
+                    if (o.type === 'Ride' && ['Confirmed', 'Started'].includes(o.status)) {
+                        adminActions += `<button type="button" onclick="window.completeRide('${o.id}')" class="bg-emerald-50 text-emerald-600 px-2 py-1.5 rounded-lg border border-emerald-200 w-full text-[9px] font-black hover:bg-emerald-100 transition active:scale-95"><i class="fa-solid fa-check"></i> COMPLETE RIDE</button>`;
+                    } else if (o.type !== 'Ride' && ['Placed', 'Accepted', 'Preparing', 'Ready', 'Out for Delivery'].includes(o.status)) {
+                        adminActions += `<button type="button" onclick="window.markDelivered('${o.id}')" class="bg-emerald-50 text-emerald-600 px-2 py-1.5 rounded-lg border border-emerald-200 w-full text-[9px] font-black hover:bg-emerald-100 transition active:scale-95"><i class="fa-solid fa-check-double"></i> MARK DELIVERED</button>`;
+                    }
+                }
+                // --------------------------------------------------
 
+                html += `
+                    <tr class="hover:bg-gray-50 transition-colors border-b border-gray-50">
+                        <td class="p-3 font-mono font-bold text-[10px] text-gray-500 align-top pt-4">#${o.id.slice(-5).toUpperCase()}<br/><span class="font-sans font-medium text-[9px] text-gray-400">${timeStr}</span>${scheduledTimeHtml}</td>
+                        <td class="p-3 font-bold text-gray-900 text-xs align-top pt-4">
+                            ${o.customer || 'Unknown'} <span class="font-normal text-[9px] text-gray-500 bg-gray-100 px-1 rounded ml-1">${displayType}</span><br/>
+                            <a href="tel:${o.phone}" class="font-mono font-normal text-[10px] text-blue-600 hover:underline inline-block mt-0.5"><i class="fa-solid fa-phone text-[8px]"></i> ${o.phone || 'N/A'}</a><br/>
+                            <span class="font-normal text-[10px] text-gray-500 leading-snug mt-1 inline-block"><i class="fa-solid fa-location-dot text-[8px] text-red-400"></i> ${addressDisplay}</span>
+                            ${itemsHtml}
+                        </td>
+                        <td class="p-3 font-medium text-gray-600 text-xs align-top pt-4">${o.type === 'Ride' ? (o.riderName || 'Pending') : (o.restaurantName || '-')}</td>
+                        <td class="p-3 font-black text-gray-900 text-xs align-top pt-4">₹${o.total ? o.total.toFixed(2) : (o.amount || 0)}</td>
+                        <td class="p-3 text-right uppercase text-[9px] font-black tracking-wider align-top pt-4">
+                            <span class="${statusColor} block mb-2">${o.status}</span>
+                            <div class="flex flex-col items-end w-full gap-1">
+                                ${adminActions}
+                            </div>
+                        </td>
+                    </tr>`;
+            });
+            adminLog.innerHTML = html;
+        };
         window.switchPartnerOrderTab = (tab) => {
             window.partnerCurrentOrderTab = tab;
             document.querySelectorAll('.partner-order-tab').forEach(el => {
