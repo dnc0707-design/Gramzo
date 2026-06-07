@@ -2396,7 +2396,7 @@
             }, 100);
         };
 
-        window.applyPromo = async () => {
+       window.applyPromo = async () => {
             const codeInput = document.getElementById('promo-code-input');
             if (!codeInput) return;
             const code = codeInput.value.trim().toUpperCase();
@@ -2413,17 +2413,19 @@
                 const matchedPromo = promos.find(p => p.code === code && !p.isItemOffer); 
                 if(!matchedPromo) {
                     window.showToast("Invalid Promo Code", "error");
-                    window.appliedPromo = 0; window.promoCode = '';
+                    window.appliedPromo = 0; window.promoCode = ''; window.appliedPromoType = 'percentage';
                 } else if (!matchedPromo.isActive) {
                     window.showToast("Promo code is disabled", "error");
-                    window.appliedPromo = 0; window.promoCode = '';
-                } else if (matchedPromo.restaurantId !== 'Global' && window.cart.length > 0 && window.cart[0].partnerId !== matchedPromo.restaurantId) {
+                    window.appliedPromo = 0; window.promoCode = ''; window.appliedPromoType = 'percentage';
+                } else if (matchedPromo.restaurantId !== 'Global' && window.cart.length > 0 && String(window.cart[0].partnerId) !== String(matchedPromo.restaurantId)) {
                     window.showToast("Promo not valid for this restaurant", "error");
-                    window.appliedPromo = 0; window.promoCode = '';
+                    window.appliedPromo = 0; window.promoCode = ''; window.appliedPromoType = 'percentage';
                 } else {
                     window.appliedPromo = matchedPromo.discount; 
                     window.promoCode = matchedPromo.code;
-                    window.showToast(`${window.appliedPromo}% Discount Applied!`, "success");
+                    // FIX: Capture if it's flat amount (₹) or percentage (%)
+                    window.appliedPromoType = matchedPromo.discountType || 'percentage'; 
+                    window.showToast(`${window.appliedPromo}${window.appliedPromoType === 'percentage' ? '%' : '₹'} Discount Applied!`, "success");
                 }
                 window.renderCartUI();
             } catch(e) { window.showToast("Network Error verifying promo", "error"); } finally { btn.innerText = origText; btn.disabled = false; }
@@ -2442,14 +2444,19 @@
             } else {
                 itemSelect.disabled = false;
                 let options = '<option value="">Apply to Entire Cart (Requires Code)</option>';
-                // Filter all products to only show items belonging to the selected restaurant
-                const restItems = window.allProducts.filter(p => p.partnerId === restId);
-                restItems.forEach(item => {
-                    options += `<option value="${item.id}">${item.name}</option>`;
-                });
+                // FIX: Force String comparison to ensure items show up
+                const restItems = window.allProducts.filter(p => String(p.partnerId) === String(restId));
+                
+                if(restItems.length === 0) {
+                    options += '<option value="" disabled>No menu items found</option>';
+                } else {
+                    restItems.forEach(item => {
+                        options += `<option value="${item.id}">${item.name || 'Unnamed Item'}</option>`;
+                    });
+                }
                 itemSelect.innerHTML = options;
             }
-        };
+        };;
 
         window.adminCreatePromo = async () => {
             const discountStr = document.getElementById('admin-promo-discount').value;
@@ -2601,7 +2608,16 @@
             }
 
             const handlingFee = window.cart.length > 0 ? 5 : 0;
-            const promoDiscountAmt = (sub * (window.appliedPromo || 0)) / 100;
+            
+            // FIX: Calculate Flat vs Percentage discounts correctly
+            let promoDiscountAmt = 0;
+            if (window.appliedPromo > 0) {
+                if (window.appliedPromoType === 'flat') {
+                    promoDiscountAmt = Math.min(sub, window.appliedPromo); // Flat discount cannot exceed subtotal
+                } else {
+                    promoDiscountAmt = (sub * window.appliedPromo) / 100; // Percentage discount
+                }
+            }
             
             let coinDiscount = 0;
             const coinsContainer = document.getElementById('cart-coins-container');
@@ -2623,7 +2639,7 @@
 
             if (summaryTotals) {
                 const promoHtml = window.appliedPromo > 0 
-                    ? `<div class="flex justify-between text-[11px] text-emerald-600 font-bold"><span>Promo (${window.appliedPromo}%)</span><span>-₹${promoDiscountAmt.toFixed(2)}</span></div>` 
+                    ? `<div class="flex justify-between text-[11px] text-emerald-600 font-bold"><span>Promo (${window.appliedPromoType === 'flat' ? '₹' + window.appliedPromo : window.appliedPromo + '%'})</span><span>-₹${promoDiscountAmt.toFixed(2)}</span></div>` 
                     : '';
                 const coinHtml = coinDiscount > 0 
                     ? `<div class="flex justify-between text-[11px] text-yellow-600 font-bold"><span>Coins Applied</span><span>-₹${Math.floor(coinDiscount)}</span></div>` 
