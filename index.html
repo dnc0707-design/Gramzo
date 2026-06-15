@@ -16,15 +16,20 @@
     <title>Gramzo | Instant Delivery Super App</title>
 
 
-    <script>
+   <script>
         (function() {
             try {
-                if (window.location.protocol === 'file:' || window.location.protocol === 'content:') {
-                    console.log("Native App Wrapper detected. Skipping aggressive web cache buster.");
+                // 1. Improved WebView Detection (Catches Android WebViews even on https://)
+                const isWebView = /(iPhone|iPod|iPad).*AppleWebKit(?!.*Safari)|Android.*(wv|\.0\.0\.0)/i.test(navigator.userAgent) || window.location.protocol === 'file:' || window.location.protocol === 'content:';
+
+                // 2. If inside the native app wrapper, STOP completely to prevent the "Chrome Custom Tab" popup
+                if (isWebView) {
+                    console.log("Native App Wrapper detected. Skipping JS reload to prevent Custom Tab overlay.");
                     return; 
                 }
 
-                const APP_VERSION = "12.0.1"; // Update: Ride Bidding System Introduced
+                // 3. Normal cache buster for standard mobile/desktop browsers only
+                const APP_VERSION = "12.0.1"; 
                 
                 const clearAllCachesAndReload = () => {
                     console.log("Wiping Service Workers and Caches for update...");
@@ -49,7 +54,6 @@
                 const storedVersion = localStorage.getItem("gramzo_app_version");
                 if (storedVersion !== APP_VERSION) {
                     clearAllCachesAndReload();
-                    return; 
                 }
             } catch (error) {
                 console.warn("Storage restricted.", error);
