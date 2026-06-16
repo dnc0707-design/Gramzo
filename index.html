@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
 
@@ -15,8 +15,7 @@
 
     <title>Gramzo | Instant Delivery Super App</title>
 
-
-   <script>
+    <script>
         (function() {
             try {
                 // 1. Improved WebView Detection (Catches Android WebViews even on https://)
@@ -189,6 +188,7 @@
 
         <main id="main-content" class="px-4 pb-24 max-w-md mx-auto sm:max-w-4xl sm:px-6 pt-6">
             
+            <!-- ====== USER VIEW ====== -->
             <div id="view-User" class="view-section active space-y-6">
                 
                 <div class="flex items-center gap-3">
@@ -324,11 +324,13 @@
 
                     <div id="available-trips-list" class="hidden space-y-3 pt-2"></div>
                 </div>
-<!-- Customer Reviews Section (NEWLY ADDED) -->
+                
+                <!-- Customer Reviews Section (NEWLY ADDED) -->
                 <div id="customer-reviews-section" class="hidden mt-8 space-y-4">
                     <h3 class="font-black text-xl text-gray-900 tracking-tight uppercase">What Our Community Says ❤️</h3>
                     <div id="public-reviews-list" class="flex gap-4 overflow-x-auto hide-scroll pb-4 snap-x"></div>
                 </div>
+                
                 <div id="partner-cta" class="mt-8 bg-gray-900 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden flex items-center justify-between">
                     <div class="relative z-10">
                         <h3 class="text-xl font-black mb-1">Partner with us</h3>
@@ -340,9 +342,8 @@
                     <i class="fa-solid fa-motorcycle text-6xl text-gray-800 absolute right-[10px] bottom-[-10px] rotate-[15deg]"></i>
                 </div>
                 
+                <!-- FIXED FOOTER -->
                 <footer class="mt-8 pt-8 border-t border-gray-200/60 pb-4">
-                    
-                    <!-- FIX: Added the missing wrapper divs here -->
                     <div class="grid grid-cols-2 gap-6 mb-8">
                         <div>
                             <h4 class="font-bold text-gray-900 mb-4 tracking-tight">Company</h4>
@@ -375,8 +376,9 @@
                         </div>
                     </div>
                 </footer>
-            </div>
+            </div> <!-- END USER VIEW -->
 
+            <!-- ====== CART VIEW ====== -->
             <div id="view-Cart" class="view-section">
                 <div class="flex items-center gap-3 mb-4 mt-2">
                     <button onclick="window.switchMainView('User')" class="w-8 h-8 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-600 shadow-sm active:scale-90 transition"><i class="fa-solid fa-arrow-left"></i></button>
@@ -479,11 +481,13 @@
                 </div>
             </div>
 
+            <!-- ====== ORDERS VIEW ====== -->
             <div id="view-Orders" class="view-section space-y-6">
                 <h2 class="text-2xl font-black text-gray-900">My Orders & Rides</h2>
                 <div id="user-orders-list" class="space-y-4"></div>
             </div>
 
+            <!-- ====== PARTNER VIEW ====== -->
             <div id="view-Partner" class="view-section space-y-6">
                 <div id="rider-top-dashboard" class="hidden bg-blue-600 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden">
                     <div class="relative z-10">
@@ -545,6 +549,7 @@
                 <div id="partner-orders-list" class="space-y-4"></div>
             </div>
 
+            <!-- ====== PARTNER PROFILE VIEW ====== -->
             <div id="view-Partner-Profile" class="view-section space-y-6">
                 <h2 class="text-2xl font-black text-gray-900">Partner Settings</h2>
                 
@@ -716,6 +721,7 @@
                 </div>
             </div>
 
+            <!-- ====== ADMIN VIEW ====== -->
             <div id="view-Admin" class="view-section space-y-6">
                 <div class="flex justify-between items-center">
                     <h2 class="text-2xl font-black text-gray-900">Admin Control</h2>
@@ -812,7 +818,6 @@
                         <button type="button" onclick="window.adminUpdateMarquee()" id="btn-update-marquee" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm">Publish Marquee</button>
                     </div>
                 </div>
-
             </div>
         </main>
     </div> <!-- End Scrollable Area -->
@@ -1638,36 +1643,36 @@
         };
 
         window.markRideStarted = async (orderId) => {
-                 try { await window.dbCall(updateDoc(getDocRef('orders', orderId), { status: 'Started' }), 10000); window.showToast("Ride Started!", "success"); } catch(e) { window.showToast("Failed to start ride.", "error"); }
-        };
+                 try { await window.dbCall(updateDoc(getDocRef('orders', orderId), { status: 'Started' }), 10000); window.showToast("Ride Started!", "success"); } catch(e) { window.showToast("Failed to start ride.", "error"); }
+        };
 
-        window.completeRide = async (orderId) => {
-            // Admin Override Logic
-            if (currentUser && currentUser.role === 'Admin') {
-                const confirmed = await window.customConfirm("Admin Override", "Force complete this ride? Points will NOT be deducted from the rider automatically here.", "Complete Ride");
-                if (!confirmed) return;
-                try {
-                    await window.dbCall(updateDoc(getDocRef('orders', orderId), { status: 'Completed' }), 10000);
-                    window.showToast("Ride forcefully completed by Admin!", "success");
-                } catch(e) { window.showToast("Failed to end ride.", "error"); }
-                return;
-            }
+        window.completeRide = async (orderId) => {
+            // Admin Override Logic
+            if (currentUser && currentUser.role === 'Admin') {
+                const confirmed = await window.customConfirm("Admin Override", "Force complete this ride? Points will NOT be deducted from the rider automatically here.", "Complete Ride");
+                if (!confirmed) return;
+                try {
+                    await window.dbCall(updateDoc(getDocRef('orders', orderId), { status: 'Completed' }), 10000);
+                    window.showToast("Ride forcefully completed by Admin!", "success");
+                } catch(e) { window.showToast("Failed to end ride.", "error"); }
+                return;
+            }
 
-            // Normal Rider Logic
-            const deductPoints = ['Car', 'Car_Mini', 'Car_SUV'].includes(currentUser.vehicleType) ? 50 : 5;
-            const confirmed = await window.customConfirm("Complete Ride", `Are you sure you have completed the ride and collected payment? ${deductPoints} Gramzo Points will be deducted.`, "Complete Ride");
-            if (!confirmed) return;
-            if((currentUser.walletPoints || 0) < deductPoints) { return window.showToast(`Insufficient Gramzo Points (${deductPoints} needed) to complete this ride. Contact Admin.`, "error"); }
-            try {
-                const newPoints = (currentUser.walletPoints || 0) - deductPoints;
-                await window.dbCall(updateDoc(getDocRef('orders', orderId), { status: 'Completed' }), 10000);
-                await window.dbCall(updateDoc(getDocRef('users', currentUser.phone), { walletPoints: newPoints }), 10000);
-                currentUser.walletPoints = newPoints;
-                const pointDisplay = document.getElementById('wallet-points-display');
-                if(pointDisplay) pointDisplay.innerText = newPoints;
-                window.showToast("Ride Completed successfully!", "success");
-            } catch(e) { window.showToast("Failed to end ride.", "error"); }
-        };
+            // Normal Rider Logic
+            const deductPoints = ['Car', 'Car_Mini', 'Car_SUV'].includes(currentUser.vehicleType) ? 50 : 5;
+            const confirmed = await window.customConfirm("Complete Ride", `Are you sure you have completed the ride and collected payment? ${deductPoints} Gramzo Points will be deducted.`, "Complete Ride");
+            if (!confirmed) return;
+            if((currentUser.walletPoints || 0) < deductPoints) { return window.showToast(`Insufficient Gramzo Points (${deductPoints} needed) to complete this ride. Contact Admin.`, "error"); }
+            try {
+                const newPoints = (currentUser.walletPoints || 0) - deductPoints;
+                await window.dbCall(updateDoc(getDocRef('orders', orderId), { status: 'Completed' }), 10000);
+                await window.dbCall(updateDoc(getDocRef('users', currentUser.phone), { walletPoints: newPoints }), 10000);
+                currentUser.walletPoints = newPoints;
+                const pointDisplay = document.getElementById('wallet-points-display');
+                if(pointDisplay) pointDisplay.innerText = newPoints;
+                window.showToast("Ride Completed successfully!", "success");
+            } catch(e) { window.showToast("Failed to end ride.", "error"); }
+        };
 
         window.adminAddPoints = async (userId, currentPoints) => {
             const amountStr = await window.customPrompt("Add Points", `Current Balance: ${currentPoints}\nEnter amount of points/coins to add:`, "amount", "number");
