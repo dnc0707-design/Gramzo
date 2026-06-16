@@ -1,8 +1,16 @@
-[{
-"relation": ["delegate_permission/common.handle_all_urls"],
-"target": {
-"namespace": "android_app",
-"package_name": "in.gramzo.app",
-"sha256_cert_fingerprints": ["DE:18:5A:70:A4:95:6B:A7:A6:6D:D8:88:37:39:CA:0C:EC:83:19:27:FE:93:FA:88:35:90:79:E2:00:9F:B1:52"]
-}
-}]
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls",
+      "delegate_permission/common.get_login_creds"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "in.gramzo.app",
+      "sha256_cert_fingerprints": [
+        "DE:18:5A:70:A4:95:6B:A7:A6:6D:D8:88:37:39:CA:0C:EC:83:19:27:FE:93:FA:88:35:90:79:E2:00:9F:B1:52",
+        "A3:0E:4B:5E:C2:FA:28:04:C8:D3:5F:10:46:B5:7B:8B:C2:34:AB:B2:B9:B3:97:5C:2A:06:1E:DB:68:0A:27:17"
+      ]
+    }
+  }
+]
