@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -43,7 +43,16 @@
                     }
                     localStorage.setItem("gramzo_app_version", APP_VERSION);
                     setTimeout(() => {
-                        window.location.href = window.location.href.split('?')[0] + '?v=' + new Date().getTime();
+                        // FIX: Check if running inside an Android/iOS WebView wrapper
+                        const isWebView = /(iPhone|iPod|iPad).*AppleWebKit(?!.*Safari)|Android.*(wv|\.0\.0\.0)/i.test(navigator.userAgent);
+                        
+                        if (isWebView) {
+                            // In a WebView wrapper, adding '?v=' triggers an external intent (showing the 'X' top bar)
+                            window.location.reload(true); 
+                        } else {
+                            // Safe for standard web browsers
+                            window.location.href = window.location.href.split('?')[0] + '?v=' + new Date().getTime();
+                        }
                     }, 800);
                 };
 
@@ -340,41 +349,38 @@
                     <i class="fa-solid fa-motorcycle text-6xl text-gray-800 absolute right-[10px] bottom-[-10px] rotate-[15deg]"></i>
                 </div>
                 
-              <footer class="mt-auto shrink-0 bg-white border-t border-gray-200/60 pt-8 pb-4 px-6 sm:px-12 w-full">
-        <div class="max-w-6xl mx-auto">
-            <div class="grid grid-cols-2 gap-6 mb-8">
-                <div>
-                    <h4 class="font-bold text-gray-900 mb-4 tracking-tight">Company</h4>
-                    <ul class="space-y-3 text-xs text-gray-500 font-medium">
-                        <li><a href="#" onclick="window.openStaticPage('about'); return false;" class="hover:text-red-600 transition">About Us</a></li>
-                        <li><a href="#" onclick="window.openStaticPage('contact'); return false;" class="hover:text-red-600 transition">Contact Us</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="font-bold text-gray-900 mb-4 tracking-tight">Legal</h4>
-                    <ul class="space-y-3 text-xs text-gray-500 font-medium">
-                        <li><a href="#" onclick="window.openStaticPage('terms'); return false;" class="hover:text-red-600 transition">Terms & Conditions</a></li>
-                        <li><a href="#" onclick="window.openStaticPage('privacy'); return false;" class="hover:text-red-600 transition">Privacy Policy</a></li>
-                    </ul>
-                </div>
-            </div>
+                <footer class="mt-8 pt-8 border-t border-gray-200/60 pb-4">
+                    
+                            <h4 class="font-bold text-gray-900 mb-4 tracking-tight">Company</h4>
+                            <ul class="space-y-3 text-xs text-gray-500 font-medium">
+                                <li><a href="#" onclick="window.openStaticPage('about'); return false;" class="hover:text-red-600 transition">About Us</a></li>
+                                <li><a href="#" onclick="window.openStaticPage('contact'); return false;" class="hover:text-red-600 transition">Contact Us</a></li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-900 mb-4 tracking-tight">Legal</h4>
+                            <ul class="space-y-3 text-xs text-gray-500 font-medium">
+                                <li><a href="#" onclick="window.openStaticPage('terms'); return false;" class="hover:text-red-600 transition">Terms & Conditions</a></li>
+                                <li><a href="#" onclick="window.openStaticPage('privacy'); return false;" class="hover:text-red-600 transition">Privacy Policy</a></li>
+                            </ul>
+                        </div>
+                    </div>
 
-            <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
-                <div class="text-center sm:text-left">
-                    <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
-                    <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v12.0.1 - Open Fare Bidding</p>
-                </div>
-                <div class="mt-4 sm:mt-0 text-center sm:text-right flex flex-col sm:flex-row gap-3">
-                    <button type="button" id="btn-partner-login-trigger" onclick="window.openAuthModal('Partner')" class="bg-gray-900 text-white hover:bg-gray-800 border px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-handshake"></i> Partner Login
-                    </button>
-                    <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-shield-halved text-sm"></i> Secure Admin
-                    </button>
-                </div>
-            </div>
-        </div>
-    </footer>
+                    <div class="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-6 gap-4">
+                        <div class="text-center sm:text-left">
+                            <p class="text-[10px] text-gray-400 font-medium tracking-wide">© 2026 Gramzo. All rights reserved.</p>
+                            <p class="text-[10px] text-red-700 font-bold mt-2 bg-red-50 border border-red-100 inline-block px-3 py-1.5 rounded-lg shadow-sm">v12.0.1 - Open Fare Bidding</p>
+                        </div>
+                        <div class="mt-4 sm:mt-0 text-center sm:text-right flex flex-col sm:flex-row gap-3">
+                            <button type="button" id="btn-partner-login-trigger" onclick="window.openAuthModal('Partner')" class="bg-gray-900 text-white hover:bg-gray-800 border px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-handshake"></i> Partner Login
+                            </button>
+                            <button type="button" onclick="window.openAdminModal()" class="bg-red-50 text-red-700 hover:bg-red-100 border px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-shield-halved text-sm"></i> Secure Admin
+                            </button>
+                        </div>
+                    </div>
+                </footer>
             </div>
 
             <div id="view-Cart" class="view-section">
